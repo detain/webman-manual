@@ -37,7 +37,7 @@ return [
 1、composer安装
 
 ```
-composer require psr/container ^1.1.1 jenssegers/blade:~1.4.0
+composer require psr/container ^1.1.1 webman/blade
 ```
 
 2、修改配置`config/view.php`为
@@ -335,6 +335,73 @@ return [
     }
 ];
 ```
+
+## blade使用component组件
+
+> **注意
+> 需要webman/blade>=1.5.2**
+
+假设需要添加一个Alert组件
+
+**新建 `app/view/components/Alert.php`**
+```php
+<?php
+
+namespace app\view\components;
+
+use Illuminate\View\Component;
+
+class Alert extends Component
+{
+    
+    public function __construct()
+    {
+    
+    }
+    
+    public function render()
+    {
+        return view('components/alert')->rawBody();
+    }
+}
+```
+
+**新建 `app/view/components/alert.blade.php`**
+```
+<div>
+    <b style="color: red">hello blade component</b>
+</div>
+```
+
+**`/config/view.php`类似如下代码**
+
+```php
+<?php
+use support\view\Blade;
+return [
+    'handler' => Blade::class,
+    'extension' => function (Jenssegers\Blade\Blade $blade) {
+        $blade->component('alert', app\view\components\Alert::class);
+    }
+];
+```
+
+至此，Blade组件Alert设置完毕，模版里使用时类似如下
+```html
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>webman</title>
+</head>
+<body>
+
+<x-alert/>
+
+</body>
+</html>
+```
+
 
 ## 扩展think-template
 think-template 使用`view.options.taglib_pre_load`来扩展标签库，例如
