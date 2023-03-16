@@ -267,6 +267,12 @@ Route::fallback(function(){
     return json(['code' => 404, 'msg' => '404 not found']);
 });
 ```
+如果想给某个[应用插件](app/app.md)设置fallback，需要通过第二个参数传递插件名，例如
+```
+Route::fallback(function(){
+    return redirect('/');
+}, 'admin');
+```
 
 相关连接 [自定义404 500页面](others/custom-error-page.md)
 
@@ -293,6 +299,21 @@ Route::group($path, $callback);
 // 资源路由
 Route::resource($path, $callback, [$options]);
 // 回退路由，设置默认的路由兜底
-Route::fallback($callback);
+Route::fallback($callback, $plugin = '');
 ```
 如果uri没有对应的路由(包括默认路由)，且回退路由也未设置，则会返回404。
+
+## 多个路由配置文件
+如果你想使用多个路由配置文件对路由进行管理，例如[多应用](multiapp.md)时每个应用下有自己的路由配置，这时可以通过`require`外部文件的方式加载外部路由配置文件。
+例如`config/route.php`中
+```php
+<?php
+
+// 加载admin应用下的路由配置
+require_once app_path('admin/config/route.php');
+// 加载api应用下的路由配置
+require_once app_path('api/config/route.php');
+
+```
+
+

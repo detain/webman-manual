@@ -20,7 +20,7 @@ server {
   access_log off;
   root /your/webman/public;
 
-  location / {
+  location ^~ / {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header Host $host;
       proxy_set_header X-Forwarded-Proto $scheme;
@@ -32,3 +32,5 @@ server {
   }
 }
 ```
+
+一般来说以上配置开发者只需要将server_name和root配置成实际值即可，其它字段不需要配置。
