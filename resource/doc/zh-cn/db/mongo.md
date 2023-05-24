@@ -8,8 +8,13 @@ webman默认使用 [jenssegers/mongodb](https://github.com/jenssegers/laravel-mo
 
 ## 安装
 
+PHP>7.2时
 ```php
-composer require psr/container ^1.1.1 illuminate/database jenssegers/mongodb ^3.8.0
+composer require -W illuminate/database jenssegers/mongodb ^3.8.0
+```
+PHP=7.2时
+```php
+composer require -W illuminate/database jenssegers/mongodb ^3.7.0
 ```
 
 安装后需要restart重启(reload无效)
@@ -36,7 +41,7 @@ return [
                 // here you can pass more settings to the Mongo Driver Manager
                 // see https://www.php.net/manual/en/mongodb-driver-manager.construct.php under "Uri Options" for a list of complete parameters that you can use
 
-                'database' => 'admin', // required with Mongo 3+
+                'appname' => 'homestead'
             ],
         ],
     ],

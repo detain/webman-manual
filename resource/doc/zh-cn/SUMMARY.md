@@ -52,7 +52,7 @@
   - [图像处理](components/image.md)
   - [验证码](components/captcha.md)
   - [Event事件](components/event.md)
-  - [env环境变量组件](components/env.md)
+  - [Env环境变量组件](components/env.md)
   - [Crontab定时任务](components/crontab.md)
   - [Excel表格](components/excel.md)
   - [微信SDK](components/wechat.md)
@@ -61,11 +61,19 @@
   - [单元测试](components/unitest.md)
   - [错误码生成](components/generate_error_code.md)
 
+- 基础插件
+  - [基础插件](plugin/base.md)
+  - [命令行](plugin/console.md)
+  - [推送](plugin/push.md)
+  - [基础插件市场](plugin/market.md)
+  - [提交基础插件](plugin/create.md)
+
 - 应用插件
   - [介绍](app/app.md)
   - [规范](app/standard.md)
   - [创建应用](app/create.md)
   - [目录结构](app/directory.md)
+  - [路由](app/route.md)
   - [配置文件](app/config.md)
   - [控制器](app/controller.md)
   - [视图](app/view.md)
@@ -79,12 +87,6 @@
   - [安装卸载](app/install.md)
   - [应用市场](app/market.md)
 
-- 基础插件
-  - [基础插件](plugin/base.md)
-  - [命令行](plugin/console.md)
-  - [基础插件市场](plugin/market.md)
-  - [提交基础插件](plugin/create.md)
-
 - 高级进阶
   - [自定义进程](process.md)
   - [依赖注入](di.md)
@@ -92,6 +94,7 @@
   
 - 其它
   - [安全](others/security.md)
+  - [函数禁用检查](others/disable-function-check.md)
   - [自定义脚本](others/scripts.md)
   - [自定义404 500](others/custom-error-page.md)
   - [升级方法](others/upgrade.md)
@@ -105,6 +108,7 @@
   - [自动加载](others/autoload.md)
   - [慢业务处理](others/task.md)
   - [性能](others/performance.md)
+  - [文件监控](others/monitor.md)
 
 - 升级
   - [1.4](upgrade/1-4.md)
