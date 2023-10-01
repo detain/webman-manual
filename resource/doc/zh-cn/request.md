@@ -166,7 +166,7 @@ class UploadController
         foreach ($request->file() as $key => $spl_file) {
             var_export($spl_file->isValid()); // 文件是否有效，例如ture|false
             var_export($spl_file->getUploadExtension()); // 上传文件后缀名，例如'jpg'
-            var_export($spl_file->getUploadMineType()); // 上传文件mine类型，例如 'image/jpeg'
+            var_export($spl_file->getUploadMimeType()); // 上传文件mine类型，例如 'image/jpeg'
             var_export($spl_file->getUploadErrorCode()); // 获取上传错误码，例如 UPLOAD_ERR_NO_TMP_DIR UPLOAD_ERR_NO_FILE UPLOAD_ERR_CANT_WRITE
             var_export($spl_file->getUploadName()); // 上传文件名，例如 'my-test.jpg'
             var_export($spl_file->getSize()); // 获得文件大小，例如 13364，单位字节
@@ -264,7 +264,15 @@ $request->fullUrl();
 ```
 返回类似`//www.workerman.net/workerman-chat?type=download`
 
-> 注意：`url()` 和 `fullUrl()` 没有返回协议部分(没有返回http或者https)
+> **注意**
+> `url()` 和 `fullUrl()` 没有返回协议部分(没有返回http或者https)。
+> 因为浏览器里使用 `//example.com` 这样以`//`开头的地址会自动识别当前站点的协议，自动以http或https发起请求。
+
+如果你使用了nginx代理，请将 `proxy_set_header X-Forwarded-Proto $scheme;` 加入到nginx配置中，[参考nginx代理](others/nginx-proxy.md)，
+这样就可以用`$request->header('x-forwarded-proto');`来判断是http还是https，例如：
+```php
+echo $request->header('x-forwarded-proto'); // 输出 http 或 https
+```
 
 ## 获取请求HTTP版本
 

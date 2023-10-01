@@ -23,7 +23,7 @@
             │                                                      │
             └──────────────────────────────────────────────────────┘
 ```
-中间件和控制器组成了一个经典的洋葱模型，中间件类似一层一层的洋葱表皮，控制器是洋葱芯。如果所示请求像箭一样穿越中间件1、2、3到达控制器，控制器返回了一个响应，然后响应又以3、2、1的顺序穿出中间件最终返回给客户端。也就是说在每个中间件里我们既可以拿到请求，也可以获得响应。
+中间件和控制器组成了一个经典的洋葱模型，中间件类似一层一层的洋葱表皮，控制器是洋葱芯。如图所示请求像箭一样穿越中间件1、2、3到达控制器，控制器返回了一个响应，然后响应又以3、2、1的顺序穿出中间件最终返回给客户端。也就是说在每个中间件里我们既可以拿到请求，也可以获得响应。
 
 ## 请求拦截
 有时候我们不想某个请求到达控制器层，例如我们在某个身份验证中间件发现当前用户并没有登录，则我们可以直接拦截请求并返回一个登录响应。那么这个流程类似下面这样
@@ -66,7 +66,7 @@ interface MiddlewareInterface
     public function process(Request $request, callable $handler): Response;
 }
 ```
-也就是必须实现`process`方法，`process`方法必须返回一个`support\Response`对象，默认这个对象由`$handler($request)`生成(请求将继续向洋葱芯穿越)，也可以可以是`response()` `json()` `xml()` `redirect()`等助手函数生成的响应(请求停止继续向洋葱芯穿越)。
+也就是必须实现`process`方法，`process`方法必须返回一个`support\Response`对象，默认这个对象由`$handler($request)`生成(请求将继续向洋葱芯穿越)，也可以是`response()` `json()` `xml()` `redirect()`等助手函数生成的响应(请求停止继续向洋葱芯穿越)。
 
 ## 中间件中获取请求及响应
 在中间件中我们可以获得请求，也可以获得执行控制器后的响应，所以中间件内部分为三个部分。
@@ -104,6 +104,7 @@ class Test implements MiddlewareInterface
 <?php
 namespace app\middleware;
 
+use ReflectionClass;
 use Webman\MiddlewareInterface;
 use Webman\Http\Response;
 use Webman\Http\Request;
@@ -112,17 +113,55 @@ class AuthCheckTest implements MiddlewareInterface
 {
     public function process(Request $request, callable $handler) : Response
     {
-        $session = $request->session();
-        // 用户未登录
-        if (!$session->get('userinfo')) {
+        if (session('user')) {
+            // 已经登录，请求继续向洋葱芯穿越
+            return $handler($request);
+        }
+
+        // 通过反射获取控制器哪些方法不需要登录
+        $controller = new ReflectionClass($request->controller);
+        $noNeedLogin = $controller->getDefaultProperties()['noNeedLogin'] ?? [];
+
+        // 访问的方法需要登录
+        if (!in_array($request->action, $noNeedLogin)) {
             // 拦截请求，返回一个重定向响应，请求停止向洋葱芯穿越
             return redirect('/user/login');
         }
-        // 请求继续向洋葱芯穿越
+
+        // 不需要登录，请求继续向洋葱芯穿越
         return $handler($request);
     }
 }
 ```
+
+新建控制器 `app/controller/UserController.php`
+```php
+<?php
+namespace app\controller;
+use support\Request;
+
+class UserController
+{
+    /**
+     * 不需要登录的方法
+     */
+    protected $noNeedLogin = ['login'];
+
+    public function login(Request $request)
+    {
+        $request->session()->set('user', ['id' => 10, 'name' => 'webman']);
+        return json(['code' => 0, 'msg' => 'login ok']);
+    }
+
+    public function info()
+    {
+        return json(['code' => 0, 'msg' => 'ok', 'data' => session('user')]);
+    }
+}
+```
+
+> **注意**
+> `$noNeedLogin`里记录了当前控制器不需要登录就可以访问的方法
 
 在 `config/middleware.php` 中添加全局中间件如下：
 ```php
@@ -151,7 +190,7 @@ class AccessControlTest implements MiddlewareInterface
 {
     public function process(Request $request, callable $handler) : Response
     {
-        // 如果是opitons请求则返回一个空的响应，否则继续向洋葱芯穿越，并得到一个响应
+        // 如果是options请求则返回一个空响应，否则继续向洋葱芯穿越，并得到一个响应
         $response = $request->method() == 'OPTIONS' ? response('') : $handler($request);
         
         // 给响应添加跨域相关的http头
