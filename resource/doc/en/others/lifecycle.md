@@ -1,25 +1,25 @@
 # Lifecycle
 
 ## Process Lifecycle
-- Each process has a long lifecycle
-- Each process is run independently without interference
-- Each process can handle multiple requests during its lifetime
-- The process will exit when it receives the `stop`, `reload` and `restart` commands, ending the life cycle
+- Each process has a long lifecycle.
+- Each process runs independently, without interference.
+- Each process can handle multiple requests within its lifecycle.
+- When a process receives the `stop`, `reload`, or `restart` command, it will exit and end its current lifecycle.
 
-> **hint**
-> Each process is independent of each other, which means that each process maintains its own resources, variables, class instances, etc., as shown by the fact that each process has its own database connection, and that some single instance is initialized once per process, then multiple processes are initialized multiple times。
+> **Tip**
+> Each process runs independently without interference, which means each process maintains its own resources, variables, class instances, etc. This is reflected in each process having its own database connection, and some singletons being initialized once for each process, leading to multiple initializations across processes.
 
 ## Request Lifecycle
-- Each request generates a `$request` object
-- `$request`Object will be recycled after the request is processed
+- Each request generates a `$request` object.
+- The `$request` object is recycled after the request is processed.
 
 ## Controller Lifecycle
-- Each controller will only be instantiated once per process，with business can be largely ignored(except for closing controller reuse，See[Controller Lifecycle](https://www.workerman.net/doc/webman/controller.html#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F))
-- The controller instance will be shared by multiple requests within the current process (except when controller multiplexing is turned off))
-- Controller lifecycle ends when the process exits (except for closing controller reuse)
+- Each controller is instantiated only once per process, but multiple instantiations are possible across processes (unless controller reusing is disabled, see [Controller Lifecycle](https://www.workerman.net/doc/webman/controller.html#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F)).
+- Controller instances are shared among multiple requests within the current process (unless controller reusing is disabled).
+- The controller's lifecycle ends when the process exits (unless controller reusing is disabled).
 
-## About variable lifecycle
-webman is based on php, so it follows php's variable recycling mechanism exactly. Temporary variables generated in the business logic, including instances of classes created by the new keyword, are automatically recycled at the end of a function or method, without the need to manually `unset` the release. This means that webman development is basically the same as traditional framework development experience. For example, in the following example `$foo` instance will be automatically released as the index method is executed ：
+## Variable Lifecycle
+webman is developed based on PHP, so it fully complies with PHP's variable recycling mechanism. Temporary variables created in business logic, including instances of classes created with the `new` keyword, are automatically recycled after a function or method ends, without the need for manual `unset` releases. This means that the development experience with webman is essentially the same as with traditional frameworks. For example, in the following example, the `$foo` instance will be automatically released when the `index` method finishes executing:
 ```php
 <?php
 
@@ -32,12 +32,12 @@ class IndexController
 {
     public function index(Request $request)
     {
-        $foo = new Foo(); // Assume here that there is a Foo class
+        $foo = new Foo(); // Assuming there is a Foo class here
         return response($foo->sayHello());
     }
 }
 ```
-If you want an instance of a class to be reused，then you can save the class to a static property of the class or longLifecycleobject(Not installed)If your，query constructorContainercontainer'sgetmethod to initialize an instance of the class，example：
+If you want an instance of a class to be reused, you can save the class to the class's static property or to a property of a long-lived object (such as a controller). You can also use the `Container` container's `get` method to initialize the class instance, for example:
 ```php
 <?php
 
@@ -56,14 +56,13 @@ class IndexController
     }
 }
 ```
-
-`Container::get()`Method to create and save an instance of the class, which will return the previously created class instance the next time it is called again with the same parameters。
+The `Container::get()` method is used to create and save class instances, so that the same parameters used in a subsequent call will return the previously created class instance.
 
 > **Note**
-> `Container::get()` can only initialize instances without constructor parameters. `Container::make()` can create instances with constructor arguments, but unlike `Container::get()`, `Container::make()` does not reuse instances, meaning that `Container::make()` always returns a new instance even with the same arguments。
+> `Container::get()` can only initialize instances without constructor parameters. `Container::make()` can create instances with constructor parameters, but unlike `Container::get()`, `Container::make()` does not reuse instances, meaning that it always returns a new instance, even with the same parameters.
 
-# About memory leaks
-The project address is assumed to be，There is no memory leak in our business code(Very little user feedback about memory leaks)，Please see the following codeNotelower-lengthLifecyclejust don't expand the array data infinitely。Also long period：
+# About Memory Leaks
+In most cases, our business code does not cause memory leaks (very few users have reported memory leaks). We just need to be mindful not to infinitely expand long-lived array data. Consider the following code:
 ```php
 <?php
 namespace app\controller;
@@ -72,7 +71,7 @@ use support\Request;
 
 class FooController
 {
-    // Array Properties
+    // Array property
     public $data = [];
     
     public function index(Request $request)
@@ -87,6 +86,6 @@ class FooController
     }
 }
 ```
-The controller is long by defaultLifecycle的(except for closing controller reuse)，Same for the controller`$data`Array PropertiesException handling section，With`foo/index`This time it can't，`$data`More and more array elements lead to memory leaks。
+By default, the controller has a long lifecycle (unless controller reusing is disabled), and similarly, the `$data` array property of the controller also has a long lifecycle. As the `foo/index` request continues to add elements to the `$data` array, it leads to a memory leak.
 
-For more information on this please refer to [constructor](./memory-leak.md)
+For more information, please refer to [Memory Leaks](./memory-leak.md).

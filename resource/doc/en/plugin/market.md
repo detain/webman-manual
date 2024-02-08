@@ -1,3 +1,3 @@
-# Plugin Marketplace
+# Plugin Market
 
-[Click here to go to the plugin marketplace](/webman#plugins)
+[Click here to enter the plugin market](/webman#plugins)

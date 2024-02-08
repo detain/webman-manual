@@ -1,4 +1,4 @@
-# webman EventBase webman-event
+# webman Event Library
 
 [![license](https://img.shields.io/github/license/Tinywan/webman-event)]()
 [![webman-event](https://img.shields.io/github/v/release/tinywan/webman-event?include_prereleases)]()
@@ -6,49 +6,52 @@
 [![webman-event](https://img.shields.io/github/last-commit/tinywan/webman-event/main)]()
 [![webman-event](https://img.shields.io/github/v/tag/tinywan/webman-event?color=ff69b4)]()
 
-The advantage of events over middleware is that events are more precisely targeted (or finer grained) than middleware, and are better suited to the extension of some business scenarios. For example, we usually encounter a user registration or login need to do a series of operations, through the event system can be done without invading the original code to complete the login operation extensions, reducing the coupling of the system at the same time, but also reduce the possibility of bugs 。
+The advantage of events over middleware is that events are more precise in positioning (or finer-grained) than middleware, and they are more suitable for extending certain business scenarios. For example, we often encounter a series of operations that need to be performed after a user registers or logs in. With the event system, we can complete the login operation extension without modifying the original code, reducing the coupling of the system and reducing the possibility of bugs.
 
-## Project address
+## Project URL
 
 [https://github.com/Tinywan/webman-permission](https://github.com/Tinywan/webman-permission)
 
-## Dependency
+## Dependencies
 
 - [symfony/event-dispatcher](https://github.com/symfony/event-dispatcher)
 
-## Install
+## Installation
 
 ```shell script
 composer require tinywan/webman-event
 ```
-## Configure 
 
-The event configuration file `config/event.php` reads as follows
+## Configuration
+
+Event configuration file `config/event.php` is as follows:
 
 ```php
 return [
-    // Event Listening
+    // Event listeners
     'listener'    => [],
 
-    // Event Subscriber
+    // Event subscribers
     'subscriber' => [],
 ];
 ```
-### Process Startup Configuration
 
-Open `config/bootstrap.php` and add the following configuration：
+### Process startup configuration
+
+Open `config/bootstrap.php` and add the following configuration:
 
 ```php
 return [
-    // Other configuration omitted here ...
+    // Other configurations are omitted here ...
     webman\event\EventManager::class,
 ];
 ```
+
 ## Quick Start
 
-### Define events
+### Define an Event
 
-Event Class `LogErrorWriteEvent.php`
+Event class `LogErrorWriteEvent.php`:
 
 ```php
 declare(strict_types=1);
@@ -59,7 +62,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class LogErrorWriteEvent extends Event
 {
-    const NAME = 'log.error.write';  // Event name, unique identifier of the event
+    const NAME = 'log.error.write';  // Event name, the unique identifier of the event
 
     /** @var array */
     public array $log;
@@ -76,19 +79,20 @@ class LogErrorWriteEvent extends Event
 }
 ```
 
-### Listening to events
+### Listen for Events
+
 ```php
 return [
-    // Event Listening
+    // Event listeners
     'listener'    => [
         \extend\event\LogErrorWriteEvent::NAME  => \extend\event\LogErrorWriteEvent::class,
     ],
 ];
 ```
 
-### Subscribe to events
+### Subscribe to Events
 
-SubscriptionClass `LoggerSubscriber.php`
+Subscription class `LoggerSubscriber.php`:
 
 ```php
 namespace extend\event\subscriber;
@@ -99,7 +103,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class LoggerSubscriber implements EventSubscriberInterface
 {
     /**
-     * @desc: Method Description
+     * @desc: Method description
      * @return array|string[]
      */
     public static function getSubscribedEvents()
@@ -110,7 +114,7 @@ class LoggerSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * @desc: Trigger events
+     * @desc: Trigger event
      * @param LogErrorWriteEvent $event
      */
     public function onLogErrorWrite(LogErrorWriteEvent $event)
@@ -121,33 +125,33 @@ class LoggerSubscriber implements EventSubscriberInterface
 }
 ```
 
-Event Subscription
+Event subscription:
+
 ```php
 return [
-    // Event Subscription
+    // Event subscribers
     'subscriber' => [
         \extend\event\subscriber\LoggerSubscriber::class,
     ],
 ];
 ```
 
-### Event Triggers
+### Event Trigger
 
-Triggers the `LogErrorWriteEvent` event。
+Trigger the `LogErrorWriteEvent` event.
 
 ```php
 $error = [
-    'errorMessage' => 'Error Message',
+    'errorMessage' => 'Error message',
     'errorCode' => 500
 ];
 EventManager::trigger(new LogErrorWriteEvent($error),LogErrorWriteEvent::NAME);
 ```
 
-Execute results
+Execution result:
 
-![Print Results](./trigger.png)
+![Print result](./trigger.png)
 
 ## License
 
 This project is licensed under the [Apache 2.0 license](LICENSE).
-

@@ -1,22 +1,23 @@
-# Business initialization
+# Business Initialization
 
-Sometimes we need to do something after the process startsBusiness initialization，This initialization is performed only once during the process life cycle，For example, setting a timer after the process starts，or initialize the database connection, etc.。We will explain this below。
+Sometimes, we need to perform some business initialization after the process starts. This initialization is only performed once during the process lifecycle, such as setting up a timer or initializing database connections after the process starts. In the following sections, we will explain how to achieve this.
 
 ## Principle
-Based on **[ExecuteProcess](process.md)** description in，webmanwill be loaded after the process starts`config/bootstrap.php`(include`config/plugin/*/*/bootstrap.php`)because all the，Package needs to be restartedstartMethod。We are instartBusiness code can be added to methods，i.e. after the completion process is startedBusiness initializationoperation。
+According to the explanation in the [Execution Process](process.md) section, webman loads the classes set in `config/bootstrap.php` (including `config/plugin/*/*/bootstrap.php`) after the process starts, and executes the `start` method of these classes. We can add our business code to the `start` method to complete the business initialization after the process starts.
 
-## Process
-Suppose we want to make a timer to report the memory usage of the current process at regular intervals, and this class is named `MemReport`。
+## Procedure
+Let's say we want to create a timer that reports the memory usage of the current process periodically. We'll name this class `MemReport`.
 
-#### Execute command
+#### Execute Command
 
-Execute the command `php webman make:bootstrap MemReport` to generate the initialization file `app/bootstrap/MemReport.php`
+Run the command `php webman make:bootstrap MemReport` to generate the initialization file `app/bootstrap/MemReport.php`.
 
-> **hint**
-> illegal accesswebmanmemory leak `webman/console`，Execute command `composer require webman/console` Install
+> **Note**
+> If your webman does not have `webman/console` installed, run the command `composer require webman/console` to install it.
 
-#### Edit initialization file
-Edit `app/bootstrap/MemReport.php` with something like this：
+#### Edit Initialization File
+Edit `app/bootstrap/MemReport.php`, and the content will look like the following:
+
 ```php
 <?php
 
@@ -28,41 +29,40 @@ class MemReport implements Bootstrap
 {
     public static function start($worker)
     {
-        // Whether it is a command line environment ?
+        // Is it a command line environment?
         $is_console = !$worker;
         if ($is_console) {
-            // If you don't want the command line environment to perform this initialization, return it directly here
+            // If you don't want this initialization to be executed in the command line environment, return directly here.
             return;
         }
-        
+
         // Execute every 10 seconds
         \Workerman\Timer::add(10, function () {
-            // For demonstration purposes, the output is used here instead of the upload process
+            // For the sake of demonstration, we use output instead of reporting process.
             echo memory_get_usage() . "\n";
         });
-        
     }
-
 }
 ```
 
-> **hint**
-> When using the command line，You can also use`config/bootstrap.php`configuredstartMethod，instance of closure`$worker`Whether isnullto determineWhether it is a command line environment，and thus decide whether to execute it or notBusiness initializationcode。
+> **Note**
+> The framework also executes the `start` method configured in `config/bootstrap.php` when using the command line. We can determine whether it is a command line environment by checking whether `$worker` is `null`, and decide whether to execute the business initialization code accordingly.
 
-#### Configuring Start with Process
-Open `config/bootstrap.php` and add the `MemReport` class to the startup entry。
+#### Configuration Starts with the Process
+Open `config/bootstrap.php` and add the `MemReport` class to the list of startup items.
 ```php
 return [
-    // ...Other configuration omitted here...
+    // ... Other configurations are omitted here...
     
     app\bootstrap\MemReport::class,
 ];
 ```
 
-This completes a business initialization process。
+In this way, we have completed the business initialization process.
 
-## Additional Notes
-[Custom process](. /process.md) will also execute the start method configured in `config/bootstrap.php` after it starts. We can use `$worker->name` to determine what the current process is, and then decide whether to execute your business initialization code in that process. MemReport.php` would look like the following ：
+## Additional Explanation
+[Custom Processes](../process.md) also execute the `start` method configured in `config/bootstrap.php`. We can use `$worker->name` to determine the current process and decide whether to execute your business initialization code in that process. For example, if we do not need to monitor the monitor process, the content of `MemReport.php` will be as follows:
+
 ```php
 <?php
 
@@ -74,21 +74,21 @@ class MemReport implements Bootstrap
 {
     public static function start($worker)
     {
-        // Whether it is a command line environment ?
+        // Is it a command line environment?
         $is_console = !$worker;
         if ($is_console) {
-            // If you don't want the command line environment to perform this initialization, return it directly here
+            // If you don't want this initialization to be executed in the command line environment, return directly here.
             return;
         }
         
-        // monitorProcesses do not execute timers
+        // Do not execute the timer in the monitor process.
         if ($worker->name == 'monitor') {
             return;
         }
         
         // Execute every 10 seconds
         \Workerman\Timer::add(10, function () {
-            // For demonstration purposes, the output is used here instead of the upload process
+            // For the sake of demonstration, we use output instead of reporting process.
             echo memory_get_usage() . "\n";
         });
         

@@ -1,11 +1,10 @@
-# webmanWhat can be done
+# What can webman do
 
-## Traditional web site
-webmanProvides a complete mvc architecture that can be used to develop traditional web sites。
+## Traditional web sites
+webman provides a complete MVC architecture and can be used to develop traditional web sites.
 
+## HTTP interfaces
+In addition to being used for developing traditional web sites, webman is also particularly suitable for providing RPC services or microservices as HTTP interfaces to the outside world.
 
-## httpInterface
-In addition to the traditional web site development, webman is also particularly suitable as an http interface to provide external rpc services or microservices。
-
-## Other
-webmanSupplied[Custom Process Features](process.md)，can be likeworkermanimplement any server-side program as well，includes instant messaging service、IoT、Other uses with、This example and。
+## Others
+webman provides custom process functionality, which can be used to implement any server-side program, such as instant messaging services, IoT, game servers, and microservices, similar to workerman.

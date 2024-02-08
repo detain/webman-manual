@@ -1,47 +1,45 @@
-# Multi-application
-Sometimes a project may be divided into multiple subprojects, for example a mall may be divided into 3 subprojects: mall main project, mall api interface, mall admin backend, all of them use the same database configuration。
+# Multiple Applications
+Sometimes a project may be divided into multiple sub-projects, such as a mall consisting of three sub-projects: main mall project, mall API interface, and mall management backend. They all use the same database configuration.
 
-webmanAllow you to plan the app directory this way：
+Webman allows you to organize the app directory in the following way:
 ```
 app
 ├── shop
-│   ├── controller
-│   ├── model
-│   └── view
+│   ├── controller
+│   ├── model
+│   └── view
 ├── api
-│   ├── controller
-│   └── model
+│   ├── controller
+│   └── model
 └── admin
     ├── controller
     ├── model
     └── view
 ```
-Accessing controllers and methods under `app/shop/controller` when visiting address `http://127.0.0.1:8787/shop/{controller}/{method}`。
+When accessing the URL `http://127.0.0.1:8787/shop/{controller}/{method}`, it will access the controller and method under `app/shop/controller`.
 
-Accessing controllers and methods under `app/api/controller` when accessing address `http://127.0.0.1:8787/api/{controller}/{method}`。
+When accessing the URL `http://127.0.0.1:8787/api/{controller}/{method}`, it will access the controller and method under `app/api/controller`.
 
-Accessing controllers and methods under `app/admin/controller` when accessing address `http://127.0.0.1:8787/admin/{controller}/{method}`。
+When accessing the URL `http://127.0.0.1:8787/admin/{controller}/{method}`, it will access the controller and method under `app/admin/controller`.
 
-In webman, you can even plan the app directory like this。
+In webman, you can even organize the app directory like this:
 ```
 app
 ├── controller
 ├── model
 ├── view
-│
+
 ├── api
-│   ├── controller
-│   └── model
+│   ├── controller
+│   └── model
 └── admin
     ├── controller
     ├── model
     └── view
 ```
+In this case, when accessing the URL `http://127.0.0.1:8787/{controller}/{method}`, it will access the controller and method under `app/controller`. When the path starts with `api` or `admin`, it will access the corresponding directory's controller and method.
 
-So when the address accesses `http://127.0.0.1:8787/{controller}/{method}`, it accesses the controllers and methods under `app/controller`. When the path starts with api or admin, it accesses the controllers and methods in the corresponding directory。
-
-Multi-applicationWhen the class namespace needs to match`psr4`，example`app/api/controller/FooController.php` causes memory leaks：
-
+In multiple applications, the class namespace must comply with `PSR-4`. For example, the file `app/api/controller/FooController.php` will look similar to this:
 ```php
 <?php
 namespace app\api\controller;
@@ -55,41 +53,41 @@ class FooController
 
 ```
 
-## Multi-application middleware configuration
-Sometimes you want to configure different middleware for different applications, e.g. `api` application may need a cross-domain middleware, `admin` needs a middleware to check the administrator login, then the configuration `config/midlleware.php` may look like the following：
+## Middleware Configuration for Multiple Applications
+Sometimes you may want to configure different middlewares for different applications. For example, the `api` application may require a CORS middleware, and the `admin` application may require a middleware to check if the administrator is logged in. In this case, the configuration of `config/middleware.php` might look like this:
 ```php
 return [
-    // Global Middleware
+    // Global middleware
     '' => [
         support\middleware\AuthCheck::class,
     ],
-    // apiApplication Middleware
+    // Middleware for the api application
     'api' => [
          support\middleware\AccessControl::class,
      ],
-    // adminApplication Middleware
+    // Middleware for the admin application
     'admin' => [
          support\middleware\AdminAuthCheck::class,
          support\middleware\SomeOtherClass::class,
     ],
 ];
 ```
-> The above middleware may not exist, so this is just an example of how to configure it by application
+> The above middlewares may not exist, this is just an example to explain how to configure middlewares according to different applications.
 
-The middleware implementation order is `Global Middleware`->`Application Middleware``。
+The order of execution for middlewares is `global middleware` -> `application middleware`.
 
-Middleware Development Reference[Initialization will not](middleware.md)
+Middleware development can refer to the [Middleware section](middleware.md).
 
-## Multi-application exception handling configuration
-Similarly, you want to configure different exception handling classes for different applications. For example, if an exception occurs in a `shop` application you may want to provide a friendly alert page; if an exception occurs in an `api` application you want to return not a page, but a json string. The configuration file `config/exception.php`, which configures different exception handling classes for different applications, looks like this ：
+## Exception Handling Configuration for Multiple Applications
+Similarly, if you want to configure different exception handlers for different applications, for example, you may want to provide a friendly error page when an exception occurs in the `shop` application, and return a JSON string instead of a page in the `api` application. The configuration file `config/exception.php` for configuring different exception handlers for different applications would look like this:
 ```php
 return [
     'shop' => support\exception\Handler::class,
     'api' => support\exception\ApiHandler::class,
 ];
 ```
-> Unlike middleware, only one exception handling class can be configured per application。
+> Unlike middlewares, each application can only configure one exception handler.
 
-> The above exception handling class may not exist, this is just an example of how to configure exception handling by application
+> The above exception handlers may not exist, this is just an example to explain how to configure exception handlers according to different applications.
 
-Exception Handling Development Reference[In case of reverse substitution](exception.md)
+Exception handling development can refer to the [Exception Handling section](exception.md).

@@ -1,5 +1,5 @@
-# Query Constructor
-## Get all lines
+# Query Builder
+## Get All Rows
 ```php
 <?php
 namespace app\controller;
@@ -17,21 +17,21 @@ class UserController
 }
 ```
 
-## Get specified columns
+## Get Specific Columns
 ```php
 $users = Db::table('user')->select('name', 'email as user_email')->get();
 ```
 
-## Get a row
+## Get One Row
 ```php
 $user = Db::table('users')->where('name', 'John')->first();
 ```
 
-## Get a column
+## Get One Column
 ```php
 $titles = Db::table('roles')->pluck('title');
 ```
-Specify the value of the id field as an index
+Specify the value of the id field as the index
 ```php
 $roles = Db::table('roles')->pluck('title', 'id');
 
@@ -40,18 +40,18 @@ foreach ($roles as $id => $title) {
 }
 ```
 
-## Get a single value (field))
+## Get a Single Value (Field)
 ```php
 $email = Db::table('users')->where('name', 'John')->value('email');
 ```
 
-## de-duplicate
+## Distinct
 ```php
 $email = Db::table('user')->select('nickname')->distinct()->get();
 ```
 
-## Chunking results
-If you need to process thousands of database records, reading them all at once can be time consuming and can easily lead to memory overruns, then you might consider using the chunkById method. This method takes a small chunk of the result set at a time and passes it to a closure function for processing. For example, we can cut up the entire users table data into small chunks of 100 records at a time：
+## Chunk the Results
+If you need to process thousands or even millions of database records, reading all the data at once can be time-consuming and may cause memory overflow. In such cases, you can consider using the `chunkById` method. This method retrieves a small chunk of the result set at a time and passes it to a closure function for processing. For example, we can chunk the entire "users" table data into small batches of 100 records, each batch being processed once:
 ```php
 Db::table('users')->orderBy('id')->chunkById(100, function ($users) {
     foreach ($users as $user) {
@@ -59,7 +59,7 @@ Db::table('users')->orderBy('id')->chunkById(100, function ($users) {
     }
 });
 ```
-You can stop the chunking process by returning false in the closure。
+You can return false in the closure to stop further chunk retrieval.
 ```php
 Db::table('users')->orderBy('id')->chunkById(100, function ($users) {
     // Process the records...
@@ -67,50 +67,46 @@ Db::table('users')->orderBy('id')->chunkById(100, function ($users) {
     return false;
 });
 ```
+> Note: Do not delete data inside the closure, as it may result in some records not being included in the result set.
 
-> Note: Do not delete data in the callback, that may result in some records not included in the result set
+## Aggregates
 
-## Aggregate
-
-The query constructor also provides various aggregate methods such as count, max, min, avg, sum, etc.。
+The query builder also provides various aggregate methods such as count, max, min, avg, sum, etc.
 ```php
 $users = Db::table('users')->count();
 $price = Db::table('orders')->max('price');
 $price = Db::table('orders')->where('finalized', 1)->avg('price');
 ```
 
-## Determine if a record exists
+## Check for Record Existence
 ```php
 return Db::table('orders')->where('finalized', 1)->exists();
 return Db::table('orders')->where('finalized', 1)->doesntExist();
 ```
 
-## Native Expression
+## Raw Expressions
 Prototype
 ```php
 selectRaw($expression, $bindings = [])
 ```
-Sometimes you may need to use native expressions in your queries. You can use `selectRaw()` to create a native expression：
-
+Sometimes, you may need to use raw expressions in your queries. You can use `selectRaw()` to create a raw expression:
 ```php
 $orders = Db::table('orders')
                 ->selectRaw('price * ? as price_with_tax', [1.0825])
                 ->get();
-
 ```
 
-same，database `whereRaw()` `orWhereRaw()` `havingRaw()` `orHavingRaw()` `orderByRaw()` `groupByRaw()` Native ExpressionMethod。
+Similarly, there are also `whereRaw()`, `orWhereRaw()`, `havingRaw()`, `orHavingRaw()`, `orderByRaw()`, and `groupByRaw()` methods for raw expressions.
 
-
-`Db::raw($value)`Also used to create a native expression, but it does not have the ability to bind parameters, so you need to be careful about SQL injection issues when using it。
+`Db::raw($value)` is also used to create a raw expression, but it does not have the binding parameter feature, so be careful with SQL injection when using it.
 ```php
 $orders = Db::table('orders')
                 ->select('department', Db::raw('SUM(price) as total_sales'))
                 ->groupBy('department')
                 ->havingRaw('SUM(price) > ?', [2500])
                 ->get();
-
 ```
+
 ## Join Statements
 ```php
 // join
@@ -146,17 +142,16 @@ $users = Db::table('users')
             ->union($first)
             ->get();
 ```
-
-## Where Statements
-Prototype 
+## Where Clause
+Prototype
 ```php
 where($column, $operator = null, $value = null)
 ```
-The first argument is the column name, the second argument is any operator supported by the database system, and the third is the value to be compared for that column
+The first argument is the column name, the second argument is any operator that the database system supports, and the third argument is the value to compare the column against.
 ```php
 $users = Db::table('users')->where('votes', '=', 100)->get();
 
-// This expression has the same effect as the previous one since it can be omitted when the operator is equal
+// When the operator is '=', it can be omitted, so this statement is the same as the previous one
 $users = Db::table('users')->where('votes', 100)->get();
 
 $users = Db::table('users')
@@ -172,7 +167,7 @@ $users = Db::table('users')
                 ->get();
 ```
 
-You can also pass an array of conditions to the where function：
+You can also pass an array of conditions to the where function:
 ```php
 $users = Db::table('users')->where([
     ['status', '=', '1'],
@@ -181,7 +176,7 @@ $users = Db::table('users')->where([
 
 ```
 
-orWhere The method receives the same parameters as the where method：
+The orWhere method accepts the same parameters as the where method:
 ```php
 $users = Db::table('users')
                     ->where('votes', '>', 100)
@@ -189,7 +184,7 @@ $users = Db::table('users')
                     ->get();
 ```
 
-You can pass a closure to the orWhere method as the first parameter：
+You can pass a closure as the first argument to the orWhere method:
 ```php
 // SQL: select * from users where votes > 100 or (name = 'Abigail' and votes > 50)
 $users = Db::table('users')
@@ -202,60 +197,60 @@ $users = Db::table('users')
 
 ```
 
-whereBetween / orWhereBetween The method verifies that the field value is between the given two values：
+The whereBetween / orWhereBetween methods validate if a field's value is between two given values:
 ```php
 $users = Db::table('users')
            ->whereBetween('votes', [1, 100])
            ->get();
 ```
 
-whereNotBetween / orWhereNotBetween whether the method validation field value is outside the given two values：
+The whereNotBetween / orWhereNotBetween methods validate if a field's value is not between two given values:
 ```php
 $users = Db::table('users')
                     ->whereNotBetween('votes', [1, 100])
                     ->get();
 ```
 
-whereIn / whereNotIn / orWhereIn / orWhereNotIn The method validation field value must exist in the specified array：
+The whereIn / whereNotIn / orWhereIn / orWhereNotIn methods validate if a field's value exists in a specified array:
 ```php
 $users = Db::table('users')
                     ->whereIn('id', [1, 2, 3])
                     ->get();
 ```
 
-whereNull / whereNotNull / orWhereNull / orWhereNotNull The field specified for method validation must be NULL：
+The whereNull / whereNotNull / orWhereNull / orWhereNotNull methods validate if a specified field is NULL:
 ```php
 $users = Db::table('users')
                     ->whereNull('updated_at')
                     ->get();
 ```
 
-whereNotNull The method validates that the specified field must not be NULL：
+The whereNotNull method validates if a specified field is not NULL:
 ```php
 $users = Db::table('users')
                     ->whereNotNull('updated_at')
                     ->get();
 ```
 
-whereDate / whereMonth / whereDay / whereYear / whereTime Method to compare field values with a given date：
+The whereDate / whereMonth / whereDay / whereYear / whereTime methods compare a field's value with a given date:
 ```php
 $users = Db::table('users')
                 ->whereDate('created_at', '2016-12-31')
                 ->get();
 ```
 
-whereColumn / orWhereColumn method for comparing the value of two fields to be equal：
+The whereColumn / orWhereColumn methods compare the values of two fields:
 ```php
 $users = Db::table('users')
                 ->whereColumn('first_name', 'last_name')
                 ->get();
                 
-// You can also pass in a comparison operator
+// You can also pass a comparison operator
 $users = Db::table('users')
                 ->whereColumn('updated_at', '>', 'created_at')
                 ->get();
                 
-// whereColumn Methods can also pass arrays
+// The whereColumn method can also accept an array
 $users = Db::table('users')
                 ->whereColumn([
                     ['first_name', '=', 'last_name'],
@@ -264,7 +259,7 @@ $users = Db::table('users')
 
 ```
 
-Parameter Grouping
+Parameter grouping
 ```php
 // select * from users where name = 'John' and (votes > 100 or title = 'Admin')
 $users = Db::table('users')
@@ -309,7 +304,7 @@ $users = Db::table('users')
                 ->groupBy('account_id')
                 ->having('account_id', '>', 100)
                 ->get();
-// You can pass multiple parameters to the groupBy method
+// You can pass multiple arguments to the groupBy method
 $users = Db::table('users')
                 ->groupBy('first_name', 'status')
                 ->having('account_id', '>', 100)
@@ -324,14 +319,14 @@ $users = Db::table('users')
                 ->get();
 ```
 
-## Insert
-Insert Single Article
+## Inserting
+Inserting a single row
 ```php
 Db::table('users')->insert(
     ['email' => 'john@example.com', 'votes' => 0]
 );
 ```
-Insert multiple entries
+Inserting multiple rows
 ```php
 Db::table('users')->insert([
     ['email' => 'taylor@example.com', 'votes' => 0],
@@ -339,24 +334,23 @@ Db::table('users')->insert([
 ]);
 ```
 
-## Self-increment ID
+## Auto-Incrementing IDs
 ```php
 $id = Db::table('users')->insertGetId(
     ['email' => 'john@example.com', 'votes' => 0]
 );
 ```
+> Note: When using PostgreSQL, the insertGetId method will assume that 'id' is the name of the auto-incrementing field by default. If you want to get the ID from another "sequence", you can pass the field name as the second parameter to the insertGetId method.
 
-> Note：when using PostgreSQL 时，insertGetId If your interface id as the name of the auto-increment field。Suitable for message pushing「Sequence」to get ID ，then you can pass the field name as a second parameter insertGetId Method。
-
-## Update
+## Updating
 ```php
 $affected = Db::table('users')
               ->where('id', 1)
               ->update(['votes' => 1]);
 ```
 
-## Update or Add
-Sometimes you may want to update an existing record in the database, or create it if no matching record exists：
+## Updating or Inserting
+Sometimes you may want to update an existing record in the database, or create it if it doesn't exist:
 ```php
 Db::table('users')
     ->updateOrInsert(
@@ -364,10 +358,10 @@ Db::table('users')
         ['votes' => '2']
     );
 ```
-updateOrInsert The method will first try to find the matching database record using the key and value pair of the first parameter。 Thank you very much here，then use the value in the second parameter to goUpdateRecord。 The number can be returned in，将InsertAll requests will be，The newly recorded data is a collection of two arrays。
+The updateOrInsert method will first try to find a matching database record using the keys and values in the first parameter. If a record is found, it will be updated with the values in the second parameter. If no record is found, a new record will be inserted with the combined data from both arrays.
 
-## Self-incrementing Self-increment & Self-decreasing self-decrementing
-Both methods take at least one parameter: the column to be modified. The second parameter is optional and is used to control the amount of column incrementing or decrementing：
+## Incrementing & Decrementing
+Both of these methods accept at least one parameter: the column to modify. The second parameter is optional and controls the amount by which the column should be incremented or decremented:
 ```php
 Db::table('users')->increment('votes');
 
@@ -377,42 +371,38 @@ Db::table('users')->decrement('votes');
 
 Db::table('users')->decrement('votes', 5);
 ```
-You can also specify the fields to be updated during the operation：
+You can also specify the fields to update during the operation:
 ```php
 Db::table('users')->increment('votes', 1, ['name' => 'John']);
 ```
 
-## delete
+## Deleting
 ```php
 Db::table('users')->delete();
 
 Db::table('users')->where('votes', '>', 100)->delete();
 ```
-If you need to empty the table, you can use the truncate method, which will delete all rows and reset the self-incrementing ID to zero：
+If you need to empty a table, you can use the truncate method, which will delete all rows and reset the auto-increment ID to zero:
 ```php
 Db::table('users')->truncate();
 ```
 
 ## Pessimistic Lock
-Query ConstructorAlso include something that can help you in select You can use「Pessimistic Lock定」function。If you want to implement one in a query「Shared lock」， Classes must be implemented sharedLock Method。 A shared lock prevents selected data columns from being tampered with，until the transaction is committed:
+The query builder also includes some functions that can help you achieve "pessimistic locking" on select statements. To achieve a "shared lock" in your query, you can use the sharedLock method. A shared lock will prevent selected data columns from being tampered with until the transaction is committed:
 ```php
 Db::table('users')->where('votes', '>', 100)->sharedLock()->get();
 ```
-Alternatively, you can use the lockForUpdate method. Use the update lock to prevent rows from being modified or selected by other shared locks：
+Alternatively, you can use the lockForUpdate method. Using an "update" lock will prevent rows from being modified or selected by other shared locks:
 ```php
 Db::table('users')->where('votes', '>', 100)->lockForUpdate()->get();
 ```
+## Debugging
+You can use the `dd` or `dump` method to output query results or SQL statements. The `dd` method displays the debugging information and stops the execution of the request. The `dump` method also displays the debugging information, but it does not stop the execution of the request:
 
-## debug
-Classes must be implemented dd or dump Method to output query results or SQL Statements。 Usage dd The request is customizeddebugmessage，then stop executing the request。 dump The method can also be displayeddebugmessage，but does not stop executing the request：
 ```php
 Db::table('users')->where('votes', '>', 100)->dd();
 Db::table('users')->where('votes', '>', 100)->dump();
 ```
 
 > **Note**
-> Debugging requires the installation of `symfony/var-dumper`, the command is`composer require symfony/var-dumper`
-
-
-
-
+> Debugging requires the installation of `symfony/var-dumper` using the command `composer require symfony/var-dumper`.

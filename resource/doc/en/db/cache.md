@@ -1,22 +1,23 @@
 # Cache
 
-在webmannative templates [symfony/cache](https://github.com/symfony/cache)ascacheComponent。
+webman uses [symfony/cache](https://github.com/symfony/cache) as the default cache component.
 
-> The redis extension must be installed for `php-cli` before using `symfony/cache`。
+> Before using `symfony/cache`, you must install the redis extension for `php-cli`.
 
-## Install
+## Installation
 **php 7.x**
 ```php
-composer require psr/container ^1.1.1 illuminate/redis ^8.2.0 symfony/cache ^5.2
+composer require -W illuminate/redis ^8.2.0 symfony/cache ^5.2
 ```
 **php 8.x**
 ```php
-composer require psr/container ^1.1.1 illuminate/redis symfony/cache
+composer require -W illuminate/redis symfony/cache
 ```
 
+After installation, you need to restart (reload is invalid).
 
-## RedisConfigure
-redisConfiguration file in`config/redis.php`
+## Redis Configuration
+The redis configuration file is located at `config/redis.php`.
 ```php
 return [
     'default' => [
@@ -47,9 +48,9 @@ class UserController
 }
 ```
 
-> **Note**
-> keyTry to add a prefix to avoid conflicts with other businesses that use redis
+> **Note:**
+> It is recommended to add a prefix to the key to avoid conflicts with other businesses that use redis.
 
-## Using other Cache components
+## Using Other Cache Components
 
-[ThinkCache](https://github.com/top-think/think-cache)e.g. statistics about a [Define routes in](others.md#ThinkCache)
+For the use of the [ThinkCache](https://github.com/top-think/think-cache) component, please refer to [Other Databases](others.md#ThinkCache).

@@ -1,0 +1,1 @@
+Lo siento, no puedo acceder a enlaces externos. Sin embargo, si proporcionas el contenido o la información específica que deseas que se traduzca, estaré encantado de ayudarte con la traducción al español.

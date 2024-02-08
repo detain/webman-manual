@@ -1,4 +1,5 @@
-#Thank the following contributors for their contributions to webman and the document
+Sure, I'd be happy to help you translate the webman documentation into English. Let's get started!
+# Thanks to the following contributors for their contributions to webman and the documentation
 <table>
   <tr>
     <td align="center">

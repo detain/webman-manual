@@ -1,18 +1,17 @@
 # Plugins
-PluginsDivide**Basic Plugins**和**Application Plugin**。
+Plugins are divided into **basic plugins** and **application plugins**.
 
 #### Basic Plugins
-The base plugin can be understood as some webman base components, it may be a generic class library (such as webman/think-orm), may be a generic middleware (such as webman/cors), or a set of routing configuration (such as webman/auto-route), or a custom process (such as webman /redis-queue), etc.。
+Basic plugins can be understood as some basic components of webman. It may be a common class library (such as webman/think-orm), a common middleware (such as webman/cors), or a set of route configurations (such as webman/auto-route), or a custom process (such as webman/redis-queue), and so on.
 
-
-should be introduced in[Basic Plugins](plugin/base.md)
+For more information, please refer to [Basic Plugins](plugin/base.md).
 
 > **Note**
-> Required for base pluginswebman>=1.2.0
+> Basic plugins require webman>=1.2.0
 
-#### Application Plugin
-Application plugin is a complete application, such as a question and answer system, CMS system, mall system, etc.。
-should be introduced in[Application Plugin](plugin/app.md)
+#### Application Plugins
+Application plugins are complete applications, such as Q&A systems, CMS systems, e-commerce systems, and so on.
+For more information, please refer to [Application Plugins](app/app.md).
 
-> **Application Plugin**
-> Required for application pluginswebman>=1.4.0
+> **Application Plugins**
+> Application plugins require webman>=1.4.0

@@ -2,31 +2,33 @@
 
 ## Description
 
-It is based on [PHP-Casbin](https://github.com/php-casbin/php-casbin), Functionality provided by、Efficient open source access control framework，and can`ACL`, `RBAC`, `ABAC`and other access control models。
-  
-## Project address
+It is based on [PHP-Casbin](https://github.com/php-casbin/php-casbin), a powerful and efficient open-source access control framework that supports access control models such as `ACL`, `RBAC`, `ABAC`, etc.
+
+## Project Address
 
 https://github.com/Tinywan/webman-permission
-  
-## Install
- 
+
+## Installation
+
 ```php
 composer require tinywan/webman-permission
 ```
-> String or PHP 7.1+ 和 [ThinkORM](https://www.kancloud.cn/manual/think-orm/1257998)，Official Handbook：https://www.workerman.net/doc/webman#/db/others
+> This extension requires PHP 7.1+ and [ThinkORM](https://www.kancloud.cn/manual/think-orm/1257998). Official documentation: https://www.workerman.net/doc/webman#/db/others
 
-## Configure
+## Configuration
 
 ### Register Service
-Create a new configuration file `config/bootstrap.php` with content similar to the following：
-  
+Create a configuration file `config/bootstrap.php` with similar content:
+
 ```php
     // ...
     webman\permission\Permission::class,
 ```
-### Model configuration file 
 
-Create a new configuration file `config/casbin-basic-model.conf` with contents similar to the following：
+### Model Configuration File
+
+Create a configuration file `config/casbin-basic-model.conf` with similar content:
+
 ```conf
 [request_definition]
 r = sub, obj, act
@@ -43,15 +45,17 @@ e = some(where (p.eft == allow))
 [matchers]
 m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 ```
-### Policy configuration file
 
-Create a new configuration file `config/permission.php` that looks like this：
+### Policy Configuration File
+
+Create a configuration file `config/permission.php` with similar content:
+
 ```php
 <?php
 
 return [
     /*
-     *Default  Permission
+     * Default Permission
      */
     'default' => 'basic',
 
@@ -63,7 +67,7 @@ return [
     'enforcers' => [
         'basic' => [
             /*
-            * Model Setup
+            * Model Setting
             */
             'model' => [
                 'config_type' => 'file',
@@ -71,24 +75,25 @@ return [
                 'config_text' => '',
             ],
 
-            // adapter .
+            // Adapter
             'adapter' => webman\permission\adapter\DatabaseAdapter::class,
 
             /*
-            * Database Settings.
+            * Database Setting
             */
             'database' => [
-                // Database connection name, leave as default configuration.
+                // Database connection name, leave blank for default configuration.
                 'connection' => '',
-                // Policy table name (without table prefix)）
+                // Policy table name (without table prefix)
                 'rules_name' => 'rule',
-                // Full name of policy table.
+                // Full name of the policy table.
                 'rules_table' => 'train_rule',
             ],
         ],
     ],
 ];
 ```
+
 ## Quick Start
 
 ```php
@@ -102,7 +107,7 @@ Permission::addRoleForUser('eve', 'writer');
 Permission::addPolicy('writer', 'articles','edit');
 ```
 
-You can check if the user has such permission
+You can check if a user has such permission
 
 ```php
 if (Permission::enforce("eve", "articles", "edit")) {
@@ -114,13 +119,13 @@ if (Permission::enforce("eve", "articles", "edit")) {
 
 ## Authorization Middleware
 
-Create the file `app/middleware/AuthorizationMiddleware.php` (if the directory does not exist, please create it yourself) as follows：
+Create file `app/middleware/AuthorizationMiddleware.php` (create the directory if it does not exist) as follows:
+
 ```php
 <?php
 
 /**
  * Authorization Middleware
- * @author ShaoBo Wan (Tinywan)
  * @datetime 2021/09/07 14:15
  */
 
@@ -143,31 +148,31 @@ class AuthorizationMiddleware implements MiddlewareInterface
 			$userId = 10086;
 			$action = $request->method();
 			if (!Permission::enforce((string) $userId, $uri, strtoupper($action))) {
-				throw new \Exception('Sorry, you do not have access to this interface');
+				throw new \Exception('Sorry, you do not have permission to access this interface');
 			}
 		} catch (CasbinException $exception) {
-			throw new \Exception('Authorization Exception' . $exception->getMessage());
+			throw new \Exception('Authorization exception' . $exception->getMessage());
 		}
 		return $next($request);
 	}
 }
 ```
 
-Add the global middleware to `config/middleware.php` as follows：
+Add the global middleware in `config/middleware.php` as follows:
 
 ```php
 return [
     // Global Middleware
     '' => [
-        // ... Omit other middleware here
+        // ... Other middleware omitted here
         app\middleware\AuthorizationMiddleware::class,
     ]
 ];
 ```
 
-## Thanks
+## Credits
 
-[Casbin](https://github.com/php-casbin/php-casbin)，You can view the full document in its  [official website](https://casbin.org/) 上。
+[Casbin](https://github.com/php-casbin/php-casbin), you can view the complete documentation on its [official website](https://casbin.org/).
 
 ## License
 

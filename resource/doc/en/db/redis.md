@@ -1,20 +1,23 @@
 # Redis
 
-webman的redisThe component uses by default[illuminate/redis](https://github.com/illuminate/redis)，is alsolaravel的redis库，Usage withlaravelsame。
+webman's redis component uses [illuminate/redis](https://github.com/illuminate/redis) by default, which is the redis library for Laravel, and its usage is the same as Laravel.
 
-You must install the redis extension for `php-cli` before using `illuminate/redis`。
+Before using `illuminate/redis`, you must install the redis extension for `php-cli`.
 
-> Use the command `php -m | grep redis` to see if `php-cli` has the redis extension installed. Note: Even if you have the redis extension installed on `php-fpm`, it does not mean you can use it on `php-cli`, because `php-cli` and `php-fpm` are different applications and may use different `php.ini` configurations. Use the command `php --ini` to see which `php.ini` configuration file is used by your `php-cli` 。
+> **Note**
+> Use the command `php -m | grep redis` to check if the redis extension is installed for `php-cli`. Note: even if you have installed the redis extension for `php-fpm`, it does not mean that you can use it for `php-cli`, because `php-cli` and `php-fpm` are different applications and may use different `php.ini` configurations. Use the command `php --ini` to check which `php.ini` configuration file is used by your `php-cli`.
 
-## Install
+## Installation
 
 ```php
-composer require psr/container ^1.1.1 illuminate/redis illuminate/events
+composer require -W illuminate/redis illuminate/events
 ```
 
+After installation, you need to restart (reload is ineffective).
 
-## Configure
-redisConfiguration file in`config/redis.php`
+
+## Configuration
+The redis configuration file is located in `config/redis.php`
 ```php
 return [
     'default' => [
@@ -26,7 +29,7 @@ return [
 ];
 ```
 
-## Examples
+## Example
 ```php
 <?php
 namespace app\controller;
@@ -45,7 +48,7 @@ class UserController
 }
 ```
 
-## RedisInterface
+## Redis API
 ```php
 Redis::append($key, $value)
 Redis::bitCount($key)
@@ -88,10 +91,10 @@ $redis->getBit($key, $offset)
 ```
 
 > **Note**
-> careful use`Redis::select($db)`Interface，due towebmanis a memory-resident framework，if a certain request uses`Redis::select($db)`Switching the database will affect other subsequent requests。Multiple databases are recommended to be different`$db`Configurea recordRedisConnectionsConfigure。
+> Be careful when using the `Redis::select($db)` API. Since webman is a persistent memory framework, if a request uses `Redis::select($db)` to switch databases, it will affect subsequent requests. For multiple databases, it is recommended to configure different `$db` with different Redis connection configurations.
 
-## Use multiple Redis connections
-e.g. configuration file`config/redis.php`
+## Using Multiple Redis Connections
+For example, in the configuration file `config/redis.php`
 ```php
 return [
     'default' => [
@@ -110,14 +113,14 @@ return [
 
 ]
 ```
-The default connection used is the one configured under `default`, you can choose which redis connection to use with the `Redis::connection()` method。
+By default, the connection configured under `default` is used. You can use the `Redis::connection()` method to select which redis connection to use.
 ```php
 $redis = Redis::connection('cache');
 $redis->get('test_key');
 ```
 
 ## Cluster Configuration
-If your application uses Redis server clusters, you should use the clusters key in the Redis configuration file to define these clusters：
+If your application uses a Redis server cluster, you should define these clusters in the Redis configuration file using the `clusters` key:
 ```php
 return [
     'clusters' => [
@@ -134,7 +137,7 @@ return [
 ];
 ```
 
-is a product based on，clusters can implement client slicing on nodes，allows you to implement node pools and create large amounts of available memory。Here toNote，Client-side sharing does not handle failure cases；therefore，This feature is mainly applicable to cached data fetched from another master database。Recommended Redis Correspondence in，Required inConfigureRule lookup options The following is specified in the key：
+By default, the cluster can implement client-side sharding on nodes, allowing you to implement node pools and create a large amount of available memory. Note that client sharing will not handle failure cases; therefore, this feature is mainly used for caching data obtained from another main database. If you want to use Redis native clustering, you need to make the following specifications in the options key in the configuration file:
 
 ```php
 return[
@@ -148,8 +151,8 @@ return[
 ];
 ```
 
-## Pipeline command
-when you need to send many commands to the server in one operation，DefaultPipeline command。 pipeline in the exception default by Redis business notification 。You can send all commands to Redis instance，They will all be executed in one operation to complete：
+## Pipeline Commands
+When you need to send a lot of commands to the server in one operation, it is recommended to use pipeline commands. The `pipeline` method takes a closure of the Redis instance. You can send all the commands to the Redis instance, and they will all be executed in one operation:
 ```php
 Redis::pipeline(function ($pipe) {
     for ($i = 0; $i < 1000; $i++) {

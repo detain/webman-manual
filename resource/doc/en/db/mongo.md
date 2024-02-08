@@ -1,19 +1,26 @@
 # MongoDB
 
-webmannative templates [jenssegers/mongodb](https://github.com/jenssegers/laravel-mongodb) asmongodbComponent，It is fromlaravelextracted from the project，Usage withlaravelsame。
+webman uses [jenssegers/mongodb](https://github.com/jenssegers/laravel-mongodb) as the default MongoDB component, which is extracted from the Laravel project and has the same usage as Laravel.
 
-You must install the mongodb extension to `php-cli` before using `jenssegers/mongodb`。
+Before using `jenssegers/mongodb`, you must first install the MongoDB extension for `php-cli`.
 
-> Use the command `php -m | grep mongodb` to see if `php-cli` has the mongodb extension installed. Note: Even if you have the mongodb extension installed in `php-fpm`, it doesn't mean you can use it in `php-cli` because `php-cli` and `php-fpm` are different applications and may use different `php.ini` configurations. Use the command `php --ini` to see which `php.ini` configuration file your `php-cli` uses 。
+> Use the command `php -m | grep mongodb` to check if the MongoDB extension is installed for `php-cli`. Note: Even if you have installed the MongoDB extension for `php-fpm`, it does not mean that you can use it in `php-cli`, because `php-cli` and `php-fpm` are different applications and may use different `php.ini` configurations. Use the command `php --ini` to see which `php.ini` configuration file your `php-cli` is using.
 
-## Install
+## Installation
 
+For PHP>7.2
 ```php
-composer require psr/container ^1.1.1 illuminate/database jenssegers/mongodb ^3.8.0
+composer require -W illuminate/database jenssegers/mongodb ^3.8.0
+```
+For PHP=7.2
+```php
+composer require -W illuminate/database jenssegers/mongodb ^3.7.0
 ```
 
-## Configure
-Add `mongodb` connection in `config/database.php`, similar to the following：
+After installation, you need to restart (reload is invalid).
+
+## Configuration
+Add the `mongodb` connection in `config/database.php`, similar to the following:
 ```php
 return [
 
@@ -21,7 +28,7 @@ return [
 
     'connections' => [
 
-         ...Other configuration omitted here...
+         ...Other configurations are omitted here...
 
         'mongodb' => [
             'driver'   => 'mongodb',
@@ -34,14 +41,14 @@ return [
                 // here you can pass more settings to the Mongo Driver Manager
                 // see https://www.php.net/manual/en/mongodb-driver-manager.construct.php under "Uri Options" for a list of complete parameters that you can use
 
-                'database' => 'admin', // required with Mongo 3+
+                'appname' => 'homestead'
             ],
         ],
     ],
 ];
 ```
 
-## Examples
+## Example
 ```php
 <?php
 namespace app\controller;
@@ -59,7 +66,6 @@ class UserController
 }
 ```
 
-## Read more at 
+## For more information, please visit
 
 https://github.com/jenssegers/laravel-mongodb
-

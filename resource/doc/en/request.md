@@ -1,8 +1,7 @@
-# Description
+# Documentation
 
-##  Get request object
-webmanThe request object is automatically injected into the first parameter of the action method, for example
-
+## Obtaining the request object
+Webman will automatically inject the request object into the first parameter of the action method, for example:
 
 **Example**
 ```php
@@ -16,126 +15,124 @@ class UserController
     public function hello(Request $request)
     {
         $default_name = 'webman';
-        // Get the name parameter from the get request, or return it if no name parameter is passed$default_name
+        // Get the 'name' parameter from the get request, or return $default_name if the parameter is not passed
         $name = $request->get('name', $default_name);
-        // Return string to browser
+        // Return a string to the browser
         return response('hello ' . $name);
     }
 }
 ```
 
-With the `$request` object we can get any data related to the request。
+Through the `$request` object, we can obtain any data related to the request.
 
-**Sometimes we want to get the `$request` object of the current request in other classes, and then we just use the helper function `request()`.**;
+**Sometimes we may want to get the `$request` object in other classes, in which case we can use the helper function `request()`**
 
-## Get request parametersget
-
+## Getting request parameters from get
 **Get the entire get array**
 ```php
 $request->get();
 ```
-Return an empty array if the request has no get parameters。
+If the request does not contain get parameters, it returns an empty array.
 
-**Get a certain value of the get array**
+**Get a value from the get array**
 ```php
 $request->get('name');
 ```
-Return if the get array does not contain this valuenull。
+If the get array does not contain this value, it returns null.
 
-You can also pass a default value to the second argument of the get method, and return the default value if the corresponding value is not found in the get array. For example：
+You can also pass a default value as the second parameter to the get method. If the corresponding value is not found in the get array, it will return the default value. For example:
 ```php
 $request->get('name', 'tom');
 ```
 
-## Get request parameterspost
-**Get the whole post array**
+## Getting request parameters from post
+**Get the entire post array**
 ```php
 $request->post();
 ```
-Returns an empty array if the request has no post parameters。
+If the request does not contain post parameters, it returns an empty array.
 
-**Get a certain value of the post array**
+**Get a value from the post array**
 ```php
 $request->post('name');
 ```
-Return if the post array does not contain this valuenull。
+If the post array does not contain this value, it returns null.
 
-Like the get method, you can also pass a default value to the second parameter of the post method and return the default value if the corresponding value is not found in the post array. For example, ：
+Similar to the get method, you can also pass a default value as the second parameter to the post method. If the corresponding value is not found in the post array, it will return the default value. For example:
 ```php
 $request->post('name', 'tom');
 ```
 
-## Get the original request post package body
+## Getting the raw request body from post
 ```php
 $post = $request->rawBody();
 ```
-This function is similar to `php-fpm`in `file_get_contents("php://input");`operation。Used to gethttpdaemon model。this inGet非`application/x-www-form-urlencoded`formatpostUseful when requesting data。 
+This function is similar to the `file_get_contents("php://input")` operation in `php-fpm`. It is used to obtain the raw HTTP request body, which is very useful when obtaining post request data in a non-`application/x-www-form-urlencoded` format.
 
-
-## Getheader
+## Getting header
 **Get the entire header array**
 ```php
 $request->header();
 ```
-Returns an empty array if the request does not have a header parameter. Note that all keys are lowercase。
+If the request does not contain header parameters, it returns an empty array. Note that all keys are lowercase.
 
-**Get a value of the header array**
+**Get a value from the header array**
 ```php
 $request->header('host');
 ```
-Returns null if the header array does not contain this value. note that all keys are lowercase。
+If the header array does not contain this value, it returns null. Note that all keys are lowercase.
 
-Like the get method, you can also pass a default value to the second parameter of the header method and return the default value if the corresponding value is not found in the header array. For example：
+Similar to the get method, you can also pass a default value as the second parameter to the header method. If the corresponding value is not found in the header array, it will return the default value. For example:
 ```php
 $request->header('host', 'localhost');
 ```
 
-## Getcookie
+## Getting cookie
 **Get the entire cookie array**
 ```php
 $request->cookie();
 ```
-Return an empty array if the request has no cookie parameters。
+If the request does not contain cookie parameters, it returns an empty array.
 
-**Get a certain value of the cookie array**
+**Get a value from the cookie array**
 ```php
 $request->cookie('name');
 ```
-Return if the cookie array does not contain this valuenull。
+If the cookie array does not contain this value, it returns null.
 
-As with the get method, you can pass a default value to the second parameter of the cookie method, and return the default value if the corresponding value is not found in the cookie array. For example：
+Similar to the get method, you can also pass a default value as the second parameter to the cookie method. If the corresponding value is not found in the cookie array, it will return the default value. For example:
 ```php
 $request->cookie('name', 'tom');
 ```
 
-## Get all inputs
-Contains a collection of `post` `get`。
+## Getting all inputs
+Includes the collection of `post` and `get`.
 ```php
 $request->all();
 ```
 
-## Get specified input value
-Get a value from the set of `post` `get`。
+## Getting a specific input value
+Get a value from the collection of `post` and `get`.
 ```php
 $request->input('name', $default_value);
 ```
 
-## Get partial input data
-Retrieve some data from the set of `post` `get`。
+## Getting partial input data
+Get part of the data from the collection of `post` and `get`.
 ```php
-// Get an array of username and password and ignore it if the corresponding key is not available, For example
+// Get an array of username and password, ignoring the key if it does not exist
 $only = $request->only(['username', 'password']);
-// Get all inputs except avatar and age
+// Get all inputs except 'avatar' and 'age'
 $except = $request->except(['avatar', 'age']);
 ```
 
-## Get upload file
-**Get the entire array of uploaded files**
+## Getting uploaded files
+**Get the entire uploaded file array**
 ```php
 $request->file();
 ```
 
-Form Similar:
+Form example:
 ```html
 <form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
 <input name="file1" multiple="multiple" type="file">
@@ -144,14 +141,14 @@ Form Similar:
 </form>
 ```
 
-`$request->file()`Returned format is similar:
+The format returned by `$request->file()` is similar to the following:
 ```php
 array (
     'file1' => object(webman\Http\UploadFile),
     'file2' => object(webman\Http\UploadFile)
 )
 ```
-He is a`webman\Http\UploadFile`Implemented syntactically。`webman\Http\UploadFile`Classes inherit from PHP built-in [`SplFileInfo`](https://www.php.net/manual/zh/class.splfileinfo.php) 类，and provides a number of practical methods。
+It is an array of instances of `webman\Http\UploadFile`. The `webman\Http\UploadFile` class inherits the native PHP [`SplFileInfo`](https://www.php.net/manual/zh/class.splfileinfo.php) class and provides some practical methods.
 
 ```php
 <?php
@@ -164,33 +161,33 @@ class UploadController
     public function files(Request $request)
     {
         foreach ($request->file() as $key => $spl_file) {
-            var_export($spl_file->isValid()); // Is the file valid, for exampleture|false
-            var_export($spl_file->getUploadExtension()); // Upload file suffix, e.g.'jpg'
-            var_export($spl_file->getUploadMineType()); // Upload file mine type, for example 'image/jpeg'
-            var_export($spl_file->getUploadErrorCode()); // Get the upload error code, e.g. UPLOAD_ERR_NO_TMP_DIR UPLOAD_ERR_NO_FILE UPLOAD_ERR_CANT_WRITE
-            var_export($spl_file->getUploadName()); // Upload file name, e.g. 'my-test.jpg'
-            var_export($spl_file->getSize()); // Get file size, e.g. 13364, in bytes
-            var_export($spl_file->getPath()); // Get the uploaded directory, e.g. '/tmp'
-            var_export($spl_file->getRealPath()); // Get temporary file path, e.g. `/tmp/workerman.upload.SRliMu`
+            var_export($spl_file->isValid()); // Whether the file is valid, for example true|false
+            var_export($spl_file->getUploadExtension()); // Uploaded file extension, for example 'jpg'
+            var_export($spl_file->getUploadMimeType()); // Uploaded file MIME type, for example 'image/jpeg'
+            var_export($spl_file->getUploadErrorCode()); // Get the upload error code, for example UPLOAD_ERR_NO_TMP_DIR UPLOAD_ERR_NO_FILE UPLOAD_ERR_CANT_WRITE
+            var_export($spl_file->getUploadName()); // Uploaded file name, for example 'my-test.jpg'
+            var_export($spl_file->getSize()); // Get file size, for example 13364, in bytes
+            var_export($spl_file->getPath()); // Get the upload directory, for example '/tmp'
+            var_export($spl_file->getRealPath()); // Get the temporary file path, for example `/tmp/workerman.upload.SRliMu`
         }
         return response('ok');
     }
 }
 ```
 
-**Note：**
+**Note:**
 
-- The file will be named as a temporary file after being uploaded, similar to `/tmp/workerman.upload.SRliMu`
-- The upload file size is subject to[defaultMaxPackageSize](http://doc.workerman.net/tcp-connection/default-max-package-size.html)restriction，default10M，Available in`config/server.php`Event data`max_package_size`Arrays of instances。
-- Temporary files will be automatically cleared after the request ends
-- If the request does not upload a file then `$request->file()` returns an empty array
-- The uploaded file is not supported `move_uploaded_file()` Method，Please use `$file->move()`Method instead，Middleware sectionExample
+- The file will be renamed to a temporary file after upload, similar to `/tmp/workerman.upload.SRliMu`
+- The uploaded file size is limited by [defaultMaxPackageSize](http://doc.workerman.net/tcp-connection/default-max-package-size.html), which is 10M by default and can be changed in the `config/server.php` file by modifying `max_package_size`.
+- The temporary files will be automatically cleared after the request ends
+- If there are no uploaded files in the request, `$request->file()` returns an empty array
+- The uploaded files do not support the `move_uploaded_file()` method, please use the `$file->move()` method instead, as shown in the example below
 
-### Get specific upload files
+### Getting a specific uploaded file
 ```php
 $request->file('avatar');
 ```
-Returns the corresponding file if it exists`webman\Http\UploadFile`instance，otherwise returnnull。
+If the file exists, it returns the corresponding file's instance of `webman\Http\UploadFile`, otherwise it returns null.
 
 **Example**
 ```php
@@ -213,162 +210,174 @@ class UploadController
 }
 ```
 
-## Gethost
-Get the host information of the request。
+## Getting host
+Get the host information of the request.
 ```php
 $request->host();
 ```
-If the request address is non-standard port 80 or 443, the host information may carry the port, e.g. `example.com:8080`. If the port is not needed the first parameter can be passed in`true`。
+If the request address is non-standard, i.e., not on port 80 or 443, the host information may include the port, for example, `example.com:8080`. If the port information is not needed, the first parameter can be set to `true`.
 
 ```php
 $request->host(true);
 ```
 
-## Get request method
+## Getting the request method
 ```php
  $request->method();
 ```
-The return value may be one of `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`, `HEAD`。
+The return value may be one of `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`, or `HEAD`.
 
-## Get Requesturi
+## Getting the request URI
 ```php
 $request->uri();
 ```
-Return the uri of the request, including the path and queryString parts。
+Returns the URI of the request, including the path and query string parts.
 
-## Get request path
-
+## Getting the request path
 ```php
 $request->path();
 ```
-Return the path part of the request。
+Returns the path part of the request.
 
-
-## Get RequestqueryString
-
+## Getting the request query string
 ```php
 $request->queryString();
 ```
-Return the queryString part of the request。
+Returns the query string part of the request.
+## Getting request URL
 
-## Get Requesturl
-`url()`Method returns without the `Query` parameter URL。
+The `url()` method returns the URL without `Query` parameters.
+
 ```php
 $request->url();
 ```
-Return similar`//www.workerman.net/workerman-chat`
 
-`fullUrl()`Method returns with `Query` parameter URL。
+It returns something like `//www.workerman.net/workerman-chat`.
+
+The `fullUrl()` method returns the URL with `Query` parameters.
+
 ```php
 $request->fullUrl();
 ```
-Return similar`//www.workerman.net/workerman-chat?type=download`
 
-> Note: `url()` and `fullUrl()` do not return the protocol part (no http or https)
+It returns something like `//www.workerman.net/workerman-chat?type=download`.
 
-## Get request HTTP version
+> **Note**
+> `url()` and `fullUrl()` do not include the protocol part (neither `http` nor `https`). This is because using `//example.com` in the browser will automatically recognize the current site's protocol and send the request using either http or https.
+
+If you are using an nginx proxy, add `proxy_set_header X-Forwarded-Proto $scheme;` to the nginx configuration, [refer to nginx proxy](others/nginx-proxy.md). This way, you can use `$request->header('x-forwarded-proto');` to determine whether it is http or https, for example:
+
+```php
+echo $request->header('x-forwarded-proto'); // outputs http or https
+```
+
+## Getting request HTTP version
 
 ```php
 $request->protocolVersion();
 ```
-Return string `1.1` or`1.0`。
 
+Returns a string `1.1` or `1.0`.
 
-## Get RequestsessionId
+## Getting request session ID
 
 ```php
 $request->sessionId();
 ```
-Returns a string, consisting of letters and numbers
 
+Returns a string consisting of letters and numbers.
 
-## Get Request ClientIP
+## Getting client's IP address
+
 ```php
 $request->getRemoteIp();
 ```
 
-## GetRequestClientPort
+## Getting client's port
+
 ```php
 $request->getRemotePort();
 ```
 
-## Get request client realIP
+## Getting client's real IP address
+
 ```php
-$request->getRealIp($safe_mode=true);
+$request->getRealIp($safe_mode = true);
 ```
 
-When a project uses a proxy (such as nginx), using `$request->getRemoteIp()` often yields a proxy server IP (something like `127.0.0.1` `192.168.x.x`) instead of the client's real IP. to get the client's real IP。
+When the project is using a proxy (such as nginx), using `$request->getRemoteIp()` often returns the proxy server's IP (like `127.0.0.1` or `192.168.x.x`) instead of the client's real IP. In such cases, you can try using `$request->getRealIp()` to obtain the client's real IP.
 
-`$request->getRealIp();`The principle is: if the client IP is found to be an intranet IP, it tries to get the real IP from the `Client-Ip`, `X-Forwarded-For`, `X-Real-Ip`, `Client-Ip`, `Via` HTTP headers. if `$safe_mode` is false, it does not determine whether the client IP is intranet IP (not safe), directly try to read the client IP data from the above HTTP header. If the HTTP header does not have the above fields, the return value of `$request->getRemoteIp()` is used as the result to return 。
+`$request->getRealIp()` will attempt to obtain the real IP from the `x-real-ip`, `x-forwarded-for`, `client-ip`, `x-client-ip`, and `via` fields in the HTTP header.
 
-> Since HTTP headers are easily forged, the client IP obtained by this method is not 100% reliable, especially if `$safe_mode` is false. The most reliable way to get the real IP of a client through a proxy is to have a known safe proxy server IP and know exactly which HTTP header carries the real IP, if the IP returned by `$request->getRemoteIp()` is confirmed to be a known safe proxy server, then pass `$request->header('HTTP header carrying real IP HTTP header')` to get the realIP。
+> Since HTTP headers can be easily spoofed, the client IP obtained from this method is not 100% reliable, especially when `$safe_mode` is set to `false`. A more reliable method for obtaining the client's real IP through a proxy is to know the secure proxy server IP and explicitly know which HTTP header carries the real IP. If the IP returned by `$request->getRemoteIp()` confirms a known secure proxy server, then use `$request->header('Header carrying the real IP')` to obtain the real IP.
 
+## Getting server's IP address
 
-## Get ServerIP
 ```php
 $request->getLocalIp();
 ```
 
-## Get server port
+## Getting server's port
+
 ```php
 $request->getLocalPort();
 ```
 
-## Determine if it is an ajax request
+## Checking if it is an AJAX request
+
 ```php
 $request->isAjax();
 ```
 
-## Determine if it is a pjax request
+## Checking if it is a PJAX request
+
 ```php
 $request->isPjax();
 ```
 
-## Determine if it is expecting a json return
+## Checking if it expects JSON response
+
 ```php
 $request->expectsJson();
 ```
 
-## Determine if the client accepts json returns
+## Checking if the client accepts JSON response
+
 ```php
 $request->acceptJson();
 ```
 
-## Get the requested plugin name
-Return empty string for non-plugin requests`''`。
+## Getting the requested plugin name
+Returns an empty string `''` for non-plugin requests.
 ```php
 $request->plugin;
 ```
-> Required for this featurewebman>=1.4.0
+> This feature requires webman>=1.4.0
 
-## Get the requested application name
-Single application always returns empty string`''`，[more applications](multiapp.md)when returning the application name
+## Getting the requested application name
+Returns an empty string `''` for single applications, and the application name for [multiple applications](multiapp.md).
 ```php
 $request->app;
 ```
+> Because closures do not belong to any application, the request from a closure route will always return an empty string `''`.
+> Refer to [Route](route.md) for closure routes.
 
-> Because closure functions do not belong to any application, requests from closure routes `$request->app` always return the empty string`''`
-> Component Usage Reference [Routing](route.md)
-
-## Get the class name of the requested controller
-Get the class name corresponding to the controller
+## Getting the requested controller class name
+Gets the class name corresponding to the controller
 ```php
 $request->controller;
 ```
-Return similar `app\controller\IndexController`
+Returns something like `app\controller\IndexController`.
 
-> Since the closure function does not belong to any controller, requests from the closure route `$request->controller` always return the empty string`''`
-> Component Usage Reference [Routing](route.md)
+> Because closures do not belong to any controller, the request from a closure route will always return an empty string `''`.
+> Refer to [Route](route.md) for closure routes.
 
-## Get the method name of the request
-Get the name of the controller method corresponding to the request
+## Getting the requested method name
+Gets the method name corresponding to the request's controller method
 ```php
 $request->action;
 ```
-Return similar `index`
+Returns something like `index`.
 
-> Because the closure function does not belong to any controller, requests from the closure route `$request->action` always return the empty string`''`
-> Component Usage Reference [Routing](route.md)
-
-
-
+> Because closures do not belong to any controller, the request from a closure route will always return an empty string `''`.
+> Refer to [Route](route.md) for closure routes.

@@ -1,14 +1,13 @@
 # Required Environment
 
+## Linux System
+Webman relies on the built-in PHP extensions `posix` and `pcntl` for proper functioning on a Linux system. These extensions typically do not require separate installation.
 
-## linuxSystem
-linuxThe system depends on the `posix` and `pcntl` extensions, which are built-in extensions to php and are generally available without installation。
+If you are using the "宝塔" control panel, simply disabling or removing functions beginning with `pnctl_` within the control panel will suffice.
 
-If you are a pagoda user, then just disable and remove the functions starting with `pnctl_` from pagoda。
+While the `event` extension is not mandatory, it is recommended to install it for improved performance.
 
-`event`Extensions are not required, but it is recommended to install this extension for better performance。
+## Windows System
+Webman can run on a Windows system; however, due to limitations such as the inability to configure multiple processes and daemon processes, it is advisable to use Windows only for development purposes. For production environments, it is suggested to utilize a Linux system.
 
-## windowsSystem
-webmanSet the class inwindowsSystem，but since it is not possible to set up multiple processes、daemon，SuggestionswindowsOnly as a development environment，In the vast majority of caseslinuxSystem。
-
-Note: Windows does not rely on the `posix` and `pcntl` extensions。
+Please note that the `posix` and `pcntl` extensions are not required for the Windows system.

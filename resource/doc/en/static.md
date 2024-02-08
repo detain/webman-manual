@@ -1,21 +1,21 @@
-## Handle static files
-webmanStatic file access is supported, static files are placed in the `public` directory, for example accessing `http://127.0.0.8787/upload/avatar.png` is actually accessing `{main project directory}/public/upload/avatar.php`。
+## Handling Static Files
+webman supports access to static files, which are placed in the `public` directory. For example, accessing `http://127.0.0.8787/upload/avatar.png` actually accesses `{main project directory}/public/upload/avatar.png`.
 
 > **Note**
-> webman Since 1.4 support for application plug-ins, static file access starting with `/app/xx/filename` is actually access to the `public` directory of the application plug-ins, which means that webman >= 1.4.0 does not support access to directories under `{main project directory}/public/app/`。
-> should be introduced in[support based on](./plugin/app.md)
+> Starting from webman 1.4, it supports application plugins. Accessing static files starting with `/app/xx/filename` actually accesses the `public` directory of the application plugin. In other words, webman >=1.4.0 does not support accessing directories under `{main project directory}/public/app/`.
+> For more information, please refer to [Application Plugins](./plugin/app.md).
 
-### Turn off static file support
-If you don't need static file support, open `config/static.php` and change the `enable` option to false404。
+### Disabling Static File Support
+If static file support is not needed, open `config/static.php` and change the `enable` option to false. After disabling, accessing all static files will return a 404 error.
 
-### Change static file directory
-webmanThe default is to use the public directory as the static file directory. To change this, please change the `public_path()` helper function in `support/helpers.php`。
+### Changing the Static File Directory
+By default, webman uses the `public` directory as the static file directory. To modify this, please edit the `public_path()` helper function in `support/helpers.php`.
 
 ### Static File Middleware
-webmanComes with a static file middleware, location`app/middleware/StaticFile.php`。
-Sometimes we need to do something with static files, such as adding cross-domain http headers to static files and disabling access to files that start with a dot (`. `) can use this middleware
+webman comes with a static file middleware located at `app/middleware/StaticFile.php`.
+Sometimes, we need to perform some processing on static files, such as adding cross-origin headers, or prohibiting access to files starting with a dot (`.`). This middleware can be used for such tasks.
 
-`app/middleware/StaticFile.php` Contents are similar to the following：
+The contents of `app/middleware/StaticFile.php` are similar to the following:
 ```php
 <?php
 namespace support\middleware;
@@ -28,13 +28,13 @@ class StaticFile implements MiddlewareInterface
 {
     public function process(Request $request, callable $next) : Response
     {
-        // Disable access to . Hidden files at the beginning
+        // Prohibit access to hidden files starting with .
         if (strpos($request->path(), '/.') !== false) {
             return response('<h1>403 forbidden</h1>', 403);
         }
         /** @var Response $response */
         $response = $next($request);
-        // Add cross-domain http header
+        // Add cross-origin headers
         /*$response->withHeaders([
             'Access-Control-Allow-Origin'      => '*',
             'Access-Control-Allow-Credentials' => 'true',
@@ -43,4 +43,4 @@ class StaticFile implements MiddlewareInterface
     }
 }
 ```
-If you need this middleware, you need to enable it in the `middleware` option in `config/static.php`。
+If this middleware is required, it needs to be enabled in the `middleware` option in `config/static.php`.

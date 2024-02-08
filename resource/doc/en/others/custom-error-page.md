@@ -1,11 +1,11 @@
-## Custom404
-webmanIn 404 will automatically return the contents of `public/404.html`, so the developer can directly change the `public/404.html` file。
+## Custom 404
+webman automatically returns the content in `public/404.html` when a 404 error occurs, so developers can directly modify the `public/404.html` file.
 
-If you want to control dynamically404Other languages，For example inajaxReturn on requestjsondata `{"code:"404", "msg":"404 not found"}`，pageReturn on request`app/view/404.html`Template，Please refer to the following examples
+If you want to dynamically control the content of the 404 error, for example, return JSON data `{"code:"404", "msg":"404 not found"}` for AJAX requests, and return the `app/view/404.html` template for page requests, please refer to the following example:
 
-> The following is an example of a php native template, other templates `twig` `blade` `think-tmplate` have similar principles
+> The example below uses PHP native templates as an example. Other templates such as `twig`, `blade`, `think-template` have similar principles.
 
-**Create files`app/view/404.html`**
+**Create the file `app/view/404.html`**
 ```html
 <!doctype html>
 <html>
@@ -19,23 +19,23 @@ If you want to control dynamically404Other languages，For example inajaxReturn 
 </html>
 ```
 
-**Add the following code to `config/route.php`：**
+**Add the following code in `config/route.php`:**
 ```php
 use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // ajaxReturn on requestjson
+    // Return JSON for AJAX requests
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
-    // The page request returns a 404.html template
+    // Return the 404.html template for page requests
     return view('404', ['error' => 'some error'])->withStatus(404);
 });
 ```
 
-## Custom500
-**New`app/view/500.html`**
+## Custom 500
+**Create `app/view/500.html`**
 
 ```html
 <!doctype html>
@@ -45,13 +45,13 @@ Route::fallback(function(Request $request){
     <title>500 Internal Server Error</title>
 </head>
 <body>
-Customize error templates：
+Custom error template:
 <?=htmlspecialchars($exception)?>
 </body>
 </html>
 ```
 
-**New**app/exception/Handler.php**(Please create your own directory if it does not exist)**
+**Create app/exception/Handler.php** (create the directory if it does not exist)
 ```php
 <?php
 
@@ -64,7 +64,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * Render Return
+     * Render the response
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -72,17 +72,17 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // ajaxRequest to return json data
+        // Return JSON data for AJAX requests
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
-        // Page request returns 500.html template
+        // Return the 500.html template for page requests
         return view('500', ['exception' => $exception], '')->withStatus(500);
     }
 }
 ```
 
-**Configure`config/exception.php`**
+**Configure `config/exception.php`**
 ```php
 return [
     '' => \app\exception\Handler::class,

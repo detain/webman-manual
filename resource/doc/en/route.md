@@ -1,40 +1,57 @@
 ## Routing
 ## Default Routing Rules
-webmanThe default routing rule is `http://127.0.0.1:8787/{controller}/{action}`。
+The default routing rule for webman is  `http://127.0.0.1:8787/{controller}/{action}`.
 
-is actually a`app\controller\IndexController`，will be accessed by default`index`。
+The default controller is `app\controller\IndexController`, and the default action is `index`.
 
-e.g. Access：
-- `http://127.0.0.1:8787` Allow you to use`app\controller\IndexController`class`index`Method
-- `http://127.0.0.1:8787/foo` Allow you to use`app\controller\FooController`class`index`Method
-- `http://127.0.0.1:8787/foo/test` Allow you to use`app\controller\FooController`class`test`Method
-- `http://127.0.0.1:8787/admin/foo/test` Allow you to use`app\admin\controller\FooController`class`test`Method (reference[more applications](multiapp.md))
+For example, when accessing:
+- `http://127.0.0.1:8787`, it will by default access the `index` method of the `app\controller\IndexController` class.
+- `http://127.0.0.1:8787/foo`, it will by default access the `index` method of the `app\controller\FooController` class.
+- `http://127.0.0.1:8787/foo/test`, it will by default access the `test` method of the `app\controller\FooController` class.
+- `http://127.0.0.1:8787/admin/foo/test`, it will by default access the `test` method of the `app\admin\controller\FooController` class (see [Multiple Applications](multiapp.md)).
 
-Change the configuration file when you want to change the routing of a request `config/route.php`。
+Additionally, starting from webman 1.4, it supports more complex default routing, such as
+```php
+app
+├── admin
+│   └── v1
+│       └── v2
+│           └── v3
+│               └── controller
+│                   └── IndexController.php
+└── controller
+    ├── v1
+    │   └── IndexController.php
+    └── v2
+        └── v3
+            └── IndexController.php
+```
 
-If you want to turn off the default route, add the following configuration to the last line of the configuration file `config/route.php`：
+When you want to change a request route, please modify the configuration file `config/route.php`.
+
+If you want to disable the default route, add the following configuration to the end of the `config/route.php` file:
 ```php
 Route::disableDefaultRoute();
 ```
 
-## Closure Routing
-`config/route.php`Add the following routing code
+## Closure Routes
+Add the following route code to `config/route.php`:
 ```php
 Route::any('/test', function ($request) {
     return response('test');
 });
-
 ```
-> **Note**
-> Since the closure function does not belong to any controller, `$request->app` `$request->controller` `$request->action` are all empty strings。
-
-When the access address is `http://127.0.0.1:8787/test`, the `test` string will be returned。
 
 > **Note**
-> The routing path must start with `/`, for example
+> Because closure functions do not belong to any controller, `$request->app`, `$request->controller`, and `$request->action` are all empty strings.
+
+When accessing the address `http://127.0.0.1:8787/test`, it will return the string `test`.
+
+> **Note**
+> The route path must start with `/`, for example:
 
 ```php
-// Error usage
+// Incorrect usage
 Route::any('test', function ($request) {
     return response('test');
 });
@@ -45,19 +62,18 @@ Route::any('/test', function ($request) {
 });
 ```
 
-
-## Class Routing
-`config/route.php`Add the following routing code
+## Class Routes
+Add the following route code to `config/route.php`:
 ```php
 Route::any('/testclass', [app\controller\IndexController::class, 'test']);
 ```
-The method will default to  `http://127.0.0.1:8787/testclass` 时，will return`app\controller\IndexController`class`test`method can be displayed。
 
+When accessing the address `http://127.0.0.1:8787/testclass`, it will return the result of the `test` method of the `app\controller\IndexController` class.
 
-## Routing parameters
-If there are parameters in the route to be matched by `{key}`, the match will be passed to the corresponding controller method parameters (in order from the second parameter), e.g.：
+## Route Parameters
+If there are parameters in the route, they can be matched using `{key}` and the matched result will be passed to the corresponding controller method parameter (starting from the second parameter), for example:
 ```php
-// Match /user/123 /user/abc
+// Matching /user/123 /user/abc
 Route::any('/user/{id}', [app\controller\UserController::class, 'get']);
 ```
 ```php
@@ -66,65 +82,66 @@ class UserController
 {
     public function get($request, $id)
     {
-        return response('Received Parameters'.$id);
+        return response('Received parameter'.$id);
     }
 }
 ```
 
-More examples：
+More examples:
 ```php
-// Match /user/123, no match /user/abc
+// Matching /user/123, not matching /user/abc
 Route::any('/user/{id:\d+}', function ($request, $id) {
     return response($id);
 });
 
-// Match /user/foobar, no match /user/foo/bar
+// Matching /user/foobar, not matching /user/foo/bar
 Route::any('/user/{name}', function ($request, $name) {
    return response($name);
 });
 
-// Match /user /user/123 and /user/abc
+// Matching /user, /user/123, and /user/abc
 Route::any('/user[/{name}]', function ($request, $name = null) {
    return response($name ?? 'tom');
 });
+
+// Matching all options requests
+Route::options('[{path:.+}]', function () {
+    return response('');
+});
 ```
 
-## Route Grouping
-
-Sometimes routes contain a lot of the same prefixes, so we can use route grouping to simplify the definition. For example：
+## Route Groups
+Sometimes, routes contain a lot of the same prefixes. In this case, we can use route groups to simplify the definition. For example:
 
 ```php
 Route::group('/blog', function () {
-   Route::any('/create', function ($rquest) {return response('create');});
-   Route::any('/edit', function ($rquest) {return response('edit');});
-   Route::any('/view/{id}', function ($rquest, $id) {return response("view $id");});
+   Route::any('/create', function ($request) {return response('create');});
+   Route::any('/edit', function ($request) {return response('edit');});
+   Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
 });
 ```
-Equivalent to
+Equivalent to:
 ```php
-Route::any('/blog/create', function ($rquest) {return response('create');});
-Route::any('/blog/edit', function ($rquest) {return response('edit');});
-Route::any('/blog/view/{id}', function ($rquest, $id) {return response("view $id");});
+Route::any('/blog/create', function ($request) {return response('create');});
+Route::any('/blog/edit', function ($request) {return response('edit');});
+Route::any('/blog/view/{id}', function ($request, $id) {return response("view $id");});
 ```
 
-groupNested Usage
-
+Nested `group` usage:
 ```php
 Route::group('/blog', function () {
    Route::group('/v1', function () {
-      Route::any('/create', function ($rquest) {return response('create');});
-      Route::any('/edit', function ($rquest) {return response('edit');});
-      Route::any('/view/{id}', function ($rquest, $id) {return response("view $id");});
+      Route::any('/create', function ($request) {return response('create');});
+      Route::any('/edit', function ($request) {return response('edit');});
+      Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
    });  
 });
 ```
 
-## Routing middleware
-
-We can set up middleware for a particular route or group of routes。
-Example：
+## Route Middleware
+We can set a middleware for a specific route or a group of routes. For example:
 ```php
-Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->middleware([
+Route::any('/admin', [app\admin\controller\IndexController::classe, 'index'])->middleware([
     app\middleware\MiddlewareA::class,
     app\middleware\MiddlewareB::class,
 ]);
@@ -132,7 +149,7 @@ Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->mi
 Route::group('/blog', function () {
    Route::any('/create', function () {return response('create');});
    Route::any('/edit', function () {return response('edit');});
-   Route::any('/view/{id}', function ($r, $id) {response("view $id");});
+   Route::any('/view/{id}', function ($request, $id) {response("view $id");});
 })->middleware([
     app\middleware\MiddlewareA::class,
     app\middleware\MiddlewareB::class,
@@ -140,47 +157,45 @@ Route::group('/blog', function () {
 ```
 
 > **Note**: 
-> `->middleware()` When the routing middleware acts on a group, the current route must be under the current group
+> In webman-framework <= 1.5.6, when the `->middleware()` route middleware applies to a group after that, the current route must be within that group.
 
 ```php
-# Incorrect Usage Example
-
+# Incorrect usage example (this usage is valid in webman-framework >= 1.5.7)
 Route::group('/blog', function () {
    Route::group('/v1', function () {
-      Route::any('/create', function ($rquest) {return response('create');});
-      Route::any('/edit', function ($rquest) {return response('edit');});
-      Route::any('/view/{id}', function ($rquest, $id) {return response("view $id");});
+      Route::any('/create', function ($request) {return response('create');});
+      Route::any('/edit', function ($request) {return response('edit');});
+      Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
    });  
 })->middleware([
     app\middleware\MiddlewareA::class,
     app\middleware\MiddlewareB::class,
 ]);
-
 ```
 
 ```php
-# Correct Use Example
+# Correct usage example
 Route::group('/blog', function () {
    Route::group('/v1', function () {
-      Route::any('/create', function ($rquest) {return response('create');});
-      Route::any('/edit', function ($rquest) {return response('edit');});
-      Route::any('/view/{id}', function ($rquest, $id) {return response("view $id");});
+      Route::any('/create', function ($request) {return response('create');});
+      Route::any('/edit', function ($request) {return response('edit');});
+      Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
    })->middleware([
-    app\middleware\MiddlewareA::class,
-    app\middleware\MiddlewareB::class,
+        app\middleware\MiddlewareA::class,
+        app\middleware\MiddlewareB::class,
     ]);  
 });
 ```
 
-## resource-based routing
+## Resourceful Routing
 ```php
 Route::resource('/test', app\controller\IndexController::class);
 
-//Specifying Resource Routing
+// Specify resource routes
 Route::resource('/test', app\controller\IndexController::class, ['index','create']);
 
-//Non-definitive resource routing
-// 如 notify how the rule changesany型Routing /text/notify或/text/notify/{id} all may routeName为 test.notify
+// Non-defining resource routes
+// If accessing notify, it will be any type of route /test/notify or /test/notify/{id} and the routeName will be test.notify
 Route::resource('/test', app\controller\IndexController::class, ['index','create','notify']);
 ```
 | Verb   | URI                 | Action   | Route Name    |
@@ -194,30 +209,25 @@ Route::resource('/test', app\controller\IndexController::class, ['index','create
 | DELETE | /test/{id}          | destroy  | test.destroy  |
 | PUT    | /test/{id}/recovery | recovery | test.recovery |
 
+## URL Generation
+> **Note**: 
+> Currently, route generation of nested route groups is not supported  
 
-
-
-## urlGenerate
-> **Note** 
-> Group nested route generation is not supported at this timeurl  
-
-For example routing：
+For example, with the route:
 ```php
 Route::any('/blog/{id}', [app\controller\BlogController::class, 'view'])->name('blog.view');
 ```
-We can generate this route using the following methodurl。
+We can use the following method to generate the URL for this route:
 ```php
-route('blog.view', ['id' => 100]); // Result for /blog/100
+route('blog.view', ['id' => 100]); // Result is /blog/100
 ```
 
-can also be usedRouting的urlThis method can be used when，class to handleRoutingDefault controller is，urlTry to runGenerate，avoid due toRoutingAddress adjustment causes a lot of changes to the view file。
-
-
-## Get routing information
+When using route URLs in a view, this method can be used so that regardless of changes to the routing rules, the URL will be generated automatically, avoiding the need to modify a large number of view files due to changes in route addresses.
+## Obtain Route Information
 > **Note**
-> required webman-framework >= 1.3.2
+> Requires webman-framework >= 1.3.2
 
-With the `$request->route` object we can get the current request routing information, for example
+We can obtain the current request route information through the `$request->route` object, for example:
 
 ```php
 $route = $request->route; // Equivalent to $route = request()->route;
@@ -227,55 +237,69 @@ if ($route) {
     var_export($route->getName());
     var_export($route->getMiddleware());
     var_export($route->getCallback());
-    var_export($route->param()); // Required for this feature webman-framework >= 1.3.16
+    var_export($route->param()); // This feature requires webman-framework >= 1.3.16
 }
 ```
 
 > **Note**
-> If the request does not match any route (other than the default route), then `$request->route` isnull
+> If the current request does not match any routes configured in `config/route.php`, `$request->route` will be null, meaning that the default route will result in `$request->route` being null.
 
+## Handling 404 Errors
+When the route is not found, the default behavior is to return a 404 status code and output the content of `public/404.html`.
 
-## Processing404
-Default return 404 status code and output `public/404.html` file content when route not found。
-
-If the developer wants to interveneRoutingNew data to the database now，to take effectwebmanthe ultimate in frameworksRouting`Route::fallback($callback)`Method。For example, the logic of the code below is whenRoutingRedirect to home page if not found。
+If developers want to intervene in the business process when a route is not found, they can use the fallback route provided by webman using the `Route::fallback($callback)` method. For example, the following code logic redirects to the homepage when the route is not found.
 ```php
 Route::fallback(function(){
     return redirect('/');
 });
 ```
-For example, returning a json when the route does not exist is very useful when webman is used as an api interface。
+Another example is returning a JSON response when the route does not exist, which is very useful when webman is used as an API endpoint.
 ```php
 Route::fallback(function(){
     return json(['code' => 404, 'msg' => '404 not found']);
 });
 ```
 
-All automatically [custom404 500page](others/custom-error-page.md)
+Related link: [Custom 404 and 500 Pages](others/custom-error-page.md)
 
-## Routing Interface
+## Route Interface
 ```php
-// Set the route of any method request for $uri
+// Set a route for any method request for $uri
 Route::any($uri, $callback);
-// Set the route for $uri get requests
+// Set a route for a get request for $uri
 Route::get($uri, $callback);
-// Set the route for $uri requests
+// Set a route for a post request for $uri
 Route::post($uri, $callback);
-// Set the route for $uri's put request
+// Set a route for a put request for $uri
 Route::put($uri, $callback);
-// Set the route for $uri's patch request
+// Set a route for a patch request for $uri
 Route::patch($uri, $callback);
-// Set the route for $uri's delete request
+// Set a route for a delete request for $uri
 Route::delete($uri, $callback);
-// Set the route for $uri's head request
+// Set a route for a head request for $uri
 Route::head($uri, $callback);
-// Set up routing for multiple request types at the same time
+// Set routes for multiple request types simultaneously
 Route::add(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'], $uri, $callback);
-// Group Routing
+// Group routes
 Route::group($path, $callback);
-// Resource Routing
+// Resource routes
 Route::resource($path, $callback, [$options]);
-// Fallback routing, set default route pocket
-Route::fallback($callback);
+// Disable the default route
+Route::disableDefaultRoute($plugin = '');
+// Fallback route, set the default route fallback
+Route::fallback($callback, $plugin = '');
 ```
-If uri does not have a corresponding route (including the default route) and the fallback route is not set, it will return 404。
+If there is no corresponding route for the URI (including the default route), and no fallback route is set, a 404 response will be returned.
+
+## Multiple Route Configuration Files
+If you want to manage routes using multiple route configuration files, for example, in the case of [multiple applications](multiapp.md) where each application has its own route configuration, you can load external route configuration files using the `require` statement.
+For example, in `config/route.php`:
+
+```php
+<?php
+
+// Load the route configuration for the admin application
+require_once app_path('admin/config/route.php');
+// Load the route configuration for the api application
+require_once app_path('api/config/route.php');
+```

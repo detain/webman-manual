@@ -1,23 +1,26 @@
-# Validator
-composerThere are many validators that can be used directly in, for example：
-#### <a href="#think-validate"> top-think/think-validate</a>
-#### <a href="#respect-validation"> respect/validation</a>
+# Validators
+
+There are many validators available in the composer that can be used directly, such as:
+
+#### [top-think/think-validate](#think-validate)
+
+#### [respect/validation](#respect-validation)
 
 <a name="think-validate"></a>
 ## Validator top-think/think-validate
 
 ### Description
-ThinkPHPOfficial Validator
+Official validator for ThinkPHP
 
-### Project address
+### Project URL
 https://github.com/top-think/think-validate
 
-### Install
+### Installation
 `composer require topthink/think-validate`
 
 ### Quick Start
 
-**New `app/index/validate/User.php`**
+**Create `app/index/validate/User.php`**
 
 ```php
 <?php
@@ -27,18 +30,18 @@ use think\Validate;
 
 class User extends Validate
 {
-    protected $rule =   [
-        'name'  => 'require|max:25',
-        'age'   => 'number|between:1,120',
-        'email' => 'email',    
+    protected $rule = [
+        'name' => 'require|max:25',
+        'age' => 'number|between:1,120',
+        'email' => 'email',
     ];
 
-    protected $message  =   [
-        'name.require' => 'Name must',
-        'name.max'     => 'Names should not exceed a maximum of 25 characters',
-        'age.number'   => 'Age must be numeric',
-        'age.between'  => 'Age can only be between 1-120',
-        'email'        => 'Incorrect email format',    
+    protected $message = [
+        'name.require' => 'Name is required',
+        'name.max' => 'Name cannot exceed 25 characters',
+        'age.number' => 'Age must be a number',
+        'age.between' => 'Age must be between 1 and 120',
+        'email' => 'Invalid email',
     ];
 
 }
@@ -47,7 +50,7 @@ class User extends Validate
 **Usage**
 ```php
 $data = [
-    'name'  => 'thinkphp',
+    'name' => 'thinkphp',
     'email' => 'thinkphp@qq.com',
 ];
 
@@ -63,14 +66,14 @@ if (!$validate->check($data)) {
 
 ### Description
 
-The project is a Chinese version of https://github.com/Respect/Validation
+This project is a Chinese version of https://github.com/Respect/Validation
 
-### Project address
+### Project URL
 
 https://github.com/walkor/validation
   
   
-### Install
+### Installation
  
 ```php
 composer require workerman/validation
@@ -92,8 +95,8 @@ class IndexController
     {
         $data = v::input($request->post(), [
             'nickname' => v::length(1, 64)->setName('Nickname'),
-            'username' => v::alnum()->length(5, 64)->setName('username'),
-            'password' => v::length(5, 64)->setName('password')
+            'username' => v::alnum()->length(5, 64)->setName('Username'),
+            'password' => v::length(5, 64)->setName('Password')
         ]);
         Db::table('user')->insert($data);
         return json(['code' => 0, 'msg' => 'ok']);
@@ -108,19 +111,19 @@ class IndexController
       url : 'http://127.0.0.1:8787',
       type : "post",
       dataType:'json',
-      data : {nickname:'Tom', username:'tom cat', password: '123456'}
+      data : {nickname:'Tom', username:'tomcat', password: '123456'}
   });
   ```
   
-Get results：
+Result:
 
-`{"code":500,"msg":"Username can only contain letters (a-z) and numbers（0-9）"}`
+`{"code":500,"msg":"Username can only contain letters (a-z) and numbers (0-9)"}`
 
-Description：
+Explanation:
 
-`v::input(array $input, array $rules)` Used to validate and collect data，If data validation fails，then throw`Respect\Validation\Exceptions\ValidationException`exception，A successful validation will return the validated data(array)。
+`v::input(array $input, array $rules)` is used to validate and collect data. If the data validation fails, it throws a `Respect\Validation\Exceptions\ValidationException` exception; if successful, it returns the validated data (array).
 
-If the business code does not capture the validation exception, the webman framework will automatically capture and return json data (similar to `{"code":500, "msg":"xxx"}`) or a normal exception page based on the HTTP request header option. If the return format does not meet the business requirements, developers can catch `ValidationException` exception and return the required data by themselves, similar to the following example ：
+If the validation exception is not caught by the business code, the webman framework will automatically catch it and return json data (similar to `{"code":500, "msg":"xxx"}`) or a normal exception page based on the HTTP request header. If the returned format does not meet the business requirements, developers can catch the `ValidationException` exception themselves and return the required data, similar to the example below:
 
 ```php
 <?php
@@ -136,8 +139,8 @@ class IndexController
     {
         try {
             $data = v::input($request->post(), [
-                'username' => v::alnum()->length(5, 64)->setName('username'),
-                'password' => v::length(5, 64)->setName('password')
+                'username' => v::alnum()->length(5, 64)->setName('Username'),
+                'password' => v::length(5, 64)->setName('Password')
             ]);
         } catch (ValidationException $e) {
             return json(['code' => 500, 'msg' => $e->getMessage()]);
@@ -147,7 +150,7 @@ class IndexController
 }
 ```
 
-### Validator Feature Guide
+### Validator Function Guide
 
 ```php
 use Respect\Validation\Validator as v;
@@ -156,43 +159,43 @@ use Respect\Validation\Validator as v;
 $number = 123;
 v::numericVal()->validate($number); // true
 
-// Multiple Rules Chain Validation
+// Multiple rules chained validation
 $usernameValidator = v::alnum()->noWhitespace()->length(1, 15);
 $usernameValidator->validate('alganet'); // true
 
-// Get the first reason for authentication failure
+// Get the first validation failure reason
 try {
-    $usernameValidator->setName('username')->check('alg  anet');
+    $usernameValidator->setName('Username')->check('alg  anet');
 } catch (ValidationException $exception) {
-    echo $exception->getMessage(); // Username can only contain letters (a-z) and numbers（0-9）
+    echo $exception->getMessage(); // Username can only contain letters (a-z) and numbers (0-9)
 }
 
 // Get all validation failure reasons
 try {
-    $usernameValidator->setName('username')->assert('alg  anet');
+    $usernameValidator->setName('Username')->assert('alg  anet');
 } catch (ValidationException $exception) {
     echo $exception->getFullMessage();
     // Will print
-    // -  Username must conform to the following rules
-    //     - Username can only contain letters (a-z) and numbers（0-9）
-    //     - Username cannot contain spaces
+    // -  Username must follow these rules
+    //    - Username can only contain letters (a-z) and numbers (0-9)
+    //    - Username cannot contain spaces
   
     var_export($exception->getMessages());
     // Will print
     // array (
-    //   'alnum' => 'Username can only contain letters (a-z) and numbers（0-9）',
+    //   'alnum' => 'Username can only contain letters (a-z) and numbers (0-9)',
     //   'noWhitespace' => 'Username cannot contain spaces',
     // )
 }
 
-// Customize error message
+// Custom error messages
 try {
-    $usernameValidator->setName('username')->assert('alg  anet');
+    $usernameValidator->setName('Username')->assert('alg  anet');
 } catch (ValidationException $exception) {
     var_export($exception->getMessages([
         'alnum' => 'Username can only contain letters and numbers',
         'noWhitespace' => 'Username cannot have spaces',
-        'length' => 'lengthComplies with the rule, so this entry will not be displayed'
+        'length' => 'This message won't show, as it satisfies the length rule'
     ]);
     // Will print 
     // array(
@@ -201,7 +204,7 @@ try {
     // )
 }
 
-// Validate Object
+// Object validation
 $user = new stdClass;
 $user->name = 'Alexandre';
 $user->birthdate = '1987-07-01';
@@ -209,7 +212,7 @@ $userValidator = v::attribute('name', v::stringType()->length(1, 32))
                 ->attribute('birthdate', v::date()->minAge(18));
 $userValidator->validate($user); // true
 
-// ValidationArray
+// Array validation
 $data = [
     'parentKey' => [
         'field1' => 'value1',
@@ -223,7 +226,7 @@ v::key(
         ->key('field2', v::stringType())
         ->key('field3', v::boolType())
     )
-    ->assert($data); // You can also use check() or validate()
+    ->assert($data); // Also can use check() or validate()
   
 // Optional validation
 v::alpha()->validate(''); // false 
@@ -231,75 +234,73 @@ v::alpha()->validate(null); // false
 v::optional(v::alpha())->validate(''); // true
 v::optional(v::alpha())->validate(null); // true
 
-// Negate Rules
+// Negated rule
 v::not(v::intVal())->validate(10); // false
 ```
   
-### Validator The three methods `validate()` `check()` `assert()` are different
+### Differences between the `validate()`, `check()`, and `assert()` methods
 
-`validate()`Return boolean, no exceptions are thrown
+`validate()` returns a boolean and does not throw an exception
 
-`check()`Exception thrown on validation failure, first reason for validation failure via `$exception->getMessage()`
+`check()` throws an exception when the validation fails, with the first validation failure reason accessible via `$exception->getMessage()`
 
-`assert()`Exceptions are thrown on validation failure, and all reasons for validation failure can be obtained via `$exception->getFullMessage()`
+`assert()` throws an exception when the validation fails, with all validation failure reasons accessible via `$exception->getFullMessage()`
   
   
-### Common authentication rules list
+### List of Common Validation Rules
 
-`Alnum()` Contains only letters and numbers
+`Alnum()` - Only contains letters and numbers
 
-`Alpha()` Include only letters
+`Alpha()` - Only contains letters
 
-`ArrayType()` Array Type
+`ArrayType()` - Array type
 
-`Between(mixed $minimum, mixed $maximum)` Validate that the input is between two other values。
+`Between(mixed $minimum, mixed $maximum)` - Validates whether the input is between two other values.
 
-`BoolType()` Verify if it is a boolean
+`BoolType()` - Validates whether it is a Boolean
 
-`Contains(mixed $expectedValue)` Verify that the input contains certain values
+`Contains(mixed $expectedValue)` - Validates whether the input contains certain values
 
-`ContainsAny(array $needles)` Verify that the input contains at least one defined value
+`ContainsAny(array $needles)` - Validates whether the input contains at least one of the defined values
 
-`Digit()` Validate that the input contains only numbers
+`Digit()` - Validates whether the input only contains numbers
 
-`Domain()` Verify that it is a legitimate domain
+`Domain()` - Validates whether it is a valid domain name
 
-`Email()` Verify that it is a legitimate email address
+`Email()` - Validates whether it is a valid email address
 
-`Extension(string $extension)` Validate Suffix Name
+`Extension(string $extension)` - Validates the file extension
 
-`FloatType()` Validate if it is floating point
+`FloatType()` - Validates whether it is a floating point number
 
-`IntType()` Verify if it is an integer
+`IntType()` - Validates whether it is an integer
 
-`Ip()` Verify that it is an ip address
+`Ip()` - Validates whether it is an IP address
 
-`Json()` Validate if it is json data
+`Json()` - Validates whether it is JSON data
 
-`Length(int $min, int $max)` Validate that the length is in the given interval
+`Length(int $min, int $max)` - Validates whether the length is within a given range
 
-`LessThan(mixed $compareTo)` Validate that the length is less than the given value
+`LessThan(mixed $compareTo)` - Validates whether the length is less than a given value
 
-`Lowercase()` Verify that it is a lowercase letter
+`Lowercase()` - Validates whether it is in lowercase
 
-`MacAddress()` verify if it is a mac address
+`MacAddress()` - Validates whether it is a MAC address
 
-`NotEmpty()` Validate for null
+`NotEmpty()` - Validates whether it is not empty
 
-`NullType()` Verify ifnull
+`NullType()` - Validates whether it is null
 
-`Number()` verify if it is a number
+`Number()` - Validates whether it is a number
 
-`ObjectType()` Validate if object
+`ObjectType()` - Validates whether it is an object
 
-`StringType()` Validate if it is a string type
+`StringType()` - Validates whether it is a string
 
-`Url()` Verify ifurl
+`Url()` - Validates whether it is a URL
   
-For more validation rules see  https://respect-validation.readthedocs.io/en/2.0/list-of-rules/ 
+For more validation rules, please refer to https://respect-validation.readthedocs.io/en/2.0/list-of-rules/
   
-### More content
+### More Information
 
-Access https://respect-validation.readthedocs.io/en/2.0/
-  
-
+Please visit https://respect-validation.readthedocs.io/en/2.0/

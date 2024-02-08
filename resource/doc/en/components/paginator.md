@@ -1,20 +1,21 @@
-# Pagination Components
+# Pagination Component
 
 ## jasongrimes/php-paginator
 
-### Project address
+### Project Address
 
 https://github.com/jasongrimes/php-paginator
-  
-### Install
+
+### Installation
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
-  
+
 ### Usage
 
-New `app/controller/UserController.php`
+Create a new `app/controller/UserController.php` file.
+
 ```php
 <?php
 namespace app\controller;
@@ -39,8 +40,10 @@ class UserController
     
 }
 ```
-**Template (php native)**
-New Template app/view/user/get.html
+
+**Template (PHP Native)**
+Create a new template `app/view/user/get.html`.
+
 ```html
 <html>
 <head>
@@ -55,8 +58,9 @@ New Template app/view/user/get.html
 </html>
 ```
 
-**Template(twig)**
-New Template app/view/user/get.html
+**Template (Twig)**
+Create a new template `app/view/user/get.html`.
+
 ```html
 <html>
 <head>
@@ -73,8 +77,9 @@ New Template app/view/user/get.html
 </html>
 ```
 
-**Template(blade)**
-New Template app/view/user/get.blade.php
+**Template (Blade)**
+Create a new template `app/view/user/get.blade.php`.
+
 ```html
 <html>
 <head>
@@ -89,8 +94,9 @@ New Template app/view/user/get.blade.php
 </html>
 ```
 
-**Template(thinkphp)**
-New Template app/view/user/get.blade.php
+**Template (ThinkPHP)**
+Create a new template `app/view/user/get.blade.php`.
+
 ```html
 <html>
 <head>
@@ -105,11 +111,9 @@ New Template app/view/user/get.blade.php
 </html>
 ```
 
-The effect is as follows：
-![](img/paginator.png)
-  
-### More content
+The result will be as follows:
+![](../../assets/img/paginator.png)
 
-Access https://github.com/jasongrimes/php-paginator
-  
+### More Information
 
+Visit https://github.com/jasongrimes/php-paginator.

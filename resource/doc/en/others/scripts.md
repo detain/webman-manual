@@ -1,8 +1,8 @@
 # Custom Scripts
 
-Sometimes we need to write ad-hoc scripts where we can call arbitrary classes or interfaces like webman to do operations like data import, data update statistics, etc. This is something that is already very easy in webman, for example：
+Sometimes we need to write some temporary scripts, in which we can call any class or interface just like webman does, to complete operations such as data import, data update, and statistics. This is already very easy to do in webman, for example:
 
-**New `scripts/update.php`** (Please create your own directory if it does not exist)
+**Create `scripts/update.php`** (create the directory if it does not exist)
 ```php
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -15,4 +15,4 @@ $user = Db::table('user')->find(1);
 var_dump($user);
 ```
 
-Of course we can also use`webman/console`Custom commands to do such operations，See[command-line](../plugin/console.md)
+Of course, we can also use `webman/console` to create custom commands to perform such operations, as described in [command line](../plugin/console.md).

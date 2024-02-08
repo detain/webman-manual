@@ -1,22 +1,22 @@
 # Programming Notes
 
 ## Operating System
-webman supports running on both linux and windows systems. However, since workerman does not support multi-process setup and daemons under windows, windows is only recommended for development and debugging purposes.。
+webman supports both Linux and Windows systems. However, because workerman does not support multi-process settings and daemon processes on Windows, it is recommended to use Windows only for development and debugging purposes. For production environments, please use Linux.
 
 ## Startup method
-**linuxSystem**Use command `php start.php start`(debugUse command) `php start.php start -d`(Interware Onion Model) Start
-**windowsSystem**Execute`windows.bat`Raw request package body `php windows.php` Start
+On Linux, use the command `php start.php start` (debug mode) or `php start.php start -d` (daemon mode) to start the server.
+On Windows, execute `windows.bat` or use the command `php windows.php` to start the server, and press Ctrl+C to stop it. Windows does not support commands such as stop, reload, status, and connections.
 
-## Resident Memory
-webman是Resident Memoryframe，Project address，phpfiles are reused once they are loaded into memory，will not read from disk again(if the record exists)。so you need to execute after formal environment business code or configuration changes`php start.php reload`Queue plugin。If the process-related configuration is changed or a new one is installedcomposerClasses set in`php start.php restart`。
+## Resident memory
+webman is a resident memory framework, which means that once a PHP file is loaded into memory, it will be reused and not read from the disk again (except for template files). Therefore, in a production environment, changes to business code or configurations require executing `php start.php reload` to take effect. If you have changed process-related configurations or installed new composer packages, you need to restart with `php start.php restart`.
 
-> To facilitate development, webman comes with a monitor custom process for monitoring business file updates and automatically executing reload when a business file is updated. this feature is only enabled when workerman is running in debug mode (without `-d` at startup). windows users need to execute `windows.bat` or ` php windows.php` to enable 。
+> For the convenience of development, webman comes with a monitor custom process for monitoring updates to business files. When a business file is updated, it will automatically execute a reload. This feature is only enabled when workerman is running in debug mode (without the `-d` flag) and is only available for Windows users by executing `windows.bat` or `php windows.php`.
 
 ## About output statements
-In a traditional php-fpm project, the output of functions like `echo`, `var_dump`, etc. is displayed directly on the page, whereas in webman this output is often displayed on the terminal and not on the page (except for the output in the template files))。
+In traditional PHP-FPM projects, using functions like `echo` or `var_dump` will directly display the data on the page. However, in webman, these outputs are often displayed in the terminal and not in the page (except for outputs in template files).
 
-## Do not execute the `exit` `die` statement
-Executing die or exit will cause the process to exit and restart, causing the current request to not be responded to correctly。
+## Do not execute `exit` or `die` statements
+Executing `die` or `exit` will cause the process to exit and restart, resulting in the current request being unable to be responded correctly.
 
 ## Do not execute the `pcntl_fork` function
-`pcntl_fork`The user creates a process, which is not allowed in webman。
+Using `pcntl_fork` to create a process is not allowed in webman.

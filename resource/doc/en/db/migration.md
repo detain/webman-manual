@@ -1,14 +1,14 @@
-# MigrationDatabase Migration Tool Phinx
+# Migration Database Migration Tool Phinx
 
-## Description
+## Introduction
 
-Phinx  allows developers to succinctly modify and maintain the database. It avoids the need to write SQL statements by hand, and it uses the powerful PHP API to manage database migrations. Developers can manage their database migrations using version control. Phinx makes it easy to migrate data between different databases. With the ability to track which migration scripts are executed, developers can stop worrying about the state of the database and focus on writing a better system。
-  
-## Project address
+Phinx allows developers to easily modify and maintain databases. It eliminates the need for manually writing SQL statements, using a powerful PHP API to manage database migrations. Developers can use version control to manage their database migrations. Phinx can easily perform data migrations between different databases. It can also track which migration scripts have been executed, allowing developers to focus more on writing better systems without worrying about the state of the database.
+
+## Project Address
 
 https://github.com/cakephp/phinx
 
-## Install
+## Installation
  
   ```php
   composer require robmorgan/phinx
@@ -16,30 +16,30 @@ https://github.com/cakephp/phinx
   
 ## Official Chinese Documentation Address
 
-You can read the official Chinese documentation for details, here is only how to configure the use in webman
+For detailed usage, you can refer to the official Chinese documentation. Here, we only discuss how to configure and use Phinx in webman.
 
 https://tsy12321.gitbooks.io/phinx-doc/content/
 
-## Migrate file directory structure
+## Migration File Directory Structure
 
 ```
 .
-├── app                           Application Catalog
-│   ├── controller                Controller Directory
-│   │   └── Index.php             controller
-│   ├── model                     Model Catalog
+├── app                           Application directory
+│   ├── controller                Controller directory
+│   │   └── Index.php             Controller
+│   ├── model                     Model directory
 ......
-├── database                      Database file
-│   ├── migrations                Migration files
-│   │   └── 20180426073606_create_user_table.php
-│   ├── seeds                     Test data
-│   │   └── UserSeeder.php
+├── database                      Database files
+│   ├── migrations                Migration files
+│   │   └── 20180426073606_create_user_table.php
+│   ├── seeds                     Test data
+│   │   └── UserSeeder.php
 ......
 ```
 
-## phinx.php Configure
+## phinx.php Configuration
 
-Create phinx.php file in the project root
+Create a phinx.php file in the project root directory
 
 ```php
 <?php
@@ -65,26 +65,22 @@ return [
 ];
 ```
 
-## Usage suggestions
+## Suggestions for Use
 
-Migration files are not allowed to be modified again once the code is merged, and problems must be handled by creating new changes or deleting the operation file。
+Once the migration file is merged, it should not be modified again. If any issues arise, a new modification or deletion operation file should be created to handle the issue.
 
-#### Data table creation operation file naming rules
+#### Naming Convention for Data Table Creation Operation Files
 
-`{time(auto create)}_create_{Table name in English lowercase}`
+`{time(auto create)}_create_{table name in lowercase}`
 
-#### The data table modifies the operation file naming rules
+#### Naming Convention for Data Table Modification Operation Files
 
-`{time(auto create)}_modify_{Table name in English lowercase + specific modifications in English lowercase}`
+`{time(auto create)}_modify_{table name in lowercase + specific modification in lowercase}`
 
-### Data table deletion operation file naming rules
+### Naming Convention for Data Table Deletion Operation Files
 
-`{time(auto create)}_delete_{Table name in English lowercase + specific modifications in English lowercase}`
+`{time(auto create)}_delete_{table name in lowercase + specific modification in lowercase}`
 
-### Populate data file naming rules
+### Naming Convention for Data Filling Files
 
-`{time(auto create)}_fill_{Table name in English lowercase + specific modifications in English lowercase}`
-
-
-
-
+`{time(auto create)}_fill_{table name in lowercase + specific modification in lowercase}`

@@ -1,9 +1,9 @@
 # Community Help
 
-## QQ问答社区A CommunityA Community
+## Q&A Community
 
 https://www.workerman.net/questions
 
-## Technical Exchange Group
+## Technical Discussion Group
 
 ![](../assets/img/webman-qun-qr.jpg)

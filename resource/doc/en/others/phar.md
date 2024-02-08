@@ -1,36 +1,48 @@
-# pharpack
+# Phar Packaging
 
-phar is a kind of packaging file in PHP similar to JAR, you can use phar to package your webman project into a single phar file for easy deployment。
+Phar is a kind of packaging file in PHP similar to JAR. You can use Phar to package your webman project into a single Phar file for easy deployment.
 
-**can also can be [fuzqing](https://github.com/fuzqing) 的PR.**
+**Very grateful to [fuzqing](https://github.com/fuzqing) for the PR.**
 
 > **Note**
-> This feature is only supported on linux systems
-> Required for this featurewebman>=1.2.4 webman-framework>=1.2.4 webman\console>=1.0.5
-> Need to turn off the `php.ini` Phar configuration option `phar.readonly = 0`
+> You need to disable the `phar` configuration option in `php.ini`, by setting `phar.readonly = 0`.
 
-## Install command line tool
-`composer require webman/console`
+## Install Command Line Tool
+Run `composer require webman/console` to install the command line tool.
 
-## pack
-Execute commands at the root of a webman project `php webman phar:pack`
-Generates a `webman.phar` file in the bulid directory。
+## Configuration Settings
+Open the `config/plugin/webman/console/app.php` file and set `'exclude_pattern'   => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$#'`. This is used to exclude some unnecessary directories and files when packaging, to avoid excessive package size.
 
-> Packaging related configuration in `config/plugin/webman/console/app.php`
+## Packaging
+Execute the command `php webman phar:pack` in the root directory of the webman project. This will generate a `webman.phar` file in the `build` directory.
 
-## Start/Stop related commands
+> Packaging related configurations are in `config/plugin/webman/console/app.php`.
+
+## Start and Stop Commands
 **Start**
-`php webman.phar start` 或 `php webman.phar start -d`
+`php webman.phar start` or `php webman.phar start -d`
 
 **Stop**
 `php webman.phar stop`
 
-**View Status**
+**Check Status**
 `php webman.phar status`
 
-**View connection status**
+**Check Connection Status**
 `php webman.phar connections`
 
-**Reboot**
-`php webman.phar restart` 或 `php webman.phar restart -d`
+**Restart**
+`php webman.phar restart` or `php webman.phar restart -d`
 
+## Notes
+* Running webman.phar will generate a `runtime` directory in the same directory as webman.phar, used for storing temporary files such as logs.
+
+* If your project uses an `.env` file, you need to place the `.env` file in the same directory as webman.phar.
+
+* If your business needs to upload files to the `public` directory, you need to separate the `public` directory and place it in the same directory as webman.phar. In this case, you need to configure `config/app.php`.
+```php
+'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
+```
+The business can use the helper function `public_path()` to find the actual location of the public directory.
+
+* webman.phar does not support custom processes on Windows.

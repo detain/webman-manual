@@ -1,20 +1,20 @@
-# Image Processing Components
+# Image Processing Component
 
 ## intervention/image
 
-### Project address
+### Project link
 
 https://github.com/Intervention/image
-  
-### Install
- 
+
+### Installation
+
 ```php
 composer require intervention/image
 ```
-  
+
 ### Usage
 
-**Upload Page Snippet**
+**Upload page fragment**
 
 ```html
   <form method="post" action="/user/img" enctype="multipart/form-data">
@@ -23,7 +23,7 @@ composer require intervention/image
   </form>
 ```
 
-**New `app/controller/UserController.php`**
+**Create `app/controller/UserController.php`**
 
 ```php
 <?php
@@ -45,10 +45,8 @@ class UserController
     
 }
 ```
-  
-  
-### More content
 
-Access http://image.intervention.io/getting_started/introduction
-  
 
+### More Information
+
+Visit http://image.intervention.io/getting_started/introduction

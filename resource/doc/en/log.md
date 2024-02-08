@@ -1,5 +1,5 @@
-# log
-webmanUsage [monolog/monolog](https://github.com/Seldaek/monolog) Processlog。
+# Logging
+webman uses [monolog/monolog](https://github.com/Seldaek/monolog) to handle logging.
 
 ## Usage
 ```php
@@ -19,7 +19,7 @@ class FooController
 }
 ```
 
-## Methods provided
+## Provided Methods
 ```php
 Log::log($level, $message, array $context = [])
 Log::debug($message, array $context = [])
@@ -45,26 +45,26 @@ $log->alert($message, array $context = [])
 $log->emergency($message, array $context = [])
 ```
 
-## Configure
+## Configuration
 ```php
 return [
-    // Default logging channel
+    // Default log channel
     'default' => [
-        // Handler for handling the default channel, multiple can be set
+        // Handlers for the default channel, can set multiple
         'handlers' => [
             [   
-                // handlerName of class
+                // Class name of the handler
                 'class' => Monolog\Handler\RotatingFileHandler::class,
-                // handlerClass constructor parameters
+                // Constructor parameters of the handler class
                 'constructor' => [
                     runtime_path() . '/logs/webman.log',
                     Monolog\Logger::DEBUG,
                 ],
-                // Format-related
+                // Formatter related
                 'formatter' => [
-                    // Formatting the name of the processing class
+                    // Class name of the formatter
                     'class' => Monolog\Formatter\LineFormatter::class,
-                    // Formatting the constructor parameters of the processing class
+                    // Constructor parameters of the formatter class
                     'constructor' => [ null, 'Y-m-d H:i:s', true],
                 ],
             ]
@@ -73,49 +73,49 @@ return [
 ];
 ```
 
-## Multichannel
-monologMultiple channels are supported, and the default is to use the `default` channel. If you want to add a `log2` channel, the configuration is similar to the following：
+## Multiple Channels
+monolog supports multiple channels, with `default` channel being used by default. If you want to add a `log2` channel, the configuration is similar to the following:
 ```php
 return [
-    // Default logging channel
+    // Default log channel
     'default' => [
-        // Handler for handling the default channel, multiple can be set
+        // Handlers for the default channel, can set multiple
         'handlers' => [
             [   
-                // handlerName of class
+                // Class name of the handler
                 'class' => Monolog\Handler\RotatingFileHandler::class,
-                // handlerClass constructor parameters
+                // Constructor parameters of the handler class
                 'constructor' => [
                     runtime_path() . '/logs/webman.log',
                     Monolog\Logger::DEBUG,
                 ],
-                // Format-related
+                // Formatter related
                 'formatter' => [
-                    // Formatting the name of the processing class
+                    // Class name of the formatter
                     'class' => Monolog\Formatter\LineFormatter::class,
-                    // Formatting the constructor parameters of the processing class
+                    // Constructor parameters of the formatter class
                     'constructor' => [ null, 'Y-m-d H:i:s', true],
                 ],
             ]
         ],
     ],
-    // log2Channel
+    // log2 channel
     'log2' => [
-        // Handler for handling the default channel, multiple can be set
+        // Handlers for the log2 channel, can set multiple
         'handlers' => [
             [   
-                // handlerName of class
+                // Class name of the handler
                 'class' => Monolog\Handler\RotatingFileHandler::class,
-                // handlerClass constructor parameters
+                // Constructor parameters of the handler class
                 'constructor' => [
                     runtime_path() . '/logs/log2.log',
                     Monolog\Logger::DEBUG,
                 ],
-                // Format-related
+                // Formatter related
                 'formatter' => [
-                    // Formatting the name of the processing class
+                    // Class name of the formatter
                     'class' => Monolog\Formatter\LineFormatter::class,
-                    // Formatting the constructor parameters of the processing class
+                    // Constructor parameters of the formatter class
                     'constructor' => [ null, 'Y-m-d H:i:s', true],
                 ],
             ]
@@ -124,7 +124,7 @@ return [
 ];
 ```
 
-The usage when using the `log2` channel is as follows：
+To use the `log2` channel, you can do as follows:
 ```php
 <?php
 namespace app\controller;

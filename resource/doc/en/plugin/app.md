@@ -1,92 +1,83 @@
-# Application Plugin
-Each application plugin is a complete application with the source code placed in the `{main project}/plugin` directory
+# Application Plugins
+Each application plugin is a complete application, and the source code is placed in the `{main project}/plugin` directory.
 
-> **hint**
-> can be used`php webman app-plugin:create {Plugin Name}` (needwebman/console>=1.2.16) You can create one locallyApplication Plugin，
-> For example `php webman app-plugin:create cms` will create the following directory structure
+> **Note**
+> Use the command `php webman app-plugin:create {plugin_name}` (requires webman/console>=1.2.16) to create an application plugin locally. For example, `php webman app-plugin:create cms` will create the following directory structure:
 
-```
+```plaintext
 plugin/
 └── cms
     ├── app
-    │   ├── controller
-    │   │   └── IndexController.php
-    │   ├── exception
-    │   │   └── Handler.php
-    │   ├── functions.php
-    │   ├── middleware
-    │   ├── model
-    │   └── view
-    │       └── index
-    │           └── index.html
+    │   ├── controller
+    │   │   └── IndexController.php
+    │   ├── exception
+    │   │   └── Handler.php
+    │   ├── functions.php
+    │   ├── middleware
+    │   ├── model
+    │   └── view
+    │       └── index
+    │           └── index.html
     ├── config
-    │   ├── app.php
-    │   ├── autoload.php
-    │   ├── container.php
-    │   ├── database.php
-    │   ├── exception.php
-    │   ├── log.php
-    │   ├── middleware.php
-    │   ├── process.php
-    │   ├── redis.php
-    │   ├── route.php
-    │   ├── static.php
-    │   ├── thinkorm.php
-    │   ├── translation.php
-    │   └── view.php
+    │   ├── app.php
+    │   ├── autoload.php
+    │   ├── container.php
+    │   ├── database.php
+    │   ├── exception.php
+    │   ├── log.php
+    │   ├── middleware.php
+    │   ├── process.php
+    │   ├── redis.php
+    │   ├── route.php
+    │   ├── static.php
+    │   ├── thinkorm.php
+    │   ├── translation.php
+    │   └── view.php
     └── public
 ```
 
-with database operationsApplication Pluginhas withwebmansame directory structure andconfiguration file。actually develop oneApplication PluginDirectory copy towebmanThe project experience is basically the same，Just a few things to keep in mind。
+We can see that an application plugin has the same directory structure and configuration files as webman. In fact, developing an application plugin is basically the same experience as developing a webman project, with just a few considerations.
 
 ## Namespace
-Only one processPSR4norm，because the plugins are placed inplugindirectory，soNamespaceall start withpluginbeginning，example`plugin\cms\app\controller\UserController`，herecmsis the main directory of the plugin's source code。
+The plugin directory and naming follow the PSR-4 specification. Since the plugins are placed in the plugin directory, the namespaces all start with `plugin`, for example `plugin\cms\app\controller\UserController`, where cms is the main directory of the plugin's source code.
 
-## urlAccess
-Application Pluginurland then pass it to`/app`beginning，example`plugin\cms\app\controller\UserController`urlAddress is `http://127.0.0.1:8787/app/cms/user`。
+## URL Access
+The URL paths for application plugins all start with `/app`. For example, the URL for `plugin\cms\app\controller\UserController` is `http://127.0.0.1:8787/app/cms/user`.
 
-## Static File
-Static FilePlaced in`plugin/{Plugin}/public`下，exampleAccess`http://127.0.0.1:8787/app/cms/avatar.png`This example passes`plugin/cms/public/avatar.png`file。
+## Static Files
+Static files are placed in `plugin/{plugin}/public`. For example, accessing `http://127.0.0.1:8787/app/cms/avatar.png` actually retrieves the file `plugin/cms/public/avatar.png`.
 
-## configuration file
-The configuration of a plugin is the same as a normal webman project, but the configuration of a plugin is generally only valid for the current plugin and generally has no effect on the main project。
-For example the value of `plugin.cms.app.controller_suffix` only affects the plugin's controller suffix and has no effect on the main project。
-For example, the value of `plugin.cms.app.controller_reuse` only affects whether the plugin reuses the controller, and has no effect on the main project。
-For example, the value of `plugin.cms.middleware` only affects the plugin's middleware and has no effect on the main project。
-For example, the value of `plugin.cms.view` only affects the view used by the plugin and has no effect on the main project。
-For example, the value of `plugin.cms.container` only affects the container used by the plugin, and has no effect on the main project。
-For example, the value of `plugin.cms.exception` only affects the plugin's exception handling class and has no effect on the main project.。
+## Configuration Files
+The configuration of the plugin is similar to that of a regular webman project. However, the configuration of a plugin generally only affects the current plugin and does not affect the main project.
+For example, the value of `plugin.cms.app.controller_suffix` only affects the controller suffix of the plugin, without affecting the main project. Similarly, other configurations such as `plugin.cms.app.controller_reuse`, `plugin.cms.middleware`, `plugin.cms.view`, `plugin.cms.container`, and `plugin.cms.exception` only affect the plugin without impacting the main project. However, since routes are global, the route configured for the plugin also affects the global configuration.
 
-But since the routes are global, the routes configured by the plugin also affect the global。
+## Accessing Configuration
+To access a specific plugin's configuration, use `config('plugin.{plugin}.{specific_configuration}')`. For example, to retrieve all configurations from `plugin/cms/config/app.php`, use `config('plugin.cms.app')`. Similarly, the main project or other plugins can use `config('plugin.cms.xxx')` to retrieve the configuration of the cms plugin.
 
-## Get Configuration
-Get a plugin configuration method as `config('plugin.{plugin}. {specific configuration}');`, for example get all configuration methods for `plugin/cms/config/app.php` as `config('plugin.cms.app')`
-Similarly, the main project or other plugins can use `config('plugin.cms.xxx')` to get the configuration of the cms plugin。
-
-## Unsupported configurations
-Application PluginNot supportedserver.php，session.phpconfigure，Not supported`app.request_class`，`app.public_path`，`app.runtime_path`configure。
+## Unsupported Configurations
+Application plugins do not support `server.php` and `session.php` configurations, and do not support `app.request_class`, `app.public_path`, and `app.runtime_path` configurations.
 
 ## Database
-Plugins can configure their own database, for example `plugin/cms/config/database.php` reads as follows
+Plugins can configure their own databases. For example, the contents of `plugin/cms/config/database.php` are as follows:
 ```php
 return  [
     'default' => 'mysql',
     'connections' => [
-        'mysql' => [ // mysqlfor connection name
+        'mysql' => [ // mysql is the connection name
             'driver'      => 'mysql',
             'host'        => '127.0.0.1',
             'port'        => 3306,
-            'database'    => 'Database',
+            'database'    => 'database_name',
             'username'    => 'username',
             'password'    => 'password',
             'charset'     => 'utf8mb4',
             'collation'   => 'utf8mb4_general_ci',
         ],
-        'admin' => [ // adminfor connection name
+        'admin' => [ // admin is the connection name
             'driver'      => 'mysql',
             'host'        => '127.0.0.1',
             'port'        => 3306,
-            'database'    => 'Database',
+            'database'    => 'database_name',
             'username'    => 'username',
             'password'    => 'password',
             'charset'     => 'utf8mb4',
@@ -95,26 +86,24 @@ return  [
     ],
 ];
 ```
-Reference as `Db::connection('plugin.{plugin}. {connection name}');`, for example
+To reference it, use `Db::connection('plugin.{plugin}.{connection_name}');`. For example:
 ```php
 use support\Db;
 Db::connection('plugin.cms.mysql')->table('user')->first();
 Db::connection('plugin.cms.admin')->table('admin')->first();
 ```
-
-If you want to use the database of the main project, just use it directly, for example
+If you want to use the main project's database, simply use it as follows:
 ```php
 use support\Db;
 Db::table('user')->first();
-// Assumes that the main project also has an admin connection configured
+// Assuming the main project also configures an 'admin' connection
 Db::connection('admin')->table('admin')->first();
 ```
-
-> **hint**
-> thinkormAlso similar usage
+> **Note**
+> ThinkORM has a similar usage.
 
 ## Redis
-RedisUsage is similar to database, for example `plugin/cms/config/redis.php`
+The usage of Redis is similar to that of the database. For example, in `plugin/cms/config/redis.php`:
 ```php
 return [
     'default' => [
@@ -131,36 +120,33 @@ return [
     ],
 ];
 ```
-Use when
+To use it:
 ```php
 use support\Redis;
 Redis::connection('plugin.cms.default')->get('key');
 Redis::connection('plugin.cms.cache')->get('key');
 ```
-
-Similarly, if you want to reuse the Redis configuration of the main project
+Similarly, if you want to reuse the main project's Redis configuration:
 ```php
 use support\Redis;
 Redis::get('key');
-// Assuming the main project is also configured with a cache connection
+// Assuming the main project also configures a 'cache' connection
 Redis::connection('cache')->get('key');
 ```
 
-## log
-Log class usage is also similar to database usage
+## Logging
+The usage of the logging class is similar to that of the database:
 ```php
 use support\Log;
 Log::channel('plugin.admin.default')->info('test');
 ```
-
-If you want to reuse the logging configuration of the main project, use it directly
+If you want to reuse the main project's logging configuration, just use it directly:
 ```php
 use support\Log;
-Log::info('Log Contents');
-// Assume the main project has a test log configuration
-Log::channel('test')->info('Log Contents');
+Log::info('log content');
+// Assuming the main project has a 'test' log configuration
+Log::channel('test')->info('log content');
 ```
 
-# Application Plugin Installation and Uninstallation
-The application plugin installation only needs to copy the plugin directory to the `{main project}/plugin` directory, it needs to reload or restart to take effect。
-Delete the corresponding plugin directory under `{main project}/plugin` when uninstalling。
+# Installing and Uninstalling Application Plugins
+To install an application plugin, simply copy the plugin directory to the `{main project}/plugin` directory, and then reload or restart for the changes to take effect. To uninstall, simply delete the corresponding plugin directory under `{main project}/plugin`.

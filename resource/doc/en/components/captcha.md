@@ -1,10 +1,9 @@
-# Captcha Related Components
-
+# Captcha-related components
 
 ## webman/captcha
-Project address https://github.com/webman-php/captcha
+Project address: https://github.com/webman-php/captcha
 
-### Install
+### Installation
 ```
 composer require webman/captcha
 ```
@@ -23,7 +22,7 @@ use Webman\Captcha\CaptchaBuilder;
 class LoginController
 {
     /**
-     * Test Page
+     * Test page
      */
     public function index(Request $request)
     {
@@ -31,32 +30,32 @@ class LoginController
     }
     
     /**
-     * output captcha image
+     * Output captcha image
      */
     public function captcha(Request $request)
     {
-        // initialize captcha class
+        // Initialize captcha class
         $builder = new CaptchaBuilder;
-        // Generate CAPTCHA
+        // Generate captcha
         $builder->build();
         // Store the value of the captcha in the session
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
         // Get captcha image binary data
         $img_content = $builder->get();
-        // Exporting CAPTCHA binary data
+        // Output captcha binary data
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
     /**
-     * Check CAPTCHA
+     * Check captcha
      */
     public function check(Request $request)
     {
-        // Get the captcha field in post requests
+        // Get the 'captcha' field from the post request
         $captcha = $request->post('captcha');
-        // Compare captcha values in session
+        // Compare the value of the captcha stored in the session
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
-            return json(['code' => 400, 'msg' => 'Incorrectly entered captcha']);
+            return json(['code' => 400, 'msg' => 'The captcha entered is incorrect']);
         }
         return json(['code' => 0, 'msg' => 'ok']);
     }
@@ -64,7 +63,7 @@ class LoginController
 }
 ```
 
-**Creating Template Files`app/view/login/index.html`**
+**Create template file `app/view/login/index.html`**
 
 ```html
 <!doctype html>
@@ -83,5 +82,33 @@ class LoginController
 </html>
 ```
 
-Go to page `http://127.0.0.1:8787/login` The interface is similar to the following：
-  ![](img/captcha.png)
+Enter the page `http://127.0.0.1:8787/login`, the interface is similar to the following:
+  ![](../../assets/img/captcha.png)
+
+### Common Parameter Settings
+```php
+    /**
+     * Output captcha image
+     */
+    public function captcha(Request $request)
+    {
+        // Initialize captcha class
+        $builder = new CaptchaBuilder;
+        // Captcha length
+        $length = 4;
+        // Characters to include
+        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
+        $builder = new PhraseBuilder($length, $chars);
+        $captcha = new CaptchaBuilder(null, $builder);
+        // Generate captcha
+        $builder->build();
+        // Store the value of the captcha in the session
+        $request->session()->set('captcha', strtolower($builder->getPhrase()));
+        // Get captcha image binary data
+        $img_content = $builder->get();
+        // Output captcha binary data
+        return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
+    }
+```
+
+For more interfaces and parameters, please refer to https://github.com/webman-php/captcha

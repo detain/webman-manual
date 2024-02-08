@@ -1,9 +1,9 @@
-# Simple example
+# Simple Example
 
-## Return String
-**New Controller**
+## Return a String
+**Create a Controller**
 
-Create a new file `app/controller/UserController.php` as follows
+Create a new file `app/controller/UserController.php` as follows:
 
 ```php
 <?php
@@ -16,9 +16,9 @@ class UserController
     public function hello(Request $request)
     {
         $default_name = 'webman';
-        // Get the name parameter from the get request, or return it if no name parameter is passed$default_name
+        // Get the 'name' parameter from the get request, and return $default_name if the 'name' parameter is not passed
         $name = $request->get('name', $default_name);
-        // Return string to browser
+        // Return a string to the browser
         return response('hello ' . $name);
     }
 }
@@ -26,12 +26,12 @@ class UserController
 
 **Access**
 
-Access in browser `http://127.0.0.1:8787/user/hello?name=tom`
+Access `http://127.0.0.1:8787/user/hello?name=tom` in the browser
 
 The browser will return `hello tom`
 
-## Returnjson
-Change the file `app/controller/UserController.php` as follows
+## Return JSON
+Modify the file `app/controller/UserController.php` as follows:
 
 ```php
 <?php
@@ -56,22 +56,22 @@ class UserController
 
 **Access**
 
-Access in browser `http://127.0.0.1:8787/user/hello?name=tom`
+Access `http://127.0.0.1:8787/user/hello?name=tom` in the browser
 
-The browser will return `{"code":0,"msg":"ok","data":"tom""}`
+The browser will return `{"code":0,"msg":"ok","data":"tom"}`
 
-Using the json helper function to return data will automatically add a header header `Content-Type: application/json`
+Using the json helper function to return data will automatically add a `Content-Type: application/json` header.
 
-## Returnxml
-Similarly, using the helper function `xml($xml)` will return an `xml` response with a `Content-Type: text/xml` header。
+## Return XML
+Similarly, using the helper function `xml($xml)` will return an `xml` response with the `Content-Type: text/xml` header.
 
-where the `$xml` parameter can be either an `xml` string or a `SimpleXMLElement` object
+The `$xml` parameter can be an `xml` string or a `SimpleXMLElement` object.
 
-## Returnjsonp
-Synonym，We just need to slightly `jsonp($data, $callback_name = 'callback')` 将Returna`jsonp`response。
+## Return JSONP
+Similarly, using the helper function `jsonp($data, $callback_name = 'callback')` will return a `jsonp` response.
 
 ## Return View
-Change the file `app/controller/UserController.php` as follows
+Modify the file `app/controller/UserController.php` as follows:
 
 ```php
 <?php
@@ -90,7 +90,7 @@ class UserController
 }
 ```
 
-Create a new file `app/view/user/hello.html` as follows
+Create a new file `app/view/user/hello.html` as follows:
 
 ```html
 <!doctype html>
@@ -105,9 +105,7 @@ hello <?=htmlspecialchars($name)?>
 </html>
 ```
 
-Access in browser `http://127.0.0.1:8787/user/hello?name=tom`
-Will return an html page with the content `hello tom`。
+Access `http://127.0.0.1:8787/user/hello?name=tom` in the browser
+It will return an html page with the content `hello tom`.
 
-note：webmanExcept for the constructorphpNative syntax as template。If you want to use other views see[view](view.md)。
-
-
+Note: By default, webman uses native PHP syntax as the template. If you want to use other views, see [Views](view.md).

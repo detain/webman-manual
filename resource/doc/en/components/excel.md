@@ -2,16 +2,16 @@
 
 ## phpoffice/phpspreadsheet
 
-### Project address
+### Project Address
 
 https://github.com/PHPOffice/PhpSpreadsheet
-  
-### Install
- 
-  ```php
-  composer require phpoffice/phpspreadsheet
-  ```
-  
+
+### Installation
+
+```php
+composer require phpoffice/phpspreadsheet
+```
+
 ### Usage
 
 ```php
@@ -31,18 +31,14 @@ class ExcelController
 
         $writer = new Xlsx($spreadsheet);
         $file_path = public_path().'/hello_world.xlsx';
-        // Save file under public
+        // Save file to public directory
         $writer->save($file_path);
         // Download file
         return response()->download($file_path, 'filename.xlsx');
     }
-
 }
 ```
-  
-  
-### More content
 
-Access https://phpspreadsheet.readthedocs.io/en/latest/
-  
+### Read More
 
+Visit https://phpspreadsheet.readthedocs.io/en/latest/

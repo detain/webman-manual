@@ -1,70 +1,69 @@
 # webman/console Command Line Plugin
 
-`webman/console` Based on `symfony/console`
+`webman/console` is based on `symfony/console`
 
-> Plugin Requiredwebman>=1.2.2 webman-framework>=1.2.1
+> The plugin requires webman>=1.2.2 webman-framework>=1.2.1
 
-## Install
+## Installation
  
 ```sh
 composer require webman/console
 ```
 
 ## Supported Commands
-**Use methods**  
-`php webman Command` or `php webman command`。
-For example `php webman version` or `php webman version`
+**Usage**  
+`php webman command` or `php webman command`
+For example, `php webman version` or `php webman version`
 
-## Supported Commands
 ### version
-**print webman version number**
+**Print the webman version number**
 
 ### route:list
-**Print current routing configuration**
+**Print the current route configuration**
 
 ### make:controller
 **Create a controller file** 
-For example `php webman make:controller admin` will create a `app/controller/AdminController.php`
-For example `php webman make:controller api/user` will create a  `app/api/controller/UserController.php`
+For example, `php webman make:controller admin` will create `app/controller/AdminController.php`
+For example, `php webman make:controller api/user` will create `app/api/controller/UserController.php`
 
 ### make:model
 **Create a model file**
-For example `php webman make:model admin` will create a  `app/model/Admin.php`
-For example `php webman make:model api/user` will create a  `app/api/model/User.php`
+For example, `php webman make:model admin` will create `app/model/Admin.php`
+For example, `php webman make:model api/user` will create `app/api/model/User.php`
 
 ### make:middleware
 **Create a middleware file**
-For example `php webman make:middleware Auth` will create a  `app/middleware/Auth.php`
+For example, `php webman make:middleware Auth` will create `app/middleware/Auth.php`
 
 ### make:command
-**Create custom command file**
-For example `php webman make:command db:config` will create a  `app\command\DbConfigCommand.php`
+**Create a custom command file**
+For example, `php webman make:command db:config` will create a `app\command\DbConfigCommand.php`
 
 ### plugin:create
-**Create a base plugin**
-Example `php webman plugin:create --name=foo/admin` will create`config/plugin/foo/admin` 和 `vendor/foo/admin` 两个目录
-See[actually get](/doc/webman/plugin/create.html)
+**Create a basic plugin**
+For example, `php webman plugin:create --name=foo/admin` will create two directories `config/plugin/foo/admin` and `vendor/foo/admin`
+See [Create basic plugin](/doc/webman/plugin/create.html)
 
 ### plugin:export
-**Export base plugin**
-Example `php webman plugin:export --name=foo/admin` 
-See[actually get](/doc/webman/plugin/create.html)
+**Export a basic plugin**
+For example, `php webman plugin:export --name=foo/admin` 
+See [Create basic plugin](/doc/webman/plugin/create.html)
 
-### plugin:create
-**Export Application Plugin**
-Example `php webman plugin:export shop`
-See[support based on](/doc/webman/plugin/app.html)
+### plugin:export
+**Export an application plugin**
+For example, `php webman plugin:export shop`
+See [Application plugin](/doc/webman/plugin/app.html)
 
 ### phar:pack
-**Package the webman project into a phar file**
-See[pharpackaged](/doc/webman/others/phar.html)
-> Required for this featurewebman>=1.2.4 webman-framework>=1.2.4 webman\console>=1.0.5
+**Pack the webman project into a phar file**
+See [Phar packaging](/doc/webman/others/phar.html)
+> This feature requires webman>=1.2.4 webman-framework>=1.2.4 webman\console>=1.0.5
 
-## Custom command
-Users can define their own commands, for example the following is the command to print the database configuration
+## Custom Commands
+Users can define their own commands, for example, the command below prints the database configuration.
 
-* Execution `php webman make:command config:mysql`
-* Open `app/command/ConfigMySQLCommand.php` and change it to the following
+* Run `php webman make:command config:mysql`
+* Open `app/command/ConfigMySQLCommand.php` and modify it as follows
 
 ```php
 <?php
@@ -79,11 +78,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ConfigMySQLCommand extends Command
 {
     protected static $defaultName = 'config:mysql';
-    protected static $defaultDescription = 'Show current MySQL server configuration';
+    protected static $defaultDescription = 'Display current MySQL server configuration';
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('MySQLThe configuration information is as follows：');
+        $output->writeln('MySQL configuration information is as follows:');
         $config = config('database');
         $headers = ['name', 'default', 'driver', 'host', 'port', 'database', 'username', 'password', 'unix_socket', 'charset', 'collation', 'prefix', 'strict', 'engine', 'schema', 'sslmode'];
         $rows = [];
@@ -116,12 +115,12 @@ class ConfigMySQLCommand extends Command
 }
 ```
   
-## test
+## Testing
 
-Command Line Run `php webman config:mysql`
+Run `php webman config:mysql` in the command line.
 
-The result is similar to the following：
-```
+The result is similar to the following:
+```php
 +-------+---------+--------+-----------+------+----------+----------+----------+-------------+---------+-----------------+--------+--------+--------+--------+---------+
 | name  | default | driver | host      | port | database | username | password | unix_socket | charset | collation       | prefix | strict | engine | schema | sslmode |
 +-------+---------+--------+-----------+------+----------+----------+----------+-------------+---------+-----------------+--------+--------+--------+--------+---------+
@@ -129,5 +128,5 @@ The result is similar to the following：
 +-------+---------+--------+-----------+------+----------+----------+----------+-------------+---------+-----------------+--------+--------+--------+--------+---------+
 ```
 
-## More information reference
+## More References
 http://www.symfonychina.com/doc/current/components/console.html
