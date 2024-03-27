@@ -271,7 +271,7 @@ Route::fallback(function(){
 });
 ```
 
-相关连接 [自定义404 500页面](others/custom-error-page.md)
+相关链接 [自定义404 500页面](others/custom-error-page.md)
 
 ## 路由接口
 ```php
@@ -279,7 +279,7 @@ Route::fallback(function(){
 Route::any($uri, $callback);
 // 设置$uri的get请求的路由
 Route::get($uri, $callback);
-// 设置$uri的请求的路由
+// 设置$uri的post请求的路由
 Route::post($uri, $callback);
 // 设置$uri的put请求的路由
 Route::put($uri, $callback);
