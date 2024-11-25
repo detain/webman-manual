@@ -12,4 +12,4 @@
 * linux用户使用命令 `zip -r foo.zip foo` 生成foo.zip
 * windows用户右键foo文件夹选择`压缩为ZIP文件` 生成foo.zip
 
-  **foo.zip为打包后的文件，参考下一章节[发布插件](publish.md)**
+**foo.zip为打包后的文件，参考下一章节[发布插件](publish.md)**

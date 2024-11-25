@@ -37,7 +37,8 @@ Route::disableDefaultRoute();
 ## 闭包路由
 `config/route.php`里添加如下路由代码
 ```php
-Route::any('/test', function ($request) {
+use support\Request;
+Route::any('/test', function (Request $request) {
     return response('test');
 });
 
@@ -51,13 +52,14 @@ Route::any('/test', function ($request) {
 > 路由路径必须以`/`开头，例如
 
 ```php
+use support\Request;
 // 错误的用法
-Route::any('test', function ($request) {
+Route::any('test', function (Request $request) {
     return response('test');
 });
 
 // 正确的用法
-Route::any('/test', function ($request) {
+Route::any('/test', function (Request $request) {
     return response('test');
 });
 ```
@@ -79,9 +81,11 @@ Route::any('/user/{id}', [app\controller\UserController::class, 'get']);
 ```
 ```php
 namespace app\controller;
+use support\Request;
+
 class UserController
 {
-    public function get($request, $id)
+    public function get(Request $request, $id)
     {
         return response('接收到参数'.$id);
     }
@@ -90,31 +94,38 @@ class UserController
 
 更多例子：
 ```php
+use support\Request;
 // 匹配 /user/123, 不匹配 /user/abc
-Route::any('/user/{id:\d+}', function ($request, $id) {
+Route::any('/user/{id:\d+}', function (Request $request, $id) {
     return response($id);
 });
 
 // 匹配 /user/foobar, 不匹配 /user/foo/bar
-Route::any('/user/{name}', function ($request, $name) {
+Route::any('/user/{name}', function (Request $request, $name) {
    return response($name);
 });
 
-// 匹配 /user /user/123 和 /user/abc
-Route::any('/user[/{name}]', function ($request, $name = null) {
+// 匹配 /user /user/123 和 /user/abc   []表示可选
+Route::any('/user[/{name}]', function (Request $request, $name = null) {
    return response($name ?? 'tom');
 });
 
 // 匹配 任意以/user/为前缀的请求
-Route::any('/user/[{path:.+}]', function (Request  $request) {
+Route::any('/user/[{path:.+}]', function (Request $request) {
     return $request->path();
 });
 
-// 匹配所有options请求
+// 匹配所有options请求   :后填写正则表达式，表示此命名参数的正则规则
 Route::options('[{path:.+}]', function () {
     return response('');
 });
 ```
+进阶用法总结
+
+> `[]` 语法在 Webman 路由中主要用于处理可选路径部分或匹配动态路由，它让你能够为路由定义更复杂的路径结构和匹配规则
+> 
+> `:用于指定正则表达式`
+
 
 ## 路由分组
 
@@ -122,16 +133,16 @@ Route::options('[{path:.+}]', function () {
 
 ```php
 Route::group('/blog', function () {
-   Route::any('/create', function ($request) {return response('create');});
-   Route::any('/edit', function ($request) {return response('edit');});
-   Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
+   Route::any('/create', function (Request $request) {return response('create');});
+   Route::any('/edit', function (Request $request) {return response('edit');});
+   Route::any('/view/{id}', function (Request $request, $id) {return response("view $id");});
 });
 ```
 等价与
 ```php
-Route::any('/blog/create', function ($request) {return response('create');});
-Route::any('/blog/edit', function ($request) {return response('edit');});
-Route::any('/blog/view/{id}', function ($request, $id) {return response("view $id");});
+Route::any('/blog/create', function (Request $request) {return response('create');});
+Route::any('/blog/edit', function (Request $request) {return response('edit');});
+Route::any('/blog/view/{id}', function (Request $request, $id) {return response("view $id");});
 ```
 
 group嵌套使用
@@ -139,9 +150,9 @@ group嵌套使用
 ```php
 Route::group('/blog', function () {
    Route::group('/v1', function () {
-      Route::any('/create', function ($request) {return response('create');});
-      Route::any('/edit', function ($request) {return response('edit');});
-      Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
+      Route::any('/create', function (Request $request) {return response('create');});
+      Route::any('/edit', function (Request $request) {return response('edit');});
+      Route::any('/view/{id}', function (Request $request, $id) {return response("view $id");});
    });  
 });
 ```
@@ -173,9 +184,9 @@ Route::group('/blog', function () {
 # 错误使用例子 (webman-framework >= 1.5.7 时此用法有效)
 Route::group('/blog', function () {
    Route::group('/v1', function () {
-      Route::any('/create', function ($request) {return response('create');});
-      Route::any('/edit', function ($request) {return response('edit');});
-      Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
+      Route::any('/create', function (Request $request) {return response('create');});
+      Route::any('/edit', function (Request $request) {return response('edit');});
+      Route::any('/view/{id}', function (Request $request, $id) {return response("view $id");});
    });  
 })->middleware([
     app\middleware\MiddlewareA::class,
@@ -187,9 +198,9 @@ Route::group('/blog', function () {
 # 正确使用例子
 Route::group('/blog', function () {
    Route::group('/v1', function () {
-      Route::any('/create', function ($request) {return response('create');});
-      Route::any('/edit', function ($request) {return response('edit');});
-      Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
+      Route::any('/create', function (Request $request) {return response('create');});
+      Route::any('/edit', function (Request $request) {return response('edit');});
+      Route::any('/view/{id}', function (Request $request, $id) {return response("view $id");});
    })->middleware([
         app\middleware\MiddlewareA::class,
         app\middleware\MiddlewareB::class,
@@ -276,7 +287,40 @@ Route::fallback(function(){
 });
 ```
 
+## 给404添加中间件
+
+> **注意**
+> 此特性需要 webman-framework >= 1.6.0
+
+默认404请求不会走任何中间件，如果需要给404请求添加中间件，请参考以下代码。
+```php
+Route::fallback(function(){
+    return json(['code' => 404, 'msg' => '404 not found']);
+})->middleware([
+    app\middleware\MiddlewareA::class,
+    app\middleware\MiddlewareB::class,
+]);
+````
+
 相关链接 [自定义404 500页面](others/custom-error-page.md)
+
+## 禁用默认路由
+
+> **注意**
+> 需要 webman-framework >= 1.6.0
+
+```php
+// 禁用主项目默认路由，不影响应用插件
+Route::disableDefaultRoute();
+// 禁用主项目的admin应用的路由，不影响应用插件
+Route::disableDefaultRoute('', 'admin');
+// 禁用foo插件的默认路由，不影响主项目
+Route::disableDefaultRoute('foo');
+// 禁用foo插件的admin应用的默认路由，不影响主项目
+Route::disableDefaultRoute('foo', 'admin');
+// 禁用控制器 [\app\controller\IndexController::class, 'index'] 的默认路由
+Route::disableDefaultRoute([\app\controller\IndexController::class, 'index']);
+```
 
 ## 路由接口
 ```php
@@ -294,6 +338,8 @@ Route::patch($uri, $callback);
 Route::delete($uri, $callback);
 // 设置$uri的head请求的路由
 Route::head($uri, $callback);
+// 设置$uri的options请求的路由
+Route::options($uri, $callback);
 // 同时设置多种请求类型的路由
 Route::add(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'], $uri, $callback);
 // 分组路由

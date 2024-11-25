@@ -38,7 +38,11 @@ php webman build:bin 8.1
 * 运行过程中会在webman.bin所在目录生成runtime目录，用于存放日志文件
 * 目前webman.bin不会读取外部php.ini文件，如需要自定义php.ini，请在 `/config/plugin/webman/console/app.php` 文件custom_ini中设置
 * 有些文件不需要打包，可以设置`config/plugin/webman/console/app.php`排除掉，避免打包后的文件过大
-* 切勿将用户上传的文件存储在包中，因为以`phar://`协议操作用户上传的文件是非常危险的(phar反序列化漏洞)。用户上传的文件必须单独存储在包之外的磁盘中(参考[phar打包](phar.md))。
+* 切勿将用户上传的文件存储在二进制包中，因为以`phar://`协议操作用户上传的文件是非常危险的(phar反序列化漏洞)。用户上传的文件必须单独存储在包之外的磁盘中。
+* 如果你的业务需要上传文件到public目录，需要将public目录独立出来放在webman.bin所在目录，这时候需要配置`config/app.php`如下并重新打包。
+```
+'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
+```
 
 ## 单独下载静态PHP
 有时候你只是不想部署PHP环境，只需要一个PHP可执行文件，点击请点击这里下载[静态php下载](https://www.workerman.net/download)
@@ -47,51 +51,7 @@ php webman build:bin 8.1
 > 如需给静态php指定php.ini文件，请使用以下命令 `php -c /your/path/php.ini start.php start -d`
 
 ## 支持的扩展
-bcmath
-calendar
-Core
-ctype
-curl
-date
-dom
-event
-exif
-FFI
-fileinfo
-filter
-gd
-hash
-iconv
-json
-libxml
-mbstring
-mongodb
-mysqlnd
-openssl
-pcntl
-pcre
-PDO
-pdo_mysql
-pdo_sqlite
-Phar
-posix
-readline
-redis
-Reflection
-session
-shmop
-SimpleXML
-soap
-sockets
-SPL
-sqlite3
-standard
-tokenizer
-xml
-xmlreader
-xmlwriter
-zip
-zlib
+Core, date, libxml, openssl, pcre, sqlite3, zlib, amqp, apcu, bcmath, calendar, ctype, curl, dba, dom, sockets, event, hash, fileinfo, filter, gd, gettext, json, iconv, SPL, session, standard, mbstring, igbinary, imagick, exif, mongodb, msgpack, mysqlnd, mysqli, pcntl, PDO, pdo_mysql, pdo_pgsql, pdo_sqlite, pdo_sqlsrv, pgsql, Phar, posix, readline, redis, Reflection, shmop, SimpleXML, soap, sodium, sqlsrv, sysvmsg, sysvsem, sysvshm, tokenizer, xlswriter, xml, xmlreader, xmlwriter, xsl, zip, memcache, Zend OPcache
 
 ## 项目出处
 
