@@ -1,16 +1,17 @@
 # Redis
 
-webman的redis组件默认使用的是[illuminate/redis](https://github.com/illuminate/redis)，也就是laravel的redis库，用法与laravel相同。
+[webman/redis](https://github.com/webman-php/redis)是在[illuminate/redis](https://github.com/illuminate/redis)的基础上添加了连接池功能，支持协程和非协程环境，用法与laravel相同。
 
 使用`illuminate/redis`之前必须先给`php-cli`安装redis扩展。
 
 > **注意**
-> 使用命令`php -m | grep redis`查看`php-cli`是否装了redis扩展。注意：即使你在`php-fpm`安装了redis扩展，不代表你在`php-cli`可以使用它，因为`php-cli`和`php-fpm`是不同的应用程序，可能使用的是不同的`php.ini`配置。使用命令`php --ini`来查看你的`php-cli`使用的是哪个`php.ini`配置文件。
+> 当前手册为 webman v2 版本，如果您使用的是webman v1版本，请查看 [v1版本手册](/doc/webman-v1/db/redis.html)
+> 此组件需要安装redis扩展，使用命令`php -m | grep redis`查看`php-cli`是否装了redis扩展。
 
 ## 安装
 
 ```php
-composer require -W illuminate/redis illuminate/events
+composer require -W webman/redis illuminate/events
 ```
 
 安装后需要restart重启(reload无效)
@@ -25,9 +26,24 @@ return [
         'password' => null,
         'port'     => 6379,
         'database' => 0,
+        'pool' => [ // 连接池配置
+            'max_connections' => 10,     // 连接池最大连接数
+            'min_connections' => 1,      // 连接池最小连接数
+            'wait_timeout' => 3,         // 从连接池获取连接最大等待时间
+            'idle_timeout' => 50,        // 连接池中连接空闲超时时间，超过该时间会被关闭，直到连接数为min_connections
+            'heartbeat_interval' => 50,  // 心跳检测间隔，不要大于60秒
+        ],
     ]
 ];
 ```
+
+## 关于连接池
+* 每个进程有自己的连接池，进程间不共享连接池。
+* 不开启协程时，业务在进程内排队执行，不会产生并发，所以连接池最多只有1个连接。
+* 开启协程后，业务在进程内并发执行，连接池会根据需要动态调整连接数，最多不超过`max_connections`，最少不小于`min_connections`。
+* 因为连接池连接数最大为`max_connections`，当操作Redis的协程数大于`max_connections`时，会有协程排队等待，最多等待`wait_timeout`秒，超过则触发异常。
+* 在空闲的情况下(包括协程和非协程环境)，连接会在`idle_timeout`时间后被回收，直到连接数为`min_connections`(`min_connections`可为0)。
+
 
 ## 示例
 ```php

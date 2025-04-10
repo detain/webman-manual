@@ -1,19 +1,15 @@
 # Cache
 
-在webman默认使用 [symfony/cache](https://github.com/symfony/cache)作为cache组件。
+[webman/cache](https://github.com/webman-php/cache)是基于[symfony/cache](https://github.com/symfony/cache)开发的缓存组件，兼容协程和非协程环境，支持连接池。
+
 
 > **注意**
-> Cache 组件在2024-09-15进行了升级，此文档需要 `workerman/webman-framework`版本 >= 1.5.24
-> 通过`composer info`命令查看`workerman/webman-framework`版本，通过命令 `composer require workerman/webman-framework ^1.5.24` 升级。
+> 当前手册为 webman v2 版本，如果您使用的是webman v1版本，请查看 [v1版本手册](/doc/webman-v1/db/cache.html)
 
 ## 安装
-**php 7.x**
+
 ```php
-composer require -W symfony/cache ^5.2 psr/simple-cache
-```
-**php 8.x**
-```php
-composer require -W symfony/cache psr/simple-cache
+composer require -W webman/cache
 ```
 
 ## 示例
@@ -36,7 +32,7 @@ class UserController
 ```
 
 ## 配置文件位置
-配置文件在 `config/cache.php`。如果你的webman没有这个文件说明框架不是最新的，请手动创建`config/cache.php`，并在项目根目录执行 `composer require workerman/webman-framework ^1.5.24` 升级 `workerman/webman-framework`。
+配置文件在 `config/cache.php`，如果没有请手动创建。
 
 ## 配置文件内容
 ```php
@@ -58,27 +54,27 @@ return [
     ]
 ];
 ```
-`stores.driver`支持3种驱动，**file**、**redis**、**array**。
+`stores.driver`支持4种驱动，**file**、**redis**、**array**、**apcu**。
 
 ### file 文件驱动
-此为默认驱动，可通过`'default' => 'xxx'`字段更改。
+此为默认驱动，不依赖其它组件，支持跨进程共享缓存数据，不支持多服务器共享缓存数据。
+
+### array 内存驱动
+内存存储，性能最好，但是会占用内存，不支持跨进程跨服务器共享数据，进程重启后失效，一般用于缓存数据量小的项目。
+
+### apcu 内存驱动
+内存存储，性能仅次于 array，但是会占用内存，支持跨进程共享缓存数据，不支持多服务器共享缓存数据，进程重启后失效，一般用于缓存数据量小的项目。
+
+> 需要安装并启用 [APCu 扩展](https://pecl.php.net/package/APCu)；不建议用于频繁进行缓存写入/删除的场景，会导致明显的性能下降。
 
 ### redis 驱动
-Redis存储，如需使用请先安装Redis组件，命令如下
+依赖[webman/redis](./redis.md)组件，支持跨进程跨服务器共享缓存数据。
 
-* php 7.x
-```
-composer require -W illuminate/redis ^8.2.0
-```
-* php 8.x
-```
-composer require -W illuminate/redis
-```
-> **提示**
-> 要想使用`illuminate/redis`请确保`php-cli`安装了Redis扩展，执行`php -m` 查看`php-cli`支持的扩展。
+**stores.redis.connection**
 
-### stores.redis.connection
-stores.redis.connection 对应的是`config/redis.php` 里对应的key。建议在`config/redis.php`创建一个独立的key，例如cache类似如下
+`stores.redis.connection` 对应的是`config/redis.php` 里对应的key。当使用redis时，会复用`webman/redis`的配置包括连接池配置。
+
+**建议在`config/redis.php`增加一个独立的配置，例如cache类似如下**
 
 ```php
 <?php
@@ -89,7 +85,7 @@ return [
         'port' => 6379,
         'database' => 0,
     ],
-    'cache' => [ // <===
+    'cache' => [ // <==== 新增
         'password' => 'abc123',
         'host' => '127.0.0.1',
         'port' => 6379,
@@ -103,7 +99,7 @@ return [
 ```php
 <?php
 return [
-    'default' => 'redis', // <=== 
+    'default' => 'redis', // <==== 
     'stores' => [
         'file' => [
             'driver' => 'file',
@@ -119,8 +115,6 @@ return [
     ]
 ];
 ```
-### array 内存驱动
-内存存储，性能最好，但是会占用内存，一般用于缓存数据量小的项目。
 
 ## 切换存储
 可以通过如下代码手动切store，从而使用不同的存储驱动，例如
@@ -130,8 +124,8 @@ Cache::store('array')->set('key', 'value');
 ```
 
 > **提示**
-> symfony/cache 的key不允许包含字符"{}()/\@:"
+> Key 名受 [PSR6](https://www.php-fig.org/psr/psr-6/#definitions) 限制不允许包含`{}()/\@:`中任一字符，但这一判断截至目前（`symfony/cache` 7.2.4）可暂时通过 PHP ini 配置 `zend.assertions=-1` 跳过。
 
 ## 使用其它Cache组件
 
-[ThinkCache](https://github.com/top-think/think-cache)组件使用参考 [其它数据库](others.md#ThinkCache)
+[ThinkCache](https://github.com/webman-php/think-cache)组件使用参考 [其它数据库](others.md#ThinkCache)

@@ -7,6 +7,7 @@
 - 快速开始
   
   - [安装](install.md)
+  - [宝塔安装](bt-install.md)
   - [目录结构](directory.md)
   - [简单示例](tutorial.md)
 
@@ -24,6 +25,7 @@
   - [日志](log.md)
   - [配置文件](config.md)
   - [多应用](multiapp.md)
+  - [协程](coroutine/coroutine.md)
 
 - 数据库
 
@@ -47,6 +49,7 @@
  
 - 常用组件
   - [验证器](components/validation.md)
+  - [限流器](components/rate-limiter.md)
   - [分页组件](components/paginator.md)
   - [多语言](components/translation.md)
   - [图像处理](components/image.md)
@@ -113,7 +116,10 @@
 
 - 升级
   - [1.4](upgrade/1-4.md)
+  - [1.5](upgrade/1-5.md)
   - [1.6](upgrade/1-6.md)
+  - [2.0](upgrade/2-0.md)
+  - [2.1](upgrade/2-1.md)
   - [致谢](thanks.md)
   
  

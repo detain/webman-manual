@@ -65,8 +65,6 @@ class Foo
  
 
 ## 控制器参数绑定
-> **注意**
-> 此特性需要 webman-framework >= 1.6.0
 
 #### 例子
 webman支持通过控制器方法参数自动绑定请求参数，例如
@@ -127,6 +125,21 @@ Input age must be of type int, string given
 
 这是因为接受的数据会按照类型进行转换，如果无法转换则会抛出`support\exception\InputTypeException`异常，
 因为传递的`age`参数无法转换为`int`类型，所以得到如上错误。
+
+#### 自定义错误
+我们可以利用多语言自定义`Missing input parameter age` 和 `Input age must be of type int, string given` 这样的错误，
+参考如下命令
+
+```
+composer require symfony/translation
+mkdir resource/translations/zh_CN/ -p
+echo "<?php
+return [
+    'Input :parameter must be of type :exceptType, :actualType given' => '输入参数 :parameter 必须是 :exceptType 类型，传递的类型是 :actualType',
+    'Missing input parameter :parameter' => '缺少输入参数 :parameter',
+];" > resource/translations/zh_CN/messages.php
+php start.php restart
+```
 
 #### 其它类型
 webman支持的参数类型有`int` `float` `string` `bool` `array` `object` `类实例`等，例如
@@ -260,9 +273,6 @@ class UserController
 当`config/app.php`里`controller_reuse`为`false`时，每个请求都会初始化一次对应的控制器实例，请求结束后控制器实例销毁，这与传统框架运行机制相同。
 
 当`config/app.php`里`controller_reuse`为`true`时，所有请求将复用控制器实例，也就是控制器实例一旦创建便常驻内存，所有请求复用。
-
-> **注意**
-> 关闭控制器复用需要webman>=1.4.0，也即是说在1.4.0之前控制器默认是所有请求复用的，无法更改。
 
 > **注意**
 > 开启控制器复用时，请求不应该更改控制器的任何属性，因为这些更改将影响后续请求，例如

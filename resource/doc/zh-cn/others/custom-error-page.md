@@ -1,5 +1,4 @@
 ## 自定义404
-webman在404时会自动返回`public/404.html`里面的内容，所以开发者可以直接更改`public/404.html`文件。
 
 如果你想动态控制404的内容时，例如在ajax请求时返回json数据 `{"code:"404", "msg":"404 not found"}`，页面请求时返回`app/view/404.html`模版，请参考如下示例
 
@@ -66,7 +65,7 @@ Route::fallback(function(Request $request, $status) {
 </html>
 ```
 
-**新建**app/exception/Handler.php**(如目录不存在请自行创建)**
+**新建`app/exception/Handler.php`(如目录不存在请自行创建)**
 ```php
 <?php
 

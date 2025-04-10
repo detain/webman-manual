@@ -2,29 +2,26 @@
 
 有时候我们需要处理慢业务，为了避免慢业务影响webman的其它请求处理，这些业务根据情况不同可以使用不同的处理方案。
 
-## 使用消息队列
+## 方案一 使用消息队列
 参考[redis队列](../queue/redis.md) [stomp队列](../queue/stomp.md)
 
-### 优点
+#### 优点
 可以应对突发海量业务处理请求
 
-### 缺点
+#### 缺点
 无法直接返回结果给客户端。如需推送结果需要配合其它服务，例如使用 [webman/push](https://www.workerman.net/plugin/2) 推送处理结果。
 
-## 新增HTTP端口
-
-> **注意**
-> 此特性需要webman-framework>=1.4
+## 方案二 新增HTTP端口
 
 新增HTTP端口处理慢请求，这些慢请求通过访问这个端口进入特定的一组进程处理，处理后将结果直接返回给客户端。
 
-### 优点
+#### 优点
 可以直接将数据返回给客户端
 
-### 缺点
+#### 缺点
 无法应对突发的海量请求
 
-### 实施步骤
+#### 实施步骤
 在 `config/process.php` 里增加如下配置。
 ```php
 return [
@@ -92,4 +89,43 @@ server {
 
 这样客户端访问`域名.com/tast/xxx`时将会走单独的8686端口处理，不影响8787端口的请求处理。
 
+## 方案三 利用http chunked 异步分段发送数据
 
+#### 优点
+可以直接将数据返回给客户端
+
+**安装 workerman/http-client**
+
+```
+composer require workerman/http-client
+```
+
+**app/controller/IndexController.php**
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+
+class IndexController
+{
+    public function index(Request $request)
+    {
+        $connection = $request->connection;
+        $http = new \Workerman\Http\Client();
+        $http->get('https://example.com/', function ($response) use ($connection) {
+            $connection->send(new Chunk($response->getBody()));
+            $connection->send(new Chunk('')); // 发送空的的chunk代表response结束
+        });
+        // 先发送一个http头，后续数据通过异步发送
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+}
+```
+
+> **提示**
+> 本例中使用了 `workerman/http-client` 客户端异步获取http结果并返回数据，也可以使用其它异步客户端例如 [AsyncTcpConnection](https://www.workerman.net/doc/workerman/async-tcp-connection/construct.html) 。

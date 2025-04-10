@@ -177,9 +177,6 @@ Route::group('/blog', function () {
 ]);
 ```
 
-> **注意**: 
-> 在 webman-framework <= 1.5.6 时 `->middleware()` 路由中间件作用于 group 分组之后时候，当前路由必须在处于当前分组之下
-
 ```php
 # 错误使用例子 (webman-framework >= 1.5.7 时此用法有效)
 Route::group('/blog', function () {
@@ -250,8 +247,6 @@ route('blog.view', ['id' => 100]); // 结果为 /blog/100
 
 
 ## 获取路由信息
-> **注意**
-> 需要 webman-framework >= 1.3.2
 
 通过`$request->route`对象我们可以获取当前请求路由信息，例如
 
@@ -263,7 +258,7 @@ if ($route) {
     var_export($route->getName());
     var_export($route->getMiddleware());
     var_export($route->getCallback());
-    var_export($route->param()); // 此特性需要 webman-framework >= 1.3.16
+    var_export($route->param());
 }
 ```
 
@@ -272,7 +267,7 @@ if ($route) {
 
 
 ## 处理404
-当路由找不到时默认返回404状态码并输出`public/404.html`文件内容。
+当路由找不到时默认返回404状态码并输出404相关内容。
 
 如果开发者想介入路由未找到时的业务流程，可以使用webman提供的回退路由`Route::fallback($callback)`方法。比如下面的代码逻辑是当路由未找到时重定向到首页。
 ```php
@@ -289,9 +284,6 @@ Route::fallback(function(){
 
 ## 给404添加中间件
 
-> **注意**
-> 此特性需要 webman-framework >= 1.6.0
-
 默认404请求不会走任何中间件，如果需要给404请求添加中间件，请参考以下代码。
 ```php
 Route::fallback(function(){
@@ -306,9 +298,6 @@ Route::fallback(function(){
 
 ## 禁用默认路由
 
-> **注意**
-> 需要 webman-framework >= 1.6.0
-
 ```php
 // 禁用主项目默认路由，不影响应用插件
 Route::disableDefaultRoute();
@@ -320,6 +309,40 @@ Route::disableDefaultRoute('foo');
 Route::disableDefaultRoute('foo', 'admin');
 // 禁用控制器 [\app\controller\IndexController::class, 'index'] 的默认路由
 Route::disableDefaultRoute([\app\controller\IndexController::class, 'index']);
+```
+
+## 注解禁用默认路由
+
+我们可以通过注解禁用某个控制器的默认路由，例如：
+
+```php
+namespace app\controller;
+use support\annotation\DisableDefaultRoute;
+
+#[DisableDefaultRoute]
+class IndexController
+{
+    public function index()
+    {
+        return 'index';
+    }
+}
+```
+
+同样的，我们也可以通过注解禁用某个控制器的默认路由，例如：
+
+```php
+namespace app\controller;
+use support\annotation\DisableDefaultRoute;
+
+class IndexController
+{
+    #[DisableDefaultRoute]
+    public function index()
+    {
+        return 'index';
+    }
+}
 ```
 
 ## 路由接口

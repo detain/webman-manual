@@ -1,6 +1,6 @@
-# 环境需求
+# 如何安装webman
 
-* PHP >= 7.2
+* PHP >= 8.1
 * [Composer](https://getcomposer.org/) >= 2.0
 
 
@@ -9,13 +9,17 @@
 curl -sO https://www.workerman.net/install-php-and-composer && sudo bash install-php-and-composer
 ```
 通过以上命令可以快速安装PHP+Composer环境，支持PHP8.0-8.3版本。
-如需要手动安装PHP可下载webman官方提供的[静态PHP文件](https://www.workerman.net/download)，解压即可使用。
+也可手动下载webman官方提供的[静态PHP](https://www.workerman.net/download)，解压即可使用。
 
 ### 1. 创建项目
 
 ```php
-composer create-project workerman/webman
+composer create-project workerman/webman:~2.0
 ```
+
+> **提示**
+> 如果报错用了有问题的composer镜像代理，请执行 `composer config -g --unset repos.packagist` 取消代理。
+> 或者使用腾讯云composer镜像 `composer config -g repos.packagist composer https://mirrors.cloud.tencent.com/composer/`
 
 ### 2. 运行
 
