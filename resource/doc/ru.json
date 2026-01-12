@@ -1,6 +1,7 @@
 {
   "name": "webman manual",
-  "lang":"Russian",
+  "lang":"Русский",
   "repo":"https://github.com/webman-php/webman-manual",
-  "zh-lang": "俄语"
+  "zh-lang": "俄语",
+  "order": 6
 }

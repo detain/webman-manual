@@ -1,4 +1,4 @@
-# session管理
+# webman session管理
 
 ## 例子
 ```php
@@ -21,7 +21,9 @@ class UserController
 
 通过`$request->session();` 获得`Workerman\Protocols\Http\Session`实例，通过实例的方法来增加、修改、删除session数据。
 
-> 注意：session对象销毁时会自动保存session数据，所以不要把`$request->session()`返回的对象保存在全局数组或者类成员中导致session无法保存。
+> **注意**
+> session对象销毁时会自动保存session数据
+> 将session对象存储到全局变量会阻止session销毁导致无法自动保存session数据，此时需要手动调用`$session->save()`保存
 
 ## 获取所有session数据
 ```php
@@ -29,7 +31,6 @@ $session = $request->session();
 $all = $session->all();
 ```
 返回的是一个数组。如果没有任何session数据，则返回一个空数组。
-
 
 
 ## 获取session中某个值
@@ -113,7 +114,6 @@ $has = $session->exists('name');
 以上代码也是用来判断session数据是否存在，区别是当对应的session项值为null时，也返回true。
 
 ## 助手函数session()
-> 2020-12-09 新增
 
 webman提供了助手函数`session()`完成相同的功能。
 ```php
@@ -191,35 +191,8 @@ return [
 ];
 ```
 
-> **注意** 
-> webman从1.4.0起更改了SessionHandler的命名空间，由原来的
-> use Webman\FileSessionHandler;  
-> use Webman\RedisSessionHandler;  
-> use Webman\RedisClusterSessionHandler;  
-> 改为  
-> use Webman\Session\FileSessionHandler;  
-> use Webman\Session\RedisSessionHandler;  
-> use Webman\Session\RedisClusterSessionHandler;  
+## 安全相关
+在使用 session 时不建议直接存储类的实例对象，尤其是来源不可控的类实例，反序列化时可能造成潜在风险。
 
 
 
-## 有效期配置
-当webman-framework < 1.3.14时，webman中session过期时间需要在`php.ini`配置。
-
-```
-session.gc_maxlifetime = x
-session.cookie_lifetime = x
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-假设设定有效期为1440秒，则配置如下
-```
-session.gc_maxlifetime = 1440
-session.cookie_lifetime = 1440
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-> **提示**
-> 可使用命令 `php --ini` 来查找`php.ini`的位置

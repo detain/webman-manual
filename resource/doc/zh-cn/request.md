@@ -65,6 +65,21 @@ $request->post('name');
 $request->post('name', 'tom');
 ```
 
+## 助手函数input()
+与$request->input()函数类似,可以获取到所有参数, input()助手函数一共有两个参数:
+1. name: 获取的参数名称 (如果为空,可以获取所有参数的数组)
+2. default: 默认值 (通过第一个参数获取失败后, 会使用该参数的值)
+
+**例如**
+```php
+//获取参数name
+$name = input('name');
+//获取参数name, 如果不存在则使用默认值
+$name = input('name','张三');
+//获取全部参数
+$all_params = input();
+```
+
 ## 获得原始请求post包体
 ```php
 $post = $request->rawBody();
@@ -345,7 +360,7 @@ $request->getRealIp($safe_mode=true);
 
 当项目使用代理(例如nginx)时，使用`$request->getRemoteIp()`得到的往往是代理服务器IP(类似`127.0.0.1` `192.168.x.x`)并非客户端真实IP。这时候可以尝试使用`$request->getRealIp()`获得客户端真实IP。
 
-`$request->getRealIp()`会尝试从HTTP头的`x-real-ip`、`x-forwarded-for`、`client-ip`、`x-client-ip`、`via`字段中获取真实IP。
+`$request->getRealIp()`会尝试从HTTP头的`x-forwarded-for`、`x-real-ip`、`client-ip`、`x-client-ip`、`via`字段中获取真实IP。
 
 > 由于HTTP头很容伪造，所以此方法获得的客户端IP并非100%可信，尤其是`$safe_mode`为false时。透过代理获得客户端真实IP的比较可靠的方法是，已知安全的代理服务器IP，并且明确知道携带真实IP是哪个HTTP头，如果`$request->getRemoteIp()`返回的IP确认为已知的安全的代理服务器，然后通过`$request->header('携带真实IP的HTTP头')`获取真实IP。
 

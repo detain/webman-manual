@@ -3,7 +3,7 @@ namespace app\controller;
 
 use GuzzleHttp\Psr7\Response;
 use support\Request;
-
+use app\support\Pangu;
 class Doc
 {
     public function index(Request $request)
@@ -51,6 +51,10 @@ class Doc
         $repo = $info['repo'] . "/tree/master/resource$uri";
 
         $langs = $this->getLangs();
+
+        if($lang == 'zh-cn'){
+            $content = Pangu::format($content);
+        }
 
         $path = substr($request->uri(), strlen("/doc/$lang/"));
 
@@ -120,11 +124,27 @@ class Doc
 
     protected function getLangs()
     {
-        $langs = [];
+        $items = [];
         foreach (glob(resource_path() . '/doc/*.json') as $file) {
             $lang = basename($file, '.json');
             $data = json_decode(file_get_contents($file), true);
-            $langs[$lang] = $data['lang'];
+            $order = isset($data['order']) ? (int)$data['order'] : 9999;
+            $items[] = [
+                'code' => $lang,
+                'name' => $data['lang'],
+                'order' => $order,
+            ];
+        }
+        usort($items, function ($a, $b) {
+            $cmp = $a['order'] <=> $b['order'];
+            if ($cmp !== 0) {
+                return $cmp;
+            }
+            return strcmp($a['code'], $b['code']);
+        });
+        $langs = [];
+        foreach ($items as $item) {
+            $langs[$item['code']] = $item['name'];
         }
         return $langs;
     }

@@ -1,6 +1,7 @@
 {
   "name": "webman manual",
-  "lang":"Portuguese",
+  "lang":"Português",
   "repo":"https://github.com/webman-php/webman-manual",
-  "zh-lang": "葡萄牙语"
+  "zh-lang": "葡萄牙语",
+  "order": 5
 }

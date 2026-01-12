@@ -1,15 +1,13 @@
-# 验证码相关组件
+# 验证码组件
 
-
-## webman/captcha
 项目地址 https://github.com/webman-php/captcha
 
-### 安装
+## 安装
 ```
 composer require webman/captcha
 ```
 
-### 使用
+## 使用
 
 **建立文件 `app/controller/LoginController.php`**
 
@@ -86,7 +84,7 @@ class LoginController
 进入页面`http://127.0.0.1:8787/login` 界面类似如下：
   ![](../../assets/img/captcha.png)
 
-### 常见参数设置
+## 常见参数设置
 ```php
     /**
      * 输出验证码图像
@@ -94,7 +92,7 @@ class LoginController
     public function captcha(Request $request)
     {
         $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
-        $captcha = new Captcha(null, $builder);
+        $captcha = new CaptchaBuilder(null, $builder);
         $captcha->build();
         $request->session()->set('join', strtolower($captcha->getPhrase()));
         $img_content = $captcha->get();

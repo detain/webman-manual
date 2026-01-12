@@ -1,16 +1,16 @@
-#限流器
+# 限流器
 webman限流器，支持注解限流。
 支持apcu、redis、memory驱动。
 
-##源码地址
+## 源码地址
 https://github.com/webman-php/rate-limiter
 
-##安装
+## 安装
 ```
 composer require webman/rate-limiter
 ```
 
-##使用
+## 使用
 ```php
 <?php
 namespace app\controller;
@@ -78,7 +78,8 @@ class UserController
 ```
 
 **说明**
-* 默认单位时间间隔为1秒钟
+* 算法为固定窗口算法
+* ttl默认单位时间间隔为1秒钟，最大不超过24小时
 * 可以通过ttl设置单位时间间隔，例如 `ttl:60` 为60秒
 * 默认限流维度为IP限流(默认`127.0.0.1`不限流，参见下面配置部分)
 * 内置IP限流、UID限流(要求`session('user.id')`不为空)，SID限流(根据`session_id`限流)
@@ -117,7 +118,7 @@ class UserController {
 }
 ```
 
-##配置
+## 配置
 **config/plugin/webman/rate-limiter/app.php**
 ```
 <?php
@@ -178,7 +179,7 @@ apc.enable_cli=1
 * 依赖
   需要安装redis扩展，并安装Redis组件，安装命令
 ```
-composer require -W illuminate/redis illuminate/events
+composer require -W webman/redis illuminate/events
 ```
 
 * 介绍
