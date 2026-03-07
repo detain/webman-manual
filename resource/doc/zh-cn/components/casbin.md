@@ -161,7 +161,7 @@ use teamones\casbin\Enforcer;
 # 1. 默认使用 default 配置
 Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# 1. 使用自定义的 rbac 配置
+# 2. 使用自定义的 rbac 配置
 Enforcer::instance('rbac')->addPermissionForUser('user1', '/user', 'read');
 ```
 
@@ -207,15 +207,15 @@ Enforcer::getUsersForRole('role1');
 
 # 判断用户是否属于一个角色
 
-Enforcer::hasRoleForUser('use1', 'role1');
+Enforcer::hasRoleForUser('user1', 'role1');
 
 # 删除用户角色
 
-Enforcer::deleteRoleForUser('use1', 'role1');
+Enforcer::deleteRoleForUser('user1', 'role1');
 
 # 删除用户所有角色
 
-Enforcer::deleteRolesForUser('use1');
+Enforcer::deleteRolesForUser('user1');
 
 # 删除角色
 

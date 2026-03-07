@@ -1,3 +1,3 @@
 # প্লাগইন মার্কেট
 
-[অ্যাপ মার্কেটে যান](https://www.workerman.net/apps)
+[অ্যাপ মার্কেটে প্রবেশ করতে এখানে ক্লিক করুন](https://www.workerman.net/apps)

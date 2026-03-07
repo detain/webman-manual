@@ -1,36 +1,43 @@
 # Qu'est-ce que webman
 
-webman est un framework de service HTTP à haute performance basé sur [workerman](https://www.workerman.net). Il est utilisé pour remplacer l'architecture traditionnelle php-fpm et fournit des services HTTP extrêmement performants et évolutifs. Avec webman, vous pouvez développer des sites web, des interfaces HTTP ou des microservices.
+Webman est un framework de services haute performance construit sur Workerman, intégrant HTTP, WebSocket, TCP, UDP et d'autres modules. Grâce à des techniques avancées telles que la mémoire résidente, les coroutines et les pools de connexions, Webman dépasse non seulement les limites de performance du PHP traditionnel, mais élargit considérablement ses domaines d'application.
 
-En plus de cela, webman prend en charge les processus personnalisés, qui peuvent effectuer toutes les tâches possibles avec workerman, telles que les services de websocket, l'Internet des objets, les jeux, les services TCP, les services UDP, les services de socket Unix, etc.
+De plus, Webman propose un mécanisme de plugins puissant permettant aux développeurs d'intégrer et de réutiliser rapidement des modules fonctionnels développés par d'autres. Que ce soit pour créer des sites web, des API HTTP, de la messagerie instantanée, des systèmes IoT, des jeux, des services TCP/UDP ou Unix Socket, Webman s'en acquitte avec aisance, offrant performance et flexibilité remarquables.
 
-# La philosophie de webman
-**Fournir la plus grande extensibilité et la plus grande performance avec le noyau minimal.**
+# Philosophie de webman
+**Extensibilité et performances maximales avec un noyau minimal.**
 
-webman ne fournit que les fonctionnalités essentielles (route, middleware, session, interfaces de processus personnalisées). Toutes les autres fonctionnalités sont entièrement réutilisables via l'écosystème de composer. Cela signifie que vous pouvez utiliser les composants les plus familiers dans webman, par exemple dans le domaine de la base de données, les développeurs peuvent choisir d'utiliser `illuminate/database` de Laravel, ou `ThinkORM` de ThinkPHP, ou d'autres composants comme `Medoo`. Les intégrer dans webman est très simple.
+Webman ne fournit que les fonctionnalités essentielles (routage, middleware, session, interface de processus personnalisés). Tout le reste est réutilisé depuis l'écosystème Composer. Vous pouvez donc utiliser vos composants habituels, par exemple [illuminate/database](./db/tutorial.md) de Laravel, [ThinkORM](./db/thinkorm.md) de ThinkPHP ou d'autres comme `Medoo` pour les bases de données. Les intégrer dans webman est très simple.
 
 # Caractéristiques de webman
 
-1. Haute stabilité. Basée sur workerman, qui a toujours été un framework socket extrêmement stable avec très peu de bugs dans l'industrie.
-2. Performances ultra-élevées. Les performances de webman sont de 10 à 100 fois supérieures à celles des frameworks traditionnels php-fpm, et environ deux fois supérieures à celles de frameworks similaires tels que gin et echo de go.
-3. Haute réutilisabilité. Aucune modification nécessaire, la plupart des composants et bibliothèques de composer peuvent être réutilisés.
-4. Grande extensibilité. Prend en charge les processus personnalisés, qui peuvent effectuer toutes les tâches possibles avec workerman.
-5. Très simple et facile à utiliser, avec un coût d'apprentissage très faible et un code écrit sans différence par rapport aux frameworks traditionnels.
-6. Utilisation de la licence MIT, la plus indulgente et conviviale.
+1. Haute stabilité. Webman repose sur Workerman, un framework socket connu dans l'industrie pour sa stabilité et le peu de bugs qu'il présente.
 
-# Adresse du projet
-GitHub: https://github.com/walkor/webman **N'oubliez pas de donner une petite étoile** 
+2. Très hautes performances. Webman dépasse les frameworks PHP-FPM traditionnels de 10 à 100 fois et environ le double des frameworks Go comme Gin ou Echo.
 
-Gitee: https://gitee.com/walkor/webman **N'oubliez pas de donner une petite étoile** 
+3. Forte réutilisabilité. L'écosystème Composer existant peut être réutilisé sans modification.
 
-# Données de test de tierce partie
+4. Grande extensibilité. Il prend en charge les processus personnalisés et peut faire tout ce que Workerman permet.
 
-![](../assets/img/benchmark1.png)
+5. Très simple et facile à utiliser, avec un coût d'apprentissage faible et un code similaire aux frameworks traditionnels.
 
-Avec des requêtes de base de données, le débit en ligne unique de webman atteint 390 000 QPS, soit près de 80 fois plus élevé que le framework Laravel de l'architecture php-fpm traditionnelle.
+6. Supporte l'[empaquetage binaire](./others/bin.md) et peut s'exécuter directement sans environnement PHP.
 
-![](../assets/img/benchmarks-go.png)
+7. Utilise la licence MIT open source, très permissive et adaptée aux développeurs.
 
-Avec des requêtes de base de données, les performances de webman sont environ deux fois supérieures à celles des frameworks web similaires en go.
+# Liens du projet
+GitHub: https://github.com/walkor/webman **N'hésitez pas à ajouter une étoile !**
 
-Ces données proviennent de [techempower.com](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)
+Gitee: https://gitee.com/walkor/webman **N'hésitez pas à ajouter une étoile !**
+
+# Données de performance par des tiers
+
+[![](../assets/img/benchmark1.png)](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)
+
+Avec des requêtes base de données, Webman atteint jusqu'à 390 000 QPS sur une seule machine, soit environ 80 fois plus que Laravel avec une architecture PHP-FPM traditionnelle.
+
+[![](../assets/img/benchmarks-go.png)](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)
+
+Avec des requêtes base de données, Webman surpasse d'environ deux fois les frameworks web similaires en Go.
+
+Les données proviennent de [techempower.com](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf).

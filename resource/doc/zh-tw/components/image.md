@@ -1,18 +1,16 @@
 # 圖像處理元件
 
-## intervention/image
-
-### 專案地址
+## 專案位址
 
 https://github.com/Intervention/image
   
-### 安裝
+## 安裝
  
 ```php
 composer require intervention/image
 ```
   
-### 使用
+## 使用
 
 **上傳頁面片段**
 
@@ -29,7 +27,8 @@ composer require intervention/image
 <?php
 namespace app\controller;
 use support\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class UserController
 {
@@ -37,15 +36,20 @@ class UserController
     {
         $file = $request->file('file');
         if ($file && $file->isValid()) {
-            $image = Image::make($file)->resize(100, 100);
-            return response($image->encode('png'), 200, ['Content-Type' => 'image/png']);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file)->scale(100, 100);
+            return response($image->encode(), 200, ['Content-Type' => 'image/png']);
         }
-        return response('檔案未找到');
+        return response('file not found');
     }
     
 }
 ```
-  
-### 更多內容
 
-訪問 http://image.intervention.io/getting_started/introduction
+> **注意**
+> 以上為 v3 版本用法
+
+## 更多內容
+
+造訪 https://image.intervention.io/v3
+  

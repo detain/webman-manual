@@ -1,35 +1,50 @@
 # Redis
 
-webmanのRedisコンポーネントはデフォルトで[illuminate/redis](https://github.com/illuminate/redis)を使用しており、つまりlaravelのRedisライブラリを使用しています。使用法はlaravelと同じです。
+[webman/redis](https://github.com/webman-php/redis) は [illuminate/redis](https://github.com/illuminate/redis) を拡張し、コネクションプール機能を追加したものです。コルーチン環境と非コルーチン環境の両方をサポートし、Laravel と同じ使い方です。
 
-`illuminate/redis`を使用する前に、`php-cli`にRedis拡張機能をインストールする必要があります。
-
-> **注意**
-> コマンド`php -m | grep redis`を使用して`php-cli`にRedis拡張機能がインストールされているかどうかを確認します。注意：`php-fpm`にRedis拡張機能をインストールしていても、`php-cli`で使用できるとは限りません。なぜなら`php-cli`と`php-fpm`は異なるアプリケーションであり、異なる`php.ini`の設定を使用する可能性があるからです。使用中の`php-cli`がどの`php.ini`設定ファイルを使用しているかを確認するには、`php --ini`コマンドを使用します。
+`illuminate/redis` を使用する前に、`php-cli` 用の Redis 拡張をインストールする必要があります。
 
 ## インストール
 
 ```php
-composer require -W illuminate/redis illuminate/events
+composer require -W webman/redis illuminate/events
 ```
 
-インストール後にrestartを行う必要があります（reloadでは適用されません）。
+インストール後は restart が必要です（reload では反映されません）。
 
 ## 設定
-Redisの設定ファイルは`config/redis.php`にあります。
+
+Redis の設定ファイルは `config/redis.php` にあります。
 
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
+        'pool' => [ // コネクションプール設定
+            'max_connections' => 10,     // プールの最大接続数
+            'min_connections' => 1,      // プールの最小接続数
+            'wait_timeout' => 3,         // 接続を取得する際の最大待機時間（秒）
+            'idle_timeout' => 50,        // アイドルタイムアウト。超過後は min_connections になるまで接続が閉じられる
+            'heartbeat_interval' => 50,  //  heartbeat 間隔（60秒以下にすること）
+        ],
     ]
 ];
 ```
 
+## コネクションプールについて
+
+* 各プロセスは独自のコネクションプールを持ち、プロセス間では共有されません。
+* コルーチン無効時は処理が順次実行されるため、接続数は最大 1 つです。
+* コルーチン有効時は処理が並列実行され、プールは `min_connections` ～ `max_connections` の間で動的に調整されます。
+* Redis を操作するコルーチン数が `max_connections` を超えると、超過分は最大 `wait_timeout` 秒待機し、超えると例外が発生します。
+* アイドル時（コルーチン有無問わず）、接続は `idle_timeout` 経過後に解放され、`min_connections`（0 可）になるまで減ります。
+
 ## サンプル
+
 ```php
 <?php
 namespace app\controller;
@@ -48,7 +63,8 @@ class UserController
 }
 ```
 
-## Redisインターフェース
+## Redis インターフェース
+
 ```php
 Redis::append($key, $value)
 Redis::bitCount($key)
@@ -78,7 +94,9 @@ Redis::expire($key, $ttl)
 Redis::expireAt($key, $timestamp)
 Redis::select($dbIndex)
 ```
-これは以下と同等です。
+
+以下と同等です。
+
 ```php
 $redis = Redis::connection('default');
 $redis->append($key, $value)
@@ -91,15 +109,17 @@ $redis->getBit($key, $offset)
 ```
 
 > **注意**
-> `Redis::select($db)`インターフェースを慎重に使用してください。webmanは常駐メモリのフレームワークのため、あるリクエストが`Redis::select($db)`を使用してデータベースを切り替えると、後続のリクエストに影響を与える可能性があります。複数のデータベースを使用する場合は、異なる`$db`を異なるRedis接続設定に設定することをお勧めします。
+> `Redis::select($db)` の使用には注意してください。webman は常駐メモリのフレームワークなので、あるリクエストで `Redis::select($db)` でデータベースを切り替えると、後続のリクエストに影響します。複数データベースを使う場合は、異なる `$db` を別々の Redis 接続として設定することを推奨します。
 
-## 複数のRedis接続の使用
-たとえば、設定ファイル`config/redis.php`には次のように記述されています。
+## 複数の Redis 接続を使用する
+
+設定ファイル `config/redis.php` の例：
 
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
@@ -115,15 +135,16 @@ return [
 ]
 ```
 
-デフォルトでは`default`の接続が使用されますが、`Redis::connection()`メソッドを使用してどのRedis接続を使用するかを選択することができます。
+デフォルトでは `default` の接続が使われます。`Redis::connection()` で Redis 接続を切り替えられます。
 
 ```php
 $redis = Redis::connection('cache');
 $redis->get('test_key');
 ```
 
-## クラスタ構成
-アプリケーションでRedisサーバークラスタを使用する場合は、クラスタを定義するにはRedis設定ファイルでclustersキーを使用する必要があります。
+## クラスタ設定
+
+Redis クラスタを使う場合は、設定ファイルで `clusters` キーを使って定義します：
 
 ```php
 return [
@@ -131,6 +152,7 @@ return [
         'default' => [
             [
                 'host'     => 'localhost',
+                'username' => null,
                 'password' => null,
                 'port'     => 6379,
                 'database' => 0,
@@ -141,7 +163,7 @@ return [
 ];
 ```
 
-デフォルトでは、クラスタはノード上でクライアントシャーディングを実装することができ、ノードプールの作成や大量の利用可能なメモリを実現することができます。ただし、クライアント側の共有は障害を処理しません。そのため、この機能は主に別のメインデータベースからキャッシュデータを取得する場合に適しています。Redisのネイティブクラスタを使用する場合は、設定ファイルのoptionsキーで次のように指定する必要があります。
+デフォルトではノード上でクライアント側シャーディングが行われ、ノードプールと大量のメモリを確保できます。クライアント側シャーディングはフェイルオーバーを扱わないため、主に別の主 DB からのキャッシュ用です。Redis ネイティブクラスタを使う場合は、設定の `options` で次を指定します：
 
 ```php
 return[
@@ -156,7 +178,8 @@ return[
 ```
 
 ## パイプラインコマンド
-1つの操作でサーバに多くのコマンドを送信する必要がある場合は、パイプラインコマンドを使用することをお勧めします。pipelineメソッドはRedisインスタンスのクロージャを受け入れます。すべてのコマンドをRedisインスタンスに送信することができますが、それらは1つの操作で実行されます。
+
+一度に多数のコマンドを送る場合は、パイプラインが推奨されます。`pipeline` メソッドは Redis インスタンスのクロージャを受け取り、渡したコマンドは一括で実行されます：
 
 ```php
 Redis::pipeline(function ($pipe) {

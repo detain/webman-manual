@@ -1,4 +1,5 @@
-# Trình xây dựng truy vấn
+# Truy vấn cơ sở dữ liệu (thành phần Laravel)
+
 ## Lấy tất cả các hàng
 ```php
 <?php
@@ -385,6 +386,9 @@ Nếu bạn cần xóa toàn bộ bảng, bạn có thể sử dụng phương t
 ```php
 Db::table('users')->truncate();
 ```
+
+## Giao dịch
+Xem [Giao dịch cơ sở dữ liệu](../others/transaction.md)
 
 ## Khóa Pessimistic
 Trình xây dựng truy vấn cũng bao gồm một số phương thức giúp bạn thực hiện "khóa pessimistic" trên cú pháp select. Nếu bạn muốn thực hiện một "khóa chia sẻ" trong truy vấn, bạn có thể sử dụng phương thức sharedLock. Khóa chia sẻ ngăn cản các cột dữ liệu được chọn bị thay đổi cho đến khi giao dịch được xác nhận:

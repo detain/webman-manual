@@ -2,7 +2,7 @@
 
 PSR4 규격에 따라 컨트롤러 클래스 네임스페이스는 `plugin\{플러그인 식별자}`로 시작합니다. 예를 들어,
 
-컨트롤러 파일을 만듭니다. `plugin/foo/app/controller/FooController.php`
+새 컨트롤러 파일 `plugin/foo/app/controller/FooController.php`를 만듭니다.
 
 ```php
 <?php
@@ -24,9 +24,9 @@ class FooController
 }
 ```
 
-`http://127.0.0.1:8787/app/foo/foo`을 방문하면 페이지에 `hello index`가 반환됩니다.
+`http://127.0.0.1:8787/app/foo/foo`에 접속하면 페이지가 `hello index`를 반환합니다.
 
-`http://127.0.0.1:8787/app/foo/foo/hello`를 방문하면 페이지에 `hello webman`이 반환됩니다.
+`http://127.0.0.1:8787/app/foo/foo/hello`에 접속하면 페이지가 `hello webman`을 반환합니다.
 
 
 ## URL 접근

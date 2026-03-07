@@ -1,8 +1,8 @@
 # AOP
 
-> Merci pour la soumission de l'auteur de Hyperf
+> Merci à l'auteur de Hyperf pour sa contribution.
 
-### Installation
+## Installation
 
 - Installer aop-integration
 
@@ -10,9 +10,9 @@
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### Ajouter une configuration concernant AOP
+## Ajouter la configuration AOP
 
-Nous devons ajouter une configuration "config.php" dans le répertoire `config`
+Il faut ajouter le fichier de configuration `config.php` dans le répertoire `config`.
 
 ```php
 <?php
@@ -36,31 +36,31 @@ return [
         ],
     ],
     'aspects' => [
-        // Écrire ici l'Aspect correspondant
+        // Indiquez ici l'Aspect correspondant
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### Fichier d'entrée de configuration start.php
+## Configurer le fichier d'entrée start.php
 
-> Nous allons placer la méthode d'initialisation sous le fuseau horaire, le code suivant est omis
+> Placez le code d'initialisation en dessous de la configuration timezone. Le reste du code est omis ci-dessous.
 
-```php
+```
 use Hyperf\AopIntegration\ClassLoader;
 
 if ($timezone = config('app.default_timezone')) {
     date_default_timezone_set($timezone);
 }
 
-// Initialiser
+// Initialisation
 ClassLoader::init();
 ```
 
-### Test
+## Tests
 
-Tout d'abord, écrivons la classe à intercepter
+Commençons par créer la classe à intercepter :
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-Ensuite, ajoutez l'aspect `DebugAspect` correspondant
+Puis ajoutez le `DebugAspect` correspondant :
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-Ensuite, modifiez le contrôleur `app/controller/IndexController.php`
+Ensuite, modifiez le contrôleur `app/controller/IndexController.php` :
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-Ensuite, configurez la route
+Puis configurez la route :
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-Enfin, démarrez le service et testez.
+Enfin, démarrez le service et lancez le test :
 
 ```shell
 php start.php start

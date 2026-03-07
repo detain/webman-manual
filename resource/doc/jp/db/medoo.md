@@ -1,20 +1,20 @@
-## Medoo
+# Medoo データベース
 
-Medooは軽量なデータベース操作プラグインです。[Medoo公式ウェブサイト](https://medoo.in/)。
+[webman/medoo](https://github.com/webman-php/medoo)は[Medoo](https://medoo.in/)にコネクションプールを追加し、コルーチン環境と非コルーチン環境の両方で動作します。使い方はMedooと同じです。
 
 ## インストール
 `composer require webman/medoo`
 
-## データベースの設定
-設定ファイルの場所は `config/plugin/webman/medoo/database.php` です。
+## Medoo データベース設定
+設定ファイルの場所：`config/plugin/webman/medoo/database.php`
 
-## 使用例
+## Medoo データベースの使い方
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use Webman\Medoo\Medoo;
+use support\Medoo;
 
 class Index
 {
@@ -30,11 +30,12 @@ class Index
 > `Medoo::get('user', '*', ['uid' => 1]);`
 > は
 > `Medoo::instance('default')->get('user', '*', ['uid' => 1]);`
+> と同等です。
 
-## 複数のデータベースの設定
+## Medoo 複数データベース設定
 
-**設定**  
-`config/plugin/webman/medoo/database.php` に新しい設定を追加し、キーは任意のものを使用します。ここでは `other` を使用しています。
+**設定**
+`config/plugin/webman/medoo/database.php` に新しい設定を追加します。キーは任意で、ここでは `other` を使用しています。
 
 ```php
 <?php
@@ -56,9 +57,16 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
+        ],
+        'pool' => [ // コネクションプール設定
+            'max_connections' => 5, // 最大接続数
+            'min_connections' => 1, // 最小接続数
+            'wait_timeout' => 60,   // プールから接続を取得する際の最大待ち時間、超えると例外が発生
+            'idle_timeout' => 3,    // プール内接続の最大アイドル時間、超えると回収され最小接続数まで減る
+            'heartbeat_interval' => 50, // プールの heartbeat 間隔（秒）、60秒未満を推奨
         ]
     ],
-    //ここでotherの設定を追加
+    // ここに other の設定を追加
     'other' => [
         'type' => 'mysql',
         'host' => 'localhost',
@@ -76,15 +84,21 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
-        ]
+        ],
+        'pool' => [
+            'max_connections' => 5,
+            'min_connections' => 1,
+            'wait_timeout' => 60,
+            'idle_timeout' => 3,
+            'heartbeat_interval' => 50,
+        ],
     ],
 ];
 ```
 
-**使用例**
+## Medoo データベースの使い方
 ```php
 $user = Medoo::instance('other')->get('user', '*', ['uid' => 1]);
 ```
 
-## 詳細なドキュメント
-[Medoo公式ドキュメント](https://medoo.in/api/select) を参照してください。
+[Medoo 公式ドキュメント](https://medoo.in/api/select) を参照してください。

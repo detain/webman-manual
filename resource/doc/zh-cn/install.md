@@ -15,8 +15,11 @@ curl -sO https://www.workerman.net/install-php-and-composer && sudo bash install
 
 ## 1. 创建项目
 
-```php
+```bash
+# 默认使用交互式安装向导
 composer create-project workerman/webman:~2.0
+# 禁用交互式安装向导
+composer create-project workerman/webman:~2.0 --no-interaction
 ```
 
 > **提示**

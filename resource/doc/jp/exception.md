@@ -63,11 +63,11 @@ class FooController
 {
     public function index(Request $request)
     {
-        $this->chackInpout($request->post());
+        $this->checkInput($request->post());
         return response('hello index');
     }
     
-    protected function chackInpout($input)
+    protected function checkInput($input)
     {
         if (!isset($input['token'])) {
             throw new BusinessException('パラメーターエラー', 3000);
@@ -121,8 +121,8 @@ JSONリクエストは次のようなJSONを受け取ります。
 {"code": 3000, "message": "パラメーターエラー"}
 ```
 
-> **注意**
-> BusinessException例外はビジネス例外（たとえば、ユーザー入力パラメーターエラー）なので、予測可能であり、フレームワークは致命的なエラーとはみなさず、ログを記録しません。
+> **ヒント**
+> BusinessException例外はビジネス例外（たとえば、ユーザー入力パラメーターエラー）であり、予測可能なものです。そのためフレームワークは致命的なエラーとはみなさず、ログを記録しません。
 
 ## まとめ
 現在のリクエストを中断し、クライアントに情報を返したい場合は、`BusinessException`を使用することを検討してください。

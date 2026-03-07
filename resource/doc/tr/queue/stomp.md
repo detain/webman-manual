@@ -1,12 +1,12 @@
-## Stomp Kuyruğu
+# Stomp Kuyruğu
 
-Stomp, basit (akış) metin tabanlı mesaj yönlendirme protokolüdür ve istemci için herhangi bir STOMP mesaj aracısı (Broker) ile etkileşim sağlayan, işbirliği yapılabilir bir bağlantı düzeni sunar. [workerman/stomp](https://github.com/walkor/stomp), öncelikle RabbitMQ, Apollo, ActiveMQ vb. mesaj kuyruğu senaryoları için Stomp istemcisini gerçekleştirir.
+Stomp, STOMP istemcilerinin herhangi bir STOMP mesaj aracısı (Broker) ile iletişim kurmasını sağlayan, birlikte çalışabilir bir bağlantı biçimi sunan basit (akış) metin tabanlı mesaj protokolüdür. [workerman/stomp](https://github.com/walkor/stomp), RabbitMQ, Apollo, ActiveMQ vb. mesaj kuyruğu senaryoları için başlıca kullanılan Stomp istemcisini gerçekleştirir.
 
 ## Kurulum
 `composer require webman/stomp`
 
 ## Yapılandırma
-Yapılandırma dosyası `config/plugin/webman/stomp` klasöründe bulunmaktadır.
+Yapılandırma dosyası `config/plugin/webman/stomp` altındadır.
 
 ## Mesaj Gönderme
 ```php
@@ -21,21 +21,21 @@ class Index
     public function queue(Request $request)
     {
         // Kuyruk
-        $queue = 'örnekler';
-        // Veri (dizi iletilirken serialize, json_encode vb. gibi kendi serileştirmeniz gerekmektedir)
+        $queue = 'examples';
+        // Veri (dizi gönderirken kendi serializasyonunuzu yapmanız gerekir, örn. json_encode, serialize vb.)
         $data = json_encode(['to' => 'tom@gmail.com', 'content' => 'hello']);
         // Gönderimi gerçekleştir
         Client::send($queue, $data);
 
-        return response('redis kuyruk testi');
+        return response('redis queue test');
     }
 
 }
 ```
-> Diğer projelerle uyumlu olması için, Stomp bileşeni otomatik serialize/deserialize işlevi sağlamamaktadır. Eğer dizi verisi gönderiliyorsa, serialize işlemini kendiniz yapmalı ve tüketme işlemi sırasında kendiniz deserialize etmelisiniz.
+> Diğer projelerle uyumluluk için Stomp bileşeni otomatik serializasyon ve deserializasyon sunmaz. Dizi verisi gönderiyorsanız, kendiniz serializasyon yapmalı ve tüketirken kendiniz deserializasyon yapmalısınız.
 
 ## Mesaj Tüketme
-Yeni bir `app/queue/stomp/MyMailSend.php` dosyası oluşturun (`class` adı isteğe bağlıdır, sadece psr4 kurallarına uymalıdır).
+Yeni `app/queue/stomp/MyMailSend.php` dosyası oluşturun (sınıf adı PSR-4 kurallarına uyduğu sürece serbesttir).
 ```php
 <?php
 namespace app\queue\stomp;
@@ -46,29 +46,29 @@ use Webman\Stomp\Consumer;
 class MyMailSend implements Consumer
 {
     // Kuyruk adı
-    public $queue = 'örnekler';
+    public $queue = 'examples';
 
     // Bağlantı adı, stomp.php dosyasındaki bağlantıya karşılık gelir
-    public $connection = 'varsayılan';
+    public $connection = 'default';
 
-    // Değer client ise, $ack_resolver->ack() çağrısının sunucuya başarıyla tüketildiğini bildirmesi gerekir
-    // Değer auto ise, $ack_resolver->ack() çağrısına gerek yoktur
+    // Değer client ise sunucuya başarıyla tüketildiğini bildirmek için $ack_resolver->ack() çağrılmalıdır
+    // Değer auto ise $ack_resolver->ack() çağrısı gerekmez
     public $ack = 'auto';
 
     // Tüketme
     public function consume($data, AckResolver $ack_resolver = null)
     {
-        // Eğer veri bir dizi ise, kendiniz deserialize etmelisiniz
-        var_export(json_decode($data, true)); // Çıktı ['to' => 'tom@gmail.com', 'content' => 'hello']
-        // Sunucuya, başarıyla tüketildiğini bildir
-        $ack_resolver->ack(); // ack değeri auto ise bu çağrıyı atlayabilirsiniz
+        // Veri dizi ise kendiniz deserializasyon yapmalısınız
+        var_export(json_decode($data, true)); // ['to' => 'tom@gmail.com', 'content' => 'hello'] çıktısı
+        // Sunucuya başarıyla tüketildiğini bildir
+        $ack_resolver->ack(); // ack auto olduğunda bu çağrı atlanabilir
     }
 }
 ```
 
-# rabbitmq'da stomp protokolünü etkinleştirme
-RabbitMQ varsayılan olarak stomp protokolünü etkinleştirmez, etkinleştirmek için aşağıdaki komutu kullanmanız gerekmektedir
-```shell
+# RabbitMQ'da Stomp Protokolünü Etkinleştirme
+RabbitMQ varsayılan olarak Stomp protokolünü etkinleştirmez. Etkinleştirmek için aşağıdaki komutu çalıştırın:
+```
 rabbitmq-plugins enable rabbitmq_stomp
-```           
-Etkinleştirdikten sonra stomp portu varsayılan olarak 61613'tür.
+```
+Etkinleştirdikten sonra Stomp'un varsayılan portu 61613'tür.

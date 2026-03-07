@@ -1,5 +1,6 @@
-# 쿼리 빌더
-## 모든 행 가져 오기
+# 데이터베이스 사용법（Laravel 데이터베이스 컴포넌트 기반）
+
+## 모든 행 가져오기
 ```php
 <?php
 namespace app\controller;
@@ -17,17 +18,17 @@ class UserController
 }
 ```
 
-## 특정 열 가져 오기
+## 특정 열 가져오기
 ```php
 $users = Db::table('user')->select('name', 'email as user_email')->get();
 ```
 
-## 한 행 가져 오기
+## 한 행 가져오기
 ```php
 $user = Db::table('users')->where('name', 'John')->first();
 ```
 
-## 한 열 가져 오기
+## 한 열 가져오기
 ```php
 $titles = Db::table('roles')->pluck('title');
 ```
@@ -40,7 +41,7 @@ foreach ($roles as $id => $title) {
 }
 ```
 
-## 개별 값(필드) 가져 오기
+## 개별 값(필드) 가져오기
 ```php
 $email = Db::table('users')->where('name', 'John')->value('email');
 ```
@@ -384,6 +385,9 @@ Db::table('users')->where('votes', '>', 100)->delete();
 ```php
 Db::table('users')->truncate();
 ```
+
+## 트랜잭션
+[데이터베이스 트랜잭션](../others/transaction.md) 참조
 
 ## 비관적 잠금
 쿼리 빌더에는 "비관적 잠금"을 구현하는 데 도움이 되는 몇 가지 기능도 포함되어 있습니다. "공유 잠금"을 쿼리에 적용하려면 sharedLock 메서드를 사용할 수 있습니다. 공유 잠금은 트랜잭션이 커밋될 때까지 선택된 데이터 행이 변경되지 않도록 합니다:

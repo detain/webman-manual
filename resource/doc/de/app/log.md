@@ -1,16 +1,14 @@
-# Protokoll
-Die Verwendung der Protokollklasse ist ähnlich wie die Verwendung der Datenbankklasse.
-
+# Logging
+Die Verwendung der Log-Klasse entspricht der Verwendung der Datenbank
 ```php
 use support\Log;
-Log::channel('plugin.admin.default')->info('Test');
+Log::channel('plugin.admin.default')->info('test');
 ```
 
-Wenn Sie die Protokollkonfiguration des Hauptprojekts wiederverwenden möchten, verwenden Sie einfach:
-
+Um die Log-Konfiguration des Hauptprojekts wiederzuverwenden, verwenden Sie direkt:
 ```php
 use support\Log;
-Log::info('Protokollinhalt');
-// Angenommen, das Hauptprojekt hat eine Test-Protokollkonfiguration
-Log::channel('test')->info('Protokollinhalt');
+Log::info('Log-Inhalt');
+// Angenommen, das Hauptprojekt hat eine Log-Konfiguration namens test
+Log::channel('test')->info('Log-Inhalt');
 ```

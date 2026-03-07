@@ -1,21 +1,22 @@
-# プロセスモニタリング
-webmanには、プロセスモニタリングを行うモニタリングプロセスが付属しており、以下の2つの機能をサポートします。
-1. ファイルの更新を監視して自動的に新しいビジネスコードをリロードする（通常は開発時に使用されます）
-2. すべてのプロセスのメモリ使用量を監視し、あるプロセスが`php.ini`の`memory_limit`制限を超えそうになると、そのプロセスを自動的に安全に再起動します（ビジネスに影響を与えません）
+# プロセス監視
+webmanには標準でmonitorプロセスが組み込まれており、次の2つの機能をサポートします。
+1. ファイルの更新を監視し、新しいビジネスコードを自動でリロード（主に開発時に使用）
+2. 全プロセスのメモリ使用量を監視し、プロセスが `php.ini` の `memory_limit` を超えそうになると自動で安全に再起動（業務への影響なし）
 
-## モニタリングの設定
-構成ファイル `config/process.php` 内の `monitor` 設定
+## 監視設定
+`config/process.php` の `monitor` 設定：
 ```php
+
 global $argv;
 
 return [
-    // ファイルの更新を検出して自動的にリロード
+    // ファイル更新の検出と自動リロード
     'monitor' => [
         'handler' => process\Monitor::class,
         'reloadable' => false,
         'constructor' => [
             // これらのディレクトリを監視
-            'monitorDir' => array_merge([    // 監視すべきディレクトリ
+            'monitorDir' => array_merge([    // 監視対象のディレクトリ
                 app_path(),
                 config_path(),
                 base_path() . '/process',
@@ -23,22 +24,22 @@ return [
                 base_path() . '/resource',
                 base_path() . '/.env',
             ], glob(base_path() . '/plugin/*/app'), glob(base_path() . '/plugin/*/config'), glob(base_path() . '/plugin/*/api')),
-            // これらの拡張子を持つファイルが監視されます
+            // これらの拡張子のファイルを監視
             'monitorExtensions' => [
                 'php', 'html', 'htm', 'env'
             ],
             'options' => [
-                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // ファイル監視を有効にするかどうか
-                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // メモリ監視を有効にするかどうか
+                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // ファイル監視を有効にするか
+                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // メモリ監視を有効にするか
             ]
         ]
     ]
 ];
 ```
-`monitorDir` は、どのディレクトリの更新を監視するかを設定するために使用されます（監視対象のファイルは多すぎないようにすることが推奨されます）。
-`monitorExtensions` は、`monitorDir`ディレクトリ内で監視するべきファイルの拡張子を設定します。
-`options.enable_file_monitor` の値が`true`の場合、ファイル更新監視が有効になります（Linuxシステムではデバッグモードで実行された場合、デフォルトでファイル監視が有効になります）。
-`options.enable_memory_monitor` の値が`true`の場合、メモリ使用量の監視が有効になります（メモリ使用量の監視はWindowsシステムではサポートされていません）。
+`monitorDir` は更新を監視するディレクトリを指定します（監視対象のファイル数は多すぎないようにすること）。
+`monitorExtensions` は `monitorDir` 内で監視するファイルの拡張子を指定します。
+`options.enable_file_monitor` が `true` の場合、ファイル更新監視が有効になります（Linuxではデバッグモード実行時、デフォルトで有効）。
+`options.enable_memory_monitor` が `true` の場合、メモリ監視が有効になります（Windowsではサポートされていません）。
 
-> **注意**
-> Windowsシステムでは、`windows.bat`または`php windows.php`を実行する必要があります。これにより、ファイルの更新監視が有効になります。
+> **ヒント**
+> Windowsでは、ファイル監視を有効にするには `windows.bat` または `php windows.php` を実行する必要があります。

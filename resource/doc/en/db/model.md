@@ -1,12 +1,12 @@
-# Quick Start
+# Database Model - Model Usage (Laravel Style)
 
-webman is a high-performance PHP framework based on workerman. The webman model is based on Eloquent ORM. Each database table has a corresponding "model" to interact with the table. You can use the model to query data from a table and insert new records into the table.
+The webman model is based on [Eloquent ORM](https://laravel.com/docs/7.x/eloquent). Each database table has a corresponding "model" to interact with that table. You can use the model to query data from a table and insert new records into the table.
 
 Before getting started, make sure to configure the database connection in `config/database.php`.
 
 > Note: To support model observers in Eloquent ORM, you need to import `composer require "illuminate/events"` [example](#model-observers).
 
-## Example
+## Database Model Example
 ```php
 <?php
 namespace app\model;
@@ -191,7 +191,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -347,7 +347,7 @@ $user->save();
 ## Batch Update
 ```php
 app\model\User::where('uid', '>', 10)
-          ->update(['name' => 'tom'']);
+          ->update(['name' => 'tom']);
 ```
 
 ## Checking for Attribute Changes
@@ -549,7 +549,7 @@ if ($post->is($anotherPost)) {
 ## Model Observers
 Please refer to [Model Events and Observer in Laravel](https://learnku.com/articles/6657/model-events-and-observer-in-laravel)
 
-Note: Eloquent ORM requires an additional package "illuminate/events" to support model observers. You can import it with composer require "illuminate/events".
+Note: Eloquent ORM requires the additional package `composer require "illuminate/events"` to support model observers.
 
 ```php
 <?php
@@ -567,3 +567,6 @@ class User extends Model
     }
 }
 ```
+
+## Transactions
+See [Database Transactions](../others/transaction.md)

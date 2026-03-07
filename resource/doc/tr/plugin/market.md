@@ -1,3 +1,3 @@
-# Eklenti Pazarı
+# Eklenti pazarı
 
-[Eklenti pazarına buradan erişin](/webman#plugins)
+[Eklenti pazarına girmek için buraya tıklayın](/webman#plugins)

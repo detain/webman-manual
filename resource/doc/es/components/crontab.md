@@ -1,41 +1,39 @@
-# Componente de tareas programadas crontab
+# Componente de tareas programadas Crontab
 
-## workerman/crontab
+## Descripción
 
-### Descripción
+`workerman/crontab` es similar al crontab de Linux, con la diferencia de que admite programación a nivel de segundos.
 
-`workerman/crontab` es similar al crontab de Linux, la diferencia es que `workerman/crontab` admite programación a nivel de segundos.
+Formato de tiempo:
 
-Explicación del tiempo:
-
-```plaintext
+```
 0   1   2   3   4   5
 |   |   |   |   |   |
-|   |   |   |   |   +------ día de la semana (0 - 6) (Domingo=0)
-|   |   |   |   +------ mes (1 - 12)
-|   |   |   +-------- día del mes (1 - 31)
-|   |   +---------- hora (0 - 23)
-|   +------------ minuto (0 - 59)
-+-------------- segundo (0-59)[Puede omitirse, si no hay 0, la granularidad de tiempo mínima es el minuto]
+|   |   |   |   |   +------ day of week (0 - 6) (Sunday=0)
+|   |   |   |   +------ month (1 - 12)
+|   |   |   +-------- day of month (1 - 31)
+|   |   +---------- hour (0 - 23)
+|   +------------ min (0 - 59)
++-------------- sec (0-59)[opcional; si falta, la granularidad mínima es el minuto]
 ```
 
-### Dirección del proyecto
+## URL del proyecto
 
 https://github.com/walkor/crontab
-
-### Instalación
-
+  
+## Instalación
+ 
 ```php
 composer require workerman/crontab
 ```
+  
+## Uso
 
-### Uso
-
-**Paso 1: Crear el archivo de proceso `process/Task.php`**
+**Paso 1: Crear el archivo de proceso `app/process/Task.php`**
 
 ```php
 <?php
-namespace process;
+namespace app\process;
 
 use Workerman\Crontab\Crontab;
 
@@ -69,7 +67,7 @@ class Task
             echo date('Y-m-d H:i:s')."\n";
         });
       
-        // Ejecutar a las 7:50 todos los días, aquí se omite la posición de los segundos
+        // Ejecutar a las 7:50 cada día (aquí se omite el campo de segundos)
         new Crontab('50 7 * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -77,32 +75,32 @@ class Task
     }
 }
 ```
-
-**Paso 2: Configurar el archivo de proceso para iniciar junto con webman**
-
-Abrir el archivo de configuración `config/process.php` y agregar la siguiente configuración
+  
+**Paso 2: Configurar el proceso para que arranque con webman**
+  
+Abrir el archivo de configuración `config/process.php` y añadir lo siguiente:
 
 ```php
 return [
-    ....otras configuraciones, omitidas por brevedad....
+    ....otras configuraciones omitidas....
   
     'task'  => [
-        'handler'  => process\Task::class
+        'handler'  => app\process\Task::class
     ],
 ];
 ```
-
+  
 **Paso 3: Reiniciar webman**
 
-> Nota: Las tareas programadas no se ejecutarán de inmediato; comenzarán a ejecutarse en el próximo minuto.
+> Nota: Las tareas programadas no se ejecutan de inmediato; empiezan a contar y a ejecutarse desde el siguiente minuto.
 
-### Notas
-El crontab no es asíncrono. Por ejemplo, si un proceso de tarea configura dos temporizadores, A y B, para ejecutarse cada segundo, pero la tarea A tarda 10 segundos en ejecutarse, entonces B tendrá que esperar a que A se complete antes de ejecutarse, lo que ocasionará un retraso en la ejecución de B.
-Si el negocio es muy sensible al intervalo de tiempo, es necesario ejecutar las tareas programadas sensibles al tiempo en un proceso separado para evitar que sean afectadas por otras tareas programadas. Por ejemplo, en `config/process.php` se puede hacer la siguiente configuración
+## Notas
+Crontab no es asíncrono. Por ejemplo: un proceso task tiene dos temporizadores A y B que se ejecutan cada segundo. Si la tarea A tarda 10 segundos, B debe esperar a que A termine antes de ejecutarse, lo que retrasa a B.
+Si la lógica es sensible al intervalo de tiempo, ejecutar las tareas sensibles en procesos separados para evitar interferencias. Ejemplo en `config/process.php`:
 
 ```php
 return [
-    ....otras configuraciones, omitidas por brevedad....
+    ....otras configuraciones omitidas....
   
     'task1'  => [
         'handler'  => process\Task1::class
@@ -112,8 +110,6 @@ return [
     ],
 ];
 ```
+Colocar las tareas sensibles al tiempo en `process/Task1.php` y el resto en `process/Task2.php`.
 
-Colocar las tareas programadas sensibles al tiempo en `process/Task1.php` y las demás tareas programadas en `process/Task2.php`.
-
-### Más
-Para obtener más información sobre la configuración de `config/process.php`, consulte [Proceso personalizado](../process.md)
+Para más información sobre `config/process.php`, consultar [Procesos personalizados](../process.md).

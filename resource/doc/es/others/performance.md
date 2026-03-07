@@ -1,6 +1,7 @@
 # Rendimiento de webman
 
-### Flujo de procesamiento de solicitudes en marcos de trabajo tradicionales
+
+## Flujo de procesamiento de solicitudes en marcos de trabajo tradicionales
 
 1. Nginx/Apache recibe la solicitud.
 2. Nginx/Apache transmite la solicitud a php-fpm.
@@ -18,10 +19,10 @@
 14. Php-fpm reenvía el resultado a Nginx/Apache.
 15. Nginx/Apache devuelve el resultado al cliente.
 
-### Flujo de procesamiento de solicitudes en webman
+## Flujo de procesamiento de solicitudes en webman
 
 1. El marco de trabajo recibe la solicitud.
-2. El marco de trabajo ejecuta la lógica empresarial.
+2. El marco de trabajo ejecuta la lógica empresarial (bytecode opcode).
 3. El marco de trabajo devuelve el resultado al cliente.
 
 Sí, sin un proxy inverso de Nginx, el marco de trabajo solo consta de estos 3 pasos. Se puede decir que esto ya es lo último en términos de marcos de trabajo PHP, lo que hace que el rendimiento de webman sea varias veces mayor que el de los marcos de trabajo tradicionales, e incluso varias veces más.  

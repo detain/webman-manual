@@ -1,30 +1,27 @@
 # Xử lý công việc chậm
 
-Đôi khi chúng ta cần xử lý các công việc chậm, để tránh ảnh hưởng đến việc xử lý các yêu cầu khác của webman, các công việc này có thể sử dụng các phương pháp xử lý khác nhau tùy thuộc vào tình hình cụ thể.
+Đôi khi chúng ta cần xử lý các công việc chậm để tránh ảnh hưởng đến việc xử lý các yêu cầu khác của webman. Tùy theo tình huống, các công việc này có thể sử dụng các phương án xử lý khác nhau.
 
-## Sử dụng hàng đợi tin nhắn
-Xem thêm [hàng đợi redis](../queue/redis.md) [hàng đợi stomp](../queue/stomp.md)
+## Phương án 1: Sử dụng hàng đợi tin nhắn
+Tham khảo [hàng đợi Redis](../queue/redis.md) [hàng đợi Stomp](../queue/stomp.md)
 
-### Ưu điểm
+#### Ưu điểm
 Có thể xử lý các yêu cầu xử lý công việc lớn đột ngột
 
-### Nhược điểm
-Không thể trả kết quả trực tiếp cho người dùng. Nếu cần thông báo kết quả, cần kết hợp với dịch vụ khác, ví dụ như sử dụng [webman/push](https://www.workerman.net/plugin/2) để đẩy kết quả xử lý.
+#### Nhược điểm
+Không thể trả kết quả trực tiếp cho khách hàng. Nếu cần đẩy kết quả phải phối hợp với dịch vụ khác, ví dụ sử dụng [webman/push](https://www.workerman.net/plugin/2) để đẩy kết quả xử lý.
 
-## Thêm cổng HTTP mới
+## Phương án 2: Thêm cổng HTTP mới
 
-> **Lưu ý**
-> Tính năng này yêu cầu webman-framework >= 1.4
+Thêm cổng HTTP mới để xử lý các yêu cầu chậm. Những yêu cầu chậm này qua cổng này được một nhóm quy trình cụ thể xử lý, sau khi xử lý trả kết quả trực tiếp cho khách hàng.
 
-Thêm cổng HTTP để xử lý các yêu cầu chậm, những yêu cầu này sẽ được xử lý bởi một nhóm quá trình cụ thể thông qua việc truy cập vào cổng này, sau đó sẽ trả kết quả trực tiếp cho người dùng.
+#### Ưu điểm
+Có thể trả dữ liệu trực tiếp cho khách hàng
 
-### Ưu điểm
-Có thể trực tiếp trả kết quả về cho người dùng
+#### Nhược điểm
+Không thể xử lý các yêu cầu lớn đột ngột
 
-### Nhược điểm
-Không thể gần gũi với các yêu cầu lớn đột ngột
-
-### Bước thực hiện
+#### Các bước thực hiện
 Thêm cấu hình sau vào `config/process.php`.
 ```php
 return [
@@ -33,30 +30,30 @@ return [
     'task' => [
         'handler' => \Webman\App::class,
         'listen' => 'http://0.0.0.0:8686',
-        'count' => 8, // Số lượng quá trình
+        'count' => 8, // Số lượng quy trình
         'user' => '',
         'group' => '',
         'reusePort' => true,
         'constructor' => [
-            'request_class' => \support\Request::class, // Cài đặt lớp request
-            'logger' => \support\Log::channel('default'), // Thực thể nhật ký
-            'app_path' => app_path(), // Vị trí thư mục app
-            'public_path' => public_path() // Vị trí thư mục public
+            'requestClass' => \support\Request::class, // Cài đặt lớp request
+            'logger' => \support\Log::channel('default'), // Thể hiện logger
+            'appPath' => app_path(), // Vị trí thư mục app
+            'publicPath' => public_path() // Vị trí thư mục public
         ]
     ]
 ];
 ```
 
-Như vậy, các giao diện chậm có thể truy cập vào nhóm quá trình này thông qua `http://127.0.0.1:8686/`, không ảnh hưởng đến việc xử lý công việc của các quá trình khác.
+Như vậy các giao diện chậm có thể đi qua nhóm quy trình tại `http://127.0.0.1:8686/` mà không ảnh hưởng đến việc xử lý công việc của các quy trình khác.
 
-Để người dùng không cảm nhận được sự khác biệt về cổng, bạn có thể thêm một đoạn mã proxy vào nginx để trỏ đến cổng 8686. Giả sử đường dẫn yêu cầu giao diện chậm đều bắt đầu bằng `/tast`, cấu hình nginx sẽ như sau:
-```nginx
+Để giao diện người dùng không cảm nhận sự khác biệt về cổng, có thể thêm proxy tới cổng 8686 trong nginx. Giả sử đường dẫn yêu cầu giao diện chậm đều bắt đầu bằng `/task`, cấu hình nginx sẽ tương tự như sau:
+```
 upstream webman {
     server 127.0.0.1:8787;
     keepalive 10240;
 }
 
-# Thêm một upstream 8686 mới
+# Thêm upstream 8686 mới
 upstream task {
    server 127.0.0.1:8686;
    keepalive 10240;
@@ -68,8 +65,8 @@ server {
   access_log off;
   root /path/webman/public;
 
-  # Các yêu cầu bắt đầu bằng /tast sẽ đi qua cổng 8686, vui lòng thay đổi /tast thành tiền tố thích hợp theo tình hình cụ thể
-  location /tast {
+  # Các yêu cầu bắt đầu bằng /task đi qua cổng 8686, vui lòng thay đổi /task thành tiền tố cần thiết theo tình hình
+  location /task {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header Host $host;
       proxy_http_version 1.1;
@@ -77,7 +74,7 @@ server {
       proxy_pass http://task;
   }
 
-  # Các yêu cầu khác sẽ đi qua cổng 8787 ban đầu
+  # Các yêu cầu khác đi qua cổng 8787 ban đầu
   location / {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header Host $host;
@@ -90,4 +87,45 @@ server {
 }
 ```
 
-Như vậy, khi người dùng truy cập `domain.com/tast/xxx` sẽ đi qua cổng 8686 riêng biệt để xử lý, không ảnh hưởng đến việc xử lý yêu cầu qua cổng 8787.
+Như vậy khi khách hàng truy cập `domain.com/task/xxx` sẽ được xử lý qua cổng 8686 riêng biệt, không ảnh hưởng đến việc xử lý yêu cầu cổng 8787.
+
+## Phương án 3: Sử dụng HTTP Chunked gửi dữ liệu phân đoạn bất đồng bộ
+
+#### Ưu điểm
+Có thể trả dữ liệu trực tiếp cho khách hàng
+
+**Cài đặt workerman/http-client**
+
+```
+composer require workerman/http-client
+```
+
+**app/controller/IndexController.php**
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+
+class IndexController
+{
+    public function index(Request $request)
+    {
+        $connection = $request->connection;
+        $http = new \Workerman\Http\Client();
+        $http->get('https://example.com/', function ($response) use ($connection) {
+            $connection->send(new Chunk($response->getBody()));
+            $connection->send(new Chunk('')); // Gửi chunk rỗng biểu thị kết thúc phản hồi
+        });
+        // Gửi header HTTP trước, dữ liệu sau được gửi bất đồng bộ
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+}
+```
+
+> **Gợi ý**
+> Ví dụ này sử dụng client `workerman/http-client` để lấy kết quả HTTP bất đồng bộ và trả dữ liệu. Cũng có thể sử dụng client bất đồng bộ khác như [AsyncTcpConnection](https://www.workerman.net/doc/workerman/async-tcp-connection/construct.html).

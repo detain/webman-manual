@@ -4,8 +4,6 @@
 
 Plugin này đi kèm với một máy khách js trên trang web `push.js` cũng như máy khách uniapp `uniapp-push.js`, các máy khách ngôn ngữ khác có thể tải xuống tại https://pusher.com/docs/channels/channels_libraries/libraries/
 
-> Yêu cầu phải có webman-framework>=1.2.0
-
 ## Cài đặt
 
 ```sh
@@ -37,7 +35,7 @@ user_channel.on('message', function(data) {
     // trong data là nội dung tin nhắn
     console.log(data);
 });
-// Khi kênh user-1 có thông báo sự kiện nhập tên
+// Khi kênh user-1 có sự kiện friendApply
 user_channel.on('friendApply', function (data) {
     // trong data là thông tin liên quan đến yêu cầu kết bạn
     console.log(data);
@@ -92,8 +90,7 @@ var user_channel = connection.subscribe('private-user-' + uid);
 
 Khi máy khách đăng ký kênh riêng tư (kênh có tiền tố là `private-`), trình duyệt sẽ gửi một yêu cầu xác thực ajax (địa chỉ ajax là cấu hình auth khi mới tạo Push) để xác định xem người dùng hiện tại có quyền để lắng nghe kênh này hay không. Điều này đảm bảo tính an toàn của việc đăng ký. 
 
-> Về xác thực xem `config/plugin/webman/push/route.php` với mã logic
-> Vì làm mới trang web có thể khiến người dùng tạm thời offline, không nên coi là offline, webman/push sẽ thực hiện xác định chậm, vì vậy sự kiện trực tuyến / ngoại tuyến sẽ có độ trễ từ 1-3 giây.
+> Về xác thực xem mã trong `config/plugin/webman/push/route.php`
 
 ## Push từ máy khách
 > **Chú ý**
@@ -105,7 +102,7 @@ var user_channel = connection.subscribe('private-user-1');
 user_channel.on('client-message', function (data) {
     // 
 });
-user_channel.trigger('client-message', {from_uid:2, content:"hello"});
+user_channel.trigger('client-message', {form_uid:2, content:"hello"});
 ```
 
 > **Chú ý**
@@ -132,7 +129,7 @@ Webhook được sử dụng để nhận sự kiện từ kênh.
 > Do việc làm mới trang web có thể làm người dùng tạm thời offline, không nên coi là offline, webman/push sẽ thực hiện xác định chậm, vì vậy sự kiện trực tuyến / ngoại tuyến sẽ có độ trễ từ 1-3 giây.
 ## Đại lý wss (SSL)
 Không thể sử dụng kết nối ws dưới giao thức https, cần sử dụng kết nối wss. Trong trường hợp này, bạn có thể sử dụng nginx để đại lý wss, cấu hình tương tự như sau:
-````
+```
 server {
     # .... Phần cấu hình khác đã được lược bỏ ...
 
@@ -145,17 +142,17 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
     }
 }
-````
+```
 **Chú ý: Phần cấu hình trên, `<app_key>` được lấy từ `config/plugin/webman/push/app.php`**
 
 Sau khi khởi động lại nginx, kết nối với máy chủ theo cách sau:
-````
+```js
 var connection = new Push({
     url: 'wss://example.com',
     app_key: '<app_key, lấy từ config/plugin/webman/push/app.php>',
     auth: '/plugin/webman/push/auth' // Xác thực đăng ký (chỉ áp dụng cho kênh riêng tư)
 });
-````
+```
 
 > **Chú ý**
 > 1.  Địa chỉ yêu cầu phải bắt đầu bằng wss

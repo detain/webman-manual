@@ -1,8 +1,8 @@
 # Sayfa Numaralandırma
 
-# 1. Laravel ORM tabanlı Sayfa Numaralandırma
+# Laravel ORM tabanlı sayfalama
 
-Laravel'in `illuminate/database` sunulan kolay sayfalama işlevselliği sağlar.
+Laravel'in `illuminate/database` paketi kolay sayfalama işlevselliği sağlar.
 
 ## Kurulum
 `composer require illuminate/pagination`
@@ -105,7 +105,7 @@ Yeni şablon oluşturun: app/view/user/get.html
 </html>
 ```
 
-**Şablon (bıçak)**
+**Şablon (blade)**
 Yeni şablon oluşturun: app/view/user/get.blade.php
 ```html
 <html>
@@ -137,12 +137,12 @@ Yeni şablon oluşturun: app/view/user/get.html
 </html>
 ```
 
-Görüntü:
+Sonuç aşağıdaki gibidir:
 ![](../../assets/img/paginator.png)
 
-# 2. Thinkphp ORM tabanlı Sayfa Numaralandırma
+# ThinkPHP ORM tabanlı sayfalama
 
-Extra bir kütüphane kurmaya gerek yok, sadece think-orm kuruluysa yeterlidir.
+Ek kütüphane kurmaya gerek yoktur; sadece think-orm kurulu olması yeterlidir.
 ## Kullanım
 ```php
 public function index(Request $request)

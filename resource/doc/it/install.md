@@ -1,40 +1,65 @@
-# Requisiti di ambiente
+# Come installare webman
 
-* PHP >= 7.2
+* PHP >= 8.1
 * [Composer](https://getcomposer.org/) >= 2.0
 
-### 1. Creare un progetto
+
+## Linux: Installare PHP + Composer (saltare se già configurato)
+```
+curl -sO https://www.workerman.net/install-php-and-composer && sudo bash install-php-and-composer
+```
+> **Nota**
+> Il comando sopra si applica a Linux e macOS. Gli utenti Windows devono installare PHP separatamente.
+
+È possibile anche scaricare manualmente la [versione statica di PHP](https://www.workerman.net/download) fornita da webman e estrarla per l'uso.
+
+## 1. Creare un progetto
 
 ```php
-composer create-project workerman/webman
+composer create-project workerman/webman:~2.0
 ```
 
-### 2. Eseguire
+> **Suggerimento**
+> In caso di errori, potrebbe essere in uso uno specchio Composer difettoso. Eseguire `composer config -g --unset repos.packagist` per rimuovere il proxy.
 
-Andare alla directory webman   
+## 2. Eseguire
+
+Andare alla directory webman
 
 #### Utenti Windows
 Fare doppio clic su `windows.bat` o eseguire `php windows.php` per avviare
 
-> **Nota**
-> Se si verificano errori, è probabile che alcune funzioni siano disabilitate. Consultare il [controllo delle funzioni disabilitate](others/disable-function-check.md) per sbloccarle
+> **Suggerimento**
+> In caso di errori, alcune funzioni potrebbero essere disabilitate. Consultare il [controllo delle funzioni disabilitate](others/disable-function-check.md) per sbloccarle.
 
 #### Utenti Linux
-Eseguire in modalità `debug` (per lo sviluppo e il debug)
+**Modalità debug** (per sviluppo: l'output appare nel terminale; il servizio si arresta alla chiusura del terminale)
 
 ```php
 php start.php start
 ```
 
-Eseguire in modalità `daemon` (per l'ambiente di produzione)
+**Modalità daemon** (per produzione: nessun output nel terminale; il servizio continua dopo la chiusura del terminale)
 
 ```php
 php start.php start -d
 ```
 
-> **Nota**
-> Se si verificano errori, è probabile che alcune funzioni siano disabilitate. Consultare il [controllo delle funzioni disabilitate](others/disable-function-check.md) per sbloccarle
+#### Utenti Docker
 
-### 3. Accesso
+Avviare tutti i servizi e collegarli alla console
+```php
+docker-compose up
+```
 
-Accedere al browser a `http://indirizzo-ip:8787`
+Eseguire i servizi in background
+```php
+docker-compose up -d
+```
+
+> **Suggerimento**
+> In caso di errori, alcune funzioni potrebbero essere disabilitate. Consultare il [controllo delle funzioni disabilitate](others/disable-function-check.md) per sbloccarle.
+
+## 3. Accesso
+
+Aprire `http://indirizzo-ip:8787` nel browser.

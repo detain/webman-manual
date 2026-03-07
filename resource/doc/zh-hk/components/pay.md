@@ -1,19 +1,19 @@
 # 付款SDK
 
 
-### 專案地址
+## 專案地址
 
  https://github.com/yansongda/pay
 
-### 安裝
+## 安裝
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-###使用 
+## 使用
 
-**支付宝**
+**支付寶**
  
 ```php
 <?php
@@ -45,7 +45,7 @@ class PayController
             'connect_timeout' => 5.0,
             // 更多配置項請參考 [Guzzle](https://guzzle-cn.readthedocs.io/zh_CN/latest/request-options.html)
         ],
-        'mode' => 'dev', // 可選，設置此參數，將進入沙箱模式
+        'mode' => 'dev', // 可選，設定此參數，將進入沙箱模式
     ];
 
     public function index()
@@ -165,6 +165,6 @@ class PayController
 }
 ```
 
-### 更多內容
- 
+## 更多內容
+
 訪問 https://pay.yanda.net.cn/docs/2.x/overview

@@ -1,22 +1,22 @@
 # Installation
 
-Die Anwendungserweiterungen können auf zwei Arten installiert werden:
+Es gibt zwei Möglichkeiten, Anwendungs-Plugins zu installieren:
 
-## Installation über den Plugin-Marktplatz
-Gehen Sie zur Seite für Anwendungserweiterungen im [offiziellen Verwaltungstool webman-admin](https://www.workerman.net/plugin/82) und klicken Sie auf die Schaltfläche "Installieren", um die entsprechende Anwendungserweiterung zu installieren.
+## Installation über den Plugin-Markt
+Öffnen Sie die [offizielle Verwaltungsoberfläche webman-admin](https://www.workerman.net/plugin/82), gehen Sie zur Anwendungs-Plugin-Seite und klicken Sie auf die Installationsschaltfläche, um das entsprechende Anwendungs-Plugin zu installieren.
 
-## Installation aus dem Quellcode-Paket
-Laden Sie das Paket für die Anwendungserweiterung aus dem Anwendungsmarktplatz herunter, entpacken Sie es und laden Sie das entpackte Verzeichnis in das Verzeichnis `{Hauptprojekt}/plugin/` hoch (erstellen Sie das Plugin-Verzeichnis manuell, wenn es nicht vorhanden ist). Führen Sie dann `php webman app-plugin:install plugin-name` aus, um die Installation abzuschließen.
+## Installation über das Quellpaket
+Laden Sie das Anwendungs-Plugin-Archiv vom Anwendungsmarkt herunter, entpacken Sie es und laden Sie das entpackte Verzeichnis in `{Hauptprojekt}/plugin/` hoch (erstellen Sie das plugin-Verzeichnis bei Bedarf manuell). Führen Sie `php webman app-plugin:install Pluginname` aus, um die Installation abzuschließen.
 
-Wenn zum Beispiel das heruntergeladene Archiv den Namen `ai.zip` hat und im Verzeichnis `{Hauptprojekt}/plugin/ai` entpackt wird, führen Sie `php webman app-plugin:install ai` aus, um die Installation abzuschließen.
+Beispiel: Wenn das heruntergeladene Archiv ai.zip heißt, entpacken Sie es nach `{Hauptprojekt}/plugin/ai` und führen Sie `php webman app-plugin:install ai` aus, um die Installation abzuschließen.
 
 
 # Deinstallation
 
-Auch die Deinstallation von Anwendungserweiterungen erfolgt auf zwei Arten:
+Es gibt auch zwei Möglichkeiten, Anwendungs-Plugins zu deinstallieren:
 
-## Deinstallation über den Plugin-Marktplatz
-Gehen Sie zur Seite für Anwendungserweiterungen im [offiziellen Verwaltungstool webman-admin](https://www.workerman.net/plugin/82) und klicken Sie auf die Schaltfläche "Deinstallieren", um die entsprechende Anwendungserweiterung zu deinstallieren.
+## Deinstallation über den Plugin-Markt
+Öffnen Sie die [offizielle Verwaltungsoberfläche webman-admin](https://www.workerman.net/plugin/82), gehen Sie zur Anwendungs-Plugin-Seite und klicken Sie auf die Deinstallationsschaltfläche, um das entsprechende Anwendungs-Plugin zu deinstallieren.
 
-## Deinstallation aus dem Quellcode-Paket
-Führen Sie `php webman app-plugin:uninstall plugin-name` aus, um die Deinstallation abzuschließen. Löschen Sie anschließend manuell das Verzeichnis der entsprechenden Erweiterung im Verzeichnis `{Hauptprojekt}/plugin/`.
+## Deinstallation über das Quellpaket
+Führen Sie `php webman app-plugin:uninstall Pluginname` aus, um die Deinstallation abzuschließen. Löschen Sie anschließend manuell das entsprechende Plugin-Verzeichnis in `{Hauptprojekt}/plugin/`.

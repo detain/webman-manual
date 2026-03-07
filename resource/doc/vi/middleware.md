@@ -202,8 +202,9 @@ class AccessControlTest implements MiddlewareInterface
 }
 ```
 
-> **Lưu ý**
-> Yêu cầu CORS có thể tạo ra yêu cầu OPTIONS, chúng ta không muốn yêu cầu OPTIONS vào tầng điều khiển, vì vậy chúng ta trả về một phản hồi trống ngay lập tức cho yêu cầu OPTIONS (`response('')`) để chặn yêu cầu. Nếu như giao diện của bạn cần thiết lập địa chỉ định tuyến, hãy sử dụng `Route::any(..)` hoặc `Route::add(['POST', 'OPTIONS'], ..)`.
+> **Mẹo**
+> Yêu cầu cross-origin có thể tạo ra yêu cầu OPTIONS preflight. Chúng ta không muốn yêu cầu OPTIONS vào tầng điều khiển, vì vậy chúng ta trả về một phản hồi trống ngay lập tức (`response('')`) để chặn yêu cầu.
+> Nếu API của bạn cần thiết lập định tuyến, hãy sử dụng `Route::any(..)` hoặc `Route::add(['POST', 'OPTIONS'], ..)`.
 
 Thêm trung gian toàn cầu trong `config/middleware.php` như sau:
 ```php
@@ -221,7 +222,6 @@ return [
 ## Giải thích
 
 - Middleware được chia thành middleware toàn cầu, middleware ứng dụng (chỉ có hiệu lực trong chế độ nhiều ứng dụng, xem [Nhiều Ứng dụng](multiapp.md)), middleware định tuyến.
-- Hiện tại không hỗ trợ middleware cho một điều khiển duy nhất (nhưng có thể thực hiện chức năng middleware tương tự bằng công cụ kiểm tra `$request->controller` trong middleware).
 - Vị trí tập tin cấu hình middleware là `config/middleware.php`.
 - Cấu hình middleware toàn cầu được đặt tại key `''`.
 - Cấu hình middleware ứng dụng được đặt tại tên ứng dụng cụ thể, ví dụ
@@ -238,6 +238,31 @@ return [
         app\middleware\ApiOnly::class,
     ]
 ];
+```
+
+## Middleware Điều khiển và Middleware Phương thức
+
+Sử dụng annotation, chúng ta có thể gán middleware cho một điều khiển hoặc các phương thức cụ thể của điều khiển.
+
+```php
+<?php
+namespace app\controller;
+use app\middleware\Controller1Middleware;
+use app\middleware\Controller2Middleware;
+use app\middleware\Method1Middleware;
+use app\middleware\Method2Middleware;
+use support\annotation\Middleware;
+use support\Request;
+
+#[Middleware(Controller1Middleware::class, Controller2Middleware::class)]
+class IndexController
+{
+    #[Middleware(Method1Middleware::class, Method2Middleware::class)]
+    public function index(Request $request): string
+    {
+        return 'hello';
+    }
+}
 ```
 
 ## Middleware Định tuyến
@@ -267,10 +292,8 @@ Route::group('/blog', function () {
 
 ## Truyền tham số vào hàm tạo Middleware
 
-> **Lưu ý**
-> Tính năng này yêu cầu webman-framework >= 1.4.8
+Tệp cấu hình hỗ trợ việc khởi tạo trực tiếp middleware, giúp dễ dàng truyền tham số vào middleware thông qua hàm tạo (constructor).
 
-Sau phiên bản 1.4.8, tệp cấu hình hỗ trợ việc khởi tạo trực tiếp middleware hoặc hàm vô danh, điều này giúp dễ dàng truyền tham số vào middleware thông qua hàm tạo.
 Ví dụ, bạn cũng có thể cấu hình như sau trong `config/middleware.php`:
 
 ```php
@@ -278,9 +301,7 @@ return [
     // Middleware toàn cầu
     '' => [
         new app\middleware\AuthCheckTest($param1, $param2, ...),
-        function(){
-            return new app\middleware\AccessControlTest($param1, $param2, ...);
-        },
+        new app\middleware\AccessControlTest($param1, $param2, ...)
     ],
     // Middleware ứng dụng api (Middleware ứng dụng chỉ có hiệu lực trong chế độ nhiều ứng dụng)
     'api' => [
@@ -289,22 +310,50 @@ return [
 ];
 ```
 
-Tương tự, middleware định tuyến cũng có thể truyền tham số vào hàm tạo Middleware, ví dụ trong `config/route.php`:
+Tương tự, middleware định tuyến cũng có thể truyền tham số qua constructor, ví dụ trong `config/route.php`:
 
 ```php
 Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->middleware([
     new app\middleware\MiddlewareA($param1, $param2, ...),
-    function(){
-        return new app\middleware\MiddlewareB($param1, $param2, ...);
-    },
+    new app\middleware\MiddlewareB($param1, $param2, ...),
 ]);
+```
+
+Ví dụ sử dụng tham số trong middleware:
+
+```php
+<?php
+namespace app\middleware;
+
+use Webman\MiddlewareInterface;
+use Webman\Http\Response;
+use Webman\Http\Request;
+
+class MiddlewareA implements MiddlewareInterface
+{
+    protected $param1;
+
+    protected $param2;
+
+    public function __construct($param1, $param2)
+    {
+        $this->param1 = $param1;
+        $this->param2 = $param2;
+    }
+
+    public function process(Request $request, callable $handler) : Response
+    {
+        var_dump($this->param1, $this->param2);
+        return $handler($request);
+    }
+}
 ```
 
 ## Thứ tự thực hiện Middleware
 
-- Thứ tự thực hiện Middleware là `Middleware toàn cầu`-> `Middleware ứng dụng`-> `Middleware định tuyến`.
-- Khi có nhiều middleware toàn cầu, chúng sẽ thực hiện theo thứ tự cấu hình thực tế (tương tự với Middleware ứng dụng và Middleware định tuyến).
-- Yêu cầu 404 không gây kích hoạt bất kỳ Middleware nào, bao gồm cả Middleware toàn cầu.
+- Thứ tự thực hiện Middleware là: `middleware toàn cầu` -> `middleware ứng dụng` -> `middleware điều khiển` -> `middleware định tuyến` -> `middleware phương thức`.
+- Khi có nhiều middleware ở cùng cấp độ, chúng thực hiện theo thứ tự cấu hình.
+- Yêu cầu 404 mặc định không kích hoạt bất kỳ middleware nào (vẫn có thể thêm middleware qua `Route::fallback(function(){})->middleware()`).
 
 ## Truyền tham số vào Middleware (route->setParams)
 
@@ -379,8 +428,6 @@ class FooController
 }
 ```
 ## Middleware lấy thông tin định tuyến yêu cầu hiện tại
-> **Lưu ý**
-> Yêu cầu webman-framework >= 1.3.2
 
 Chúng ta có thể sử dụng `$request->route` để lấy đối tượng định tuyến và lấy thông tin tương ứng bằng cách gọi các phương thức tương ứng.
 
@@ -423,13 +470,7 @@ class Hello implements MiddlewareInterface
 }
 ```
 
-> **Lưu ý**
-> Phương thức `$route->param()` yêu cầu webman-framework >= 1.3.16
-
-
 ## Middleware lấy ngoại lệ
-> **Lưu ý**
-> Yêu cầu webman-framework >= 1.3.15
 
 Trong quá trình xử lý kinh doanh, có thể phát sinh ngoại lệ, trong middleware sử dụng `$response->exception()` để lấy ngoại lệ.
 
@@ -468,12 +509,9 @@ class Hello implements MiddlewareInterface
 ```
 
 
-## Middleware toàn cầu
+## Middleware siêu toàn cầu
 
-> **Lưu ý**
-> Tính năng này yêu cầu webman-framework >= 1.5.16
-
-Middleware toàn cầu của dự án chính chỉ ảnh hưởng đến dự án chính, không ảnh hưởng đến [plugin ứng dụng](app/app.md). Đôi khi chúng ta muốn thêm một middleware ảnh hưởng toàn cầu bao gồm tất cả các plugin, chúng ta có thể sử dụng middleware toàn cầu. 
+Middleware toàn cầu của dự án chính chỉ ảnh hưởng đến dự án chính, không ảnh hưởng đến [plugin ứng dụng](app/app.md). Đôi khi chúng ta muốn thêm một middleware ảnh hưởng toàn cầu bao gồm tất cả các plugin, chúng ta có thể sử dụng middleware siêu toàn cầu. 
 
 Cấu hình trong `config/middleware.php` như sau:
 ```php
@@ -485,14 +523,10 @@ return [
 ];
 ```
 
-> **Ghi chú**
-> Middleware `@` toàn cầu không chỉ có thể cấu hình trong dự án chính mà cũng có thể cấu hình trong một plugin nào đó, ví dụ `plugin/ai/config/middleware.php` cấu hình middleware `@`, điều này cũng sẽ ảnh hưởng đến dự án chính và tất cả các plugin.
-
+> **Mẹo**
+> Middleware siêu toàn cầu `@` không chỉ có thể cấu hình trong dự án chính mà cũng có thể cấu hình trong một plugin nào đó, ví dụ `plugin/ai/config/middleware.php` cấu hình middleware `@`, điều này cũng sẽ ảnh hưởng đến dự án chính và tất cả các plugin.
 
 ## Thêm middleware cho một plugin cụ thể
-
-> **Lưu ý**
-> Tính năng này yêu cầu webman-framework >= 1.5.16
 
 Đôi khi chúng ta muốn thêm một middleware cho một [plugin ứng dụng](app/app.md) cụ thể mà không muốn thay đổi mã của plugin (vì mã sẽ bị ghi đè khi nâng cấp), lúc đó chúng ta có thể cấu hình middleware cho nó trong dự án chính.
 
@@ -500,9 +534,9 @@ Cấu hình trong `config/middleware.php` như sau:
 ```php
 return [
     'plugin.ai' => [], // Thêm middleware cho plugin ai
-    'plugin.ai.admin' => [], // Thêm middleware cho module admin của plugin ai
+    'plugin.ai.admin' => [], // Thêm middleware cho module admin của plugin ai (thư mục plugin\ai\app\admin)
 ];
 ```
 
-> **Ghi chú**
+> **Mẹo**
 > Tất nhiên cũng có thể cấu hình tương tự trong một plugin để ảnh hưởng đến plugin khác, ví dụ `plugin/foo/config/middleware.php` thêm cấu hình như trên sẽ ảnh hưởng đến plugin ai.

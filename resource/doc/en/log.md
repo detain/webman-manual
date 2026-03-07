@@ -124,7 +124,7 @@ return [
 ];
 ```
 
-To use the `log2` channel, you can do as follows:
+Usage of the `log2` channel is as follows:
 ```php
 <?php
 namespace app\controller;

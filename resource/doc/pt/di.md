@@ -1,25 +1,29 @@
-# Injeção Automática de Dependência
+# Injeção automática de dependências
 
-No webman, a injeção automática de dependência é uma funcionalidade opcional que é desativada por padrão. Se você precisa de injeção automática de dependência, é recomendável usar o [php-di](https://php-di.org/doc/getting-started.html). Abaixo está o uso do webman em combinação com o `php-di`.
+No webman, a injeção automática de dependências é uma funcionalidade opcional e desativada por padrão. Se precisar de injeção automática de dependências, recomenda-se usar [php-di](https://php-di.org/doc/getting-started.html). Abaixo descreve-se o uso de `php-di` com webman.
 
 ## Instalação
-```sh
-composer require psr/container ^1.1.1 php-di/php-di ^6 doctrine/annotations ^1.14
+
+```
+composer require php-di/php-di:^7.0
 ```
 
-Modifique o arquivo de configuração `config/container.php` com o seguinte conteúdo final:
+Modifique a configuração `config/container.php`. O conteúdo final deve ser o seguinte:
+
 ```php
 $builder = new \DI\ContainerBuilder();
 $builder->addDefinitions(config('dependence', []));
 $builder->useAutowiring(true);
-$builder->useAnnotations(true);
+$builder->useAttributes(true);
 return $builder->build();
 ```
 
-> O arquivo `config/container.php` deve retornar uma instância de um recipiente que atenda à especificação `PSR-11`. Se você não deseja usar o `php-di`, pode criar e retornar uma outra instância de recipiente que atenda à especificação `PSR-11`.
+> O arquivo `config/container.php` deve retornar uma instância de contêiner em conformidade com a especificação PSR-11. Se não quiser usar `php-di`, pode criar e retornar aqui outra instância de contêiner compatível com PSR-11. A configuração padrão fornece apenas a funcionalidade básica do contêiner webman.
 
-## Injeção por Construtor
-Crie o arquivo `app/service/Mailer.php` (se o diretório não existir, crie-o manualmente) com o seguinte conteúdo:
+## Injeção por construtor
+
+Crie o arquivo `app/service/Mailer.php` (crie o diretório se não existir) com o seguinte conteúdo:
+
 ```php
 <?php
 namespace app\service;
@@ -33,7 +37,8 @@ class Mailer
 }
 ```
 
-O conteúdo do arquivo `app/controller/UserController.php` é o seguinte:
+O conteúdo de `app/controller/UserController.php` é o seguinte:
+
 ```php
 <?php
 namespace app\controller;
@@ -43,11 +48,9 @@ use app\service\Mailer;
 
 class UserController
 {
-    private $mailer;
 
-    public function __construct(Mailer $mailer)
+    public function __construct(private Mailer $mailer)
     {
-        $this->mailer = $mailer;
     }
 
     public function register(Request $request)
@@ -57,50 +60,51 @@ class UserController
     }
 }
 ```
-Normalmente, as seguintes linhas de código seriam necessárias para instanciar `app\controller\UserController`:
+
+Normalmente, o seguinte código seria necessário para instanciar `app\controller\UserController`:
 
 ```php
 $mailer = new Mailer;
 $user = new UserController($mailer);
 ```
-Porém, ao usar o `php-di`, o desenvolvedor não precisa instanciar manualmente o `Mailer` dentro do controlador, pois o webman fará isso automaticamente. Se houver dependências de outras classes durante a instanciação do `Mailer`, o webman também as instanciará e injetará automaticamente. O desenvolvedor não precisa realizar nenhum trabalho de inicialização.
+
+Usando `php-di`, os desenvolvedores não precisam instanciar manualmente o `Mailer` no controlador — o webman faz isso automaticamente. Se houver outras dependências de classes durante a instanciação do `Mailer`, o webman também as instanciará e injetará. Nenhum trabalho de inicialização é exigido do desenvolvedor.
 
 > **Nota**
-> A injeção automática de dependência só pode ser realizada em instâncias criadas pelo framework ou pelo `php-di`. Instâncias criadas manualmente com `new` não podem ser injetadas automaticamente. Para permitir a injeção, é necessário usar a interface `support\Container` para substituir a declaração `new`. Por exemplo:
+> Apenas instâncias criadas pelo framework ou `php-di` suportam injeção automática de dependências. Instâncias criadas manualmente com `new` não podem. Para injetar, use a interface `support\Container` em vez de `new`, por exemplo:
 
 ```php
 use app\service\UserService;
 use app\service\LogService;
 use support\Container;
 
-// Instâncias criadas com a palavra-chave "new" não podem ser injetadas
+// Instâncias criadas com new não podem usar injeção de dependências
 $user_service = new UserService;
-// Instâncias criadas com a palavra-chave "new" não podem ser injetadas
+// Instâncias criadas com new não podem usar injeção de dependências
 $log_service = new LogService($path, $name);
 
-// As instâncias criadas com Container podem ser injetadas
+// Instâncias criadas com Container podem usar injeção de dependências
 $user_service = Container::get(UserService::class);
-// As instâncias criadas com Container podem ser injetadas
+// Instâncias criadas com Container podem usar injeção de dependências
 $log_service = Container::make(LogService::class, [$path, $name]);
 ```
 
-## Injeção por Anotação
-Além da injeção por construtor, também é possível usar a injeção por anotação. No exemplo anterior, o `app\controller\UserController` seria alterado da seguinte forma:
+## Injeção por atributos
+
+Além da injeção por construtor, pode usar injeção por atributos. Continuando o exemplo anterior, altere `app\controller\UserController` assim:
+
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
 use app\service\Mailer;
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class UserController
 {
-    /**
-     * @Inject
-     * @var Mailer
-     */
-    private $mailer;
+    #[Inject]
+    private Mailer $mailer;
 
     public function register(Request $request)
     {
@@ -109,10 +113,11 @@ class UserController
     }
 }
 ```
-Neste exemplo, a injeção é realizada através da anotação `@Inject`, e o tipo do objeto é declarado através da anotação `@var`. O efeito é o mesmo da injeção por construtor, mas o código fica mais enxuto.
+
+Este exemplo usa o atributo `#[Inject]` para injeção e injeta automaticamente a instância na variável de membro com base no tipo de objeto. O efeito é igual à injeção por construtor, mas o código é mais conciso.
 
 > **Nota**
-> Antes da versão 1.4.6, o webman não suportava a injeção de parâmetros do controlador. Por exemplo, o seguinte código não era suportado se o webman <= 1.4.6:
+> O webman não suporta injeção de parâmetros de controlador antes da versão 1.4.6. Por exemplo, o seguinte código não é suportado quando webman<=1.4.6:
 
 ```php
 <?php
@@ -123,7 +128,7 @@ use app\service\Mailer;
 
 class UserController
 {
-    // Antes da versão 1.4.6, a injeção de parâmetros do controlador não é suportada
+    // Injeção de parâmetros de controlador não suportada antes da versão 1.4.6
     public function register(Request $request, Mailer $mailer)
     {
         $mailer->mail('hello@webman.com', 'Olá e bem-vindo!');
@@ -132,8 +137,10 @@ class UserController
 }
 ```
 
-## Injeção Personalizada por Construtor
-Às vezes, os parâmetros passados para o construtor não são instâncias de classe, mas sim string, número, array, etc. Por exemplo, o construtor do `Mailer` precisa receber o endereço IP e a porta do servidor SMTP:
+## Injeção personalizada por construtor
+
+Por vezes os parâmetros passados ao construtor não são instâncias de classes mas strings, números, arrays ou outros dados não-objeto. Por exemplo, o construtor de Mailer pode precisar do IP e da porta do servidor SMTP:
+
 ```php
 <?php
 namespace app\service;
@@ -156,24 +163,29 @@ class Mailer
     }
 }
 ```
-Nesses casos, a injeção automática por construtor não funciona, pois o `php-di` não pode determinar os valores de `$smtp_host` e `$smtp_port`. Nesse ponto, você pode tentar a injeção personalizada.
 
-No arquivo `config/dependence.php` (se não existir, crie-o manualmente), adicione o seguinte código:
+Este caso não permite usar diretamente a injeção automática por construtor, pois `php-di` não consegue determinar os valores de `$smtp_host` e `$smtp_port`. Neste caso, pode usar injeção personalizada.
+
+Adicione o seguinte código em `config/dependence.php` (crie o arquivo se não existir):
+
 ```php
 return [
-    // ... outras configurações omitidas
-    
-    app\service\Mailer::class => new app\service\Mailer('192.168.1.11', 25);
+    // ... Outras configurações omitidas
+
+    app\service\Mailer::class =>  new app\service\Mailer('192.168.1.11', 25);
 ];
 ```
-Assim, quando a injeção de dependência precisar de uma instância de `app\service\Mailer`, será automaticamente utilizada a instância criada deste modo no arquivo de configuração.
 
-Observa-se que, no arquivo `config/dependence.php`, foi utilizado `new` para instanciar a classe `Mailer`. Isso não apresenta problemas neste exemplo, mas imagine se a classe `Mailer` tivesse dependências de outras classes ou usasse injeção por anotação internamente, a inicialização com `new` não permitiria a injeção automática de dependência. A solução é usar a injeção personalizada por meio das interfaces `Container::get(classname)` ou `Container::make(classname, [construct_params])` para instanciar a classe.
-## Injeção de Interface Personalizada
+Quando a injeção de dependências precisar obter uma instância de `app\service\Mailer`, usará automaticamente a instância criada nesta configuração.
 
-No mundo real, preferimos programar orientados a interfaces em vez de classes concretas. Por exemplo, em `app\controller\UserController`, deveríamos importar `app\service\MailerInterface` em vez de `app\service\Mailer`.
+Note que `config/dependence.php` usa `new` para instanciar a classe `Mailer`. Neste exemplo não há problema, mas se a classe `Mailer` depender de outras classes ou usar injeção por atributos internamente, a inicialização com `new` não fará a injeção automática de dependências. A solução é usar injeção personalizada por interface e inicializar as classes via `Container::get(nome da classe)` ou `Container::make(nome da classe, [parâmetros do construtor])`.
 
-Definindo a interface `MailerInterface`:
+## Injeção personalizada por interface
+
+Em projetos reais, prefere-se programar contra interfaces em vez de classes concretas. Por exemplo, `app\controller\UserController` deve depender de `app\service\MailerInterface` em vez de `app\service\Mailer`.
+
+Defina a interface `MailerInterface`:
+
 ```php
 <?php
 namespace app\service;
@@ -184,7 +196,8 @@ interface MailerInterface
 }
 ```
 
-Definindo a implementação da interface `MailerInterface`:
+Defina a implementação de `MailerInterface`:
+
 ```php
 <?php
 namespace app\service;
@@ -203,28 +216,26 @@ class Mailer implements MailerInterface
 
     public function mail($email, $content)
     {
-        // Código de envio de e-mail OMITIDO
+        // Código de envio de e-mail omitido
     }
 }
 ```
 
-Importando a interface `MailerInterface` em vez da implementação concreta:
+Use a interface `MailerInterface` em vez da implementação concreta:
+
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
 use app\service\MailerInterface;
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class UserController
 {
-    /**
-     * @Inject
-     * @var MailerInterface
-     */
-    private $mailer;
-    
+    #[Inject]
+    private MailerInterface $mailer;
+
     public function register(Request $request)
     {
         $this->mailer->mail('hello@webman.com', 'Olá e bem-vindo!');
@@ -233,9 +244,11 @@ class UserController
 }
 ```
 
-Em `config/dependence.php`, define a implementação da interface `MailerInterface` da seguinte forma:
+Defina a implementação de `MailerInterface` em `config/dependence.php`:
+
 ```php
 use Psr\Container\ContainerInterface;
+
 return [
     app\service\MailerInterface::class => function(ContainerInterface $container) {
         return $container->make(app\service\Mailer::class, ['smtp_host' => '192.168.1.11', 'smtp_port' => 25]);
@@ -243,15 +256,16 @@ return [
 ];
 ```
 
-Dessa forma, quando o negócio precisar usar a interface `MailerInterface`, a implementação `Mailer` será usada automaticamente.
+Quando a aplicação precisar usar a interface `MailerInterface`, usará automaticamente a implementação `Mailer`.
 
-> A vantagem da programação orientada a interfaces é que, quando precisamos mudar algum componente, não precisamos alterar o código do negócio; apenas precisamos alterar a implementação específica em `config/dependence.php`. Isso também é muito útil para fazer testes unitários.
+> A vantagem de programar contra interfaces é que ao substituir um componente não é necessário alterar o código de negócios — apenas a implementação concreta em `config/dependence.php`. Isso também é muito útil para testes unitários.
 
-## Outras Injeções Personalizadas
+## Outras injeções personalizadas
 
-Em `config/dependence.php`, além de poder definir as dependências de classes, também é possível definir outros valores, como strings, números, arrays, etc.
+Além de dependências de classes, `config/dependence.php` pode definir outros valores como strings, números, arrays, etc.
 
-Por exemplo, definindo em `config/dependence.php` da seguinte forma:
+Por exemplo, se `config/dependence.php` for definido assim:
+
 ```php
 return [
     'smtp_host' => '192.168.1.11',
@@ -259,35 +273,119 @@ return [
 ];
 ```
 
-Dessa forma, podemos injetar `smtp_host` e `smtp_port` nos atributos da classe usando `@Inject`.
+Pode injetar `smtp_host` e `smtp_port` nas propriedades da classe com `#[Inject]`:
+
 ```php
 <?php
 namespace app\service;
 
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class Mailer
 {
-    /**
-     * @Inject("smtp_host")
-     */
+    #[Inject("smtp_host")]
     private $smtpHost;
 
-    /**
-     * @Inject("smtp_port")
-     */
+    #[Inject("smtp_port")]
     private $smtpPort;
 
     public function mail($email, $content)
     {
-        // Código de envio de e-mail OMITIDO
-        echo "{$this->smtpHost}:{$this->smtpPort}\n"; // Irá imprimir 192.168.1.11:25
+        // Código de envio de e-mail omitido
+        echo "{$this->smtpHost}:{$this->smtpPort}\n"; // Exibirá 192.168.1.11:25
     }
 }
 ```
 
-> Nota: `@Inject("chave")` deve estar entre aspas duplas.
+# Carregamento preguiçoso (Lazy Loading)
 
-## Mais Conteúdo
+> O carregamento preguiçoso é um padrão de projeto que adia a criação ou inicialização de objetos até serem realmente necessários.
 
-Por favor, consulte o [Manual do PHP-DI](https://php-di.org/doc/getting-started.html) para mais informações.
+Esta funcionalidade requer uma dependência adicional. O seguinte pacote é um fork de `ocramius/proxy-manager`; o repositório original não suporta PHP 8.
+
+```
+composer require friendsofphp/proxy-manager-lts
+```
+
+Uso:
+
+```php
+<?php
+
+use DI\Attribute\Injectable;
+use DI\Attribute\Inject;
+
+#[Injectable(lazy: true)]
+class MyClass
+{
+    private string $name;
+
+    public function __construct()
+    {
+        echo "MyClass instanciado\n";
+        $this->name = "Lazy Loaded Object";
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+}
+
+class Controller
+{
+    #[Inject]
+    public MyClass $myClass;
+
+    public function getClass()
+    {
+        echo "Nome da classe proxy: " . get_class($this->myClass) . "\n";
+        echo "name: " . $this->myClass->getName();
+
+    }
+}
+```
+
+Saída:
+
+```
+Nome da classe proxy: ProxyManagerGeneratedProxy\__PM__\app\web\MyClass\Generated98d2817da63e3c088c808a0d4f6e9ae0
+MyClass instanciado
+name: Lazy Loaded Object
+```
+
+Este exemplo mostra que para uma classe declarada com o atributo `#[Injectable]`, ao ser injetada primeiro é criada a classe proxy. A classe real só é instanciada quando qualquer um dos seus métodos é chamado.
+
+# Dependências circulares
+
+Dependências circulares ocorrem quando várias classes dependem umas das outras, formando um ciclo fechado de dependências.
+
+- Dependência circular direta
+  - O módulo A depende do módulo B e o módulo B depende do módulo A
+  - Forma o ciclo: A → B → A
+
+- Dependência circular indireta
+  - Envolve vários módulos em um ciclo de dependências
+  - Por exemplo: A → B → C → A
+
+Ao usar injeção por atributos, `php-di` detecta automaticamente dependências circulares e lança uma exceção. Se necessário, use a seguinte abordagem:
+
+```php
+class userController
+{
+
+    // Remova este código
+    // #[Inject]
+    // private UserService userService;
+
+    public function getUserName()
+    {
+        $userService = Container::get(UserService::class);
+        return $userService->getName();
+    }
+}
+```
+
+## Mais informações
+
+Consulte a [documentação do php-di](https://php-di.org/doc/getting-started.html).

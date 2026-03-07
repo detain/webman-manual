@@ -13,8 +13,8 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('ทดสอบบันทึก');
-        return response('สวัสดี ดัชนี');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
@@ -139,8 +139,8 @@ class FooController
     public function index(Request $request)
     {
         $log = Log::channel('log2');
-        $log->info('ทดสอบ log2');
-        return response('สวัสดี ดัชนี');
+        $log->info('log2 test');
+        return response('hello index');
     }
 }
 ```

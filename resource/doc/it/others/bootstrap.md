@@ -61,7 +61,7 @@ return [
 In questo modo, abbiamo completato un flusso di inizializzazione dell'attività.
 
 ## Ulteriori dettagli
-Dopo l'avvio dei **[processi personalizzati](../process.md)**, verrà eseguito il metodo di avvio definito in `config/bootstrap.php`. Possiamo determinare quale processo stiamo eseguendo verificando il valore di `$worker->name` e decidere se eseguire il codice di inizializzazione dell'attività per quel processo. Ad esempio, se non vogliamo monitorare il processo "monitor", il contenuto di `MemReport.php` sarà simile al seguente:
+Anche i [processi personalizzati](../process.md) eseguono il metodo di avvio definito in `config/bootstrap.php` dopo il loro avvio. Possiamo usare `$worker->name` per determinare quale processo è attualmente in esecuzione e inoltre `$worker->id` per identificare il numero del processo. In tal modo possiamo decidere se eseguire il codice di inizializzazione dell'attività in quel processo. Ad esempio, se dobbiamo eseguire solo nel processo 0 di webman, il contenuto di `MemReport.php` sarà simile al seguente:
 ```php
 <?php
 
@@ -80,8 +80,8 @@ class MemReport implements Bootstrap
             return;
         }
         
-        // Il processo di monitoraggio non esegue il timer
-        if ($worker->name == 'monitor') {
+        // Esegui solo nel processo 0 di webman
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

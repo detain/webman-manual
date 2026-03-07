@@ -1,29 +1,31 @@
-# Schnellstart
+# Datenbank Schnellstart (basierend auf Laravel-Datenbankkomponente)
 
-Die webman-Datenbank verwendet standardmäßig [illuminate/database](https://github.com/illuminate/database), das auch als [Laravel-Datenbank](https://learnku.com/docs/laravel/8.x/database/9400) bekannt ist. Die Verwendung ist ähnlich wie bei Laravel.
+[webman/database](https://github.com/webman-php/database) baut auf [illuminate/database](https://github.com/illuminate/database) auf und ergänzt Connection-Pooling für Koroutinen- und Nicht-Koroutinen-Umgebungen. Die Verwendung entspricht Laravel.
 
-Natürlich können Sie auch das Kapitel [Verwendung anderer Datenbankkomponenten](others.md) konsultieren, um ThinkPHP oder andere Datenbanken zu verwenden.
+Zusätzlich können Sie das Kapitel [Verwendung anderer Datenbankkomponenten](others.md) nutzen, um ThinkPHP oder andere Datenbanken zu verwenden.
 
-## Installation
+## Datenbank-Installation
 
-`composer require -W illuminate/database illuminate/pagination illuminate/events symfony/var-dumper`
+`composer require -W webman/database illuminate/pagination illuminate/events symfony/var-dumper`
 
-Nach der Installation ist ein Neustart (reload ist nicht wirksam) erforderlich.
+Nach der Installation ist ein Neustart erforderlich (reload hat keine Wirkung).
 
 > **Hinweis**
-> Wenn Sie keine Seitennummerierung, Datenbankereignisse und SQL-Druck benötigen, führen Sie einfach aus:
-> `composer require -W illuminate/database`
+> webman/database hängt von Laravels `illuminate/database` ab, daher werden die Abhängigkeiten von `illuminate/database` automatisch mitinstalliert.
 
-## Datenbankkonfiguration
+> **Achtung**
+> Wenn Sie keine Paginierung, keine DB-Events und kein SQL-Logging brauchen, reicht:
+> `composer require -W webman/database`
 
+## Datenbank-Konfiguration
 `config/database.php`
 ```php
 
 return [
-    // Standarddatenbank
+    // Standard-Datenbank
     'default' => 'mysql',
 
-    // Verschiedene Datenbankeinstellungen
+    // Verbindungs-Konfigurationen
     'connections' => [
         'mysql' => [
             'driver'      => 'mysql',
@@ -39,14 +41,31 @@ return [
             'strict'      => true,
             'engine'      => null,
             'options' => [
-                \PDO::ATTR_TIMEOUT => 3
-            ]
+                PDO::ATTR_EMULATE_PREPARES => false, // Erforderlich bei swoole oder swow als Runtime
+            ],
+            'pool' => [ // Connection-Pool-Konfiguration
+                'max_connections' => 5, // Maximale Verbindungszahl
+                'min_connections' => 1, // Minimale Verbindungszahl
+                'wait_timeout' => 3,    // Max. Wartezeit auf Verbindung aus dem Pool; danach Exception. Nur bei Koroutinen
+                'idle_timeout' => 60,   // Max. Leerlaufzeit von Verbindungen; danach Schließen bis min_connections
+                'heartbeat_interval' => 50, // Pool-Heartbeat-Intervall (Sekunden); unter 60 Sekunden empfohlen
+            ],
         ],
     ],
 ];
 ```
 
-## Verwendung
+Bis auf die `pool`-Konfiguration ist alles wie bei Laravel.
+
+## Zum Connection Pool
+* Jeder Prozess hat seinen eigenen Connection Pool, Pools werden nicht zwischen Prozessen geteilt.
+* Ohne Koroutinen werden Anfragen nacheinander ausgeführt, es gibt keine Parallelität, daher maximal eine Verbindung im Pool.
+* Mit Koroutinen laufen Anfragen parallel; der Pool passt die Verbindungszahl dynamisch an, maximal `max_connections`, mindestens `min_connections`.
+* Da der Pool maximal `max_connections` hat, warten bei mehr DB-Koroutinen Überschüsse bis zu `wait_timeout` Sekunden; danach wird eine Exception ausgelöst.
+* Im Leerlauf (mit und ohne Koroutinen) werden Verbindungen nach `idle_timeout` zurückgegeben, bis `min_connections` erreicht ist (`min_connections` kann 0 sein).
+
+
+## Datenbank-Beispiel
 ```php
 <?php
 namespace app\controller;
@@ -61,7 +80,9 @@ class UserController
         $default_uid = 29;
         $uid = $request->get('uid', $default_uid);
         $name = Db::table('users')->where('uid', $uid)->value('username');
-        return response("Guten Tag, $name");
+        return response("hello $name");
     }
 }
 ```
+
+Die Nutzung entspricht Laravel: Mit der Methode `Db::table()` arbeiten Sie mit der Datenbank.

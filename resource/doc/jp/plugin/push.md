@@ -4,8 +4,6 @@
 
 プラグインには、ウェブページのJavaScriptクライアント `push.js` とuniappクライアント `uniapp-push.js` が含まれています。その他の言語のクライアントは、https://pusher.com/docs/channels/channels_libraries/libraries/ からダウンロードできます。
 
-> プラグインは `webman-framework>=1.2.0` が必要です。
-
 ## インストール
 
 ```sh

@@ -10,12 +10,8 @@ Phar est un type de fichier d'emballage similaire à JAR dans PHP. Vous pouvez u
 ## Installation de l'outil en ligne de commande
 `composer require webman/console`
 
-## Configuration
-Ouvrez le fichier `config/plugin/webman/console/app.php` et définissez `'exclude_pattern' => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$'` pour exclure certains répertoires et fichiers inutiles lors de l'empaquetage, afin d'éviter une taille de paquet trop importante.
-
 ## Empaquetage
-Exécutez la commande suivante dans le répertoire racine du projet webman : `php webman phar:pack`
-Cela générera un fichier `webman.phar` dans le répertoire de construction.
+Exécutez la commande `php webman build:phar` dans le répertoire racine du projet webman. Cela générera un fichier `webman.phar` dans le répertoire `build`.
 
 > La configuration relative à l'empaquetage se trouve dans `config/plugin/webman/console/app.php`.
 
@@ -36,14 +32,20 @@ Cela générera un fichier `webman.phar` dans le répertoire de construction.
 `php webman.phar restart` ou `php webman.phar restart -d`
 
 ## Remarques
-* L'exécution de webman.phar générera un répertoire runtime dans le répertoire où se trouve webman.phar, utilisé pour stocker des fichiers temporaires tels que les journaux.
+* Les projets empaquetés ne prennent pas en charge le reload ; il faut redémarrer pour mettre à jour le code.
+
+* Pour éviter une taille de paquet excessive et une consommation mémoire trop élevée, vous pouvez configurer les options `exclude_pattern` et `exclude_files` dans `config/plugin/webman/console/app.php` pour exclure les fichiers inutiles.
+
+* L'exécution de webman.phar générera un répertoire `runtime` dans le répertoire où se trouve webman.phar, utilisé pour stocker des fichiers temporaires tels que les journaux.
 
 * Si votre projet utilise un fichier .env, vous devez placer le fichier .env dans le même répertoire que webman.phar.
+
+* Ne stockez jamais les fichiers téléversés par les utilisateurs dans le paquet Phar, car opérer sur ces fichiers via le protocole `phar://` est très dangereux (vulnérabilité de désérialisation Phar). Les fichiers téléversés par les utilisateurs doivent être stockés séparément sur le disque, en dehors du paquet Phar. Voir ci-dessous.
 
 * Si votre application a besoin de téléverser des fichiers dans le répertoire public, ce répertoire doit être séparé et placé dans le même répertoire que webman.phar. Dans ce cas, vous devez configurer `config/app.php`.
 ```php
 'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
 ```
-L'application peut utiliser la fonction d'aide `public_path()` pour trouver l'emplacement réel du répertoire public.
+L'application peut utiliser la fonction d'aide `public_path($chemin_relatif)` pour trouver l'emplacement réel du répertoire public.
 
-* webman.phar ne prend pas en charge la définition de processus personnalisés sous Windows.
+* webman.phar ne prend pas en charge les processus personnalisés sous Windows.

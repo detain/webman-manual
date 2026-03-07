@@ -14,19 +14,19 @@ class FooController
 {
     public function index(Request $request)
     {
-        return response('ciao index');
+        return response('hello index');
     }
 
     public function hello(Request $request)
     {
-        return response('ciao webman');
+        return response('hello webman');
     }
 }
 ```
 
-Quando si visita `http://127.0.0.1:8787/app/foo/foo`, la pagina restituirà `ciao index`
+Quando si visita `http://127.0.0.1:8787/app/foo/foo`, la pagina restituirà `hello index`
 
-Quando si visita `http://127.0.0.1:8787/app/foo/foo/hello`, la pagina restituirà `ciao webman`
+Quando si visita `http://127.0.0.1:8787/app/foo/foo/hello`, la pagina restituirà `hello webman`
 
 ## Accesso tramite URL
 Il percorso dell'URL dell'applicazione del plugin inizia sempre con `/app`, seguito dall'identificativo del plugin e poi il controller e il metodo specifico.

@@ -1,17 +1,17 @@
-Entendido, ¿podrías por favor enviarme el texto que requieres que traduzca al español?
 # SDK de pago
 
-### Proyecto de dirección
 
-https://github.com/yansongda/pay
+## Dirección del proyecto
 
-### Instalación
+ https://github.com/yansongda/pay
+
+## Instalación
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### Uso
+## Uso
 
 **Alipay**
 
@@ -93,7 +93,7 @@ class PayController
 }
 ```
 
-**Wechat**
+**WeChat**
 
 ```php
 <?php
@@ -153,7 +153,7 @@ class PayController
         try{
             $data = $pay->verify(); // ¡Sí, verificar es tan simple como esto!
 
-            Log::debug('Notificación de Wechat', $data->all());
+            Log::debug('Wechat notify', $data->all());
         } catch (\Exception $e) {
             // $e->getMessage();
         }
@@ -164,6 +164,6 @@ class PayController
 ```
 
 
-### Más Contenido
+## Más información
 
 Visite https://pay.yanda.net.cn/docs/2.x/overview

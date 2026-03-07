@@ -1,21 +1,17 @@
-# ওয়েবম্যান
+# এক্সেল টেবিল
 
-ওয়েবম্যান হল একটি উচ্চ কার্যকরী PHP ফ্রেমওয়ার্ক, যা workerman এর উপর নির্মিত, নিম্নলিখিতটি ওয়েবম্যান এর নথি শুরু হয়।
-
-## Excel
-
-### phpoffice/phpspreadsheet
-
-#### প্রকল্প ঠিকানা
+## প্রজেক্ট অ্যাড্রেস
 
 https://github.com/PHPOffice/PhpSpreadsheet
   
-#### ইনস্টলেশন
-```php
-composer require phpoffice/phpspreadsheet
-```
+## ইনস্টলেশন
+ 
+  ```php
+  composer require phpoffice/phpspreadsheet
+  ```
   
-#### ব্যবহার
+## ব্যবহার
+
 ```php
 <?php
 namespace app\controller;
@@ -33,7 +29,7 @@ class ExcelController
 
         $writer = new Xlsx($spreadsheet);
         $file_path = public_path().'/hello_world.xlsx';
-        // ফাইলটি public এ সংরক্ষণ করুন
+        // public ফোল্ডারে ফাইল সংরক্ষণ করুন
         $writer->save($file_path);
         // ফাইল ডাউনলোড করুন
         return response()->download($file_path, 'ফাইলের_নাম.xlsx');
@@ -41,7 +37,8 @@ class ExcelController
 
 }
 ```
-  
-#### আরও বিস্তারিত
 
-https://phpspreadsheet.readthedocs.io/en/latest/
+## আরও তথ্য
+
+ভিজিট করুন https://phpspreadsheet.readthedocs.io/en/latest/
+  

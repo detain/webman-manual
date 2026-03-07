@@ -1,4 +1,4 @@
-# Быстрый старт
+# Модель базы данных - Использование Model (стиль Laravel)
 
 Модель webman основана на [Eloquent ORM](https://laravel.com/docs/7.x/eloquent). Каждая таблица базы данных имеет соответствующую ей "модель", с помощью которой можно взаимодействовать с этой таблицей. Вы можете использовать модель для запроса данных из таблицы, а также для вставки новых записей в таблицу.
 
@@ -6,7 +6,7 @@
 
 > Заметка: Для поддержки наблюдателя моделей Eloquent ORM требуется дополнительное импортирование `composer require "illuminate/events"` [Пример](#модель-наблюдатель)
 
-## Пример
+## Пример модели базы данных
 ```php
 <?php
 namespace app\model;
@@ -192,7 +192,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -552,7 +552,7 @@ if ($post->is($anotherPost)) {
 ## Наблюдатели моделей
 Используйте ссылку [События модели и Observer в Laravel](https://learnku.com/articles/6657/model-events-and-observer-in-laravel)
 
-Примечание: Для поддержки наблюдателей модели Eloquent ORM вам нужно дополнительно установить composer require "illuminate/events"
+Примечание: Для поддержки наблюдателей модели Eloquent ORM вам нужно дополнительно установить `composer require "illuminate/events"`
 
 ```php
 <?php
@@ -570,3 +570,6 @@ class User extends Model
     }
 }
 ```
+
+## Транзакции
+См. [Транзакции базы данных](../others/transaction.md)

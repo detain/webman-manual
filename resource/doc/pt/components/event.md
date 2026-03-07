@@ -1,34 +1,35 @@
 # Manipulação de eventos
-
-`webman/event` oferece um mecanismo de eventos sofisticado que pode executar lógica de negócios sem invadir o código, permitindo a desacoplamento entre os módulos de negócios. Um cenário típico inclui o registro bem-sucedido de um novo usuário, onde basta emitir um evento personalizado como `user.register` e todos os módulos podem receber o evento e executar a lógica de negócios correspondente.
+`webman/event` oferece um mecanismo de eventos elegante que permite executar lógica de negócios sem alterar o código, alcançando o desacoplamento entre módulos. Cenário típico: quando um novo usuário se registra com sucesso, basta publicar um evento personalizado como `user.register`, e cada módulo pode receber o evento e executar a lógica correspondente.
 
 ## Instalação
-
 `composer require webman/event`
 
-## Inscrição de eventos
-A inscrição de eventos é configurada de forma centralizada através do arquivo `config/event.php`
+## Inscrição em eventos
+A inscrição em eventos é configurada de forma centralizada no arquivo `config/event.php`.
+
 ```php
 <?php
 return [
     'user.register' => [
         [app\event\User::class, 'register'],
-        // ... outras funções de manipulação de eventos ...
+        // ...outras funções de manipulação de eventos...
     ],
     'user.logout' => [
         [app\event\User::class, 'logout'],
-        // ... outras funções de manipulação de eventos ...
+        // ...outras funções de manipulação de eventos...
     ]
 ];
 ```
 
-**Observações:**
-- `user.register`, `user.logout` e assim por diante são nomes de eventos, do tipo string, é recomendado usar letras minúsculas e separar com ponto (`.`)
-- Um evento pode ter múltiplas funções de manipulação de eventos e serão chamadas na ordem em que foram configuradas.
+**Observação:**
+- `user.register`, `user.logout`, etc. são nomes de eventos (tipo string). Recomenda-se palavras em minúsculas separadas por ponto (`.`).
+- Um evento pode ter várias funções de manipulação; são chamadas na ordem configurada.
 
 ## Funções de manipulação de eventos
-As funções de manipulação de eventos podem ser qualquer método de classe, função ou função de fecho.
-Por exemplo, crie uma classe de manipulação de eventos `app/event/User.php` (se o diretório não existir, por favor, crie-o)
+As funções podem ser métodos de classe, funções ou closures.
+
+Exemplo: crie a classe `app/event/User.php` (crie o diretório se não existir).
+
 ```php
 <?php
 namespace app\event;
@@ -46,8 +47,9 @@ class User
 }
 ```
 
-## Emissão de eventos
-Use `Event::emit($event_name, $data);` para emitir um evento, por exemplo
+## Publicar eventos
+Use `Event::dispatch($event_name, $data);` ou `Event::emit($event_name, $data);` para publicar um evento. Por exemplo:
+
 ```php
 <?php
 namespace app\controller;
@@ -61,16 +63,19 @@ class User
             'name' => 'webman',
             'age' => 2
         ];
-        Event::emit('user.register', $user);
+        Event::dispatch('user.register', $user);
     }
 }
 ```
 
+Existem duas funções para publicar: `Event::dispatch($event_name, $data);` e `Event::emit($event_name, $data);` — ambas com os mesmos parâmetros. A diferença: `emit` captura exceções internamente; se uma função lançar exceção, as outras ainda serão executadas. Já `dispatch` não captura exceções; se alguma função lançar exceção, a execução é interrompida e a exceção é propagada.
+
 > **Dica**
-> O parâmetro `$data` em `Event::emit($event_name, $data);` pode ser qualquer tipo de dado, como array, instância de classe, string, entre outros.
+> O parâmetro `$data` pode ser qualquer tipo de dado (array, instância de classe, string, etc.).
 
 ## Escuta de eventos com curinga
-A inscrição com curinga permite lidar com vários eventos no mesmo ouvinte, por exemplo, configurando em `config/event.php`:
+A inscrição com curinga permite tratar vários eventos com o mesmo listener. Por exemplo, em `config/event.php`:
+
 ```php
 <?php
 return [
@@ -79,7 +84,9 @@ return [
     ],
 ];
 ```
-Podemos obter o nome específico do evento usando o segundo parâmetro `$event_data` na função de manipulação de eventos.
+
+É possível obter o nome específico do evento pelo segundo parâmetro `$event_data` da função de manipulação:
+
 ```php
 <?php
 namespace app\event;
@@ -87,17 +94,17 @@ class User
 {
     function deal($user, $event_name)
     {
-        echo $event_name; // Nome específico do evento, como user.register, user.logout, etc.
+        echo $event_name; // nome específico do evento, ex. user.register, user.logout, etc.
         var_export($user);
     }
 }
 ```
 
-## Parar a transmissão de eventos
-Ao retornar `false` na função de manipulação de eventos, a transmissão desse evento será interrompida.
+## Parar a transmissão do evento
+Quando uma função de manipulação retorna `false`, a transmissão desse evento é interrompida.
 
-## Funções de manipulação de eventos como funções de fecho
-As funções de manipulação de eventos podem ser métodos de classe ou funções de fecho, por exemplo
+## Manipulação de eventos com closures
+A função de manipulação pode ser um método de classe ou uma closure. Por exemplo:
 
 ```php
 <?php
@@ -113,5 +120,10 @@ return [
 ## Ver eventos e ouvintes
 Use o comando `php webman event:list` para ver todos os eventos e ouvintes configurados no projeto.
 
-## Nota
-A manipulação de eventos não é assíncrona e não é adequada para lidar com operações lentas. Para operações lentas, deve-se utilizar uma fila de mensagens, como por exemplo [webman/redis-queue](https://www.workerman.net/plugin/12)
+## Escopo de suporte
+Além do projeto principal, os [plugins base](../plugin/base.md) e os [plugins de aplicação](../app/app.md) também suportam a configuração `event.php`.
+**Arquivo de config. do plugin base:** `config/plugin/vendor/nome-plugin/event.php`
+**Arquivo de config. do plugin de aplicação:** `plugin/nome-plugin/config/event.php`
+
+## Notas
+A manipulação de eventos não é assíncrona e não é adequada para operações lentas; estas devem usar filas de mensagens, como [webman/redis-queue](https://www.workerman.net/plugin/12).

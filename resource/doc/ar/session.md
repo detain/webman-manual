@@ -1,6 +1,6 @@
-# webman session管理
+# إدارة الجلسة في webman
 
-## 例子
+## مثال
 ```php
 <?php
 namespace app\controller;
@@ -19,146 +19,150 @@ class UserController
 }
 ```
 
-通过`$request->session();` 获得`Workerman\Protocols\Http\Session`实例，通过实例的方法来增加、修改、删除session数据。
+احصل على مثيل `Workerman\Protocols\Http\Session` عبر `$request->session();` واستخدم طرقه لإضافة أو تعديل أو حذف بيانات الجلسة.
 
-> 注意：session对象销毁时会自动保存session数据，所以不要把`$request->session()`返回的对象保存在全局数组或者类成员中导致session无法保存。
+> **ملاحظة**
+> تُحفظ بيانات الجلسة تلقائياً عند إتلاف كائن الجلسة.
+> تخزين كائن الجلسة في متغير عام يمنع إتلافه وبالتالي عدم الحفظ التلقائي. في هذه الحالة يجب استدعاء `$session->save()` يدوياً لحفظ البيانات.
 
-## 获取所有session数据
+## الحصول على جميع بيانات الجلسة
 ```php
 $session = $request->session();
 $all = $session->all();
 ```
-返回的是一个数组。如果没有任何session数据，则返回一个空数组。
+تُرجع مصفوفة. إذا لم تكن هناك بيانات جلسة، تُرجع مصفوفة فارغة.
 
 
-## 获取session中某个值
+## الحصول على قيمة من الجلسة
 ```php
 $session = $request->session();
 $name = $session->get('name');
 ```
-如果数据不存在则返回null。
+إذا لم تكن البيانات موجودة، تُرجع null.
 
-你也可以给get方法第二个参数传递一个默认值，如果session数组中没找到对应值则返回默认值。例如：
+يمكنك تمرير قيمة افتراضية كمعامل ثاني للطريقة `get`. إذا لم يُعثر على القيمة المقابلة في مصفوفة الجلسة، تُرجع القيمة الافتراضية. مثلاً:
 ```php
 $session = $request->session();
 $name = $session->get('name', 'tom');
 ```
 
 
-## 存储session
-存储某一项数据时用set方法。
+## تخزين بيانات الجلسة
+استخدم الطريقة `set` لتخزين قيمة واحدة.
 ```php
 $session = $request->session();
 $session->set('name', 'tom');
 ```
-set没有返回值，session对象销毁时session会自动保存。
+الطريقة `set` لا ترجع شيئاً. تُحفظ بيانات الجلسة تلقائياً عند إتلاف كائن الجلسة.
 
-当存储多个值时使用put方法。
+استخدم الطريقة `put` لتخزين عدة قيم.
 ```php
 $session = $request->session();
 $session->put(['name' => 'tom', 'age' => 12]);
 ```
-同样的，put也没有返回值。
+وبالمثل، الطريقة `put` لا ترجع شيئاً.
 
-## 删除session数据
-删除某个或者某些session数据时用`forget`方法。
+## حذف بيانات الجلسة
+استخدم الطريقة `forget` لحذف قيمة أو أكثر من الجلسة.
 ```php
 $session = $request->session();
-// 删除一项
+// حذف قيمة واحدة
 $session->forget('name');
-// 删除多项
+// حذف عدة قيم
 $session->forget(['name', 'age']);
 ```
 
-另外系统提供了delete方法，与forget方法区别是，delete只能删除一项。
+يتوفر أيضاً الطريقة `delete`. على عكس `forget`، يمكنه حذف قيمة واحدة فقط.
 ```php
 $session = $request->session();
-// 等同于 $session->forget('name');
+// يعادل $session->forget('name');
 $session->delete('name');
 ```
 
-## 获取并删除session某个值
+
+## الحصول على قيمة من الجلسة وحذفها
 ```php
 $session = $request->session();
 $name = $session->pull('name');
 ```
-效果与如下代码相同
+هذا يعادل الكود التالي:
 ```php
 $session = $request->session();
-$value = $session->get($name);
-$session->delete($name);
+$value = $session->get('name');
+$session->delete('name');
 ```
-如果对应session不存在，则返回null。
+تُرجع null إذا لم تكن قيمة الجلسة المقابلة موجودة.
 
 
-## 删除所有session数据
+## حذف جميع بيانات الجلسة
 ```php
 $request->session()->flush();
 ```
-没有返回值，session对象销毁时session会自动从存储中删除。
+لا ترجع شيئاً. تُحذف بيانات الجلسة تلقائياً من التخزين عند إتلاف كائن الجلسة.
 
 
-## 判断对应session数据是否存在
+## التحقق من وجود قيمة في الجلسة
 ```php
 $session = $request->session();
 $has = $session->has('name');
 ```
-以上当对应的session不存在或者对应的session值为null时返回false，否则返回true。
+تُرجع false إذا لم تكن القيمة موجودة أو كانت null؛ وإلا تُرجع true.
 
-```
+```php
 $session = $request->session();
 $has = $session->exists('name');
 ```
-以上代码也是用来判断session数据是否存在，区别是当对应的session项值为null时，也返回true。
+الكود أعلاه يتحقق أيضاً من وجود قيمة في الجلسة. الفرق أن `exists` تُرجع true حتى عندما تكون القيمة null.
 
-## 助手函数session()
+## الدالة المساعدة session()
 
-webman提供了助手函数`session()`完成相同的功能。
+يوفر webman الدالة المساعدة `session()` لنفس الوظائف.
 ```php
-// 获取session实例
+// الحصول على مثيل الجلسة
 $session = session();
-// 等价于
+// يعادل
 $session = $request->session();
 
-// 获取某个值
+// الحصول على قيمة
 $value = session('key', 'default');
-// 等价与
+// يعادل
 $value = session()->get('key', 'default');
-// 等价于
+// يعادل
 $value = $request->session()->get('key', 'default');
 
-// 给session赋值
+// تعيين قيم للجلسة
 session(['key1'=>'value1', 'key2' => 'value2']);
-// 相当于
+// يعادل
 session()->put(['key1'=>'value1', 'key2' => 'value2']);
-// 相当于
+// يعادل
 $request->session()->put(['key1'=>'value1', 'key2' => 'value2']);
 
 ```
 
-## 配置文件
-session配置文件在`config/session.php`，内容类似如下：
+
+## ملف الإعدادات
+ملف إعدادات الجلسة في `config/session.php`. المحتوى مشابه لما يلي:
 ```php
 use Webman\Session\FileSessionHandler;
 use Webman\Session\RedisSessionHandler;
 use Webman\Session\RedisClusterSessionHandler;
 
 return [
-    // FileSessionHandler::class 或者 RedisSessionHandler::class 或者 RedisClusterSessionHandler::class 
+    // FileSessionHandler::class أو RedisSessionHandler::class أو RedisClusterSessionHandler::class 
     'handler' => FileSessionHandler::class,
     
-    // handler为FileSessionHandler::class时值为file，
-    // handler为RedisSessionHandler::class时值为redis
-    // handler为RedisClusterSessionHandler::class时值为redis_cluster 既redis集群
+    // إذا كان handler هو FileSessionHandler::class فالقيمة 'file'
+    // إذا كان handler هو RedisSessionHandler::class فالقيمة 'redis'
+    // إذا كان handler هو RedisClusterSessionHandler::class فالقيمة 'redis_cluster' (عنقود Redis)
     'type'    => 'file',
 
-    // 不同的handler使用不同的配置
+    // كل معالج يستخدم إعدادات مختلفة
     'config' => [
-        // type为file时的配置
+        // إعدادات عندما يكون type هو 'file'
         'file' => [
             'save_path' => runtime_path() . '/sessions',
         ],
-        // type为redis时的配置
+        // إعدادات عندما يكون type هو 'redis'
         'redis' => [
             'host'      => '127.0.0.1',
             'port'      => 6379,
@@ -176,21 +180,19 @@ return [
         
     ],
 
-    'session_name' => 'PHPSID', // 存储session_id的cookie名
-    'auto_update_timestamp' => false,  // 是否自动刷新session，默认关闭
-    'lifetime' => 7*24*60*60,          // session过期时间
-    'cookie_lifetime' => 365*24*60*60, // 存储session_id的cookie过期时间
-    'cookie_path' => '/',              // 存储session_id的cookie路径
-    'domain' => '',                    // 存储session_id的cookie域名
-    'http_only' => true,               // 是否开启httpOnly，默认开启
-    'secure' => false,                 // 仅在https下开启session，默认关闭
-    'same_site' => '',                 // 用于防止CSRF攻击和用户追踪，可选值strict/lax/none
-    'gc_probability' => [1, 1000],     // 回收session的几率
+    'session_name' => 'PHPSID', // اسم كوكي تخزين session_id
+    'auto_update_timestamp' => false,  // تحديث الجلسة تلقائياً، الافتراضي: معطل
+    'lifetime' => 7*24*60*60,          // مدة صلاحية الجلسة
+    'cookie_lifetime' => 365*24*60*60, // مدة صلاحية كوكي session_id
+    'cookie_path' => '/',              // مسار كوكي session_id
+    'domain' => '',                    // نطاق كوكي session_id
+    'http_only' => true,               // تفعيل httpOnly، الافتراضي: مفعل
+    'secure' => false,                 // تفعيل الجلسة فقط عبر HTTPS، الافتراضي: معطل
+    'same_site' => '',                 // لمنع هجمات CSRF وتتبع المستخدمين، القيم: strict/lax/none
+    'gc_probability' => [1, 1000],     // احتمال جمع بيانات الجلسة
 ];
 ```
 
-## 安全相关
-在使用 session 时不建议直接存储类的实例对象，尤其是来源不可控的类实例，反序列化时可能造成潜在风险。
-
-
+## الأمان
+لا يُنصح بتخزين مثيلات الكلاسات مباشرة في الجلسة، خاصة من مصادر غير موثوقة. إلغاء التسلسل قد يتسبب في مخاطر أمنية.
 

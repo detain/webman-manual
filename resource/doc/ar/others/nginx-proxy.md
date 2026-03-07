@@ -1,13 +1,14 @@
-# nginx代理
-当webman需要直接提供外网访问时，建议在webman前增加一个nginx代理，这样有以下好处。
+# وكيل nginx
 
- - 静态资源由nginx处理，让webman专注业务逻辑处理
- - 让多个webman共用80、443端口，通过域名区分不同站点，实现单台服务器部署多个站点
- - 能够实现php-fpm与webman架构共存
- - nginx代理ssl实现https，更加简单高效
- - 能够严格过滤外网一些不合法请求
+عندما يحتاج webman إلى توفير الوصول المباشر من الشبكة الخارجية، يُوصى بإضافة وكيل nginx أمام webman. وهذا يوفر الفوائد التالية:
 
-## nginx代理示例
+- تتم معالجة الموارد الثابتة بواسطة nginx، مما يتيح لـ webman التركيز على منطق الأعمال
+- يمكن لعدة مثيلات من webman مشاركة المنافذ 80 و 443، والتمييز بين المواقع المختلفة حسب اسم النطاق، مما يتيح تشغيل عدة مواقع على خادم واحد
+- يسمح بتعايش بنية php-fpm و webman
+- وكيل nginx مع SSL لـ https أبسط وأكثر كفاءة
+- يمكن تصفية الطلبات غير القانونية من الشبكة الخارجية بشكل صارم
+
+## مثال على وكيل nginx
 ```
 upstream webman {
     server 127.0.0.1:8787;
@@ -15,35 +16,37 @@ upstream webman {
 }
 
 server {
-  server_name 站点域名;
+  server_name نطاق_الموقع;
   listen 80;
   access_log off;
-  # 注意，这里一定是webman下的public目录，不能是webman根目录
+  # مهم: يجب أن يشير root إلى مجلد public ضمن webman، وليس إلى المجلد الجذر لـ webman
   root /your/webman/public;
 
-  location ^~ / {
-      proxy_set_header Host $http_host;
-      proxy_set_header X-Forwarded-For $remote_addr;
-      proxy_set_header X-Forwarded-Proto $scheme;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_http_version 1.1;
-      proxy_set_header Connection "";
-      if (!-e $request_filename){
-          proxy_pass http://webman;
-      }
+  location / {
+    try_files $uri @proxy;
   }
 
-  # 拒绝访问所有以 .php 结尾的文件
+  location @proxy {
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_pass http://webman;
+  }
+
+  # رفض الوصول لجميع الملفات التي تنتهي بـ .php
   location ~ \.php$ {
       return 404;
   }
 
-  # 允许访问 .well-known 目录
+  # السماح بالوصول إلى مجلد .well-known
   location ~ ^/\.well-known/ {
     allow all;
   }
 
-  # 拒绝访问所有以 . 开头的文件或目录
+  # رفض الوصول لجميع الملفات أو المجلدات التي تبدأ بـ .
   location ~ /\. {
       return 404;
   }
@@ -51,7 +54,7 @@ server {
 }
 ```
 
-一般来说以上配置开发者只需要将server_name和root配置成实际值即可，其它字段不需要配置。
+بشكل عام، يحتاج المطورون فقط إلى تكوين server_name و root بالقيم الفعلية؛ ولا حاجة لتكوين الحقول الأخرى.
 
-> **注意**
-> 特别注意的是，root选项一定要配置成webman下的public目录，千万不要直接设置成webman目录，否则你的所有文件可能会被外网下载访问，包括数据库配置等敏感文件。
+> **ملاحظة**
+> من المهم بشكل خاص أن تشير خيار root إلى مجلد public ضمن webman. لا تضبطها أبداً على المجلد الجذر لـ webman، وإلا فقد تصبح جميع ملفاتك قابلة للتنزيل والوصول من الإنترنت، بما في ذلك الملفات الحساسة مثل إعدادات قاعدة البيانات.

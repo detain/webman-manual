@@ -13,36 +13,36 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('günlük test');
-        return response('merhaba index');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
 
 ## Sağlanan Yöntemler
 ```php
-Log::log($seviye, $mesaj, array $bağlam = [])
-Log::debug($mesaj, array $bağlam = [])
-Log::info($mesaj, array $bağlam = [])
-Log::notice($mesaj, array $bağlam = [])
-Log::warning($mesaj, array $bağlam = [])
-Log::error($mesaj, array $bağlam = [])
-Log::critical($mesaj, array $bağlam = [])
-Log::alert($mesaj, array $bağlam = [])
-Log::emergency($mesaj, array $bağlam = [])
+Log::log($level, $message, array $context = [])
+Log::debug($message, array $context = [])
+Log::info($message, array $context = [])
+Log::notice($message, array $context = [])
+Log::warning($message, array $context = [])
+Log::error($message, array $context = [])
+Log::critical($message, array $context = [])
+Log::alert($message, array $context = [])
+Log::emergency($message, array $context = [])
 ```
 Eşdeğerdir
 ```php
 $log = Log::channel('default');
-$log->log($seviye, $mesaj, array $bağlam = [])
-$log->debug($mesaj, array $bağlam = [])
-$log->info($mesaj, array $bağlam = [])
-$log->notice($mesaj, array $bağlam = [])
-$log->warning($mesaj, array $bağlam = [])
-$log->error($mesaj, array $bağlam = [])
-$log->critical($mesaj, array $bağlam = [])
-$log->alert($mesaj, array $bağlam = [])
-$log->emergency($mesaj, array $bağlam = [])
+$log->log($level, $message, array $context = [])
+$log->debug($message, array $context = [])
+$log->info($message, array $context = [])
+$log->notice($message, array $context = [])
+$log->warning($message, array $context = [])
+$log->error($message, array $context = [])
+$log->critical($message, array $context = [])
+$log->alert($message, array $context = [])
+$log->emergency($message, array $context = [])
 ```
 
 ## Yapılandırma
@@ -138,7 +138,7 @@ class FooController
     {
         $log = Log::channel('log2');
         $log->info('log2 test');
-        return response('merhaba index');
+        return response('hello index');
     }
 }
 ```

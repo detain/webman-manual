@@ -1,24 +1,29 @@
-# 依赖自动注入
-在webman里依赖自动注入是可选功能，此功能默认关闭。如果你需要依赖自动注入，推荐使用[php-di](https://php-di.org/doc/getting-started.html)，以下是webman结合`php-di`的用法。
+# الحقن التلقائي للتبعيات
 
-## 安装
+في webman، الحقن التلقائي للتبعيات ميزة اختيارية ومعطلة افتراضيًا. إذا كنت بحاجة إليه، يُوصى باستخدام [php-di](https://php-di.org/doc/getting-started.html). فيما يلي كيفية استخدام `php-di` مع webman.
+
+## التثبيت
+
 ```
-composer require psr/container ^1.1.1 php-di/php-di ^6.3 doctrine/annotations ^1.14
+composer require php-di/php-di:^7.0
 ```
 
-修改配置`config/container.php`，其最终内容如下：
+عدّل إعداد `config/container.php`. المحتوى النهائي يجب أن يكون كالتالي:
+
 ```php
 $builder = new \DI\ContainerBuilder();
 $builder->addDefinitions(config('dependence', []));
 $builder->useAutowiring(true);
-$builder->useAnnotations(true);
+$builder->useAttributes(true);
 return $builder->build();
 ```
 
-> `config/container.php`里最终返回一个符合`PSR-11`规范的容器实例。如果你不想使用 `php-di` ，可以在这里创建并返回一个其它符合`PSR-11`规范的容器实例。
+> يجب أن يعيد ملف `config/container.php` في النهاية مثيل حاوية متوافق مع مواصفة PSR-11. إن لم ترغب في استخدام `php-di`، يمكنك إنشاء وإرجاع مثيل حاوية آخر متوافق مع PSR-11 هنا. الإعداد الافتراضي يوفر فقط الوظائف الأساسية لحاوية webman.
 
-## 构造函数注入
-新建`app/service/Mailer.php`(如目录不存在请自行创建)内容如下：
+## الحقن عبر المُنشئ
+
+أنشئ ملف `app/service/Mailer.php` (أنشئ المجلد إن لم يكن موجودًا) بالمحتوى التالي:
+
 ```php
 <?php
 namespace app\service;
@@ -27,12 +32,12 @@ class Mailer
 {
     public function mail($email, $content)
     {
-        // 发送邮件代码省略
+        // كود إرسال البريد محذوف
     }
 }
 ```
 
-`app/controller/UserController.php`内容如下：
+محتوى `app/controller/UserController.php`:
 
 ```php
 <?php
@@ -43,75 +48,76 @@ use app\service\Mailer;
 
 class UserController
 {
-    private $mailer;
 
-    public function __construct(Mailer $mailer)
+    public function __construct(private Mailer $mailer)
     {
-        $this->mailer = $mailer;
     }
 
     public function register(Request $request)
     {
-        $this->mailer->mail('hello@webman.com', 'Hello and welcome!');
+        $this->mailer->mail('hello@webman.com', 'مرحباً بك!');
         return response('ok');
     }
 }
 ```
-正常情况下，需要以下代码才能完成`app\controller\UserController`的实例化：
+
+عادةً، لإنشاء مثيل `app\controller\UserController` يلزم الكود التالي:
+
 ```php
 $mailer = new Mailer;
 $user = new UserController($mailer);
 ```
-当使用`php-di`后，开发者无需手动实例化控制器中的`Mailer`，webman会自动帮你完成。如果在实例化`Mailer`过程中有其它类的依赖，webman也会自动实例化并注入。开发者不需要任何的初始化工作。
 
-> **注意**
-> 必须是由框架或者`php-di`创建的实例才能完成依赖自动注入，手动`new`的实例无法完成依赖自动注入，如需注入，需要使用`support\Container`接口替换`new`语句，例如：
+عند استخدام `php-di`، لا يحتاج المطورون إلى إنشاء مثيل `Mailer` يدويًا في المتحكم — إذ يقوم webman بذلك تلقائيًا. وإن كانت هناك تبعيات أخرى عند إنشاء مثيل `Mailer`، سيُنشئها webman ويُحقنها تلقائيًا. لا يلزم أي عمل إعدادي من المطور.
+
+> **ملاحظة**
+> الحقن التلقائي للتبعيات متاح فقط للمثيلات التي تُنشأ بواسطة الإطار أو `php-di`. المثيلات المُنشأة يدويًا بـ `new` لا تدعمه. للحقن، استخدم واجهة `support\Container` بدلاً من `new`، مثلاً:
 
 ```php
 use app\service\UserService;
 use app\service\LogService;
 use support\Container;
 
-// new关键字创建的实例无法依赖注入
+// المثيلات المُنشأة بـ new لا تدعم الحقن
 $user_service = new UserService;
-// new关键字创建的实例无法依赖注入
+// المثيلات المُنشأة بـ new لا تدعم الحقن
 $log_service = new LogService($path, $name);
 
-// Container创建的实例可以依赖注入
+// المثيلات المُنشأة بـ Container تدعم الحقن
 $user_service = Container::get(UserService::class);
-// Container创建的实例可以依赖注入
+// المثيلات المُنشأة بـ Container تدعم الحقن
 $log_service = Container::make(LogService::class, [$path, $name]);
 ```
 
-## 注解注入
-除了构造函数依赖自动注入，我们还可以使用注解注入。继续上面的例子，`app\controller\UserController`更改成如下：
+## الحقن عبر السمات (Attributes)
+
+إلى جانب الحقن عبر المُنشئ، يمكنك استخدام الحقن عبر السمات. بمتابعة المثال السابق، عدّل `app\controller\UserController` كالتالي:
+
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
 use app\service\Mailer;
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class UserController
 {
-    /**
-     * @Inject
-     * @var Mailer
-     */
-    private $mailer;
+    #[Inject]
+    private Mailer $mailer;
 
     public function register(Request $request)
     {
-        $this->mailer->mail('hello@webman.com', 'Hello and welcome!');
+        $this->mailer->mail('hello@webman.com', 'مرحباً بك!');
         return response('ok');
     }
 }
 ```
-这个例子通过 `@Inject` 注解注入，并且由 `@var` 注解声明对象类型。这个例子和构造函数注入效果一样，但是代码更精简。
 
-> **注意**
-> webman在1.4.6版本之前不支持控制器参数注入，例如以下代码当webman<=1.4.6时是不支持的
+هذا المثال يستخدم السمة `#[Inject]` للحقن ويحقن المثيل تلقائيًا في العضو وفقًا لنوع الكائن. التأثير مثل الحقن عبر المُنشئ لكن الكود أوضح.
+
+> **ملاحظة**
+> webman لا يدعم حقن معاملات المتحكم قبل الإصدار 1.4.6. مثلاً الكود التالي غير مدعوم عندما webman<=1.4.6:
 
 ```php
 <?php
@@ -122,18 +128,19 @@ use app\service\Mailer;
 
 class UserController
 {
-    // 1.4.6版本之前不支持控制器参数注入
+    // حقن معاملات المتحكم غير مدعوم قبل الإصدار 1.4.6
     public function register(Request $request, Mailer $mailer)
     {
-        $mailer->mail('hello@webman.com', 'Hello and welcome!');
+        $mailer->mail('hello@webman.com', 'مرحباً بك!');
         return response('ok');
     }
 }
 ```
 
-## 自定义构造函数注入
+## حقن مخصص عبر المُنشئ
 
-有时候构造函数传入的参数可能不是类的实例，而是字符串、数字、数组等数据。例如Mailer构造函数需要传递smtp服务器ip和端口：
+أحيانًا معاملات المُنشئ قد تكون ليست مثيلات صنف بل نصوصًا أو أرقامًا أو مصفوفات أو بيانات أخرى. مثلاً مُنشئ Mailer قد يحتاج عنوان IP ومنفذ خادم SMTP:
+
 ```php
 <?php
 namespace app\service;
@@ -152,30 +159,33 @@ class Mailer
 
     public function mail($email, $content)
     {
-        // 发送邮件代码省略
+        // كود إرسال البريد محذوف
     }
 }
 ```
 
-这种情况无法直接使用前面介绍的构造函数自动注入，因为`php-di`无法确定`$smtp_host` `$smtp_port`的值是什么。这时候可以尝试自定义注入。
+هنا لا يمكن استخدام الحقن التلقائي عبر المُنشئ مباشرة لأن `php-di` لا يستطيع تحديد قيم `$smtp_host` و `$smtp_port`. في هذه الحالة يمكن استخدام حقن مخصص.
 
-在`config/dependence.php`(文件不存在请自行创建)中加入如下代码：
+أضف الكود التالي في `config/dependence.php` (أنشئ الملف إن لم يكن موجودًا):
+
 ```php
 return [
-    // ... 这里忽略了其它配置
-    
+    // ... إعدادات أخرى محذوفة
+
     app\service\Mailer::class =>  new app\service\Mailer('192.168.1.11', 25);
 ];
 ```
-这样当依赖注入需要获取`app\service\Mailer`实例时将自动使用这个配置中创建的`app\service\Mailer`实例。
 
-我们注意到，`config/dependence.php` 中使用了`new`来实例化`Mailer`类，这个在本示例没有任何问题，但是想象下如果`Mailer`类依赖了其它类的话或者`Mailer`类内部使用了注解注入，使用`new`初始化将不会依赖自动注入。解决办法是利用自定义接口注入，通过`Container::get(类名)` 或者 `Container::make(类名, [构造函数参数])`方法来初始化类。
+عند حاجة الحقن لمثيل `app\service\Mailer`، سيُستخدم المثيل المُنشأ في هذا الإعداد تلقائيًا.
 
+لاحظ أن `config/dependence.php` يستخدم `new` لإنشاء مثيل صنف `Mailer`. في هذا المثال لا مشكلة، لكن إذا كان `Mailer` يعتمد على أصناف أخرى أو يستخدم الحقن عبر السمات داخليًا، فالتهيئة بـ `new` لن تقوم بالحقن التلقائي. الحل هو استخدام حقن مخصص عبر واجهة وتهيئة الأصناف عبر `Container::get(اسم الصنف)` أو `Container::make(اسم الصنف, [معاملات المُنشئ])`.
 
-## 自定义接口注入
-在现实项目中，我们更希望面向接口编程，而不是具体的类。比如`app\controller\UserController`里应该引入`app\service\MailerInterface`而不是`app\service\Mailer`。
+## حقن مخصص عبر واجهة
 
-定义`MailerInterface`接口。
+في المشاريع الحقيقية يُفضّل البرمجة ضد الواجهات بدلاً من الأصناف الملموسة. مثلاً `app\controller\UserController` يجب أن يعتمد على `app\service\MailerInterface` بدلاً من `app\service\Mailer`.
+
+عرّف واجهة `MailerInterface`:
+
 ```php
 <?php
 namespace app\service;
@@ -186,7 +196,8 @@ interface MailerInterface
 }
 ```
 
-定义`MailerInterface`接口的实现。
+عرّف تنفيذ `MailerInterface`:
+
 ```php
 <?php
 namespace app\service;
@@ -205,39 +216,39 @@ class Mailer implements MailerInterface
 
     public function mail($email, $content)
     {
-        // 发送邮件代码省略
+        // كود إرسال البريد محذوف
     }
 }
 ```
 
-引入`MailerInterface`接口而非具体实现。
+استخدم واجهة `MailerInterface` بدلاً من التنفيذ الملموس:
+
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
 use app\service\MailerInterface;
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class UserController
 {
-    /**
-     * @Inject
-     * @var MailerInterface
-     */
-    private $mailer;
-    
+    #[Inject]
+    private MailerInterface $mailer;
+
     public function register(Request $request)
     {
-        $this->mailer->mail('hello@webman.com', 'Hello and welcome!');
+        $this->mailer->mail('hello@webman.com', 'مرحباً بك!');
         return response('ok');
     }
 }
 ```
 
-`config/dependence.php` 将 `MailerInterface` 接口定义如下实现。
+عرّف تنفيذ `MailerInterface` في `config/dependence.php`:
+
 ```php
 use Psr\Container\ContainerInterface;
+
 return [
     app\service\MailerInterface::class => function(ContainerInterface $container) {
         return $container->make(app\service\Mailer::class, ['smtp_host' => '192.168.1.11', 'smtp_port' => 25]);
@@ -245,14 +256,16 @@ return [
 ];
 ```
 
-这样当业务需要使用`MailerInterface`接口时，将自动使用`Mailer`实现。
+عند حاجة التطبيق لواجهة `MailerInterface`، سيُستخدم تنفيذ `Mailer` تلقائيًا.
 
-> 面向接口编程的好处是，当我们需要更换某个组件时，不需要更改业务代码，只需要更改`config/dependence.php`中的具体实现即可。这在做单元测试也非常有用。
+> ميزة البرمجة ضد الواجهات أن استبدال مكوّن لا يتطلب تغيير كود الأعمال — فقط التنفيذ الملموس في `config/dependence.php`. مفيد جدًا أيضًا لاختبار الوحدة.
 
-## 其它自定义注入
-`config/dependence.php`除了能定义类的依赖，也能定义其它值，例如字符串、数字、数组等。
+## حقن مخصص آخر
 
-例如`config/dependence.php`定义如下：
+بالإضافة لتبعيات الأصناف، يمكن لـ `config/dependence.php` تعريف قيم أخرى كالنصوص والأرقام والمصفوفات.
+
+مثلاً إن عُرّف `config/dependence.php` كالتالي:
+
 ```php
 return [
     'smtp_host' => '192.168.1.11',
@@ -260,35 +273,119 @@ return [
 ];
 ```
 
-这时候我们可以通过`@Inject`将`smtp_host` `smtp_port` 注入到类的属性中。
+يمكن حقن `smtp_host` و `smtp_port` في خصائص الصنف عبر `#[Inject]`:
+
 ```php
 <?php
 namespace app\service;
 
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class Mailer
 {
-    /**
-     * @Inject("smtp_host")
-     */
+    #[Inject("smtp_host")]
     private $smtpHost;
 
-    /**
-     * @Inject("smtp_port")
-     */
+    #[Inject("smtp_port")]
     private $smtpPort;
 
     public function mail($email, $content)
     {
-        // 发送邮件代码省略
-        echo "{$this->smtpHost}:{$this->smtpPort}\n"; // 将输出 192.168.1.11:25
+        // كود إرسال البريد محذوف
+        echo "{$this->smtpHost}:{$this->smtpPort}\n"; // سيُطبع 192.168.1.11:25
     }
 }
 ```
 
-> 注意：`@Inject("key")` 里面是双引号
+# التحميل الكسول (Lazy Loading)
 
+> التحميل الكسول نمط تصميم يؤخر إنشاء أو تهيئة الكائنات حتى الحاجة الفعلية إليها.
 
-## 更多内容
-请参考[php-di手册](https://php-di.org/doc/getting-started.html)
+هذه الميزة تحتاج تبعية إضافية. الحزمة التالية فرع من `ocramius/proxy-manager`؛ المستودع الأصلي لا يدعم PHP 8.
+
+```
+composer require friendsofphp/proxy-manager-lts
+```
+
+الاستخدام:
+
+```php
+<?php
+
+use DI\Attribute\Injectable;
+use DI\Attribute\Inject;
+
+#[Injectable(lazy: true)]
+class MyClass
+{
+    private string $name;
+
+    public function __construct()
+    {
+        echo "MyClass مُنشأ\n";
+        $this->name = "Lazy Loaded Object";
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+}
+
+class Controller
+{
+    #[Inject]
+    public MyClass $myClass;
+
+    public function getClass()
+    {
+        echo "اسم صنف الوكيل: " . get_class($this->myClass) . "\n";
+        echo "name: " . $this->myClass->getName();
+
+    }
+}
+```
+
+المخرجات:
+
+```
+اسم صنف الوكيل: ProxyManagerGeneratedProxy\__PM__\app\web\MyClass\Generated98d2817da63e3c088c808a0d4f6e9ae0
+MyClass مُنشأ
+name: Lazy Loaded Object
+```
+
+يوضّح هذا المثال أنه عند حقن صنف مُعلَن بالسمة `#[Injectable]`، يُنشأ أولاً صنف الوكيل. الصنف الفعلي يُنشأ فقط عند استدعاء أي من طرقه.
+
+# التبعيات الدائرية
+
+التبعيات الدائرية تحدث عندما تعتمد أصناف متعددة على بعضها، مكوّنة حلقة مغلقة من التبعيات.
+
+- تبعية دائرية مباشرة
+  - الوحدة A تعتمد على الوحدة B والوحدة B تعتمد على الوحدة A
+  - تشكل الحلقة: A → B → A
+
+- تبعية دائرية غير مباشرة
+  - تشمل عدة وحدات في حلقة التبعيات
+  - مثلاً: A → B → C → A
+
+عند استخدام الحقن عبر السمات، يكتشف `php-di` التبعيات الدائرية ويرمي استثناء. عند الحاجة، استخدم الأسلوب التالي:
+
+```php
+class userController
+{
+
+    // احذف هذا الكود
+    // #[Inject]
+    // private UserService userService;
+
+    public function getUserName()
+    {
+        $userService = Container::get(UserService::class);
+        return $userService->getName();
+    }
+}
+```
+
+## المزيد
+
+راجع [توثيق php-di](https://php-di.org/doc/getting-started.html).

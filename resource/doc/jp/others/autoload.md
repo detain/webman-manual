@@ -1,43 +1,41 @@
 # 自動読み込み
 
-## Composerを使用してPSR-0の規格のファイルを読み込む
-webmanは`PSR-4`の自動読み込み規格に従います。もし、貴方の業務が`PSR-0`の規格のコードライブラリを読み込む必要があれば、以下の手順を参考にしてください。
+## Composer で PSR-0 規格のファイルを読み込む
+webman は `PSR-4` 自動読み込み規格に従います。プロジェクトで PSR-0 規格のライブラリを読み込む必要がある場合は、以下の手順に従ってください。
 
-- `extend`ディレクトリを作成し、その中に`PSR-0`の規格に従ったコードライブラリを保存します。
-- `composer.json`を編集し、`autoload`に以下の内容を追加します。
+- `extend` ディレクトリを作成し、PSR-0 規格のライブラリを格納します
+- `composer.json` を編集し、`autoload` に以下を追加します：
 
-```js
+```json
 "psr-0" : {
     "": "extend/"
 }
 ```
-最終的な結果は以下のようになります。
+最終的な結果は以下のようになります：
 ![](../../assets/img/psr0.png)
 
-- `composer dumpautoload`を実行します。
-- `php start.php restart`を実行してwebmanを再起動します（注意：再起動する必要があります）。
+- `composer dumpautoload` を実行します
+- `php start.php restart` を実行して webman を再起動します（注意：変更を反映するには再起動が必要です）
 
-## Composerを使用して特定のファイルを読み込む
+## Composer で特定のファイルを読み込む
 
-- `composer.json`を編集し、`autoload.files`に読み込みたいファイルを追加します。
-
-```json
+- `composer.json` を編集し、`autoload.files` に読み込むファイルを追加します：
+```
 "files": [
     "./support/helpers.php",
     "./app/helpers.php"
 ]
 ```
-- `composer dumpautoload`を実行します。
-- `php start.php restart`を実行してwebmanを再起動します（注意：再起動する必要があります）。
+
+- `composer dumpautoload` を実行します
+- `php start.php restart` を実行して webman を再起動します（注意：変更を反映するには再起動が必要です）
 
 > **ヒント**
-> composer.jsonの`autoload.files`に設定されているファイルは、webmanが起動する前に読み込まれます。一方で、フレームワークの`config/autoload.php`で読み込まれるファイルは、webmanが起動した後に読み込まれます。
-> composer.jsonの`autoload.files`で読み込まれるファイルを変更した場合、再起動が必要ですが、再読み込みでは反映されません。一方で、フレームワークの`config/autoload.php`で読み込まれるファイルは、変更後に再読み込みすることで即座に反映されます。
+> composer.json の `autoload.files` で設定したファイルは webman 起動前に読み込まれます。一方、フレームワークの `config/autoload.php` で読み込むファイルは webman 起動後に読み込まれます。
+> composer.json の `autoload.files` で読み込むファイルの変更を反映するには restart が必要で、reload では反映されません。`config/autoload.php` で読み込むファイルはホットリロードに対応しており、変更は reload で反映されます。
 
-## フレームワークを使用して特定のファイルを読み込む
-
-SPR規格に準拠しないファイルがある場合、`config/autoload.php`を設定してこれらのファイルを読み込むことができます。例：
-
+## フレームワークで特定のファイルを読み込む
+PSR 規格に準拠しないファイルがあり自動読み込みできない場合は、`config/autoload.php` を設定して読み込むことができます。例：
 ```php
 return [
     'files' => [
@@ -47,6 +45,5 @@ return [
     ]
 ];
 ```
-
-> **ヒント**
-> `autoload.php`で`support/Request.php`と`support/Response.php`の読み込み設定がされています。これは、`vendor/workerman/webman-framework/src/support/`にも同名のファイルがあるためです。`autoload.php`を使用することで、プロジェクトルートの`support/Request.php`および`support/Response.php`を優先的に読み込み、これらのファイルの内容をカスタマイズすることができます。もしカスタマイズが必要ない場合は、これらの設定を無視していただいて構いません。
+ > **ヒント**
+ > `autoload.php` で `support/Request.php` と `support/Response.php` の読み込みが設定されています。これは `vendor/workerman/webman-framework/src/support/` にも同名のファイルがあるためです。`autoload.php` によりプロジェクトルートのファイルを優先的に読み込むことで、`vendor` 内を変更せずにこれらをカスタマイズできます。カスタマイズが不要な場合は、この 2 つの設定を省略して構いません。

@@ -16,14 +16,14 @@ return [
     ],
 ];
 ```
-Para usarlo
+Al usar
 ```php
 use support\Redis;
 Redis::connection('plugin.foo.default')->get('key');
 Redis::connection('plugin.foo.cache')->get('key');
 ```
 
-Del mismo modo, si se desea reutilizar la configuración de Redis del proyecto principal
+Del mismo modo, si se quiere reutilizar la configuración Redis del proyecto principal
 ```php
 use support\Redis;
 Redis::get('key');

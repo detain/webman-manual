@@ -1,23 +1,29 @@
-# การสร้างความสามารถในการส่งเข้า
-ใน webman การสร้างความสามารถในการส่งเข้าเป็นคุณสมบัติที่เลือกได้ คุณสมบัตินี้ถูกปิดไว้โดยค่าเริ่มต้น หากคุณต้องการสร้างความสามารถในการส่งเข้า แนะนำให้ใช้[php-di](https://php-di.org/doc/getting-started.html) ต่อไปคือวิธีการใช้ webman ร่วมกับ `php-di`
+# การฉีดพึ่งพาอัตโนมัติ
+
+ใน webman การฉีดพึ่งพาอัตโนมัติเป็นฟีเจอร์ตัวเลือก และปิดโดยค่าเริ่มต้น ถ้าต้องการการฉีดพึ่งพาอัตโนมัติ แนะนำให้ใช้ [php-di](https://php-di.org/doc/getting-started.html) ด้านล่างอธิบายการใช้ `php-di` กับ webman
 
 ## การติดตั้ง
+
 ```
-composer require psr/container ^1.1.1 php-di/php-di ^6 doctrine/annotations ^1.14
+composer require php-di/php-di:^7.0
 ```
 
-แก้ไขการตั้งค่า `config/container.php` ให้เป็นดังนี้
+แก้ไขการตั้งค่า `config/container.php` เนื้อหาสุดท้ายต้องเป็นดังนี้:
+
 ```php
 $builder = new \DI\ContainerBuilder();
 $builder->addDefinitions(config('dependence', []));
 $builder->useAutowiring(true);
-$builder->useAnnotations(true);
+$builder->useAttributes(true);
 return $builder->build();
 ```
-> `config/container.php` ต้องคืนการสร้างตัวอย่างที่เป็นไปตามมาตรฐาน `PSR-11` ถ้าคุณไม่ต้องการใช้ `php-di` คุณสามารถสร้างและคืนตัวอย่างอื่นที่เป็นไปตามมาตรฐาน `PSR-11` ที่นี่
 
-## การส่งตัวให้นำมาใช้
-สร้าง `app/service/Mailer.php`(ถ้าโฟลเดอร์ไม่มีให้สร้างขึ้นมาเอง) โดยมีเนื้อหาดังนี้
+> ไฟล์ `config/container.php` ต้องส่งคืน instance คอนเทนเนอร์ที่ปฏิบัติตามข้อกำหนด PSR-11 ในตอนท้าย หากไม่ต้องการใช้ `php-di` สามารถสร้างและส่งคืน instance คอนเทนเนอร์ที่ปฏิบัติตาม PSR-11 อื่นที่นี่ได้ การตั้งค่าเริ่มต้นให้เฉพาะฟังก์ชันพื้นฐานของ webman container
+
+## การฉีดผ่าน constructor
+
+สร้างไฟล์ `app/service/Mailer.php` (สร้างโฟลเดอร์หากไม่มี) ด้วยเนื้อหาดังนี้:
+
 ```php
 <?php
 namespace app\service;
@@ -26,12 +32,13 @@ class Mailer
 {
     public function mail($email, $content)
     {
-        // โค้ดส่งอีเมลล์ของคุณ
+        // โค้ดส่งอีเมลละไว้
     }
 }
 ```
 
-เนื้อหาของ `app/controller/UserController.php` ดังนี้
+เนื้อหาของ `app/controller/UserController.php`:
+
 ```php
 <?php
 namespace app\controller;
@@ -41,76 +48,76 @@ use app\service\Mailer;
 
 class UserController
 {
-    private $mailer;
 
-    public function __construct(Mailer $mailer)
+    public function __construct(private Mailer $mailer)
     {
-        $this->mailer = $mailer;
     }
 
     public function register(Request $request)
     {
-        $this->mailer->mail('hello@webman.com', 'Hello and welcome!');
+        $this->mailer->mail('hello@webman.com', 'สวัสดีและยินดีต้อนรับ!');
         return response('ok');
     }
 }
 ```
 
-ตามปกติต้องมีการใช้โค้ดนี้เพื่อทำให้  `app\controller\UserController` ได้ยิ่งไปกับการสร้างโดยตั้งชื่อตัวแปรประเภท Mailer ไว้ดังนี้
+โดยปกติ ต้องใช้โค้ดต่อไปนี้เพื่อสร้าง instance `app\controller\UserController`:
+
 ```php
 $mailer = new Mailer;
 $user = new UserController($mailer);
 ```
-เมื่อใช้ `php-di` นักพัฒนาไม่จำเป็นต้องสร้างตัวแปรของ `Mailer` ในคอนโทลเลอร์ เพราะ webman จะทำให้ด้วยเอง ถ้าต้องการใช้คลาสอื่นในการสร้าง `Mailer` ก็จะทำการสร้างและส่งเข้าโดยอัตโนมัติ นักพัฒนาไม่จำเป็นต้องทำงานเริ่มต้นใด ๆ
+
+เมื่อใช้ `php-di` นักพัฒนไม่ต้องสร้าง instance `Mailer` ใน controller เอง — webman จะทำให้อัตโนมัติ ถ้าขณะสร้าง instance `Mailer` มีการพึ่งพาคลาสอื่น webman จะสร้างและฉีดให้อัตโนมัติเช่นกัน ไม่ต้องดำเนินการเริ่มต้นใด ๆ จากนักพัฒนา
 
 > **หมายเหตุ**
-> ต้องมีการสร้างตัวอย่างที่ถูกสร้างด้วย webman หรือ `php-di` เท่านั้นที่จะสามารถส่งเข้าอัตโนมัติได้ การสร้างตัวเองด้วยคำสั่ง `new` ไม่สามารถส่งเข้าอัตโนมัติ หากต้องการส่งเข้าจะต้องใช้ `support\Container` อินเทอร์เฟซแทนคำสั่ง `new` เช่น
+> เฉพาะ instance ที่สร้างโดย framework หรือ `php-di` เท่านั้นที่รองรับการฉีดพึ่งพาอัตโนมัติ Instance ที่สร้างด้วย `new` เองไม่สามารถใช้ได้ หากต้องการฉีด ให้ใช้ interface `support\Container` แทน `new` เช่น:
 
 ```php
 use app\service\UserService;
 use app\service\LogService;
 use support\Container;
 
-// สร้างตัวตามคำสั่ง new ไม่สามารถทำให้ส่งเข้าได้
+// Instance ที่สร้างด้วย new ไม่รองรับการฉีดพึ่งพา
 $user_service = new UserService;
-// สร้างตัวตามคำสั่ง new ไม่สามารถทำให้ส่งเข้าได้
+// Instance ที่สร้างด้วย new ไม่รองรับการฉีดพึ่งพา
 $log_service = new LogService($path, $name);
 
-// สร้างตัวโดยใช้ Container เพื่อทำให้สามารถส่งเข้าได้
+// Instance ที่สร้างด้วย Container รองรับการฉีดพึ่งพา
 $user_service = Container::get(UserService::class);
-// สร้างตัวโดยใช้ Container เพื่อทำให้สามารถส่งเข้าได้
+// Instance ที่สร้างด้วย Container รองรับการฉีดพึ่งพา
 $log_service = Container::make(LogService::class, [$path, $name]);
 ```
 
-## ส่งเข้าโดยใช้คำอธิบาย
-นอกจากการส่งเข้าการสร้างตัวด้วยสร้อยการู้ ยังสามารถใช้การส่งเข้าโดยใช้คำอธิบายได้อีกด้วย ตัดเช่นตัวอย่างที่กำหนดไว้ข้างต้น  `app\controller\UserController` การเปลี่ยนแปลงเป็นดังนี้
+## การฉีดผ่าน Attributes
+
+นอกจากฉีดผ่าน constructor แล้ว ยังใช้การฉีดผ่าน attributes ได้ ต่อจากตัวอย่างก่อนหน้า แก้ไข `app\controller\UserController` ดังนี้:
+
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
 use app\service\Mailer;
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class UserController
 {
-    /**
-     * @Inject
-     * @var Mailer
-     */
-    private $mailer;
+    #[Inject]
+    private Mailer $mailer;
 
     public function register(Request $request)
     {
-        $this->mailer->mail('hello@webman.com', 'Hello and welcome!');
+        $this->mailer->mail('hello@webman.com', 'สวัสดีและยินดีต้อนรับ!');
         return response('ok');
     }
 }
 ```
-โดยตัวอย่างนี้ผ่านการใช้ `@Inject` การส่งเข้าภูมิการ์ และได้ทำการประกาศประเภทวัตถุด้วย `@var` โดยตัวอย่างนี้และการส่งเข้าตามคำอธิบายได้ทำซ้ำเอฟเฟกต์กับ การส่งเข้าตามสร้างตัว แต่โค้ดสั้นกว่า
+
+ตัวอย่างนี้ใช้ attribute `#[Inject]` เพื่อฉีด และฉีด instance เข้า member variable โดยอัตโนมัติตามประเภทออบเจ็กต์ ผลลัพธ์เหมือนการฉีดผ่าน constructor แต่โค้ดกระชับขึ้น
 
 > **หมายเหตุ**
-> เวอร์ชันก่อนหน้าที่เขียนโค้ดนี้ webman ไม่รองรับการส่งพารามิเตอร์ของคอนโทลเลอร์ เช่น โค้ดนี้เมื่อ webman<=1.4.6 จะไม่รองรับ
+> webman ไม่รองรับการฉีดพารามิเตอร์ controller ก่อนเวอร์ชัน 1.4.6 เช่น โค้ดต่อไปนี้ไม่รองรับเมื่อ webman<=1.4.6:
 
 ```php
 <?php
@@ -121,17 +128,18 @@ use app\service\Mailer;
 
 class UserController
 {
-    // มีการส่งพารามิเตอร์ของคอนโทลเลอร์ไม่รองรับก่อนเวอร์ชัน 1.4.6
+    // การฉีดพารามิเตอร์ controller ไม่รองรับก่อนเวอร์ชัน 1.4.6
     public function register(Request $request, Mailer $mailer)
     {
-        $mailer->mail('hello@webman.com', 'Hello and welcome!');
+        $mailer->mail('hello@webman.com', 'สวัสดีและยินดีต้อนรับ!');
         return response('ok');
     }
 }
 ```
 
-## การสร้างตัวอย่างการส่งเข้าเองเอง
-เวลาในบางครั้งพารามิเตอร์ที่ผ่านการสร้างตัวอย่างอาจจะไม่ใช่ตัวอย่างของคลาส แต่อาจจะเป็นสตริง, เลข, อาเรย์ และอื่น ๆ ตัวอย่างเช่น Mailer จำเป็นต้องผ่านการส่ง smpt server ip และ port:
+## การฉีด constructor แบบกำหนดเอง
+
+บางครั้งพารามิเตอร์ constructor อาจไม่ใช่ instance ของคลาสแต่เป็นสตริง ตัวเลข อาเรย์ หรือข้อมูลอื่น เช่น constructor Mailer อาจต้องการ IP และพอร์ตเซิร์ฟเวอร์ SMTP:
 
 ```php
 <?php
@@ -151,26 +159,33 @@ class Mailer
 
     public function mail($email, $content)
     {
-        // โค้ดส่งอีเมลล์ของคุณ
+        // โค้ดส่งอีเมลละไว้
     }
 }
 ```
 
-การส่งเข้าด้วยตนเองจะไม่สามารถใช้สร้างตัวอย่างที่ผ่านการสร้างตัวอย่างได้เนื่องจาก `php-di` ไม่สามารถระบุค่าของ `$smtp_host` `$smtp_port` ได้ ในกรณีนี้ลองใช้การส่งเข้าโดยกำหนดเอง
+กรณีนี้ไม่สามารถใช้การฉีดอัตโนมัติผ่าน constructor โดยตรง เพราะ `php-di` ไม่ทราบค่า `$smtp_host` และ `$smtp_port` ในกรณีนี้ลองใช้การฉีดแบบกำหนดเอง
 
-ใน `config/dependence.php`(หากไม่มีไฟล์นี้ให้สร้างขึ้นมาเอง) อย่างนี้:
+เพิ่มโค้ดต่อไปนี้ใน `config/dependence.php` (สร้างไฟล์หากไม่มี):
+
 ```php
 return [
-    // ... การตั้งค่าส่วนต่อ
+    // ... การตั้งค่าอื่นละไว้
+
     app\service\Mailer::class =>  new app\service\Mailer('192.168.1.11', 25);
 ];
 ```
-นี่คือการสร้างเมื่อต้องการผ่านการสร้างตัวอย่างคอลสการีเป็นตัวอย่างให้ `app\service\Mailer` โดยระบบจะทำการส่งโดยอัตโนมัติ `app\service\Mailer` ระหับตัวอย่างที่สร้างไว้ในคอสนี้
 
-เราสังเกตได้ว่า `config/dependence.php` ใช้คำสั่ง `new` ในการสร้าง `Mailer` นั้นไม่มีปัญหาในตัวอย่างนี้ แต่มองการว่าถ้า `Mailer` อีกรูปแบบจะต้องผ่านการสร้างด้วย `new` สร้างตัวเองข้อมูลผ่านการสสร้างตัวอย่างของคอลสหไม่สามารถส่งเข้าได้ วิธีการแก้ไขคือใช้การส่งเข้าระหว่างฟฟฟ ย้ำ `Container::get(ชื่อคลาส)` หรือ `Container::make(ชื่อคลาส, [พารามิเตอร์ของคอนโทลเลอร์])` เพื่อสร้างคลาส
-## การฝังอินเทอร์เฟซที่กำหนดเอง
-ในโครงการจริงเราต้องการโปรแกรมตามหลักการของอินเทอร์เฟซ แทนที่จะเป็นคลาสที่เฉพาะเจาะจง เช่น `app\controller\UserController` ควรจะ include `app\service\MailerInterface` แทนที่จะ include `app\service\Mailer`  
-กำหนดอินเทอร์เฟซ `MailerInterface` ดังนี้
+เมื่อการฉีดพึ่งพาต้องการ instance ของ `app\service\Mailer` จะใช้ instance ที่สร้างในการตั้งค่านี้โดยอัตโนมัติ
+
+สังเกตว่า `config/dependence.php` ใช้ `new` เพื่อสร้าง instance คลาส `Mailer` ในตัวอย่างนี้ไม่มีปัญหา แต่ถ้าคลาส `Mailer` พึ่งพาคลาสอื่นหรือใช้การฉีดผ่าน attributes ข้างใน การเริ่มต้นด้วย `new` จะไม่ทำการฉีดพึ่งพาอัตโนมัติ วิธีแก้คือใช้การฉีด interface แบบกำหนดเอง และเริ่มต้นคลาสผ่าน `Container::get(ชื่อคลาส)` หรือ `Container::make(ชื่อคลาส, [พารามิเตอร์ constructor])`
+
+## การฉีด interface แบบกำหนดเอง
+
+ในโปรเจกต์จริง ควรเขียนโปรแกรมต่อ interface มากกว่าคลาสจริง เช่น `app\controller\UserController` ควรพึ่งพา `app\service\MailerInterface` แทน `app\service\Mailer`
+
+กำหนด interface `MailerInterface`:
+
 ```php
 <?php
 namespace app\service;
@@ -180,7 +195,9 @@ interface MailerInterface
     public function mail($email, $content);
 }
 ```
-กำหนดการปฏิบัติตามอินเทอร์เฟซ `MailerInterface`
+
+กำหนดการ implement ของ `MailerInterface`:
+
 ```php
 <?php
 namespace app\service;
@@ -199,27 +216,26 @@ class Mailer implements MailerInterface
 
     public function mail($email, $content)
     {
-        // ข้อความส่งออกจะถูกละเลย
+        // โค้ดส่งอีเมลละไว้
     }
 }
 ```
-Include อินเทอร์เฟซ `MailerInterface` แทนที่จะมีการปฏิบัติตามตัวเอง
+
+ใช้ interface `MailerInterface` แทนการ implement จริง:
+
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
 use app\service\MailerInterface;
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class UserController
 {
-    /**
-     * @Inject
-     * @var MailerInterface
-     */
-    private $mailer;
-    
+    #[Inject]
+    private MailerInterface $mailer;
+
     public function register(Request $request)
     {
         $this->mailer->mail('hello@webman.com', 'สวัสดีและยินดีต้อนรับ!');
@@ -227,54 +243,149 @@ class UserController
     }
 }
 ```
-`config/dependence.php` ถูกกำหนดตามอินเทอร์เฟซ `MailerInterface` ดังนี้
+
+กำหนดการ implement ของ `MailerInterface` ใน `config/dependence.php`:
+
 ```php
 use Psr\Container\ContainerInterface;
+
 return [
     app\service\MailerInterface::class => function(ContainerInterface $container) {
         return $container->make(app\service\Mailer::class, ['smtp_host' => '192.168.1.11', 'smtp_port' => 25]);
     }
 ];
 ```
-นั่นคือเมื่อธุรกิจต้องการใช้ `MailerInterface` อินเทอร์เฟซ จะถูกใช้ `Mailer` สิ่งที่ดำเนินการ  
->  ประโยชน์ของการใช้อินเทอร์เฟซคือ เมื่อเราต้องการเปลี่ยนคอมโพเนนต์ใด ๆ เราไม่จำเป็นต้องเปลี่ยนโค้ดทำธุรกิจ แค่ต้องการเปลี่ยนการปฏิบัติตามใน `config/dependence.php` เท่านั้น สิ่งนี้ก็เป็นประโยชน์มากในการทดสอบของหน่วย
 
-## การฝังอินเจคอื่นๆ
-ใน `config/dependence.php` สามารถกำหนดค่าต่างๆของคลาสอื่นคลาส เช่น สตริง ตัวเลข อาเรย์ และอื่นๆ  
-เช่น `config/dependence.php` ถูกกำหนดดังนี้
+เมื่อธุรกิจต้องใช้ interface `MailerInterface` จะใช้การ implement `Mailer` โดยอัตโนมัติ
+
+> ข้อดีของการเขียนโปรแกรมต่อ interface คือ เมื่อต้องเปลี่ยน component ไม่ต้องแก้โค้ดธุรกิจ แค่เปลี่ยนการ implement จริงใน `config/dependence.php` ยังมีประโยชน์มากสำหรับการทดสอบหน่วย
+
+## การฉีดแบบกำหนดเองอื่น ๆ
+
+นอกจากกำหนดการพึ่งพาคลาส `config/dependence.php` ยังกำหนดค่าอื่น เช่น สตริง ตัวเลข อาเรย์ ได้
+
+เช่น ถ้า `config/dependence.php` กำหนดดังนี้:
+
 ```php
 return [
     'smtp_host' => '192.168.1.11',
     'smtp_port' => 25
 ];
 ```
-นี้เวลาเราสามารถใช้ `@Inject` เพื่อฝัง `smtp_host` `smtp_port` เข้าไปในแอตทริบิวต์
+
+สามารถใช้ `#[Inject]` เพื่อฉีด `smtp_host` และ `smtp_port` เข้า properties ของคลาส:
+
 ```php
 <?php
 namespace app\service;
 
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class Mailer
 {
-    /**
-     * @Inject("smtp_host")
-     */
+    #[Inject("smtp_host")]
     private $smtpHost;
 
-    /**
-     * @Inject("smtp_port")
-     */
+    #[Inject("smtp_port")]
     private $smtpPort;
 
     public function mail($email, $content)
     {
-        // ข้อความส่งออกจะถูกละเลย
-        echo "{$this->smtpHost}:{$this->smtpPort}\n"; // ผลลัพธ์จะเอา 192.168.1.11:25
+        // โค้ดส่งอีเมลละไว้
+        echo "{$this->smtpHost}:{$this->smtpPort}\n"; // จะแสดง 192.168.1.11:25
     }
 }
 ```
->  โปรดทราบ: `@Inject("key")` ในนั้นมีเครื่องหมายคำพูดคู่
 
-## เนื้อหาเพิ่มเติม
-โปรดอ้างถึง[คู่มือ php-di](https://php-di.org/doc/getting-started.html)
+# การโหลดแบบเฉื่อย (Lazy Loading)
+
+> การโหลดแบบเฉื่อยเป็นรูปแบบการออกแบบที่เลื่อนการสร้างหรือเริ่มต้นออบเจ็กต์จนกว่าจะใช้จริง
+
+ฟีเจอร์นี้ต้องใช้ dependency เพิ่มเติม แพ็กเกจต่อไปนี้เป็น fork ของ `ocramius/proxy-manager` รีโพซิทอรีดั้งเดิมไม่รองรับ PHP 8
+
+```
+composer require friendsofphp/proxy-manager-lts
+```
+
+วิธีใช้:
+
+```php
+<?php
+
+use DI\Attribute\Injectable;
+use DI\Attribute\Inject;
+
+#[Injectable(lazy: true)]
+class MyClass
+{
+    private string $name;
+
+    public function __construct()
+    {
+        echo "MyClass ถูกสร้าง instance\n";
+        $this->name = "Lazy Loaded Object";
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+}
+
+class Controller
+{
+    #[Inject]
+    public MyClass $myClass;
+
+    public function getClass()
+    {
+        echo "ชื่อคลาสพร็อกซี่: " . get_class($this->myClass) . "\n";
+        echo "name: " . $this->myClass->getName();
+
+    }
+}
+```
+
+ผลลัพธ์:
+
+```
+ชื่อคลาสพร็อกซี่: ProxyManagerGeneratedProxy\__PM__\app\web\MyClass\Generated98d2817da63e3c088c808a0d4f6e9ae0
+MyClass ถูกสร้าง instance
+name: Lazy Loaded Object
+```
+
+ตัวอย่างนี้แสดงว่าเมื่อคลาสที่ประกาศด้วย attribute `#[Injectable]` ถูกฉีด จะสร้างคลาสพร็อกซี่ก่อน คลาสจริงจะถูกสร้าง instance ก็ต่อเมื่อเรียกเมธอดใด ๆ ของมัน
+
+# การพึ่งพาแบบวน (Circular Dependencies)
+
+การพึ่งพาแบบวนเกิดขึ้นเมื่อหลายคลาสพึ่งพาซึ่งกันและกัน เป็นวงจรการพึ่งพาปิด
+
+- การพึ่งพาแบบวนโดยตรง
+  - โมดูล A พึ่งพาโมดูล B โมดูล B พึ่งพาโมดูล A
+  - เป็นวงจร: A → B → A
+
+- การพึ่งพาแบบวนโดยอ้อม
+  - มีหลายโมดูลในวงจรการพึ่งพา
+  - เช่น A → B → C → A
+
+เมื่อใช้การฉีดผ่าน attributes `php-di` จะตรวจจับการพึ่งพาแบบวนโดยอัตโนมัติและโยน exception หากจำเป็น ให้ใช้แนวทางต่อไปนี้แทน:
+
+```php
+class userController
+{
+
+    // ลบบรรทัดนี้
+    // #[Inject]
+    // private UserService userService;
+
+    public function getUserName()
+    {
+        $userService = Container::get(UserService::class);
+        return $userService->getName();
+    }
+}
+```
+
+## ข้อมูลเพิ่มเติม
+
+โปรดดู [เอกสาร php-di](https://php-di.org/doc/getting-started.html)

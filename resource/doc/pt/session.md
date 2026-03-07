@@ -1,7 +1,6 @@
-# Gestão de sessão
+# Gestão de sessão webman
 
 ## Exemplo
-
 ```php
 <?php
 namespace app\controller;
@@ -15,64 +14,56 @@ class UserController
         $name = $request->get('name');
         $session = $request->session();
         $session->set('name', $name);
-        return response('olá ' . $session->get('name'));
+        return response('hello ' . $session->get('name'));
     }
 }
 ```
 
-Obtenha uma instância de `Workerman\Protocols\Http\Session` usando `$request->session();` e use os métodos dessa instância para adicionar, alterar ou excluir dados da sessão.
+Obtenha uma instância de `Workerman\Protocols\Http\Session` através de `$request->session();` e use os métodos da instância para adicionar, modificar ou excluir dados da sessão.
 
-> Observação: Quando o objeto da sessão é destruído, os dados da sessão são salvos automaticamente. Portanto, não armazene o objeto retornado por `$request->session()` em um array global ou membro da classe, pois isso pode impedir o salvamento da sessão.
+> **Nota**
+> Os dados da sessão são salvos automaticamente quando o objeto da sessão é destruído.
+> Armazenar o objeto da sessão em uma variável global impede sua destruição e o salvamento automático. Nesse caso, chame manualmente `$session->save()` para salvar os dados.
 
 ## Obter todos os dados da sessão
-
 ```php
 $session = $request->session();
 $all = $session->all();
 ```
+Retorna um array. Se não houver dados na sessão, retorna um array vazio.
 
-Retorna um array. Se não houver nenhum dado na sessão, um array vazio será retornado.
 
 ## Obter um valor da sessão
-
 ```php
 $session = $request->session();
 $name = $session->get('name');
 ```
+Retorna null se os dados não existirem.
 
-Se os dados não existirem, null será retornado.
-
-Você também pode passar um valor padrão como segundo argumento para o método `get`, que será retornado se o valor correspondente não for encontrado na sessão. Por exemplo:
-
+Você pode passar um valor padrão como segundo argumento ao método `get`. Se o valor correspondente não for encontrado na sessão, o valor padrão será retornado. Por exemplo:
 ```php
 $session = $request->session();
 $name = $session->get('name', 'tom');
 ```
 
-## Armazenar na sessão
 
-Use o método `set` para armazenar um dado na sessão.
-
+## Armazenar dados na sessão
+Use o método `set` para armazenar um dado.
 ```php
 $session = $request->session();
 $session->set('name', 'tom');
 ```
+O método `set` não retorna valor. Os dados são salvos automaticamente quando o objeto da sessão é destruído.
 
-O método `set` não retorna nada, e os dados da sessão são salvos automaticamente quando o objeto da sessão é destruído.
-
-Ao armazenar vários valores, use o método `put`.
-
+Use o método `put` para armazenar vários valores.
 ```php
 $session = $request->session();
 $session->put(['name' => 'tom', 'age' => 12]);
 ```
-
-Novamente, o método `put` não retorna nada.
+Da mesma forma, o método `put` não retorna valor.
 
 ## Excluir dados da sessão
-
-Use o método `forget` para excluir um ou vários dados da sessão.
-
+Use o método `forget` para excluir um ou mais dados da sessão.
 ```php
 $session = $request->session();
 // Excluir um item
@@ -81,61 +72,51 @@ $session->forget('name');
 $session->forget(['name', 'age']);
 ```
 
-Além disso, o sistema fornece o método `delete`, que difere do método `forget` apenas em relação à capacidade de excluir apenas um item.
-
+O sistema também fornece o método `delete`. Ao contrário de `forget`, ele só pode excluir um item.
 ```php
 $session = $request->session();
 // Equivalente a $session->forget('name');
 $session->delete('name');
 ```
 
-## Obter e excluir um valor da sessão
 
+## Obter e excluir um valor da sessão
 ```php
 $session = $request->session();
 $name = $session->pull('name');
 ```
-
-O efeito acima é o mesmo que:
-
+Equivale ao seguinte código:
 ```php
 $session = $request->session();
-$value = $session->get($name);
-$session->delete($name);
+$value = $session->get('name');
+$session->delete('name');
 ```
+Retorna null se o valor da sessão correspondente não existir.
 
-Se a sessão correspondente não existir, null será retornado.
 
 ## Excluir todos os dados da sessão
-
 ```php
 $request->session()->flush();
 ```
+Não retorna valor. Os dados são removidos automaticamente do armazenamento quando o objeto da sessão é destruído.
 
-Não há retorno, e os dados da sessão são removidos automaticamente do armazenamento quando o objeto da sessão é destruído.
 
-## Verificar se um dado da sessão existe
-
+## Verificar se um valor da sessão existe
 ```php
 $session = $request->session();
 $has = $session->has('name');
 ```
-
-Quando a sessão correspondente não existe ou o valor da sessão correspondente é null, false é retornado; caso contrário, true é retornado.
+Retorna false se o valor não existir ou for null; caso contrário, retorna true.
 
 ```php
 $session = $request->session();
 $has = $session->exists('name');
 ```
-
-O código acima também é usado para verificar se um dado da sessão existe, mas difere no sentido de que, quando o valor associado à sessão é null, ele também retorna true.
+O código acima também verifica a existência de um valor na sessão. A diferença é que `exists` retorna true mesmo quando o valor é null.
 
 ## Função auxiliar session()
 
-> Adicionado em 09/12/2020
-
-O webman oferece a função auxiliar `session()` para realizar as mesmas funcionalidades.
-
+webman fornece a função auxiliar `session()` para as mesmas operações.
 ```php
 // Obter a instância da sessão
 $session = session();
@@ -143,24 +124,24 @@ $session = session();
 $session = $request->session();
 
 // Obter um valor
-$value = session('chave', 'padrão');
+$value = session('key', 'default');
 // Equivalente a
-$value = session()->get('chave', 'padrão');
+$value = session()->get('key', 'default');
 // Equivalente a
-$value = $request->session()->get('chave', 'padrão');
+$value = $request->session()->get('key', 'default');
 
 // Definir valores na sessão
-session(['chave1'=>'valor1', 'chave2' => 'valor2']);
+session(['key1'=>'value1', 'key2' => 'value2']);
 // Equivalente a
-session()->put(['chave1'=>'valor1', 'chave2' => 'valor2']);
+session()->put(['key1'=>'value1', 'key2' => 'value2']);
 // Equivalente a
-$request->session()->put(['chave1'=>'value1', 'chave2' => 'valor2']);
+$request->session()->put(['key1'=>'value1', 'key2' => 'value2']);
+
 ```
 
+
 ## Arquivo de configuração
-
-O arquivo de configuração da sessão está em `config/session.php` e é semelhante ao exemplo a seguir:
-
+O arquivo de configuração da sessão está em `config/session.php`. O conteúdo é semelhante a:
 ```php
 use Webman\Session\FileSessionHandler;
 use Webman\Session\RedisSessionHandler;
@@ -170,18 +151,18 @@ return [
     // FileSessionHandler::class ou RedisSessionHandler::class ou RedisClusterSessionHandler::class 
     'handler' => FileSessionHandler::class,
     
-    // Quando o manipulador é FileSessionHandler::class, o valor é file
-    // Quando o manipulador é RedisSessionHandler::class, o valor é redis
-    // Quando o manipulador é RedisClusterSessionHandler::class, o valor é redis_cluster (ou seja, cluster Redis)
+    // Quando handler é FileSessionHandler::class, o valor é 'file',
+    // quando handler é RedisSessionHandler::class, o valor é 'redis'
+    // quando handler é RedisClusterSessionHandler::class, o valor é 'redis_cluster' (cluster Redis)
     'type'    => 'file',
 
-    // Diferentes manipuladores de sessão usam diferentes configurações
+    // Diferentes handlers usam configurações diferentes
     'config' => [
-        // Configuração quando o tipo é file
+        // Configuração quando type é 'file'
         'file' => [
             'save_path' => runtime_path() . '/sessions',
         ],
-        // Configuração quando o tipo é redis
+        // Configuração quando type é 'redis'
         'redis' => [
             'host'      => '127.0.0.1',
             'port'      => 6379,
@@ -199,52 +180,19 @@ return [
         
     ],
 
-    'session_name' => 'PHPSESSID', // Nome do cookie para armazenar o session_id
-    
-    // === As configurações a seguir exigem webman-framework>=1.3.14 workerman>=4.0.37 ===
-    'auto_update_timestamp' => false,  // Atualizar automaticamente a sessão, padrão é desligado
+    'session_name' => 'PHPSID', // Nome do cookie para armazenar o session_id
+    'auto_update_timestamp' => false,  // Atualizar automaticamente a sessão, padrão: desligado
     'lifetime' => 7*24*60*60,          // Tempo de expiração da sessão
-    'cookie_lifetime' => 365*24*60*60, // Tempo de expiração do cookie para armazenar o session_id
-    'cookie_path' => '/',              // Caminho do cookie para armazenar o session_id
+    'cookie_lifetime' => 365*24*60*60, // Tempo de expiração do cookie que armazena o session_id
+    'cookie_path' => '/',              // Caminho do cookie que armazena o session_id
     'domain' => '',                    // Domínio do cookie que armazena o session_id
-    'http_only' => true,               // Ativar o httpOnly, padrão é ativar
-    'secure' => false,                 // Ativar a sessão apenas em https, padrão é desativar
-    'same_site' => '',                 // Usado para evitar ataques CSRF e rastreamento de usuários, valores possíveis: strict/lax/none
-    'gc_probability' => [1, 1000],     // Probabilidade de recolha da sessão
+    'http_only' => true,               // Habilitar httpOnly, padrão: habilitado
+    'secure' => false,                 // Habilitar sessão apenas em HTTPS, padrão: desligado
+    'same_site' => '',                 // Prevenir ataques CSRF e rastreamento de usuários, opções: strict/lax/none
+    'gc_probability' => [1, 1000],     // Probabilidade de coleta de sessão
 ];
 ```
 
-> **Observação** 
-> A partir de webman 1.4.0, o namespace do SessionHandler foi alterado de:
-> use Webman\FileSessionHandler;  
-> use Webman\RedisSessionHandler;  
-> use Webman\RedisClusterSessionHandler;  
-> Para:
-> use Webman\Session\FileSessionHandler;  
-> use Webman\Session\RedisSessionHandler;  
-> use Webman\Session\RedisClusterSessionHandler;  
+## Segurança
+Não é recomendável armazenar diretamente instâncias de classes na sessão, especialmente de classes de fontes não confiáveis. A desserialização pode introduzir riscos de segurança.
 
-
-
-## Configuração de tempo de vida
-
-Quando o webman-framework < 1.3.14, o tempo de expiração da sessão no webman precisa ser configurado no `php.ini`.
-
-```ini
-session.gc_maxlifetime = x
-session.cookie_lifetime = x
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-Por exemplo, se o tempo de expiração for definido como 1440 segundos, a configuração ficará assim:
-
-```ini
-session.gc_maxlifetime = 1440
-session.cookie_lifetime = 1440
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-> **Nota**
-> Você pode usar o comando `php --ini` para localizar o arquivo `php.ini`.

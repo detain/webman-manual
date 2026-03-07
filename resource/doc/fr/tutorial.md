@@ -1,4 +1,4 @@
-# Exemple simple
+# Exemple simple de démarrage rapide avec webman
 
 ## Retourner une chaîne de caractères
 **Créer un contrôleur**
@@ -106,6 +106,6 @@ hello <?=htmlspecialchars($name)?>
 ```
 
 Accédez à `http://127.0.0.1:8787/user/hello?name=tom`
-un page html contenant `hello tom` sera renvoyée.
+une page HTML contenant `hello tom` sera renvoyée.
 
-Remarque : webman utilise par défaut la syntaxe PHP native comme modèle. Pour utiliser d'autres vues, voir [View](view.md)
+Remarque : webman utilise par défaut la syntaxe PHP native comme modèle. Pour utiliser d'autres vues, consultez [Vues](view.md).

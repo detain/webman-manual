@@ -6,9 +6,43 @@
 composer require --dev phpunit/phpunit
 ```
 
+## Configurazione
+
+Aggiungere il file di configurazione `phpunit.xml` nella directory root del progetto. È possibile personalizzarlo in base alle esigenze del progetto. Consultare la [documentazione sulla configurazione di phpunit.xml](https://docs.phpunit.de/en/12.4/configuration.html).
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="support/bootstrap.php"
+    cacheDirectory=".phpunit.cache"
+    executionOrder="depends,defects"
+    shortenArraysForExportThreshold="10"
+    requireCoverageMetadata="false"
+    beStrictAboutCoverageMetadata="true"
+    beStrictAboutOutputDuringTests="true"
+    displayDetailsOnPhpunitDeprecations="true"
+    failOnPhpunitDeprecation="true"
+    failOnRisky="true"
+    failOnWarning="true"
+    colors="true">
+    <testsuites>
+        <testsuite name="tests">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </source>
+</phpunit>
+
+```
+
 ## Utilizzo
 
-Creare un nuovo file `tests/TestConfig.php` per testare la configurazione del database:
+Creare il file `tests/TestConfig.php` per testare la configurazione dell'applicazione:
 
 ```php
 <?php
@@ -27,10 +61,20 @@ class TestConfig extends TestCase
     }
 }
 ```
-
+  
 ## Esecuzione
 
-Eseguire nel directory radice del progetto: `./vendor/bin/phpunit --bootstrap support/bootstrap.php tests/TestConfig.php`
+Eseguire tutti i test dalla directory root del progetto:
+
+```bash
+./vendor/bin/phpunit
+```
+
+Eseguire un test specifico dalla directory root del progetto:
+
+```bash
+./vendor/bin/phpunit tests/TestConfig.php
+```
 
 Il risultato sarà simile al seguente:
 

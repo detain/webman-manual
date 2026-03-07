@@ -1,27 +1,31 @@
-# Быстрый старт
+# Быстрый старт с базой данных (на основе компонента Laravel)
 
-По умолчанию webman использует [illuminate/database](https://github.com/illuminate/database), то есть [база данных Laravel](https://learnku.com/docs/laravel/8.x/database/9400), ее использование аналогично Laravel.
+[webman/database](https://github.com/webman-php/database) построен на [illuminate/database](https://github.com/illuminate/database) и добавляет пул соединений для корутин и не-корутин сред. Использование такое же, как в Laravel.
 
-Конечно же, вы можете обратиться к разделу [Использование других компонентов базы данных](others.md), чтобы использовать ThinkPHP или другую базу данных.
+Также можно обратиться к разделу [Использование других компонентов базы данных](others.md), чтобы использовать ThinkPHP или другие базы данных.
 
-## Установка
+## Установка базы данных
 
-`composer require -W illuminate/database illuminate/pagination illuminate/events symfony/var-dumper`
+`composer require -W webman/database illuminate/pagination illuminate/events symfony/var-dumper`
 
-После установки необходимо выполнить restart (перезагрузка) (reload не сработает).
+После установки требуется перезапуск (restart), reload не сработает.
 
 > **Подсказка**
-> Если не требуется пагинация, события базы данных и вывод SQL, достаточно выполнить
-> `composer require -W illuminate/database`
+> webman/database зависит от `illuminate/database` Laravel, поэтому при установке автоматически устанавливаются зависимости `illuminate/database`.
 
-## Настройка базы данных
+> **Примечание**
+> Если не нужны пагинация, события БД и логирование SQL, достаточно выполнить:
+> `composer require -W webman/database`
+
+## Конфигурация базы данных
 `config/database.php`
 ```php
+
 return [
-    // По умолчанию используемая база данных
+    // База данных по умолчанию
     'default' => 'mysql',
 
-    // Настройки различных баз данных
+    // Настройки подключений
     'connections' => [
         'mysql' => [
             'driver'      => 'mysql',
@@ -37,15 +41,31 @@ return [
             'strict'      => true,
             'engine'      => null,
             'options' => [
-                \PDO::ATTR_TIMEOUT => 3
-            ]
+                PDO::ATTR_EMULATE_PREPARES => false, // Обязательно при использовании swoole или swow
+            ],
+            'pool' => [ // Пул соединений
+                'max_connections' => 5, // Максимальное число соединений
+                'min_connections' => 1, // Минимальное число соединений
+                'wait_timeout' => 3,    // Максимальное время ожидания соединения из пула; при превышении — исключение. Только в корутинной среде
+                'idle_timeout' => 60,   // Максимальное время простоя соединений; затем они закрываются до min_connections
+                'heartbeat_interval' => 50, // Интервал проверки пула (сек). Рекомендуется меньше 60
+            ],
         ],
     ],
 ];
 ```
 
+Кроме настроек `pool`, остальное совпадает с Laravel.
 
-## Использование
+## О пуле соединений
+* У каждого процесса свой пул соединений, между процессами пул не делится.
+* Без корутин запросы выполняются последовательно, нет конкурентности, поэтому в пуле не более одного соединения.
+* С корутинами запросы выполняются параллельно; пул подстраивает число соединений под нагрузку, не более `max_connections` и не менее `min_connections`.
+* Из-за лимита `max_connections`, когда корутин, работающих с БД, больше, часть ждёт в очереди до `wait_timeout` секунд; при превышении генерируется исключение.
+* В режиме простоя (и с корутинами, и без) соединения возвращаются в пул после `idle_timeout`, пока не достигнут `min_connections` (`min_connections` может быть 0).
+
+
+## Пример использования базы данных
 ```php
 <?php
 namespace app\controller;
@@ -64,3 +84,5 @@ class UserController
     }
 }
 ```
+
+Использование как в Laravel: метод `Db::table()` для работы с базой данных.

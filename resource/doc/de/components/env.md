@@ -1,21 +1,23 @@
-# vlucas/phpdotenv
+# ENV-Komponente vlucas/phpdotenv
 
 ## Beschreibung
 `vlucas/phpdotenv` ist eine Komponente zum Laden von Umgebungsvariablen und dient dazu, Konfigurationen für verschiedene Umgebungen (wie Entwicklungsumgebung, Testumgebung usw.) zu unterscheiden.
 
 ## Projektadresse
-https://github.com/vlucas/phpdotenv
 
+https://github.com/vlucas/phpdotenv
+  
 ## Installation
+ 
 ```php
 composer require vlucas/phpdotenv
-```
-
+ ```
+  
 ## Verwendung
 
-#### Erstellen Sie eine neue Datei namens `.env` im Stammverzeichnis des Projekts
+### Erstellen Sie eine neue `.env`-Datei im Projektstammverzeichnis
 **.env**
-``` 
+```
 DB_HOST = 127.0.0.1
 DB_PORT = 3306
 DB_NAME = test
@@ -23,7 +25,7 @@ DB_USER = foo
 DB_PASSWORD = 123456
 ```
 
-#### Ändern Sie die Konfigurationsdatei
+### Konfigurationsdatei anpassen
 **config/database.php**
 ```php
 return [
@@ -51,11 +53,12 @@ return [
 ```
 
 > **Hinweis**
-> Es wird empfohlen, die Datei `.env` in die `.gitignore`-Liste aufzunehmen, um zu vermeiden, dass sie dem Code-Repository hinzugefügt wird. Fügen Sie dem Code-Repository eine Beispielkonfigurationsdatei mit dem Namen `.env.example` hinzu, und kopieren Sie diese beim Projektdeploy als`.env`. Passen Sie dann die Konfiguration in `.env` je nach aktueller Umgebung an. Auf diese Weise können verschiedene Konfigurationen je nach Umgebung im Projekt geladen werden.
+> Es wird empfohlen, die `.env`-Datei in die `.gitignore`-Liste aufzunehmen, um sie nicht ins Code-Repository zu übernehmen. Fügen Sie stattdessen eine `.env.example`-Beispieldatei ins Repository ein. Beim Deployen des Projekts kopieren Sie `.env.example` als `.env` und passen die Konfiguration in `.env` an die aktuelle Umgebung an. So kann das Projekt je nach Umgebung unterschiedliche Konfigurationen laden.
 
-> **Anmerkung**
-> `vlucas/phpdotenv` kann in der PHP-TS-Version (Thread-sichere Version) Fehler aufweisen. Verwenden Sie daher die NTS-Version (nicht Thread-sichere Version).
-> Die aktuelle PHP-Version kann mit `php -v` überprüft werden.
+> **Achtung**
+> `vlucas/phpdotenv` kann in der PHP-TS-Version (Thread-Safe) Fehler verursachen. Verwenden Sie die NTS-Version (Non-Thread-Safe). Die aktuelle PHP-Version können Sie mit `php -v` prüfen.
 
 ## Weitere Informationen
+
 Besuchen Sie https://github.com/vlucas/phpdotenv
+  

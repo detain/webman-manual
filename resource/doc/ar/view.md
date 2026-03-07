@@ -1,85 +1,83 @@
-# 视图
-webman默认使用的是php原生语法作为模版，在打开`opcache`后具有最好的性能。除了php原生模版，webman还提供了[Twig](https://twig.symfony.com/doc/3.x/)、 [Blade](https://learnku.com/docs/laravel/8.x/blade/9377)、 [think-template](https://www.kancloud.cn/manual/think-template/content) 模版引擎。
+# العرض
+يستخدم webman بشكل افتراضي بناء جملة PHP الأصلي كقالب، ويحقق أفضل أداء عند تفعيل `opcache`. بالإضافة إلى قالب PHP الأصلي، يوفر webman محركات قوالب [Twig](https://twig.symfony.com/doc/3.x/)، [Blade](https://learnku.com/docs/laravel/8.x/blade/9377)، [think-template](https://www.kancloud.cn/manual/think-template/content).
 
-## 开启opcache
-使用视图时，强烈建议开启php.ini中`opcache.enable`和`opcache.enable_cli` 两个选项，以便模版引擎达到最好性能。
+## تفعيل opcache
+عند استخدام العرض، يُوصى بشدة بتفعيل خياري `opcache.enable` و `opcache.enable_cli` في ملف php.ini لتحقيق أفضل أداء لمحرك القوالب.
 
+## تثبيت Twig
+1. التثبيت عبر composer
 
-## 安装Twig
-1、composer安装
+   `composer require twig/twig`
 
-`composer require twig/twig`
+2. تعديل الإعدادات في `config/view.php` كالتالي
+   ```php
+   <?php
+   use support\view\Twig;
 
-2、修改配置`config/view.php`为
-```php
-<?php
-use support\view\Twig;
+   return [
+       'handler' => Twig::class
+   ];
+   ```
+   > **ملاحظة**
+   > يمكن تمرير خيارات الإعدادات الأخرى عبر options، مثلاً:
 
-return [
-    'handler' => Twig::class
-];
-```
-> **提示**
-> 其它配置选项通过options传入，例如  
+   ```php
+   return [
+       'handler' => Twig::class,
+       'options' => [
+           'debug' => false,
+           'charset' => 'utf-8'
+       ]
+   ];
+   ```
 
-```php
-return [
-    'handler' => Twig::class,
-    'options' => [
-        'debug' => false,
-        'charset' => 'utf-8'
-    ]
-];
-```
+## تثبيت Blade
+1. التثبيت عبر composer
 
+   ```
+   composer require psr/container ^1.1.1 webman/blade
+   ```
 
-## 安装Blade
-1、composer安装
+2. تعديل الإعدادات في `config/view.php` كالتالي
+   ```php
+   <?php
+   use support\view\Blade;
 
-```
-composer require psr/container ^1.1.1 webman/blade
-```
+   return [
+       'handler' => Blade::class
+   ];
+   ```
 
-2、修改配置`config/view.php`为
-```php
-<?php
-use support\view\Blade;
+## تثبيت think-template
+1. التثبيت عبر composer
 
-return [
-    'handler' => Blade::class
-];
-```
+   `composer require topthink/think-template`
 
-## 安装think-template
-1、composer安装
+2. تعديل الإعدادات في `config/view.php` كالتالي
+   ```php
+   <?php
+   use support\view\ThinkPHP;
 
-`composer require topthink/think-template`
+   return [
+       'handler' => ThinkPHP::class,
+   ];
+   ```
+   > **ملاحظة**
+   > يمكن تمرير خيارات الإعدادات الأخرى عبر options، مثلاً:
 
-2、修改配置`config/view.php`为
-```php
-<?php
-use support\view\ThinkPHP;
+   ```php
+   return [
+       'handler' => ThinkPHP::class,
+       'options' => [
+           'view_suffix' => 'html',
+           'tpl_begin' => '{',
+           'tpl_end' => '}'
+       ]
+   ];
+   ```
 
-return [
-    'handler' => ThinkPHP::class,
-];
-```
-> **提示**
-> 其它配置选项通过options传入，例如
-
-```php
-return [
-    'handler' => ThinkPHP::class,
-    'options' => [
-        'view_suffix' => 'html',
-        'tpl_begin' => '{',
-        'tpl_end' => '}'
-    ]
-];
-```
-
-## 原生PHP模版引擎例子
-创建文件 `app/controller/UserController.php` 如下
+## مثال على محرك قالب PHP الأصلي
+إنشاء الملف `app/controller/UserController.php` كالتالي:
 
 ```php
 <?php
@@ -96,7 +94,7 @@ class UserController
 }
 ```
 
-新建文件 `app/view/user/hello.html` 如下
+إنشاء الملف `app/view/user/hello.html` كالتالي:
 
 ```html
 <!doctype html>
@@ -111,9 +109,9 @@ hello <?=htmlspecialchars($name)?>
 </html>
 ```
 
-## Twig模版引擎例子
+## مثال على محرك قالب Twig
 
-修改配置`config/view.php`为
+تعديل الإعدادات في `config/view.php` كالتالي:
 ```php
 <?php
 use support\view\Twig;
@@ -123,7 +121,7 @@ return [
 ];
 ```
 
-`app/controller/UserController.php` 如下
+الملف `app/controller/UserController.php` كالتالي:
 
 ```php
 <?php
@@ -140,7 +138,7 @@ class UserController
 }
 ```
 
-文件 `app/view/user/hello.html` 如下
+الملف `app/view/user/hello.html` كالتالي:
 
 ```html
 <!doctype html>
@@ -155,10 +153,10 @@ hello {{name}}
 </html>
 ```
 
-更多文档参考 [Twig](https://twig.symfony.com/doc/3.x/) 
+للمزيد من الوثائق راجع [Twig](https://twig.symfony.com/doc/3.x/)
 
-## Blade 模版的例子
-修改配置`config/view.php`为
+## مثال على قالب Blade
+تعديل الإعدادات في `config/view.php` كالتالي:
 ```php
 <?php
 use support\view\Blade;
@@ -168,7 +166,7 @@ return [
 ];
 ```
 
-`app/controller/UserController.php` 如下
+الملف `app/controller/UserController.php` كالتالي:
 
 ```php
 <?php
@@ -185,9 +183,9 @@ class UserController
 }
 ```
 
-文件 `app/view/user/hello.blade.php` 如下
+الملف `app/view/user/hello.blade.php` كالتالي:
 
-> 注意blade模版后缀名为`.blade.php`
+> لاحظ أن امتداد قالب blade هو `.blade.php`
 
 ```html
 <!doctype html>
@@ -202,10 +200,10 @@ hello {{$name}}
 </html>
 ```
 
-更多文档参考 [Blade](https://learnku.com/docs/laravel/8.x/blade/9377)
+للمزيد من الوثائق راجع [Blade](https://learnku.com/docs/laravel/8.x/blade/9377)
 
-## ThinkPHP 模版的例子
-修改配置`config/view.php`为
+## مثال على قالب ThinkPHP
+تعديل الإعدادات في `config/view.php` كالتالي:
 ```php
 <?php
 use support\view\ThinkPHP;
@@ -215,7 +213,7 @@ return [
 ];
 ```
 
-`app/controller/UserController.php` 如下
+الملف `app/controller/UserController.php` كالتالي:
 
 ```php
 <?php
@@ -232,8 +230,7 @@ class UserController
 }
 ```
 
-文件 `app/view/user/hello.html` 如下
-
+الملف `app/view/user/hello.html` كالتالي:
 
 ```html
 <!doctype html>
@@ -248,10 +245,10 @@ hello {$name}
 </html>
 ```
 
-更多文档参考 [think-template](https://www.kancloud.cn/manual/think-template/content)
+للمزيد من الوثائق راجع [think-template](https://www.kancloud.cn/manual/think-template/content)
 
-## 模版赋值
-除了使用`view(模版, 变量数组)`给模版赋值，我们还可以在任意位置通过调用`View::assign()`给模版赋值。例如：
+## تعيين القالب
+بالإضافة إلى استخدام `view(القالب، مصفوفة_المتغيرات)` لتعيين القالب، يمكننا أيضاً استدعاء `View::assign()` في أي مكان لتعيين القالب. مثلاً:
 ```php
 <?php
 namespace app\controller;
@@ -273,19 +270,19 @@ class UserController
 }
 ```
 
-`View::assign()`在某些场景下非常有用，例如某系统每个页面首部都要显示当前登录者信息，如果每个页面都将此信息通过 `view('模版', ['user_info' => '用户信息']);` 赋值将非常麻烦。解决办法就是在中间件中获得用户信息，然后通过`View::assign()`将用户信息赋值给模版。
+يكون `View::assign()` مفيداً جداً في بعض السيناريوهات، مثلاً عندما يتعين عرض معلومات المستخدم الحالي المسجل دخوله في رأس كل صفحة في نظام ما. سيكون من المرهق تعيين هذه المعلومات في كل صفحة عبر `view('القالب', ['user_info' => 'معلومات المستخدم']);`. الحل هو الحصول على معلومات المستخدم في الوسيط ثم تعيينها للقالب عبر `View::assign()`.
 
-## 关于视图文件路径
+## حول مسار ملف العرض
 
-#### 控制器
-当控制器调用`view('模版名',[]);`时，视图文件按照如下规则查找：
+#### المتحكم
+عندما يستدعي المتحكم `view('اسم_القالب',[]);`، يتم البحث عن ملف العرض وفق القواعد التالية:
 
-1. `/`开头则直接使用该路径查找视图文件
-2. 不是以`/`开头并且非多应用时，使用 `app/view/` 下对应的视图文件
-3. 不是以`/`开头并且是[多应用](multiapp.md)时，使用 `app/应用名/view/` 下对应的视图文件
-4. 如果不传模板参数，自动根据2 3规则查找模板文件
+1. إذا بدأ المسار بـ `/`، استخدم هذا المسار مباشرة للبحث عن ملف العرض
+2. إذا لم يبدأ بـ `/` ولم تكن تطبيقاً متعدداً، استخدم ملف العرض المقابل تحت `app/view/`
+3. إذا لم يبدأ بـ `/` وكان [تطبيقاً متعدداً](multiapp.md)، استخدم ملف العرض المقابل تحت `app/اسم_التطبيق/view/`
+4. إذا لم يتم تمرير معامل القالب، يتم البحث عن ملف القالب تلقائياً وفق القاعدتين 2 و 3
 
-例子：
+مثال:
 ```php
 <?php
 namespace app\controller;
@@ -296,29 +293,27 @@ class UserController
 {
     public function hello(Request $request)
     {
-        // 等价于 return view('user/hello', ['name' => 'webman']);
-        // 等价于 return view('/app/view/user/hello', ['name' => 'webman']);
+        // يعادل return view('user/hello', ['name' => 'webman']);
+        // يعادل return view('/app/view/user/hello', ['name' => 'webman']);
         return view(['name' => 'webman']);
     }
 }
 ```
 
-#### 闭包函数
-闭包函数`$request->app` 为空，不属于任何应用，所以闭包函数使用`app/view/`下的视图文件，例如 `config/route.php` 里定义路由
+#### دالة الإغلاق
+دالة الإغلاق `$request->app` فارغة ولا تنتمي إلى أي تطبيق، لذلك تستخدم دالة الإغلاق ملفات العرض تحت `app/view/`، مثلاً عند تعريف المسار في `config/route.php`:
 ```php
-Route::any('/admin/user/get', function (Reqeust $reqeust) {
+Route::any('/admin/user/get', function (Request $request) {
     return view('user', []);
 });
 ```
-会使用`app/view/user.html`作为模版文件(当使用blade模版时模版文件为`app/view/user.blade.php`)。
+سيتم استخدام `app/view/user.html` كملف قالب (عند استخدام قالب blade يكون ملف القالب `app/view/user.blade.php`).
 
-#### 指定应用
-为了多应用模式下模版可以复用，view($template, $data, $app = null) 提供了第三个参数 `$app`，可以用来指定使用哪个应用目录下的模版。例如 `view('user', [], 'admin');` 会强制使用 `app/admin/view/` 下的视图文件。
+#### تحديد التطبيق
+لتمكين إعادة استخدام القوالب في وضع التطبيقات المتعددة، يوفر `view($template, $data, $app = null)` المعامل الثالث `$app` لتحديد قالب أي مجلد تطبيق سيتم استخدامه. مثلاً `view('user', [], 'admin');` سيُجبر على استخدام ملفات العرض تحت `app/admin/view/`.
 
-#### 省略模板参数
-
-
-在类的控制器里可以省略模板参数，例如
+#### حذف معامل القالب
+في المتحكمات المعتمدة على الصنف، يمكنك حذف معامل القالب. مثلاً:
 ```php
 <?php
 namespace app\controller;
@@ -329,33 +324,32 @@ class UserController
 {
     public function hello(Request $request)
     {
-        // 等价于 return view('user/hello', ['name' => 'webman']);
-        // 等价于 return view('/app/view/user/hello', ['name' => 'webman']);
+        // يعادل return view('user/hello', ['name' => 'webman']);
+        // يعادل return view('/app/view/user/hello', ['name' => 'webman']);
         return view(['name' => 'webman']);
     }
 }
 ```
 
-## 扩展twig
+## تمديد twig
 
-我们可以通过给配置`view.extension`回调，来扩展twig视图实例，例如`config/view.php`如下
+يمكننا تمديد مثيل عرض twig من خلال توفير رد اتصال `view.extension` في الإعدادات، مثلاً `config/view.php` كالتالي:
 ```php
 <?php
 use support\view\Twig;
 return [
     'handler' => Twig::class,
     'extension' => function (\Twig\Environment $twig) {
-        $twig->addExtension(new your\namespace\YourExtension()); // 增加Extension
-        $twig->addFilter(new \Twig\TwigFilter('rot13', 'str_rot13')); // 增加Filter
-        $twig->addFunction(new \Twig\TwigFunction('function_name', function () {})); // 增加函数
+        $twig->addExtension(new your\namespace\YourExtension()); // إضافة امتداد
+        $twig->addFilter(new \Twig\TwigFilter('rot13', 'str_rot13')); // إضافة فلتر
+        $twig->addFunction(new \Twig\TwigFunction('function_name', function () {})); // إضافة دالة
     }
 ];
 ```
 
+## تمديد blade
 
-## 扩展blade
-
-同样的我们可以通过给配置`view.extension`回调，来扩展blade视图实例，例如`config/view.php`如下
+وبالمثل يمكننا تمديد مثيل عرض blade من خلال توفير رد اتصال `view.extension` في الإعدادات، مثلاً `config/view.php` كالتالي:
 
 ```php
 <?php
@@ -363,7 +357,7 @@ use support\view\Blade;
 return [
     'handler' => Blade::class,
     'extension' => function (Jenssegers\Blade\Blade $blade) {
-        // 给blade添加指令
+        // إضافة توجيهات إلى blade
         $blade->directive('mydate', function ($timestamp) {
             return "<?php echo date('Y-m-d H:i:s', $timestamp); ?>";
         });
@@ -371,11 +365,11 @@ return [
 ];
 ```
 
-## blade使用component组件
+## استخدام مكون component في blade
 
-假设需要添加一个Alert组件
+لنفترض أننا بحاجة إلى إضافة مكون Alert
 
-**新建 `app/view/components/Alert.php`**
+**إنشاء `app/view/components/Alert.php` جديد**
 ```php
 <?php
 
@@ -398,14 +392,14 @@ class Alert extends Component
 }
 ```
 
-**新建 `app/view/components/alert.blade.php`**
+**إنشاء `app/view/components/alert.blade.php` جديد**
 ```
 <div>
     <b style="color: red">hello blade component</b>
 </div>
 ```
 
-**`/config/view.php`类似如下代码**
+**الكود في `/config/view.php` مشابه لما يلي:**
 
 ```php
 <?php
@@ -418,7 +412,7 @@ return [
 ];
 ```
 
-至此，Blade组件Alert设置完毕，模版里使用时类似如下
+بهذا يكون مكون Blade Alert جاهزاً، وعند الاستخدام في القالب يكون كما يلي:
 ```html
 <!doctype html>
 <html>
@@ -434,9 +428,8 @@ return [
 </html>
 ```
 
-
-## 扩展think-template
-think-template 使用`view.options.taglib_pre_load`来扩展标签库，例如
+## تمديد think-template
+يستخدم think-template `view.options.taglib_pre_load` لتمديد مكتبة العلامات، مثلاً:
 ```php
 <?php
 use support\view\ThinkPHP;
@@ -448,4 +441,4 @@ return [
 ];
 ```
 
-详情参考 [think-template标签扩展](https://www.kancloud.cn/manual/think-template/1286424)
+للتفاصيل راجع [تمديد علامات think-template](https://www.kancloud.cn/manual/think-template/1286424)

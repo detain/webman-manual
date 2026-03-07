@@ -6,12 +6,12 @@
 - Cada proceso puede manejar múltiples solicitudes durante su ciclo de vida.
 - Cuando un proceso recibe comandos de "stop", "reload" o "restart", ejecutará una salida, terminando el ciclo de vida actual.
 
-> **Nota**
-> Cada proceso es independiente y sin interferencias, lo que significa que cada proceso mantiene sus propios recursos, variables y instancias de clases, lo que se manifiesta en cada proceso teniendo su propia conexión a base de datos. Algunos singletons se inicializan en cada proceso, lo que resulta en múltiples inicializaciones en varios procesos.
+> **Consejo**
+> Cada proceso es independiente y no interfiere con los demás, lo que significa que cada proceso mantiene sus propios recursos, variables e instancias de clase. Esto se refleja en que cada proceso tiene su propia conexión a base de datos, y algunos singletons se inicializan una vez por proceso, por lo que múltiples procesos darán lugar a múltiples inicializaciones.
 
 ## Ciclo de vida de la solicitud
 - Cada solicitud generará un objeto `$request`.
-- El objeto `$request` será recolectado después de que se complete el manejo de la solicitud.
+- El objeto `$request` se recicla después de que se complete el procesamiento de la solicitud.
 
 ## Ciclo de vida del controlador
 - Cada controlador solo se instanciará una vez por cada proceso, pero se instanciará varias veces en múltiples procesos (excepto cuando se desactiva la reutilización del controlador, consulte [Ciclo de vida del controlador](https://www.workerman.net/doc/webman/controller.html#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F)).
@@ -63,7 +63,7 @@ El método `Container::get()` se utiliza para crear y guardar instancias de clas
 > **Nota**
 > `Container::get()` solo puede inicializar instancias sin parámetros de constructor. `Container::make()` puede crear instancias con parámetros de constructor, pero a diferencia de `Container::get()`, `Container::make()` no reutilizará la instancia, es decir, incluso si se llama con los mismos parámetros, `Container::make()` siempre devolverá una nueva instancia.
 
-# Sobre las fugas de memoria
+## Sobre las fugas de memoria
 En la gran mayoría de los casos, nuestro código empresarial no sufrirá fugas de memoria (muy raramente los usuarios informan sobre fugas de memoria). Solo necesitamos prestar un poco de atención para evitar la expansión infinita de datos de largo ciclo de vida. Por ejemplo:
 
 ```php

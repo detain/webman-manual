@@ -1,4 +1,4 @@
-# Ứng dụng đa nhiệm
+# Nhiều ứng dụng
 
 Đôi khi một dự án có thể chia thành nhiều dự án con, ví dụ, một cửa hàng có thể chia thành ba dự án con bao gồm: dự án chính của cửa hàng, giao diện lập trình ứng dụng (API) của cửa hàng và trang quản trị của cửa hàng. Tất cả họ đều sử dụng cấu hình cơ sở dữ liệu giống nhau.
 
@@ -22,6 +22,8 @@ Khi truy cập vào địa chỉ `http://127.0.0.1:8787/shop/{controller}/{metho
 Khi truy cập vào địa chỉ `http://127.0.0.1:8787/api/{controller}/{method}` thì truy cập vào các điều khiển và phương thức trong `app/api/controller`.
 
 Khi truy cập vào địa chỉ `http://127.0.0.1:8787/admin/{controller}/{method}` thì truy cập vào các điều khiển và phương thức trong `app/admin/controller`.
+
+Trong webman, mỗi thư mục dưới app có thể được coi là một ứng dụng.
 
 Trong webman, thậm chí bạn có thể lên kế hoạch thư mục ứng dụng như sau:
 ```
@@ -55,7 +57,7 @@ class FooController
 ```
 
 ## Cấu hình tiền xử lý đa ứng dụng
-Đôi khi bạn muốn cấu hình các tiền xử lý khác nhau cho các ứng dụng khác nhau, ví dụ như ứng dụng `api` có thể cần một tiền xử lý chuyển tiếp (middleware) còn `admin` cần một tiền xử lý kiểm tra đăng nhập quản trị viên. Trong trường hợp này, tệp cấu hình `config/midlleware.php` có thể giống như sau:
+Đôi khi bạn muốn cấu hình các tiền xử lý khác nhau cho các ứng dụng khác nhau, ví dụ như ứng dụng `api` có thể cần một tiền xử lý chuyển tiếp (middleware) còn `admin` cần một tiền xử lý kiểm tra đăng nhập quản trị viên. Trong trường hợp này, tệp cấu hình `config/middleware.php` có thể giống như sau:
 ```php
 return [
     // Tiền xử lý toàn cầu

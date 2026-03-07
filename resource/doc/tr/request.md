@@ -64,6 +64,21 @@ Get yöntemi ile benzer şekilde, ikinci bir parametre olarak post yöntemine va
 $request->post('name', 'tom');
 ```
 
+## Yardımcı fonksiyon input()
+`$request->input()` ile benzer şekilde, `input()` yardımcı fonksiyonu tüm parametreleri alabilir. İki parametresi vardır:
+1. name: alınacak parametrenin adı (boşsa tüm parametrelerin dizisini alır)
+2. default: varsayılan değer (ilk argümandan parametre bulunamazsa kullanılır)
+
+**Örnek**
+```php
+// name parametresini al
+$name = input('name');
+// name parametresini al, yoksa varsayılan değeri kullan
+$name = input('name', 'Ahmet');
+// Tüm parametreleri al
+$all_params = input();
+```
+
 ## Raw Post İsteği Almak
 ```php
 $post = $request->rawBody();
@@ -126,15 +141,54 @@ $only = $request->only(['username', 'password']);
 // Avatar ve yaş dışındaki tüm girişleri al
 $except = $request->except(['avatar', 'age']);
 ```
+
+## Denetleyici parametreleri ile giriş alma
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Yukarıdaki mantık şununla eşdeğerdir:
+```php
+<?php
+namespace app\controller;
+use support\Request;
+use support\Response;
+
+class UserController
+{
+    public function create(Request $request): Response
+    {
+        $name = $request->input('name');
+        $age = (int)$request->input('age', 18);
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Daha fazla bilgi için [Denetleyici parametre bağlama](controller.md#denetleyici-parametre-bağlama) bölümüne bakın.
+
 ## Dosya Yükleme
+
+> **Not**
+> Dosya yüklemesi `multipart/form-data` biçiminde bir form gerektirir.
+
 **Tüm yükleme dosyası dizisini alın**
 ```php
 $request->file();
 ```
 
-Forma benzer:
+Form örneği:
 ```html
-<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
+<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data">
 <input name="file1" multiple="multiple" type="file">
 <input name="file2" multiple="multiple" type="file">
 <input type="submit">
@@ -295,7 +349,7 @@ $request->getRealIp($safe_mode=true);
 
 Projede bir işaretleme (örneğin nginx) kullanıldığında, `$request->getRemoteIp()` kullanılarak genellikle temsilci sunucusu IP'si (örneğin `127.0.0.1` `192.168.x.x`) elde edilir, gerçek istemci IP'si değil. Bu durumda, istemci gerçek IP'sini elde etmek için `$request->getRealIp()` kullanılabilir.
 
-`$request->getRealIp()`, gerçek IP'yi almak için HTTP başlığının `x-real-ip`, `x-forwarded-for`, `client-ip`, `x-client-ip`, `via` alanlarından almaya çalışacaktır.
+`$request->getRealIp()`, gerçek IP'yi almak için HTTP başlığının `x-forwarded-for`, `x-real-ip`, `client-ip`, `x-client-ip`, `via` alanlarından almaya çalışacaktır.
 
 > HTTP başlıkları kolayca sahte olabileceğinden, bu yöntemle elde edilen istemci IP'si %100 güvenilir değildir, özellikle `$safe_mode` false ise. İstemci gerçek IP'sini bir temsilciden güvenilir bir şekilde almak için, bilinen güvenli bir temsilci sunucusu IP'sini bilmek ve gerçek IP'nin hangi HTTP başlığıyla taşındığını bilmek gereklidir. Eğer `$request->getRemoteIp()` dönen IP, bilinen güvenli bir temsilci sunucusunu doğrularsa, o zaman gerçek IP'yi almak için `$request->header('gerçek IP'yi içeren HTTP başlığı')` kullanılabilir.
 
@@ -338,13 +392,10 @@ $request->acceptJson();
 
 
 ## İstek Plugin Adını Alma
-Plugin isteği boş dize `''` olarak döner.
+Plugin isteği olmayan istekler boş dize `''` döner.
 ```php
 $request->plugin;
 ```
-> Bu özellik için webman>=1.4.0 gereklidir
-
-
 
 ## İstek Uygulama Adını Alma
 Tek uygulamada her zaman boş dize `''` döner, [çoklu uygulamada](multiapp.md) uygulama adını döner
@@ -379,3 +430,33 @@ $request->action;
 
 > Kapanış fonksiyonları herhangi bir denetleyiciye ait olmadığı için, kapanış rotasından gelen isteklerde `$request->action` daima boş dize `''` döner
 > Kapanış rotası için bakınız: [Rotalar](route.md)
+
+## Parametreleri Üzerine Yazma
+
+Bazen istek parametrelerini üzerine yazmak isteriz, örneğin isteği filtreleyip sonra istek nesnesine yeniden atamak. Bu durumda `setGet()`, `setPost()` ve `setHeader()` yöntemlerini kullanabiliriz.
+
+#### GET parametrelerini üzerine yazma
+```php
+$request->get(); // Sonucun ['name' => 'tom', 'age' => 18] olduğunu varsayalım
+$request->setGet(['name' => 'tom']);
+$request->get(); // Nihai sonuç ['name' => 'tom']
+```
+
+> **Not**
+> Örnekte gösterildiği gibi, `setGet()` tüm GET parametrelerini üzerine yazar. `setPost()` ve `setHeader()` de aynı şekilde davranır.
+
+#### POST parametrelerini üzerine yazma
+```php
+$post = $request->post();
+foreach ($post as $key => $value) {
+    $post[$key] = htmlspecialchars($value);
+}
+$request->setPost($post);
+$request->post(); // Filtrelenmiş post parametrelerini al
+```
+
+#### HEADER parametrelerini üzerine yazma
+```php
+$request->setHeader(['host' => 'example.com']);
+$request->header('host'); // Çıktı: example.com
+```

@@ -61,7 +61,7 @@ return [
 Damit haben wir einen Geschäftsinitialisierungsprozess abgeschlossen.
 
 ## Zusätzliche Hinweise
-[Benutzerdefinierte Prozesse](../process.md) führen die in `config/bootstrap.php` konfigurierte `start`-Methode ebenfalls aus. Durch Überprüfen von `$worker->name` können wir feststellen, um welchen Prozess es sich handelt, und entscheiden, ob Ihr Geschäftsinitialisierungscode in diesem Prozess ausgeführt werden soll. Angenommen, wir müssen den `monitor`-Prozess nicht überwachen, dann könnte der Inhalt von `MemReport.php` wie folgt aussehen:
+[Benutzerdefinierte Prozesse](../process.md) führen nach dem Start ebenfalls die in `config/bootstrap.php` konfigurierte `start`-Methode aus. Wir können mit `$worker->name` feststellen, welcher Prozess aktuell läuft, und mit `$worker->id` die Prozessnummer ermitteln. Anschließend können wir entscheiden, ob Ihr Geschäftsinitialisierungscode in diesem Prozess ausgeführt werden soll. Sollen wir die Initialisierung beispielsweise nur in Webmans Prozess 0 ausführen, könnte der Inhalt von `MemReport.php` wie folgt aussehen:
 ```php
 <?php
 
@@ -79,9 +79,9 @@ class MemReport implements Bootstrap
             // Wenn Sie nicht möchten, dass diese Initialisierung in der Befehlszeilenumgebung ausgeführt wird, geben Sie hier einfach zurück
             return;
         }
-        
-        // Der Monitorprozess führt den Timer nicht aus
-        if ($worker->name == 'monitor') {
+
+        // Nur in Webmans Prozess 0 ausführen
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

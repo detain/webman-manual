@@ -232,8 +232,7 @@ return [
 
 ## 설명
 
-- 중간웨어에는 전역 중간웨어, 응용 프로그램 중간웨어(다중 응용 프로그램 모드에서만 유효, [다중 앱](multiapp.md)참조) 및 라우팅 중간웨어가 있습니다.
-- 현재 단일 컨트롤러의 중간웨어를 지원하지 않지만, 중간웨어 내에서 `$request->controller`를 확인하여 컨트롤러 중간웨어 기능과 유사한 기능을 구현할 수 있습니다.
+- 중간웨어에는 전역 중간웨어, 응용 프로그램 중간웨어(다중 응용 프로그램 모드에서만 유효, [다중 앱](multiapp.md) 참조) 및 라우팅 중간웨어가 있습니다.
 - 중간웨어 구성 파일의 위치는 `config/middleware.php`입니다.
 - 전역 중간웨어는 `''` 키 하위에 구성됩니다.
 - 응용 프로그램 중간웨어는 각 응용 프로그램 이름 아래에 구성됩니다. 예시:
@@ -250,6 +249,31 @@ return [
         app\middleware\ApiOnly::class,
     ]
 ];
+```
+
+## 컨트롤러 중간웨어 및 메서드 중간웨어
+
+어노테이션을 사용하여 특정 컨트롤러 또는 컨트롤러의 특정 메서드에 중간웨어를 설정할 수 있습니다.
+
+```php
+<?php
+namespace app\controller;
+use app\middleware\Controller1Middleware;
+use app\middleware\Controller2Middleware;
+use app\middleware\Method1Middleware;
+use app\middleware\Method2Middleware;
+use support\annotation\Middleware;
+use support\Request;
+
+#[Middleware(Controller1Middleware::class, Controller2Middleware::class)]
+class IndexController
+{
+    #[Middleware(Method1Middleware::class, Method2Middleware::class)]
+    public function index(Request $request): string
+    {
+        return 'hello';
+    }
+}
 ```
 
 ## 라우팅 중간웨어
@@ -278,19 +302,14 @@ Route::group('/blog', function () {
 ```
 ## 미들웨어 생성자 매개변수 전달
 
-> **주의**
-> 이 기능은 webman-framework >= 1.4.8 이상이 필요합니다.
-
-1.4.8 버전 이후, 설정 파일에서 미들웨어를 직접 인스턴스화하거나 익명 함수로 만들어서 생성자를 통해 미들웨어에 매개변수를 전달할 수 있습니다.
-예를 들어 `config/middleware.php`에서 다음과 같이 구성할 수도 있습니다.
-```php
+설정 파일에서 미들웨어를 직접 인스턴스화할 수 있어 생성자를 통해 매개변수를 편리하게 전달할 수 있습니다.
+예를 들어 `config/middleware.php`에서 다음과 같이 구성할 수 있습니다.
+```
 return [
-    // 전역 미들웨어
+    // 전역 중간웨어
     '' => [
         new app\middleware\AuthCheckTest($param1, $param2, ...),
-        function(){
-            return new app\middleware\AccessControlTest($param1, $param2, ...);
-        },
+        new app\middleware\AccessControlTest($param1, $param2, ...)
     ],
     // API 애플리케이션 미들웨어(다중 애플리케이션 모드에서만 유효)
     'api' => [
@@ -299,20 +318,47 @@ return [
 ];
 ```
 
-마찬가지로 라우팅 미들웨어도 생성자를 통해 매개변수를 전달할 수 있습니다. 예를 들어 `config/route.php`에서 다음과 같이 구성할 수도 있습니다.
-```php
+마찬가지로 라우팅 미들웨어도 생성자를 통해 매개변수를 전달할 수 있습니다. 예를 들어 `config/route.php`에서 다음과 같이 구성할 수 있습니다.
+```
 Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->middleware([
     new app\middleware\MiddlewareA($param1, $param2, ...),
-    function(){
-        return new app\middleware\MiddlewareB($param1, $param2, ...);
-    },
+    new app\middleware\MiddlewareB($param1, $param2, ...),
 ]);
 ```
 
+중간웨어에서 매개변수 사용 예시
+```
+<?php
+namespace app\middleware;
+
+use Webman\MiddlewareInterface;
+use Webman\Http\Response;
+use Webman\Http\Request;
+
+class MiddlewareA implements MiddlewareInterface
+{
+    protected $param1;
+
+    protected $param2;
+
+    public function __construct($param1, $param2)
+    {
+        $this->param1 = $param1;
+        $this->param2 = $param2;
+    }
+
+    public function process(Request $request, callable $handler) : Response
+    {
+        var_dump($this->param1, $this->param2);
+        return $handler($request);
+    }
+}
+```
+
 ## 미들웨어 실행 순서
-- 미들웨어 실행 순서는 `전역 미들웨어` -> `애플리케이션 미들웨어` -> `라우팅 미들웨어` 순입니다.
-- 여러 개의 전역 미들웨어가있는 경우, 미들웨어의 구성 순서대로 실행됩니다(애플리케이션 미들웨어 및 라우팅 미들웨어도 마찬가지).
-- 404 요청은 전역 미들웨어를 비롯한 어떤 미들웨어도 트리거하지 않습니다.
+- 미들웨어 실행 순서는 `전역 미들웨어` -> `애플리케이션 미들웨어` -> `컨트롤러 미들웨어` -> `라우팅 미들웨어` -> `메서드 미들웨어` 순입니다.
+- 동일한 계층에 여러 미들웨어가 있는 경우 해당 계층의 미들웨어 실제 구성 순서대로 실행됩니다.
+- 404 요청은 기본적으로 어떤 미들웨어도 트리거하지 않습니다(단, `Route::fallback(function(){})->middleware()`로 미들웨어를 추가할 수 있습니다).
 
 ## 라우팅을 통해 미들웨어에 매개변수 전달(route->setParams)
 
@@ -388,10 +434,8 @@ class FooController
 ```
 
 ## 미들웨어에서 현재 요청 라우팅 정보 가져오기
-> **주의**
-> webman-framework >= 1.3.2가 필요합니다.
 
-`$request->route`를 사용하여 라우팅 객체를 가져와 해당 정보를 가져올 수 있습니다.
+`$request->route`를 사용하여 라우팅 객체를 가져와 해당 메서드를 호출하여 관련 정보를 가져올 수 있습니다.
 
 **라우팅 구성**
 ```php
@@ -432,12 +476,7 @@ class Hello implements MiddlewareInterface
 }
 ```
 
-> **주의**
-> `$route->param()` 메서드는 webman-framework >= 1.3.16가 필요합니다.
-
 ## 미들웨어에서 예외 가져오기
-> **주의**
-> webman-framework >= 1.3.15가 필요합니다.
 
 비즈니스 처리 중에 예외가 발생할 수 있으며, 미들웨어에서 `$response->exception()`을 사용하여 예외를 가져올 수 있습니다.
 
@@ -474,3 +513,37 @@ class Hello implements MiddlewareInterface
     }
 }
 ```
+
+## 초글로벌 미들웨어
+
+메인 프로젝트의 전역 미들웨어는 메인 프로젝트에만 영향을 미치며 [애플리케이션 플러그인](app/app.md)에는 영향을 주지 않습니다. 때로는 모든 플러그인을 포함한 전체에 영향을 주는 미들웨어를 추가하고 싶을 수 있으며, 이 경우 초글로벌 미들웨어를 사용할 수 있습니다.
+
+`config/middleware.php`에서 다음과 같이 구성합니다:
+
+```php
+return [
+    '@' => [ // 메인 프로젝트 및 모든 플러그인에 전역 미들웨어 추가
+        app\middleware\MiddlewareGlobl::class,
+    ], 
+    '' => [], // 메인 프로젝트에만 전역 미들웨어 추가
+];
+```
+
+> **팁**
+> `@` 초글로벌 미들웨어는 메인 프로젝트뿐만 아니라 플러그인에서도 구성할 수 있습니다. 예를 들어 `plugin/ai/config/middleware.php`에서 `@` 초글로벌 미들웨어를 구성하면 메인 프로젝트 및 모든 플러그인에 영향을 미칩니다.
+
+## 특정 플러그인에 미들웨어 추가하기
+
+때로는 특정 [애플리케이션 플러그인](app/app.md)에 미들웨어를 추가하고 싶지만 플러그인 코드를 수정하고 싶지 않을 수 있습니다(업그레이드 시 덮어쓰여지므로). 이 경우 메인 프로젝트에서 해당 플러그인에 미들웨어를 구성할 수 있습니다.
+
+`config/middleware.php`에서 다음과 같이 구성합니다:
+
+```php
+return [
+    'plugin.ai' => [], // ai 플러그인에 미들웨어 추가
+    'plugin.ai.admin' => [], // ai 플러그인의 admin 모듈(plugin\ai\app\admin 디렉토리)에 미들웨어 추가
+];
+```
+
+> **팁**
+> 플러그인에서도 유사한 구성을 추가하여 다른 플러그인에 영향을 줄 수 있습니다. 예를 들어 `plugin/foo/config/middleware.php`에 위와 같은 구성을 추가하면 ai 플러그인에 영향을 미칩니다.

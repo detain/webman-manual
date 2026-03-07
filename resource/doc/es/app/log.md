@@ -5,10 +5,10 @@ use support\Log;
 Log::channel('plugin.admin.default')->info('test');
 ```
 
-Si deseas reutilizar la configuración de registro del proyecto principal, simplemente utiliza
+Si desea reutilizar la configuración de registro del proyecto principal, use directamente:
 ```php
 use support\Log;
 Log::info('Contenido del registro');
-// Supongamos que el proyecto principal tiene una configuración de registro llamada "test"
+// Suponiendo que el proyecto principal tiene una configuración de registro llamada test
 Log::channel('test')->info('Contenido del registro');
 ```

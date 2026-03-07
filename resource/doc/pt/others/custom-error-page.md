@@ -1,11 +1,10 @@
-## Personalizar 404
-Quando o webman retorna um erro 404, ele automaticamente mostra o conteúdo do arquivo `public/404.html`, então os desenvolvedores podem simplesmente mudar o arquivo `public/404.html`.
+# Personalizar 404
 
-Se você quer controlar dinamicamente o conteúdo do erro 404, por exemplo, retornar dados JSON `{"code:"404", "msg":"404 not found"}` durante uma requisição AJAX, ou retornar o template `app/view/404.html` durante uma requisição de página, por favor siga o exemplo abaixo.
+Se você quiser controlar dinamicamente o conteúdo do 404, por exemplo retornar dados JSON `{"code:"404", "msg":"404 not found"}` em requisições AJAX e retornar o template `app/view/404.html` em requisições de página, consulte o exemplo a seguir.
 
-> O exemplo a seguir é baseado no uso de templates PHP nativos, mas o princípio é similar para outros templates como `twig`, `blade` ou `think-template`.
+> O exemplo usa templates nativos de PHP. Outros templates como `twig`, `blade`, `think-template` seguem o mesmo princípio.
 
-**Crie o arquivo `app/view/404.html`**
+**Criar o arquivo `app/view/404.html`**
 ```html
 <!doctype html>
 <html>
@@ -19,23 +18,41 @@ Se você quer controlar dinamicamente o conteúdo do erro 404, por exemplo, reto
 </html>
 ```
 
-**Adicione o seguinte código no`config/route.php`:**
+**Adicionar o seguinte código em `config/route.php`:**
 ```php
 use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // retorna um JSON durante uma requisição AJAX
+    // Retornar JSON em requisições AJAX
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
-    // retorna o template 404.html durante uma requisição de página
+    // Retornar o template 404.html em requisições de página
     return view('404', ['error' => 'some error'])->withStatus(404);
 });
 ```
 
-## Personalizar 500
-**Crie o arquivo `app/view/500.html`**
+# Personalizar 405
+
+A partir do webman-framework 1.5.23, o callback de fallback suporta o parâmetro `status`. 404 significa que a requisição não existe; 405 significa que o método de requisição atual não é permitido (ex.: acessar via GET uma rota definida com `Route::post()`).
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# Personalizar 500
+
+**Criar `app/view/500.html`**
 
 ```html
 <!doctype html>
@@ -45,13 +62,13 @@ Route::fallback(function(Request $request){
     <title>500 Internal Server Error</title>
 </head>
 <body>
-Erro personalizado:
+Template de erro personalizado:
 <?=htmlspecialchars($exception)?>
 </body>
 </html>
 ```
 
-**Crie o arquivo `app/exception/Handler.php` (se o diretório não existir, por favor crie-o):**
+**Criar `app/exception/Handler.php`** (criar o diretório se não existir)
 ```php
 <?php
 
@@ -64,7 +81,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * Renderizar e retornar
+     * Renderizar e retornar a resposta
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -72,17 +89,17 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // Retorna dados JSON durante uma requisição AJAX
+        // Retornar dados JSON em requisições AJAX
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
-        // Retorna o template 500.html durante uma requisição de página
+        // Retornar o template 500.html em requisições de página
         return view('500', ['exception' => $exception], '')->withStatus(500);
     }
 }
 ```
 
-**Configure `config/exception.php`**
+**Configurar `config/exception.php`**
 ```php
 return [
     '' => \app\exception\Handler::class,

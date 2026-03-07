@@ -1,8 +1,8 @@
 # AOP
 
-> ขอบคุณคุณ Hyperf ที่ส่งมา
+> ขอขอบคุณผู้เขียน Hyperf สำหรับการมีส่วนร่วม
 
-### การติดตั้ง
+## การติดตั้ง
 
 - ติดตั้ง aop-integration
 
@@ -10,9 +10,9 @@
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### เพิ่มการกำหนดค่า AOP ที่เกี่ยวข้อง
+## เพิ่มการตั้งค่าที่เกี่ยวข้องกับ AOP
 
-เราต้องเพิ่มการกำหนดค่า `config.php` ในไดเรกทอรี `config`
+ต้องเพิ่มไฟล์การตั้งค่า `config.php` ในโฟลเดอร์ `config`
 
 ```php
 <?php
@@ -36,18 +36,18 @@ return [
         ],
     ],
     'aspects' => [
-        // ที่นี่เขียน Aspect ที่เกี่ยวข้อง
+        // เพิ่ม Aspect ที่เกี่ยวข้องที่นี่
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### การกำหนดค่าในไฟล์ start.php
+## กำหนดค่าไฟล์เอนทรี start.php
 
-> เราจะแทนที่วิธีเริ่มต้นไว้ที่ timezone 以下นี้ข้ามการเขียนโค้ดอื่น ๆ
+> วางโค้ดเริ่มต้นไว้ด้านล่างการตั้งค่า timezone โค้ดส่วนอื่นถูกละไว้ด้านล่าง
 
-```php
+```
 use Hyperf\AopIntegration\ClassLoader;
 
 if ($timezone = config('app.default_timezone')) {
@@ -58,9 +58,9 @@ if ($timezone = config('app.default_timezone')) {
 ClassLoader::init();
 ```
 
-### การทดสอบ
+## การทดสอบ
 
-ก่อนอื่น ให้เราเขียนคลาสที่ต้องการตัดเข้า
+ขั้นแรก สร้างคลาสที่จะถูกดักจับ:
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-จากนั้นเพิ่ม `DebugAspect` ที่เกี่ยวข้อง
+จากนั้นเพิ่ม `DebugAspect` ที่เกี่ยวข้อง:
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-แล้วแก้ไขคอนโทรลเลอร์ `app/controller/IndexController.php`
+จากนั้นแก้ไขตัวควบคุม `app/controller/IndexController.php`:
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-จากรูที่นั้นก็กำหนดเส้นทาง
+จากนั้นกำหนดค่าเส้นทาง:
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-สุดท้าย ทำการเริ่มบริการและทดสอบ
+สุดท้าย เริ่มต้นบริการและรันการทดสอบ:
 
 ```shell
 php start.php start

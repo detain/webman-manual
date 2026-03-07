@@ -1,105 +1,60 @@
 # 二進制打包
 
-webman支持將項目打包成一個二進制文件，這使得webman無需php環境也能在linux系統運行起來。
+webman 支援將專案打包成一個二進制檔案，令 webman 無需 PHP 環境亦可在 Linux 上執行。
 
 > **注意**
-> 打包後的文件目前只支持運行在x86_64架構的linux系統上，不支持mac系統
-> 需要關閉`php.ini`的phar配置選項，即設定 `phar.readonly = 0`
+> 打包後的檔案目前僅支援於 x86_64 架構的 Linux 執行，不支援 Windows 與 Mac
+> 需關閉 `php.ini` 的 phar 設定，即設定 `phar.readonly = 0`
 
-## 安裝命令行工具
-`composer require webman/console ^1.2.24`
-
-## 配置設置
-打開 `config/plugin/webman/console/app.php` 文件，設置 
-```php
-'exclude_pattern'   => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$#'
-```
-用於打包時排除一些無用的目錄及文件，避免打包體積過大
+## 安裝命令列工具
+`composer require webman/console`
 
 ## 打包
-運行命令
-```php
+執行指令
+```
 php webman build:bin
 ```
-同時可以指定以哪個php版本打包，例如
-```php
+可指定打包所用的 PHP 版本，例如
+```
 php webman build:bin 8.1
 ```
 
-打包後會在bulid目錄生成一個`webman.bin`文件
+打包完成後會在 build 目錄生成 `webman.bin` 檔案。
 
 ## 啟動
-將webman.bin上傳至linux服務器，執行 `./webman.bin start` 或 `./webman.bin start -d` 即可啟動。
+將 webman.bin 上傳至 Linux 伺服器，執行 `./webman.bin start` 或 `./webman.bin start -d` 即可啟動。
 
 ## 原理
-* 首先將本地webman項目打包成一個phar文件
-* 然後遠程下載php8.x.micro.sfx到本地
-* 將php8.x.micro.sfx和phar文件拼接為一個二進制文件
+* 先將本地 webman 專案打包成 phar 檔案
+* 遠端下載 php8.x.micro.sfx 至本地
+* 將 php8.x.micro.sfx 與 phar 拼接成單一二進制檔案
 
 ## 注意事項
-* 本地php版本>=7.2都可以執行打包命令
-* 但是只能打包成php8的二進制文件
-* 強烈建議本地php版本和打包版本一致，也就是如果本地是php8.0，打包也用php8.0，避免出現兼容問題
-* 打包會下載php8的源碼，但是並不會本地安裝，不會影響本地php環境
-* webman.bin目前只支持在x86_64架構的linux系統運行，不支持在mac系統運行
-* 默認不打包env文件(`config/plugin/webman/console/app.php`中exclude_files控制)，所以啟動時env文件應該放置與webman.bin相同目錄下
-* 運行過程中會在webman.bin所在目錄生成runtime目錄，用於存放日誌文件
-* 目前webman.bin不會讀取外部php.ini文件，如需要自定義php.ini，請在 `/config/plugin/webman/console/app.php` 文件custom_ini中設置
+* 強烈建議本地 PHP 版本與打包版本一致（如皆為 PHP 8.1），以避免相容性問題
+* 打包會下載 PHP 8 原始碼，但不會在本地安裝，不影響本地 PHP 環境
+* webman.bin 僅支援於 x86_64 Linux 執行，不支援 Mac
+* 打包後的專案不支援 reload，更新程式碼需 restart 重啟
+* 預設不會打包 env 檔（由 `config/plugin/webman/console/app.php` 的 exclude_files 控制），啟動時 env 檔應與 webman.bin 置於同目錄
+* 執行時會在 webman.bin 所在目錄生成 runtime 目錄，存放日誌檔案
+* 目前 webman.bin 不會讀取外部 php.ini，若需自訂，請在 `config/plugin/webman/console/app.php` 的 custom_ini 中設定
+* 不需打包的檔案可在 `config/plugin/webman/console/app.php` 排除，避免包體過大
+* 二進制打包不支援 Swoole 協程
+* 切勿將使用者上傳檔案存於二進制包內，以 `phar://` 協定操作上傳檔具 phar 反序列化風險。上傳檔須存於包外磁碟
+* 若需將檔案上傳至 public 目錄，請將 public 目錄獨立置於 webman.bin 同目錄，並在 `config/app.php` 設定如下後重新打包：
+```
+'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
+```
 
-## 單獨下載靜態PHP
-有時候你只是不想部署PHP環境，只需要一個PHP可執行文件，點擊請點擊這裡下載[靜態php下載](https://www.workerman.net/download)
+## 單獨下載靜態 PHP
+若只需要 PHP 可執行檔而不想部署完整 PHP 環境，請至此下載：[靜態 PHP 下載](https://www.workerman.net/download)
 
 > **提示**
-> 如需給靜態php指定php.ini文件，請使用以下命令 `php -c /your/path/php.ini start.php start -d`
+> 若需為靜態 PHP 指定 php.ini，請使用：`php -c /your/path/php.ini start.php start -d`
 
-## 支持的擴展
-bcmath
-calendar
-Core
-ctype
-curl
-date
-dom
-event
-exif
-FFI
-fileinfo
-filter
-gd
-hash
-iconv
-json
-libxml
-mbstring
-mongodb
-mysqlnd
-openssl
-pcntl
-pcre
-PDO
-pdo_mysql
-pdo_sqlite
-Phar
-posix
-readline
-redis
-Reflection
-session
-shmop
-SimpleXML
-soap
-sockets
-SPL
-sqlite3
-standard
-tokenizer
-xml
-xmlreader
-xmlwriter
-zip
-zlib
+## 支援的擴展
+apcu, bcmath, bz2, calendar, Core, ctype, curl, date, dba, dom, event, exif, fileinfo, filter, ftp, gd, gmp, hash, iconv, imagick, imap, intl, json, libxml, mbstring, mysqli, mysqlnd, openssl, pcntl, pcre, PDO, pdo_mysql, pgsql, Phar, posix, protobuf, readline, redis, Reflection, session, shmop, SimpleXML, soap, sockets, sodium, SPL, sqlite3, standard, swoole, sysvmsg, sysvsem, sysvshm, tokenizer, xml, xmlreader, xmlwriter, xsl, Zend OPcache, zip, zlib
 
-## 項目出處
+## 專案出處
 
 https://github.com/crazywhalecc/static-php-cli
 https://github.com/walkor/static-php-cli

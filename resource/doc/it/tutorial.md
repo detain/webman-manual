@@ -1,4 +1,4 @@
-# Esempio Semplice
+# Esempio semplice di avvio rapido con webman
 
 ## Ritorno di una stringa
 **Creare un Controller**
@@ -58,7 +58,7 @@ class UserController
 
 Accedere da un browser a `http://127.0.0.1:8787/user/hello?name=tom`
 
-Il browser restituirà `{"code":0,"msg":"ok","data":"tom""}`
+Il browser restituirà `{"code":0,"msg":"ok","data":"tom"}`
 
 Utilizzare la funzione di supporto json per restituire i dati aggiungerà automaticamente un'intestazione `Content-Type: application/json`
 

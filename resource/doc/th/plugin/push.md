@@ -4,8 +4,6 @@
 
 อีกทั้ง ปลัูกอินมีลูกค้า js ที่มาพร้อมเองชื่อ push.js เพื่อ uniapp มีลูกค้า uniapp-push.js, ลูกค้าทั้งหมดอื่น ๆ สามารถดาวน์โหลดได้ที่ https://pusher.com/docs/channels/channels_libraries/libraries/
 
-> ปลัูกอินต้องการ webman-framework>=1.2.0
-
 ## การติดตั้ง
 
 ```sh

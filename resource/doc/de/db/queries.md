@@ -1,4 +1,5 @@
-# Abfrage-Builder
+# Datenbankabfragen (Laravel-Datenbankkomponente)
+
 ## Abrufen aller Zeilen
 ```php
 <?php
@@ -12,7 +13,7 @@ class UserController
     public function all(Request $request)
     {
         $users = Db::table('users')->get();
-        return view('user/all', ['benutzer' => $users]);
+        return view('user/all', ['users' => $users]);
     }
 }
 ```
@@ -384,6 +385,9 @@ Wenn Sie alle Datensätze in einer Tabelle löschen möchten, können Sie die tr
 ```php
 Db::table('users')->truncate();
 ```
+
+## Transaktionen
+Siehe [Datenbanktransaktionen](../others/transaction.md)
 
 ## Pessimistisches Sperren
 Der Query Builder enthält auch einige Funktionen, die Ihnen bei der Umsetzung von "pessimistischem Locking" in SELECT-Statements helfen können. Wenn Sie in Ihrer Abfrage ein "shared lock" implementieren möchten, können Sie die sharedLock-Methode verwenden. Der shared lock verhindert, dass die ausgewählten Datensätze geändert werden, bis die Transaktion abgeschlossen ist:

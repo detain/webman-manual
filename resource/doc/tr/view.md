@@ -277,10 +277,28 @@ class UserController
 #### Denetleyici
 Denetleyici `view('templateName',[]);` çağrıldığında, görünüm dosyası aşağıdaki kurallara göre bulunur:
 
-1. Birden fazla uygulama olmadığında, ilgili görünüm dosyası `app/view/` altında bulunur
-2. [Birden fazla uygulama](multiapp.md) durumunda, ilgili görünüm dosyası `app/applicationName/view/` altında bulunur
+1. Yol `/` ile başlıyorsa, görünüm dosyasını bulmak için bu yolu doğrudan kullanın.
+2. `/` ile başlamıyorsa ve çoklu uygulama değilse, `app/view/` altındaki ilgili görünüm dosyasını kullanın.
+3. `/` ile başlamıyorsa ve [çoklu uygulama](multiapp.md) ise, `app/uygulamaAdi/view/` altındaki ilgili görünüm dosyasını kullanın.
+4. Şablon parametresi geçirilmezse, şablon dosyası kurallar 2 ve 3'e göre otomatik olarak bulunur.
 
-Özetle, eğer `$request->app` boşsa, `app/view/` altındaki görünüm dosyaları kullanılır, aksi takdirde `app/{$request->app}/view/` altındaki görünüm dosyaları kullanılır.
+Örnek:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // return view('user/hello', ['name' => 'webman']); ile eşdeğer
+        // return view('/app/view/user/hello', ['name' => 'webman']); ile eşdeğer
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### Kapanış Fonksiyonu
 Kapanış fonksiyonu `$request->app` boş olduğundan, herhangi bir uygulamaya ait değildir, bu yüzden kapanış fonksiyonu `app/view/` altındaki görünüm dosyalarını kullanır, örneğin `config/route.php` dosyasında tanımlı rotaya aşağıdaki gibi tanımlanmışsa
@@ -293,6 +311,25 @@ Route::any('/admin/user/get', function (Reqeust $reqeust) {
 
 #### Belirli Uygulama
 Çoklu uygulama modunda şablonların yeniden kullanılabilmesi için view($template, $data, $app=null) üçüncü parametre olan `$app` ile hangi uygulama dizinine ait şablonun kullanılacağı belirtilebilir. Örneğin, `view('user', [], 'admin');` komutu `app/admin/view/` altındaki görünüm dosyasının zorunlu olarak kullanılmasını sağlar.
+
+#### Şablon Parametresini Atlama
+Sınıf tabanlı denetleyicilerde şablon parametresini atlayabilirsiniz. Örnek:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // return view('user/hello', ['name' => 'webman']); ile eşdeğer
+        // return view('/app/view/user/hello', ['name' => 'webman']); ile eşdeğer
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## Twig Genişletme
 

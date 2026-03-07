@@ -1,27 +1,29 @@
-## ThinkORM
+# think-orm
 
-### การติดตั้ง ThinkORM
+[webman/think-orm](https://github.com/webman-php/think-orm) เป็นคอมโพเนนต์ฐานข้อมูลที่พัฒนาบน [top-think/think-orm](https://github.com/top-think/think-orm) รองรับ connection pool และทำงานได้ทั้งในสภาพแวดล้อม coroutine และ non-coroutine
+
+## การติดตั้ง
 
 `composer require -W webman/think-orm`
 
-หลังจากติดตั้งเสร็จ จะต้อง restart หรือ รีโหลด(reload ไม่มีผล)
+หลังติดตั้งต้อง restart (รีสตาร์ท) เท่านั้น (reload ไม่มีผล)
 
-> **คำแนะนำ**
-> หากติดตั้งไม่สำเร็จ อาจเป็นเพราะคุณใช้代理ของ composer ลองรัน `composer config -g --unset repos.packagist` เพื่อยกเลิกการใช้งาน代理ของ composer 
+## ไฟล์กำหนดค่า
 
-> [webman/think-orm](https://www.workerman.net/plugin/14) ที่จริงๆแล้วเป็นปลั๊กอินสำหรับการติดตั้งโมเดล `toptink/think-orm` ถ้าเว็บแมนของคุณเวอร์ชั่นต่ำกว่า `1.2` ไม่สามารถใช้ปลั๊กอินได้ โปรดอ่านบทความ [การติดตั้งและกำหนดค่า think-orm ด้วยตัวเอง](https://www.workerman.net/a/1289) สำหรับข้อมูลเพิ่มเติม
+แก้ไขไฟล์กำหนดค่า `config/think-orm.php` ตามความต้องการจริงของคุณ
 
-### ไฟล์การกำหนดค่า
-ปรับแต่งไฟล์การกำหนดค่าตามสถานการณ์จริง ที่ `config/thinkorm.php`
+## เอกสาร
 
-### การใช้งาน
+https://www.kancloud.cn/manual/think-orm
+
+## การใช้งาน
 
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use think\facade\Db;
+use support\think\Db;
 
 class FooController
 {
@@ -33,43 +35,43 @@ class FooController
 }
 ```
 
-### สร้างโมเดล
+## การสร้างโมเดล
 
-โมเดลของ ThinkOrm สืบทอดมาจาก `think\Model` เช่นดังต่อไปนี้
-```php
+โมเดล think-orm สืบทอดจาก `support\think\Model` ดังตัวอย่างด้านล่าง:
+
+```
 <?php
 namespace app\model;
 
-use think\Model;
+use support\think\Model;
 
 class User extends Model
 {
     /**
-     * ตารางที่เกี่ยวข้องกับโมเดลนี้
+     * ตารางที่เกี่ยวข้องกับโมเดล
      *
      * @var string
      */
     protected $table = 'user';
 
     /**
-     * คีย์หลักที่เกี่ยวข้องกับตาราง
+     * คีย์หลักของตาราง
      *
      * @var string
      */
     protected $pk = 'id';
 
-    
 }
 ```
 
-คุณยังสามารถใช้คำสั่งต่อไปนี้เพื่อสร้างโมเดลที่ใช้กับ thinkorm
-```sh
+คุณสามารถใช้คำสั่งด้านล่างสร้างโมเดล think-orm ได้เช่นกัน:
+
+```
 php webman make:model ชื่อตาราง
 ```
 
 > **คำแนะนำ**
-> คำสั่งนี้ต้องการการติดตั้ง `webman/console` คำสั่งการติดตั้งคือ `composer require webman/console ^1.2.13`
+> คำสั่งนี้ต้องมี `webman/console` ติดตั้งก่อน: `composer require webman/console ^1.2.13`
 
 > **ข้อควรระวัง**
-> ถ้าคำสั่ง `make:model` ตรวจพบว่าโปรเจ็กต์หลักใช้ `illuminate/database` จะสร้างไฟล์โมเดลที่ใช้กับ `illuminate/database` แทนที่จะใช้กับ thinkorm ในกรณีนี้ คุณสามารถใช้พารามิเตอร์เพิ่มเติม `tp` เพื่อสร้างโมเดลที่ใช้กับ think-orm โดยใช้คำสั่งเช่น `php webman make:model ชื่อตาราง tp` (หากไม่ทำงานโปรดอัปเกรด `webman/console`)
-
+> ถ้าคำสั่ง make:model ตรวจพบว่าโปรเจ็กต์หลักใช้ `illuminate/database` จะสร้างไฟล์โมเดลจาก Illuminate แทน think-orm ในกรณีนี้ให้เพิ่มพารามิเตอร์ `tp`: `php webman make:model ชื่อตาราง tp` (ถ้าไม่ทำงานให้อัปเกรด `webman/console`)

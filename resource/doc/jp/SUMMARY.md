@@ -24,6 +24,7 @@
   - [ログ](log.md)
   - [設定ファイル](config.md)
   - [マルチアプリケーション](multiapp.md)
+  - [コルーチン](coroutine/coroutine.md)
 
 - データベース
 
@@ -47,6 +48,7 @@
  
 - 一般的なコンポーネント
   - [バリデータ](components/validation.md)
+  - [レート制限](components/rate-limiter.md)
   - [ページネーションコンポーネント](components/paginator.md)
   - [多言語対応](components/translation.md)
   - [画像処理](components/image.md)
@@ -90,17 +92,18 @@
 - 上級者向け
   - [カスタムプロセス](process.md)
   - [依存性注入](di.md)
+  - [バイナリパッケージ](others/bin.md)
   - [AOP](aop.md)
   
 - その他
   - [セキュリティ](others/security.md)
+  - [データベーストランザクション](others/transaction.md)
   - [無効な関数の検査](others/disable-function-check.md)
   - [カスタムスクリプト](others/scripts.md)
   - [カスタム404 500ページ](others/custom-error-page.md)
   - [アップグレード方法](others/upgrade.md)
   - [nginxプロキシ](others/nginx-proxy.md)
   - [pharパッケージ](others/phar.md)
-  - [バイナリパッケージ](others/bin.md)
   - [起動プロセス](others/process.md)
   - [ライフサイクル](others/lifecycle.md)
   - [メモリリーク](others/memory-leak.md)
@@ -113,4 +116,9 @@
 
 - アップグレード
   - [1.4](upgrade/1-4.md)
+  - [1.5](upgrade/1-5.md)
+  - [1.6](upgrade/1-6.md)
+  - [2.0](upgrade/2-0.md)
+  - [2.1](upgrade/2-1.md)
+  - [2.2](upgrade/2-2.md)
   - [感謝の意](thanks.md)

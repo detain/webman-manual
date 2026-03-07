@@ -4,8 +4,6 @@
 
 플러그인에는 웹페이지 JS 클라이언트인 push.js와 uniapp 클라이언트 `uniapp-push.js`가 내장되어 있으며, 다른 언어 클라이언트는 https://pusher.com/docs/channels/channels_libraries/libraries/에서 다운로드할 수 있습니다.
 
-> 플러그인은 webman-framework>=1.2.0를 필요로 합니다.
-
 ## 설치
 
 ```sh
@@ -151,7 +149,7 @@ server {
 **주의 설정에서의`<app_key>`는 `config/plugin/webman/push/app.php`에서 가져옵니다.**
 
 nginx를 다시 시작한 후, 다음 방법으로 서버에 연결합니다.
-```wss
+```js
 var connection = new Push({
     url: 'wss://example.com',
     app_key: '<app_key, config/plugin/webman/push/app.php에서 얻을 수 있음>',

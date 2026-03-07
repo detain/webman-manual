@@ -1,41 +1,41 @@
-# Auto-Loading
+# Automatisches Laden
 
-## Laden von Dateien im PSR-0-Format mit Composer
-Webman folgt der automatischen Laden-Spezifikation `PSR-4`. Wenn Sie Bibliotheken im Format `PSR-0` laden müssen, befolgen Sie die folgenden Schritte.
+## PSR-0-konforme Dateien über Composer laden
+webman folgt der `PSR-4`-Autoload-Spezifikation. Wenn dein Projekt PSR-0-konforme Bibliotheken laden muss, gehe wie folgt vor:
 
-- Erstellen Sie das Verzeichnis `extend`, um Bibliotheken im Format `PSR-0` zu speichern.
-- Bearbeiten Sie die Datei `composer.json` und fügen Sie unter `autoload` den folgenden Inhalt hinzu:
+- Erstelle ein `extend`-Verzeichnis zur Aufnahme von PSR-0-konformen Bibliotheken
+- Bearbeite `composer.json` und ergänze unter `autoload` folgende Einträge:
 
-```js
+```json
 "psr-0" : {
     "": "extend/"
 }
 ```
-Das Endergebnis ähnelt folgendem:
+Das Ergebnis sieht in etwa so aus:
 ![](../../assets/img/psr0.png)
 
-- Führen Sie `composer dumpautoload` aus.
-- Führen Sie `php start.php restart` aus, um Webman neu zu starten (Hinweis: Ein Neustart ist erforderlich, damit die Änderungen wirksam werden).
+- Führe `composer dumpautoload` aus
+- Führe `php start.php restart` aus, um webman neu zu starten (Hinweis: Nur ein Neustart macht die Änderungen wirksam)
 
-## Laden bestimmter Dateien mit Composer
+## Bestimmte Dateien über Composer laden
 
-- Bearbeiten Sie die Datei `composer.json` und fügen Sie unter `autoload.files` die zu ladenden Dateien hinzu:
-```json
+- Bearbeite `composer.json` und füge unter `autoload.files` die zu ladenden Dateien hinzu:
+```
 "files": [
     "./support/helpers.php",
     "./app/helpers.php"
 ]
 ```
-- Führen Sie `composer dumpautoload` aus.
-- Führen Sie `php start.php restart` aus, um Webman neu zu starten (Hinweis: Ein Neustart ist erforderlich, damit die Änderungen wirksam werden).
+
+- Führe `composer dumpautoload` aus
+- Führe `php start.php restart` aus, um webman neu zu starten (Hinweis: Nur ein Neustart macht die Änderungen wirksam)
 
 > **Hinweis**
-> Die Dateien, die in der `autoload.files`-Konfiguration von `composer.json` aufgeführt sind, werden vor dem Start von Webman geladen. Dateien, die mit dem Framework `config/autoload.php` geladen werden, werden nach dem Start von Webman geladen.
-> Wenn sich die mit `autoload.files` konfigurierten Dateien ändern, müssen Sie Webman neu starten, damit die Änderungen wirksam werden. Ein Neuladen reicht nicht aus. Dateien, die mit `config/autoload.php` geladen werden, unterstützen das Hot-Loading und Änderungen werden sofort nach einem Neuladen wirksam.
+> In `composer.json` unter `autoload.files` konfigurierte Dateien werden vor dem Start von webman geladen. Über die Framework-Datei `config/autoload.php` geladene Dateien werden erst nach dem Start von webman geladen.
+> Änderungen an Dateien in `composer.json` unter `autoload.files` erfordern einen Neustart, Reload reicht nicht. Über `config/autoload.php` geladene Dateien unterstützen Hot-Reload; Änderungen wirken nach einem Reload.
 
-## Laden bestimmter Dateien mit dem Framework
-Einige Dateien entsprechen möglicherweise nicht dem PSR-Standard und können daher nicht automatisch geladen werden. In solchen Fällen können wir die Dateien mithilfe der Konfiguration von `config/autoload.php` laden, beispielsweise:
-
+## Bestimmte Dateien über das Framework laden
+Manche Dateien entsprechen möglicherweise nicht der PSR-Spezifikation und können nicht automatisch geladen werden. Du kannst sie über `config/autoload.php` laden, z. B.:
 ```php
 return [
     'files' => [
@@ -45,5 +45,5 @@ return [
     ]
 ];
 ```
-> **Hinweis**
-> In der `autoload.php`-Konfiguration sehen wir, dass die Dateien `support/Request.php` und `support/Response.php` zum Laden festgelegt sind. Dies liegt daran, dass sich im Verzeichnis `vendor/workerman/webman-framework/src/support/` ebenfalls zwei identische Dateien befinden. Durch `autoload.php` werden die Dateien `support/Request.php` und `support/Response.php` im Stammverzeichnis des Projekts priorisiert geladen, was es ermöglicht, den Inhalt dieser beiden Dateien anzupassen, ohne die Dateien im `vendor`-Ordner ändern zu müssen. Wenn Sie diese nicht anpassen müssen, können Sie diese Konfigurationen ignorieren.
+ > **Hinweis**
+ > In `autoload.php` sind `support/Request.php` und `support/Response.php` hinterlegt, da dieselben Dateien auch unter `vendor/workerman/webman-framework/src/support/` existieren. Über `autoload.php` werden die Versionen im Projektstammverzeichnis bevorzugt geladen, sodass du diese Dateien anpassen kannst, ohne die in `vendor` zu ändern. Wenn du sie nicht anpassen möchtest, kannst du diese beiden Einträge weglassen.

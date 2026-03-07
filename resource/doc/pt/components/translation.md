@@ -1,14 +1,16 @@
-# Multilinguagem
+# Multilíngue
 
-O uso de multilinguagem é feito com o componente [symfony/translation](https://github.com/symfony/translation).
+A funcionalidade multilíngue utiliza o componente [symfony/translation](https://github.com/symfony/translation).
 
 ## Instalação
-```composer require symfony/translation```
+```
+composer require symfony/translation
+```
 
-## Criação de pacote de idiomas
-Por padrão, o webman armazena o pacote de idiomas na diretoria `resource/translations` (se não existir, crie-a), se precisar de alterar o diretório, defina-o no arquivo `config/translation.php`.
-Cada idioma corresponde a uma subpasta, e as definições de idioma são normalmente armazenadas no arquivo `messages.php`. Exemplo:
-```shell
+## Criar pacotes de idioma
+O webman armazena os pacotes de idioma por padrão no diretório `resource/translations` (crie-o se não existir). Para alterar o diretório, configure em `config/translation.php`.
+Cada idioma corresponde a uma subpasta, e as definições ficam em `messages.php` por padrão. Exemplo:
+```
 resource/
 └── translations
     ├── en
@@ -34,25 +36,25 @@ return [
 return [
     // Idioma padrão
     'locale' => 'zh_CN',
-    // Idioma de fallback, se a tradução não for encontrada no idioma atual, tenta usar a tradução do idioma de fallback
+    // Idioma alternativo: quando a tradução não for encontrada no idioma atual, tenta o idioma alternativo
     'fallback_locale' => ['zh_CN', 'en'],
-    // Diretório de armazenamento dos arquivos de idioma
+    // Pasta onde os arquivos de idioma são armazenados
     'path' => base_path() . '/resource/translations',
 ];
 ```
 
 ## Tradução
 
-A tradução é feita utilizando o método `trans()`.
+Use o método `trans()` para traduzir.
 
-Crie o arquivo de idioma `resource/translations/zh_CN/messages.php` da seguinte forma:
+Criar o arquivo de idioma `resource/translations/zh_CN/messages.php`:
 ```php
 return [
     'hello' => '你好 世界!',
 ];
 ```
 
-Crie o arquivo `app/controller/UserController.php`
+Criar o arquivo `app/controller/UserController.php`:
 ```php
 <?php
 namespace app\controller;
@@ -69,13 +71,13 @@ class UserController
 }
 ```
 
-Acesse `http://127.0.0.1:8787/user/get` para retornar "你好 世界!"
+Ao acessar `http://127.0.0.1:8787/user/get` será retornado "你好 世界!"
 
-## Alterar idioma padrão
+## Alterar o idioma padrão
 
-Para alterar o idioma, utilize o método `locale()`.
+Use o método `locale()` para trocar de idioma.
 
-Adicione o arquivo de idioma `resource/translations/en/messages.php` da seguinte forma:
+Adicionar o arquivo de idioma `resource/translations/en/messages.php`:
 ```php
 return [
     'hello' => 'hello world!',
@@ -92,16 +94,16 @@ class UserController
 {
     public function get(Request $request)
     {
-        // Alterar idioma
+        // Trocar idioma
         locale('en');
         $hello = trans('hello'); // hello world!
         return response($hello);
     }
 }
 ```
-Acesse `http://127.0.0.1:8787/user/get` para retornar "hello world!"
+Ao acessar `http://127.0.0.1:8787/user/get` será retornado "hello world!"
 
-Também é possível utilizar o quarto parâmetro da função `trans()` para alterar temporariamente o idioma, como nos exemplos acima e abaixo:
+Também é possível usar o 4º parâmetro da função `trans()` para trocar temporariamente de idioma. O exemplo acima é equivalente a:
 ```php
 <?php
 namespace app\controller;
@@ -112,17 +114,17 @@ class UserController
 {
     public function get(Request $request)
     {
-        // O quarto parâmetro altera o idioma
+        // O 4º parâmetro troca o idioma
         $hello = trans('hello', [], null, 'en'); // hello world!
         return response($hello);
     }
 }
 ```
 
-## Definir idioma de forma explícita para cada solicitação
-A tradução é um singleton, o que significa que todas as solicitações compartilham essa instância. Se uma solicitação definir o idioma padrão usando `locale()`, isso afetará todas as solicitações subsequentes nesse processo. Portanto, é necessário definir o idioma de forma explícita para cada solicitação. Por exemplo, utilizando o middleware a seguir:
+## Definir o idioma explicitamente para cada requisição
+translation é um singleton, ou seja, todas as requisições compartilham a mesma instância. Se uma requisição definir o idioma padrão com `locale()`, isso afetará todas as requisições seguintes do processo. Por isso, é necessário definir o idioma explicitamente para cada requisição, por exemplo com o seguinte middleware:
 
-Crie o arquivo `app/middleware/Lang.php` (crie-o se não existir) da seguinte forma:
+Criar o arquivo `app/middleware/Lang.php` (criar o diretório se não existir):
 ```php
 <?php
 namespace app\middleware;
@@ -141,41 +143,42 @@ class Lang implements MiddlewareInterface
 }
 ```
 
-Adicione o middleware global em `config/middleware.php`:
+Adicionar o middleware global em `config/middleware.php`:
 ```php
 return [
     // Middleware global
     '' => [
-        // ... outros middlewares
+        // ... outros middlewares omitidos
         app\middleware\Lang::class,
     ]
 ];
 ```
 
-## Uso de espaços reservados
-Às vezes, uma mensagem contém variáveis que precisam ser traduzidas, por exemplo
+
+## Usar marcadores de posição
+Às vezes uma mensagem contém variáveis que precisam ser traduzidas, por exemplo
 ```php
 trans('hello ' . $name);
 ```
-Nesses casos, utilize espaços reservados para lidar com eles.
+Nesses casos, use marcadores de posição.
 
-Altere `resource/translations/zh_CN/messages.php` da seguinte forma:
+Alterar `resource/translations/zh_CN/messages.php`:
 ```php
 return [
     'hello' => '你好 %name%!',
 ];
 ```
-Ao traduzir, forneça os valores correspondentes aos espaços reservados através do segundo parâmetro da função `trans()`.
+Ao traduzir, passe os valores pelo segundo parâmetro:
 ```php
 trans('hello', ['%name%' => 'webman']); // 你好 webman!
 ```
 
-## Manuseio de plurais
-Em alguns idiomas, a forma de expressar uma frase pode variar conforme a quantidade de itens, por exemplo `There is %count% apple`. Quando `%count%` é 1, a frase está correta, mas acima de 1, está incorreta.
+## Tratar plurais
+Em alguns idiomas a estrutura da frase varia conforme a quantidade. Por exemplo, "There is %count% apple" está correto quando `%count%` é 1, mas incorreto quando é maior.
 
-Nesses casos, utilize o **pipe** (`|`) para listar as formas plurais.
+Nesses casos, use o **pipe** (`|`) para listar as formas no plural.
 
-Adicione a chave `apple_count` ao arquivo de idioma `resource/translations/en/messages.php` da seguinte forma:
+Adicionar `apple_count` no arquivo `resource/translations/en/messages.php`:
 ```php
 return [
     // ...
@@ -187,7 +190,7 @@ return [
 trans('apple_count', ['%count%' => 10]); // There are 10 apples
 ```
 
-É possível até especificar um intervalo de números, criando regras plurais mais complexas:
+Também é possível especificar intervalos numéricos para regras de plural mais complexas:
 ```php
 return [
     // ...
@@ -199,20 +202,21 @@ return [
 trans('apple_count', ['%count%' => 20]); // There are many apples
 ```
 
-## Especificar o arquivo de idioma
-O arquivo de idioma tem como nome padrão `messages.php`, mas na verdade é possível criar arquivos com outros nomes.
+## Especificar arquivo de idioma
 
-Crie o arquivo de idioma `resource/translations/zh_CN/admin.php` da seguinte forma:
+O nome padrão é `messages.php`, mas é possível criar arquivos com outros nomes.
+
+Criar o arquivo `resource/translations/zh_CN/admin.php`:
 ```php
 return [
     'hello_admin' => '你好 管理员!',
 ];
 ```
 
-Use o terceiro parâmetro da função `trans()` para especificar o arquivo de idioma (sem o sufixo `.php`).
+Especificar o arquivo pelo 3º parâmetro de `trans()` (omitir a extensão `.php`):
 ```php
 trans('hello', [], 'admin', 'zh_CN'); // 你好 管理员!
 ```
 
-## Mais Informações
-Consulte o manual [symfony/translation](https://symfony.com/doc/current/translation.html)
+## Mais informações
+Consulte a [documentação symfony/translation](https://symfony.com/doc/current/translation.html)

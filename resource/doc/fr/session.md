@@ -1,4 +1,4 @@
-# Gestion de session
+# Gestion des sessions webman
 
 ## Exemple
 ```php
@@ -19,44 +19,48 @@ class UserController
 }
 ```
 
-Obtenez l'instance de `Workerman\Protocols\Http\Session` avec `$request->session();`, puis utilisez les méthodes de l'objet pour ajouter, modifier et supprimer les données de session.
+Obtenez l'instance `Workerman\Protocols\Http\Session` via `$request->session();` et utilisez ses méthodes pour ajouter, modifier ou supprimer les données de session.
 
-> Remarque : L'objet de session sauvegardera automatiquement les données de session lorsqu'il sera détruit. Par conséquent, ne conservez pas l'objet retourné par `$request->session()` dans un tableau global ou en tant que membre de classe, ce qui empêcherait la sauvegarde de la session.
+> **Remarque**
+> Les données de session sont enregistrées automatiquement à la destruction de l'objet de session.
+> Si l'objet de session est stocké dans une variable globale, il ne sera pas détruit et ne sera pas sauvegardé automatiquement. Il faut alors appeler manuellement `$session->save()` pour enregistrer les données.
 
-## Obtenir toutes les données de session
+## Récupérer toutes les données de session
 ```php
 $session = $request->session();
 $all = $session->all();
 ```
-Renvoie un tableau. S'il n'y a pas de données de session, un tableau vide est renvoyé.
+Retourne un tableau. Si aucune donnée de session n'existe, un tableau vide est retourné.
 
-## Obtenir une valeur de session spécifique
+
+## Récupérer une valeur de session
 ```php
 $session = $request->session();
 $name = $session->get('name');
 ```
-Renvoie null si les données n'existent pas.
+Retourne null si la donnée n'existe pas.
 
-Vous pouvez également fournir une valeur par défaut en passant un deuxième argument à la méthode get. Si aucune valeur correspondante n'est trouvée dans le tableau de session, la valeur par défaut est renvoyée. Par exemple :
+Vous pouvez passer une valeur par défaut comme second argument à la méthode `get`. Si la valeur correspondante n'est pas trouvée dans le tableau de session, la valeur par défaut est retournée. Par exemple :
 ```php
 $session = $request->session();
 $name = $session->get('name', 'tom');
 ```
 
-## Stocker une session
-Utilisez la méthode `set` pour stocker des données.
+
+## Stocker des données de session
+Utilisez la méthode `set` pour stocker une donnée.
 ```php
 $session = $request->session();
 $session->set('name', 'tom');
 ```
-La méthode `set` ne renvoie rien. Les données de session seront automatiquement sauvegardées lorsque l'objet de session est détruit.
+La méthode `set` ne retourne rien. Les données de session sont enregistrées automatiquement à la destruction de l'objet de session.
 
-Utilisez la méthode `put` pour stocker plusieurs valeurs à la fois.
+Utilisez la méthode `put` pour stocker plusieurs valeurs.
 ```php
 $session = $request->session();
 $session->put(['name' => 'tom', 'age' => 12]);
 ```
-De même, cette méthode ne renvoie rien.
+De même, la méthode `put` ne retourne rien.
 
 ## Supprimer des données de session
 Utilisez la méthode `forget` pour supprimer une ou plusieurs données de session.
@@ -68,73 +72,76 @@ $session->forget('name');
 $session->forget(['name', 'age']);
 ```
 
-De plus, le système propose la méthode `delete`, qui diffère de la méthode `forget` en ce qu'elle ne peut supprimer qu'une seule valeur.
+Le système fournit également la méthode `delete`. Contrairement à `forget`, elle ne peut supprimer qu'une seule valeur.
 ```php
 $session = $request->session();
 // Équivaut à $session->forget('name');
 $session->delete('name');
 ```
 
-## Obtenir et supprimer une valeur de session spécifique
+
+## Récupérer et supprimer une valeur de session
 ```php
 $session = $request->session();
 $name = $session->pull('name');
 ```
-Cela a le même effet que le code suivant :
+Équivaut au code suivant :
 ```php
 $session = $request->session();
-$value = $session->get($name);
-$session->delete($name);
+$value = $session->get('name');
+$session->delete('name');
 ```
-Renvoie null si la session correspondante n'existe pas.
+Retourne null si la valeur de session correspondante n'existe pas.
+
 
 ## Supprimer toutes les données de session
 ```php
 $request->session()->flush();
 ```
-Cette méthode ne renvoie rien. Les données de session seront automatiquement supprimées de la sauvegarde lorsque l'objet de session est détruit.
+Ne retourne rien. Les données de session sont automatiquement supprimées du stockage à la destruction de l'objet de session.
 
-## Vérifier si des données de session spécifiques existent
+
+## Vérifier si une valeur de session existe
 ```php
 $session = $request->session();
 $has = $session->has('name');
 ```
-Lorsque la session correspondante n'existe pas ou que sa valeur est null, false est renvoyé, sinon true est renvoyé.
+Retourne false si la valeur de session n'existe pas ou est null ; sinon retourne true.
 
 ```php
 $session = $request->session();
 $has = $session->exists('name');
 ```
-Ce code est également utilisé pour vérifier si des données de session existent. La différence est que lorsque la valeur correspondante de la session est null, true est également renvoyé.
+Le code ci-dessus vérifie aussi l'existence d'une valeur de session. La différence : `exists` retourne true même lorsque la valeur est null.
 
 ## Fonction helper session()
-> Ajouté le 09-12-2020
 
-webman propose la fonction helper `session()` pour accomplir les mêmes fonctionnalités.
+webman fournit la fonction helper `session()` pour effectuer les mêmes opérations.
 ```php
-// Obtenir une instance de session
+// Obtenir l'instance de session
 $session = session();
-// Équivalent à
+// Équivaut à
 $session = $request->session();
 
-// Obtenir une valeur spécifique
+// Obtenir une valeur
 $value = session('key', 'default');
-// Équivalent à
+// Équivaut à
 $value = session()->get('key', 'default');
-// Équivalent à
+// Équivaut à
 $value = $request->session()->get('key', 'default');
 
-// Affecter une valeur à la session
+// Assigner des valeurs à la session
 session(['key1'=>'value1', 'key2' => 'value2']);
-// Équivalent à
+// Équivaut à
 session()->put(['key1'=>'value1', 'key2' => 'value2']);
-// Équivalent à
+// Équivaut à
 $request->session()->put(['key1'=>'value1', 'key2' => 'value2']);
 
 ```
 
+
 ## Fichier de configuration
-Le fichier de configuration de la session se trouve dans `config/session.php` et a le contenu suivant :
+Le fichier de configuration de session se trouve dans `config/session.php`. Son contenu ressemble à :
 ```php
 use Webman\Session\FileSessionHandler;
 use Webman\Session\RedisSessionHandler;
@@ -144,18 +151,18 @@ return [
     // FileSessionHandler::class ou RedisSessionHandler::class ou RedisClusterSessionHandler::class 
     'handler' => FileSessionHandler::class,
     
-    // type est égal à file lorsque handler est FileSessionHandler::class,
-    // type est égal à redis lorsque handler est RedisSessionHandler::class,
-    // type est égal à redis_cluster lorsque handler est RedisClusterSessionHandler::class, c'est-à-dire un cluster Redis.
+    // Si handler est FileSessionHandler::class, la valeur est 'file',
+    // si handler est RedisSessionHandler::class, la valeur est 'redis'
+    // si handler est RedisClusterSessionHandler::class, la valeur est 'redis_cluster' (cluster Redis)
     'type'    => 'file',
 
-    // Différents gestionnaires utilisent des configurations différentes
+    // Chaque handler utilise une configuration différente
     'config' => [
-        // Configuration lorsque le type est file
+        // Configuration quand type est 'file'
         'file' => [
             'save_path' => runtime_path() . '/sessions',
         ],
-        // Configuration lorsque le type est redis
+        // Configuration quand type est 'redis'
         'redis' => [
             'host'      => '127.0.0.1',
             'port'      => 6379,
@@ -173,48 +180,19 @@ return [
         
     ],
 
-    'session_name' => 'PHPSID', // Nom du cookie pour stocker l'ID de session
-    
-    // === Les configurations suivantes nécessitent webman-framework>=1.3.14 et workerman>=4.0.37 ===
-    'auto_update_timestamp' => false,  // Actualiser automatiquement la session, désactivé par défaut
+    'session_name' => 'PHPSID', // Nom du cookie pour stocker le session_id
+    'auto_update_timestamp' => false,  // Rafraîchir automatiquement la session, par défaut : désactivé
     'lifetime' => 7*24*60*60,          // Durée de vie de la session
-    'cookie_lifetime' => 365*24*60*60, // Durée de vie du cookie stockant l'ID de session
-    'cookie_path' => '/',              // Chemin du cookie stockant l'ID de session
-    'domain' => '',                    // Domaine du cookie stockant l'ID de session
-    'http_only' => true,               // Activer uniquement HTTP, activé par défaut
-    'secure' => false,                 // Activer la session uniquement en HTTPS, désactivé par défaut
-    'same_site' => '',                 // Pour prévenir les attaques CSRF et le suivi des utilisateurs, valeurs possibles : strict/lax/none
-    'gc_probability' => [1, 1000],     // Probabilité de collecte de session
+    'cookie_lifetime' => 365*24*60*60, // Durée de vie du cookie stockant le session_id
+    'cookie_path' => '/',              // Chemin du cookie stockant le session_id
+    'domain' => '',                    // Domaine du cookie stockant le session_id
+    'http_only' => true,               // Activer httpOnly, par défaut : activé
+    'secure' => false,                 // Activer la session uniquement en HTTPS, par défaut : désactivé
+    'same_site' => '',                 // Prévention CSRF et suivi utilisateur, valeurs possibles : strict/lax/none
+    'gc_probability' => [1, 1000],     // Probabilité de nettoyage de la session
 ];
 ```
 
-> **Remarque** 
-> À partir de la version 1.4.0, webman a modifié l'espace de noms de SessionHandler, passant de
-> use Webman\FileSessionHandler;  
-> use Webman\RedisSessionHandler;  
-> use Webman\RedisClusterSessionHandler;  
-> à
-> use Webman\Session\FileSessionHandler;  
-> use Webman\Session\RedisSessionHandler;  
-> use Webman\Session\RedisClusterSessionHandler;  
+## Sécurité
+Il n'est pas recommandé de stocker directement des instances de classes dans la session, notamment des instances provenant de sources non fiables. La désérialisation peut entraîner des risques de sécurité.
 
-
-## Configuration de la durée de validité
-Pour webman-framework < 1.3.14, la durée de validité de la session dans webman doit être configurée dans `php.ini`.
-
-```ini
-session.gc_maxlifetime = x
-session.cookie_lifetime = x
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-Supposons que la durée de validité soit de 1440 secondes, la configuration est la suivante :
-```ini
-session.gc_maxlifetime = 1440
-session.cookie_lifetime = 1440
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-> **Remarque**
-> Vous pouvez utiliser la commande `php --ini` pour trouver l'emplacement de votre `php.ini`.

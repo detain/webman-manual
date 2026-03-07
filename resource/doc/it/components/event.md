@@ -1,31 +1,35 @@
 # Gestione degli eventi
-`webman/event` fornisce un meccanismo per gestire gli eventi in modo agile, consentendo di eseguire la logica di business senza modificare il codice sorgente e ottenendo il disaccoppiamento dei moduli di business. Uno scenario tipico è quando si registra un nuovo utente con successo, è sufficiente pubblicare un evento personalizzato come `user.register`, affinché tutti i moduli possano ricevere tale evento ed eseguire la relativa logica di business.
+`webman/event` fornisce un meccanismo di eventi raffinato che consente di eseguire logica di business senza modificare il codice, realizzando il disaccoppiamento tra i moduli. Scenario tipico: quando un nuovo utente si registra con successo, basta pubblicare un evento personalizzato come `user.register`, e ogni modulo può ricevere l'evento ed eseguire la logica corrispondente.
 
 ## Installazione
 `composer require webman/event`
 
 ## Sottoscrizione degli eventi
-La sottoscrizione degli eventi viene configurata in modo centralizzato nel file `config/event.php` come mostrato di seguito:
+La sottoscrizione agli eventi si configura in modo centralizzato nel file `config/event.php`.
+
 ```php
 <?php
 return [
     'user.register' => [
         [app\event\User::class, 'register'],
-        // ...altre funzioni di gestione degli eventi...
+        // ...altre funzioni di gestione eventi...
     ],
     'user.logout' => [
         [app\event\User::class, 'logout'],
-        // ...altre funzioni di gestione degli eventi...
+        // ...altre funzioni di gestione eventi...
     ]
 ];
 ```
-**Spiegazione:**
-- `user.register`, `user.logout` sono nomi degli eventi, di tipo stringa, è consigliato usarli in minuscolo e separati da un punto (`.`)
-- Un evento può avere più di una funzione di gestione degli eventi, che vengono eseguite nell'ordine specificato nella configurazione
 
-## Funzioni di gestione degli eventi
-Le funzioni di gestione degli eventi possono essere qualsiasi metodo di classe, funzione o chiusura.
-Ad esempio, creare una classe di gestione degli eventi in `app/event/User.php` (creare la cartella se non esiste):
+**Nota:**
+- `user.register`, `user.logout`, ecc. sono nomi di eventi (stringa). Si consiglia l'uso di parole in minuscolo separate da punto (`.`).
+- Un evento può avere più funzioni di gestione, chiamate nell'ordine di configurazione.
+
+## Funzioni di gestione eventi
+Le funzioni di gestione possono essere metodi di classe, funzioni o closure.
+
+Esempio: creare la classe `app/event/User.php` (creare la cartella se non esiste).
+
 ```php
 <?php
 namespace app\event;
@@ -43,8 +47,9 @@ class User
 }
 ```
 
-## Pubblicazione degli eventi
-Utilizzare `Event::emit($event_name, $data);` per pubblicare un evento, ad esempio:
+## Pubblicazione eventi
+Usare `Event::dispatch($event_name, $data);` o `Event::emit($event_name, $data);` per pubblicare un evento. Ad esempio:
+
 ```php
 <?php
 namespace app\controller;
@@ -58,15 +63,19 @@ class User
             'name' => 'webman',
             'age' => 2
         ];
-        Event::emit('user.register', $user);
+        Event::dispatch('user.register', $user);
     }
 }
 ```
-> **Nota**
-> Il parametro `$data` di `Event::emit($event_name, $data);` può essere qualsiasi dato, ad esempio un array, un'istanza di classe, una stringa, ecc.
 
-## Ascolto degli eventi tramite wildcard
-La registrazione tramite wildcard consente di gestire più eventi con lo stesso gestore, ad esempio la configurazione nel file `config/event.php` è la seguente:
+Esistono due metodi per pubblicare: `Event::dispatch($event_name, $data);` e `Event::emit($event_name, $data);`, con gli stessi parametri. La differenza: `emit` intercetta le eccezioni internamente; se una funzione lancia un'eccezione, le altre continuano. Con `dispatch` le eccezioni non vengono intercettate; se una funzione lancia un'eccezione, l'esecuzione si interrompe e l'eccezione viene propagata.
+
+> **Suggerimento**
+> Il parametro `$data` può essere qualsiasi tipo di dato (array, istanza di classe, stringa, ecc.).
+
+## Ascolto eventi con wildcard
+La registrazione con wildcard permette di gestire più eventi con lo stesso listener. Ad esempio in `config/event.php`:
+
 ```php
 <?php
 return [
@@ -75,7 +84,9 @@ return [
     ],
 ];
 ```
-È possibile ottenere il nome specifico dell'evento passando il secondo parametro `$event_data` alla funzione di gestione degli eventi, come mostrato di seguito:
+
+È possibile ottenere il nome concreto dell'evento tramite il secondo parametro `$event_data` della funzione di gestione:
+
 ```php
 <?php
 namespace app\event;
@@ -83,17 +94,18 @@ class User
 {
     function deal($user, $event_name)
     {
-        echo $event_name; // nome specifico dell'evento, ad esempio user.register, user.logout, ecc.
+        echo $event_name; // nome concreto dell'evento, es. user.register, user.logout, ecc.
         var_export($user);
     }
 }
 ```
 
-## Arresto della diffusione degli eventi
-Quando una funzione di gestione degli eventi restituisce `false`, l'evento viene interrotto.
+## Arrestare la diffusione dell'evento
+Quando una funzione di gestione restituisce `false`, la diffusione dell'evento si interrompe.
 
-## Funzioni di gestione degli eventi come chiusura
-Le funzioni di gestione degli eventi possono essere sia metodi di classe che chiusure, ad esempio:
+## Gestione eventi con closure
+La funzione di gestione può essere un metodo di classe o una closure. Ad esempio:
+
 ```php
 <?php
 return [
@@ -105,8 +117,13 @@ return [
 ];
 ```
 
-## Visualizzazione degli eventi e degli ascoltatori
-Utilizzare il comando `php webman event:list` per visualizzare tutti gli eventi e gli ascoltatori configurati nel progetto.
+## Visualizzare eventi e listener
+Usare il comando `php webman event:list` per vedere tutti gli eventi e i listener configurati nel progetto.
+
+## Ambito di supporto
+Oltre al progetto principale, i [plugin base](../plugin/base.md) e i [plugin app](../app/app.md) supportano la configurazione `event.php`.
+**File di configurazione plugin base:** `config/plugin/vendor/nome-plugin/event.php`
+**File di configurazione plugin app:** `plugin/nome-plugin/config/event.php`
 
 ## Note
-La gestione degli eventi non è asincrona e non è adatta per gestire operazioni lente. Le operazioni lente dovrebbero essere gestite tramite code di messaggistica, ad esempio con [webman/redis-queue](https://www.workerman.net/plugin/12).
+La gestione degli eventi non è asincrona e non è adatta a operazioni lente; queste andrebbero gestite con code di messaggi, ad esempio [webman/redis-queue](https://www.workerman.net/plugin/12).

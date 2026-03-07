@@ -1,41 +1,65 @@
-# Umgebungsvoraussetzungen
+# webman installieren
 
-* PHP >= 7.2
+* PHP >= 8.1
 * [Composer](https://getcomposer.org/) >= 2.0
 
 
-### 1. Projekt erstellen
+## Linux: PHP + Composer-Umgebung installieren (bei bestehender Umgebung überspringen)
+```
+curl -sO https://www.workerman.net/install-php-and-composer && sudo bash install-php-and-composer
+```
+> **Hinweis**
+> Der obige Befehl gilt für Linux- und macOS-Systeme. Windows-Benutzer müssen PHP separat installieren.
+
+Sie können auch die von webman bereitgestellte [statische PHP-Version](https://www.workerman.net/download) manuell herunterladen und entpacken.
+
+## 1. Projekt erstellen
 
 ```php
-composer create-project workerman/webman
+composer create-project workerman/webman:~2.0
 ```
 
-### 2. Ausführen
+> **Tipp**
+> Bei Fehlern verwenden Sie möglicherweise einen defekten Composer-Mirror. Führen Sie `composer config -g --unset repos.packagist` aus, um den Proxy zu entfernen.
 
-Navigieren Sie zum Webman-Verzeichnis
+## 2. Ausführen
+
+Wechseln Sie in das webman-Verzeichnis
 
 #### Windows-Benutzer
 Doppelklicken Sie auf `windows.bat` oder führen Sie `php windows.php` aus, um zu starten
 
-> **Hinweis**
-> Wenn Fehler auftreten, liegt dies wahrscheinlich daran, dass bestimmte Funktionen deaktiviert sind. Siehe [Deaktivierungsprüfung von Funktionen](others/disable-function-check.md), um die Deaktivierung aufzuheben.
+> **Tipp**
+> Bei Fehlern könnten Funktionen deaktiviert sein. Siehe [Prüfung deaktivierter Funktionen](others/disable-function-check.md) zur Aufhebung.
 
 #### Linux-Benutzer
-Im `Debug`-Modus ausführen (für Entwicklungsdebugging)
+**Debug-Modus** (für Entwicklung: Ausgabe erscheint im Terminal, Service wird beim Schließen des Terminals beendet)
 
 ```php
 php start.php start
 ```
 
-Im `Daemon`-Modus ausführen (für den Produktionsumgebung)
+**Daemon-Modus** (für Produktion: Keine Terminal-Ausgabe, Service läuft nach Schließen des Terminals weiter)
 
 ```php
 php start.php start -d
 ```
 
-> **Hinweis**
-> Wenn Fehler auftreten, liegt dies wahrscheinlich daran, dass bestimmte Funktionen deaktiviert sind. Siehe [Deaktivierungsprüfung von Funktionen](others/disable-function-check.md), um die Deaktivierung aufzuheben.
+#### Docker-Benutzer
 
-### 3. Zugriff
+Alle Dienste starten und an die Konsole anbinden
+```php
+docker-compose up
+```
 
-Öffnen Sie den Browser und rufen Sie `http://IP-Adresse:8787` auf
+Dienste im Hintergrund ausführen
+```php
+docker-compose up -d
+```
+
+> **Tipp**
+> Bei Fehlern könnten Funktionen deaktiviert sein. Siehe [Prüfung deaktivierter Funktionen](others/disable-function-check.md) zur Aufhebung.
+
+## 3. Zugriff
+
+Öffnen Sie im Browser `http://IP-Adresse:8787`.

@@ -61,7 +61,7 @@ return [
 In this way, we have completed the business initialization process.
 
 ## Additional Explanation
-[Custom Processes](../process.md) also execute the `start` method configured in `config/bootstrap.php`. We can use `$worker->name` to determine the current process and decide whether to execute your business initialization code in that process. For example, if we do not need to monitor the monitor process, the content of `MemReport.php` will be as follows:
+[Custom Processes](../process.md) also execute the `start` method configured in `config/bootstrap.php` after they start. We can use `$worker->name` to determine which process is currently running, and further use `$worker->id` to determine the process number. Then we can decide whether to execute your business initialization code in that process. For example, if we only need to execute in webman's process 0, the content of `MemReport.php` will be as follows:
 
 ```php
 <?php
@@ -80,9 +80,9 @@ class MemReport implements Bootstrap
             // If you don't want this initialization to be executed in the command line environment, return directly here.
             return;
         }
-        
-        // Do not execute the timer in the monitor process.
-        if ($worker->name == 'monitor') {
+
+        // Only execute in webman's process 0
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

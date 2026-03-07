@@ -1,34 +1,31 @@
-## Coda Redis
+# Coda Redis
 
-Coda Redis è una coda dei messaggi basata su Redis che supporta il ritardo nell'elaborazione dei messaggi.
+Coda di messaggi basata su Redis che supporta l'elaborazione ritardata dei messaggi.
 
 ## Installazione
 `composer require webman/redis-queue`
 
 ## File di configurazione
-Il file di configurazione di Redis viene generato automaticamente in `config/plugin/webman/redis-queue/redis.php`, il cui contenuto è simile al seguente:
-
+Il file di configurazione Redis viene generato automaticamente in `{progetto-principale}/config/plugin/webman/redis-queue/redis.php`, con contenuto simile al seguente:
 ```php
 <?php
 return [
     'default' => [
         'host' => 'redis://127.0.0.1:6379',
         'options' => [
-            'auth' => '',         // Password, parametro opzionale
+            'auth' => '',         // Password, opzionale
             'db' => 0,            // Database
-            'max_attempts'  => 5, // Tentativi di consumo dopo un fallimento
-            'retry_seconds' => 5, // Intervallo di ritentativo, in secondi
+            'max_attempts'  => 5, // Numero di tentativi dopo fallimento di consumo
+            'retry_seconds' => 5, // Intervallo di ritentativo in secondi
         ]
     ],
 ];
 ```
 
-### Ritentativi di consumo in caso di fallimento
-Se si verifica un errore durante il consumo (ad esempio un'eccezione), il messaggio viene inserito in una coda di ritardo e sarà elaborato nuovamente in seguito. Il numero di ritentativi è controllato dal parametro `max_attempts`, mentre l'intervallo di ritentativo è controllato da `retry_seconds` insieme a `max_attempts`. Ad esempio, se `max_attempts` è 5 e `retry_seconds` è 10, il primo ritentativo avverrà dopo `1*10` secondi, il secondo dopo `2*10` secondi e così via fino a un massimo di 5 tentativi. Se il numero di ritentativi supera quello impostato in `max_attempts`, il messaggio viene inserito nella coda dei fallimenti con chiave `{redis-queue}-failed`.
+### Ritentativi in caso di fallimento di consumo
+Se il consumo fallisce (si verifica un'eccezione), il messaggio viene inserito nella coda ritardata e attende il ritentativo successivo. Il numero di ritentativi è controllato da `max_attempts`, l'intervallo da `retry_seconds` e `max_attempts` congiuntamente. Es. se `max_attempts` è 5 e `retry_seconds` è 10, l'intervallo del 1° ritentativo è `1*10` secondi, del 2° `2*10` secondi, del 3° `3*10` secondi, fino a 5 ritentativi. Se si supera il numero di ritentativi impostato in `max_attempts`, il messaggio va nella coda falliti con chiave `{redis-queue}-failed`.
 
-## Invio di messaggi (sincrono)
-> **Nota:**
-> È necessario installare webman/redis >= 1.2.0 e dipendenze dall'estensione redis.
+## Invio messaggi (sincrono)
 
 ```php
 <?php
@@ -43,23 +40,24 @@ class Index
     {
         // Nome della coda
         $queue = 'send-mail';
-        // Dati, è possibile passare direttamente un array senza la necessità di serializzarlo
+        // Dati, si può passare un array direttamente senza serializzazione
         $data = ['to' => 'tom@gmail.com', 'content' => 'hello'];
-        // Invio del messaggio
+        // Inviare messaggio
         Redis::send($queue, $data);
-        // Invio di un messaggio con ritardo, che verrà elaborato dopo 60 secondi
+        // Inviare messaggio ritardato, elaborato dopo 60 secondi
         Redis::send($queue, $data, 60);
 
-        return response('test della coda Redis');
+        return response('redis queue test');
     }
+
 }
 ```
-Il successo dell'invio con `Redis::send()` restituisce true, altrimenti restituirà false o genererà un'eccezione.
+In caso di invio riuscito, `Redis::send()` restituisce true, altrimenti false o lancia un'eccezione.
 
-> **Suggerimento:**
-> Il tempo di consumo della coda di ritardo potrebbe variare. Ad esempio, se la velocità di consumo è inferiore a quella di produzione, la coda potrebbe accumularsi, causando un ritardo nel consumo. Una soluzione è avviare più processi di consumo.
+> **Suggerimento**
+> Può esserci scostamento nel tempo di consumo della coda ritardata. Es. quando la velocità di consumo è inferiore a quella di produzione, la coda può accumularsi e ritardare il consumo. Mitigazione: avviare più processi consumatori.
 
-## Invio di messaggi (asincrono)
+## Invio messaggi (asincrono)
 ```php
 <?php
 namespace app\controller;
@@ -73,28 +71,28 @@ class Index
     {
         // Nome della coda
         $queue = 'send-mail';
-        // Dati, è possibile passare direttamente un array senza la necessità di serializzarlo
+        // Dati, si può passare un array direttamente senza serializzazione
         $data = ['to' => 'tom@gmail.com', 'content' => 'hello'];
-        // Invio del messaggio
+        // Inviare messaggio
         Client::send($queue, $data);
-        // Invio di un messaggio con ritardo, che verrà elaborato dopo 60 secondi
+        // Inviare messaggio ritardato, elaborato dopo 60 secondi
         Client::send($queue, $data, 60);
 
-        return response('test della coda Redis');
+        return response('redis queue test');
     }
+
 }
 ```
-`Client::send()` non restituisce valori ed è un invio asincrono, che non garantisce il 100% di consegna del messaggio a Redis.
+`Client::send()` non restituisce alcun valore. È un push asincrono e non garantisce il 100% di consegna a Redis.
 
-> **Suggerimento:**
-> Il principio di funzionamento di `Client::send()` è quello di creare una coda in memoria locale e inviare in modo asincrono i messaggi a Redis (il che avviene molto rapidamente, con circa 10.000 messaggi al secondo). Se si riavvia il processo e la coda locale in memoria non ha ancora completato la sincronizzazione, potrebbero verificarsi perdite di messaggi. `Client::send()` è adatto per l'invio di messaggi non importanti.
+> **Suggerimento**
+> Il principio di `Client::send()` è creare una coda in memoria locale e sincronizzare i messaggi in modo asincrono con Redis (la sincronizzazione è veloce, circa 10.000 messaggi al secondo). Se il processo si riavvia prima che i dati della coda in memoria siano sincronizzati del tutto, possono andare persi messaggi. L'invio asincrono con `Client::send()` è adatto per messaggi non critici.
 
-> **Suggerimento:**
-> `Client::send()` è asincrono e può essere utilizzato solo nell'ambiente di esecuzione di Workerman. Per gli script della riga di comando, si consiglia di utilizzare l'interfaccia sincrona `Redis::send()`.
+> **Suggerimento**
+> `Client::send()` è asincrono e può essere usato solo nell'ambiente di esecuzione Workerman. Per script da riga di comando usare l'interfaccia sincrona `Redis::send()`.
 
-
-## Invio di messaggi da altri progetti
-A volte potrebbe essere necessario inviare messaggi a una coda da altri progetti e non è possibile utilizzare `webman\redis-queue`. In questo caso, è possibile utilizzare la seguente funzione per inviare messaggi alla coda.
+## Inviare messaggi da altri progetti
+A volte è necessario inviare messaggi da altri progetti e non si può usare `webman\redis-queue`. In tali casi si può riferire alla seguente funzione per inviare messaggi alla coda.
 
 ```php
 function redis_queue_send($redis, $queue, $data, $delay = 0) {
@@ -116,24 +114,23 @@ function redis_queue_send($redis, $queue, $data, $delay = 0) {
 }
 ```
 
-In questo caso, il parametro `$redis` è un'istanza di Redis. Ad esempio, l'utilizzo dell'estensione Redis è simile a quanto segue:
+Qui il parametro `$redis` è l'istanza Redis. Es. l'uso dell'estensione redis è simile a:
 
 ```php
 $redis = new Redis;
 $redis->connect('127.0.0.1', 6379);
 $queue = 'user-1';
-$data= ['qualche', 'dato'];
+$data= ['some', 'data'];
 redis_queue_send($redis, $queue, $data);
-````
+```
 
 ## Consumo
-Il file di configurazione del processo di consumo si trova in `config/plugin/webman/redis-queue/process.php`.
-La directory dei consumatori si trova in `app/queue/redis/`.
+Il file di configurazione del processo consumatore è in `{progetto-principale}/config/plugin/webman/redis-queue/process.php`. La directory dei consumatori è sotto `{progetto-principale}/app/queue/redis/`.
 
-Eseguendo il comando `php webman redis-queue:consumer my-send-mail` verrà generato il file `app/queue/redis/MyMailSend.php`.
+Eseguendo il comando `php webman redis-queue:consumer my-send-mail` si genera il file `{progetto-principale}/app/queue/redis/MyMailSend.php`.
 
-> **Suggerimento:**
-> Se il comando non esiste, è possibile generarlo manualmente.
+> **Suggerimento**
+> Questo comando richiede l'installazione del plugin [Console](../plugin/console.md). Se non si vuole installarlo, si può creare manualmente un file simile al seguente:
 
 ```php
 <?php
@@ -146,57 +143,82 @@ class MyMailSend implements Consumer
 {
     // Nome della coda da consumare
     public $queue = 'send-mail';
-    
-    // Nome della connessione, corrispondente alla connessione definita in plugin/webman/redis-queue/redis.php
+
+    // Nome connessione, corrisponde alla connessione in plugin/webman/redis-queue/redis.php
     public $connection = 'default';
-    
+
     // Consumo
     public function consume($data)
     {
-        // Nessuna necessità di deserializzare
-        var_export($data); // Output: ['to' => 'tom@gmail.com', 'content' => 'hello']
+        // Non serve deserializzare
+        var_export($data); // Output ['to' => 'tom@gmail.com', 'content' => 'hello']
+    }
+    // Callback in caso di fallimento consumo
+    /* 
+    $package = [
+        'id' => 1357277951, // ID messaggio
+        'time' => 1709170510, // Tempo messaggio
+        'delay' => 0, // Tempo ritardo
+        'attempts' => 2, // Conteggio consumi
+        'queue' => 'send-mail', // Nome coda
+        'data' => ['to' => 'tom@gmail.com', 'content' => 'hello'], // Contenuto messaggio
+        'max_attempts' => 5, // Numero max ritentativi
+        'error' => 'Messaggio errore' // Messaggio errore
+    ]
+    */
+    public function onConsumeFailure(\Throwable $e, $package)
+    {
+        echo "consume failure\n";
+        echo $e->getMessage() . "\n";
+        // Non serve deserializzare
+        var_export($package); 
     }
 }
 ```
 
-> **Nota:**
-> Durante il consumo, l'assenza di eccezioni o errori viene considerata un consumo riuscito. In caso contrario, il consumo fallisce e il messaggio viene inserito nella coda di ritentativi. Coda Redis non dispone di un meccanismo di ack. È possibile considerarlo come un ack automatico (in assenza di eccezioni o errori). Se durante il consumo si desidera contrassegnare il messaggio corrente come non consumato con successo, è possibile generare manualmente un'eccezione in modo che il messaggio venga nuovamente inserito nella coda di ritentativi. In realtà, questo è esattamente equivalente al meccanismo di ack.
+> **Nota**
+> Il consumo è considerato riuscito se durante il consumo non viene lanciata eccezione o Error; altrimenti fallimento e il messaggio entra nella coda di ritentativi. redis-queue non ha meccanismo ack; si può considerare come ack automatico (quando non c'è eccezione o Error). Per marcare il messaggio corrente come non consumato con successo, si può lanciare manualmente un'eccezione per mandare il messaggio nella coda di ritentativi. In pratica non è diverso da un meccanismo ack.
 
-> **Suggerimento:**
-> Il processo di consumo supporta più server e più processi, e lo stesso messaggio **non verrà** consumato più volte. I messaggi già consumati verranno automaticamente rimossi dalla coda, senza necessità di rimozione manuale.
+> **Suggerimento**
+> I consumatori supportano più server e processi, e lo stesso messaggio **non** viene consumato due volte. I messaggi consumati vengono rimossi automaticamente dalla coda; non serve eliminazione manuale.
 
-> **Suggerimento:**
-> È possibile consumare contemporaneamente diverse code con lo stesso consumatore. Aggiungere nuove code non richiede alcuna modifica alla configurazione presente in `process.php`. È sufficiente aggiungere una nuova classe `Consumer` corrispondente nella directory `app/queue/redis` e specificare il nome della coda tramite la proprietà di classe `$queue`.
+> **Suggerimento**
+> I processi consumatori possono consumare più code diverse contemporaneamente. Aggiungere una nuova coda non richiede modificare la configurazione in `process.php`. Per aggiungere un consumatore di coda nuova, basta aggiungere la classe `Consumer` corrispondente sotto `app/queue/redis` e usare la proprietà `$queue` per specificare il nome della coda da consumare.
 
-> **Suggerimento:**
-> Gli utenti Windows devono eseguire `php windows.php` per avviare Webman, altrimenti i processi di consumo non verranno avviati.
-## Impostazione di processi di consumo diversi per code diverse
-Per impostazione predefinita, tutti i consumatori condividono lo stesso processo di consumo. Tuttavia, a volte è necessario separare il consumo di alcune code, ad esempio mettendo in un gruppo separato i processi di consumo per le attività lente e in un altro gruppo i processi di consumo per le attività veloci. Per fare ciò, è possibile suddividere i consumatori in due directory, ad esempio `app_path() . '/queue/redis/fast'` e `app_path() . '/queue/redis/slow'` (si noti che è necessario apportare le opportune modifiche allo spazio dei nomi delle classi di consumo), quindi configurare come segue:
+> **Suggerimento**
+> Gli utenti Windows devono eseguire `php windows.php` per avviare webman, altrimenti il processo consumatore non si avvierà.
+
+> **Suggerimento**
+> Il callback onConsumeFailure viene attivato a ogni fallimento di consumo. Qui si può gestire la logica post-fallimento. (Questa funzione richiede `webman/redis-queue>=1.3.2` e `workerman/redis-queue>=1.2.1`)
+
+## Impostare processi consumatori diversi per code diverse
+Di default tutti i consumatori condividono lo stesso processo. A volte si vuole separare il consumo di alcune code—es. business a consumo lento in un gruppo di processi, a consumo rapido in un altro. Per questo si possono dividere i consumatori in due directory, es. `app_path() . '/queue/redis/fast'` e `app_path() . '/queue/redis/slow'` (nota: il namespace della classe consumatore va aggiornato di conseguenza). La configurazione è:
 ```php
 return [
-    ... altre configurazioni omesse ...
-
-    'redis_consumer_fast'  => [
+    ...altre configurazioni omesse...
+    
+    'redis_consumer_fast'  => [ // La chiave è personalizzata, nessun vincolo di formato, qui redis_consumer_fast
         'handler'     => Webman\RedisQueue\Process\Consumer::class,
         'count'       => 8,
         'constructor' => [
-            // Directory delle classi dei consumatori
+            // Directory classi consumatori
             'consumer_dir' => app_path() . '/queue/redis/fast'
         ]
     ],
-    'redis_consumer_slow'  => [
+    'redis_consumer_slow'  => [  // La chiave è personalizzata, nessun vincolo di formato, qui redis_consumer_slow
         'handler'     => Webman\RedisQueue\Process\Consumer::class,
         'count'       => 8,
         'constructor' => [
-            // Directory delle classi dei consumatori
+            // Directory classi consumatori
             'consumer_dir' => app_path() . '/queue/redis/slow'
         ]
     ]
 ];
 ```
-Attraverso la suddivisione delle directory e la relativa configurazione, è possibile impostare facilmente processi di consumo diversi per diversi consumatori.
 
-## Configurazione di più database Redis
+In questo modo i consumatori veloci vanno nella directory `queue/redis/fast` e i lenti in `queue/redis/slow`, raggiungendo l'obiettivo di assegnare processi consumatori alle code.
+
+## Configurazione Redis multipla
 #### Configurazione
 `config/plugin/webman/redis-queue/redis.php`
 ```php
@@ -205,41 +227,43 @@ return [
     'default' => [
         'host' => 'redis://192.168.0.1:6379',
         'options' => [
-            'auth' => null,       // password, di tipo stringa, parametro opzionale
-            'db' => 0,            // database
-            'max_attempts'  => 5, // numero di tentativi dopo un fallimento del consumo
-            'retry_seconds' => 5, // intervallo di ritentativo, in secondi
+            'auth' => null,       // Password, tipo stringa, opzionale
+            'db' => 0,           // Database
+            'max_attempts'  => 5, // Ritentativi dopo fallimento consumo
+            'retry_seconds' => 5, // Intervallo ritentativo in secondi
         ]
     ],
     'other' => [
         'host' => 'redis://192.168.0.2:6379',
         'options' => [
-            'auth' => null,       // password, di tipo stringa, parametro opzionale
-            'db' => 0,            // database
-            'max_attempts'  => 5, // numero di tentativi dopo un fallimento del consumo
-            'retry_seconds' => 5, // intervallo di ritentativo, in secondi
+            'auth' => null,       // Password, tipo stringa, opzionale
+            'db' => 0,           // Database
+            'max_attempts'  => 5, // Ritentativi dopo fallimento consumo
+            'retry_seconds' => 5, // Intervallo ritentativo in secondi
         ]
     ],
 ];
 ```
-Si noti che è stata aggiunta una configurazione Redis con chiave `other`.
 
-#### Invio di messaggi a più database Redis
+Nota: nella configurazione è stata aggiunta un'ulteriore configurazione Redis con chiave `other`.
+
+#### Invio messaggi a Redis multipli
+
 ```php
-// Inviare un messaggio alla coda con chiave `default`
+// Inviare messaggio alla coda con chiave `default`
 Client::connection('default')->send($queue, $data);
 Redis::connection('default')->send($queue, $data);
-// Equivalente a
+// Uguale a
 Client::send($queue, $data);
 Redis::send($queue, $data);
 
-// Inviare un messaggio alla coda con chiave `other`
+// Inviare messaggio alla coda con chiave `other`
 Client::connection('other')->send($queue, $data);
 Redis::connection('other')->send($queue, $data);
 ```
 
-#### Consumo da più database Redis
-Configurazione del consumo dalla coda con chiave `other`
+#### Consumo da Redis multipli
+Consumare messaggi dalla coda con chiave `other` nella configurazione:
 ```php
 namespace app\queue\redis;
 
@@ -250,22 +274,22 @@ class SendMail implements Consumer
     // Nome della coda da consumare
     public $queue = 'send-mail';
 
-    // === Impostato su 'other', che corrisponde alla configurazione di consumo con chiave 'other' ===
+    // === Impostare qui 'other' per consumare dalla coda con chiave 'other' nella configurazione ===
     public $connection = 'other';
 
     // Consumo
     public function consume($data)
     {
-        // Nessuna necessità di deserializzazione
+        // Non serve deserializzare
         var_export($data);
     }
 }
 ```
 
-## Domande frequenti
+## FAQ
 
-**Perché ricevo l'errore `Workerman\Redis\Exception: Workerman Redis Wait Timeout (600 seconds)`?**
+**Perché compare l'errore `Workerman\Redis\Exception: Workerman Redis Wait Timeout (600 seconds)`?**
 
-Questo errore si verifica solo nell'interfaccia di invio asincrono `Client::send()`. Inviando messaggi in modo asincrono, innanzitutto vengono memorizzati localmente e, quando il processo è inattivo, i messaggi vengono inviati a Redis. Se la velocità di ricezione di Redis è inferiore alla velocità di produzione dei messaggi o se il processo è occupato con altre attività e non ha abbastanza tempo per sincronizzare i messaggi in memoria con Redis, si verificherà un ingorgo dei messaggi. Se un messaggio rimane in coda per più di 600 secondi, si verificherà questo errore.
+Questo errore si verifica solo con l'interfaccia di invio asincrono `Client::send()`. L'invio asincrono salva prima i messaggi in memoria locale, poi li invia a Redis quando il processo è inattivo. Se Redis riceve i messaggi più lentamente di quanto vengono prodotti, o il processo è occupato con altre attività e non ha tempo sufficiente per sincronizzare i messaggi dalla memoria a Redis, può verificarsi un accumulo. Se i messaggi restano accumulati per più di 600 secondi, viene attivato questo errore.
 
-Soluzione: utilizzare l'interfaccia di invio sincrono `Redis::send()` per inviare i messaggi.
+Soluzione: usare l'interfaccia di invio sincrono `Redis::send()` per l'invio messaggi.

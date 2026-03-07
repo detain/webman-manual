@@ -1,18 +1,16 @@
-# Excel
+# Excel-Tabellen
 
-## phpoffice/phpspreadsheet
-
-### Projektadresse
+## Projektadresse
 
 https://github.com/PHPOffice/PhpSpreadsheet
   
-### Installation
+## Installation
  
   ```php
   composer require phpoffice/phpspreadsheet
   ```
   
-### Verwendung
+## Verwendung
 
 ```php
 <?php
@@ -31,7 +29,7 @@ class ExcelController
 
         $writer = new Xlsx($spreadsheet);
         $file_path = public_path().'/hello_world.xlsx';
-        // Datei im Public-Verzeichnis speichern
+        // Datei im public-Verzeichnis speichern
         $writer->save($file_path);
         // Datei herunterladen
         return response()->download($file_path, 'Dateiname.xlsx');
@@ -39,8 +37,8 @@ class ExcelController
 
 }
 ```
-  
-  
-### Weitere Informationen
+
+## Weitere Informationen
 
 Besuchen Sie https://phpspreadsheet.readthedocs.io/en/latest/
+  

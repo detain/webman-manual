@@ -22,17 +22,17 @@ class FooController
 }
 ```
 
-Cuando se accede a `http://127.0.0.1:8787/foo`, la página devuelve `hello index`.
+Al acceder a `http://127.0.0.1:8787/foo`, la página devuelve `hello index`.
 
-Cuando se accede a `http://127.0.0.1:8787/foo/hello`, la página devuelve `hello webman`.
+Al acceder a `http://127.0.0.1:8787/foo/hello`, la página devuelve `hello webman`.
 
-Por supuesto, puedes cambiar las reglas de enrutamiento a través de la configuración de rutas, consulte [Rutas](route.md).
+Puede cambiar las reglas de enrutamiento mediante la configuración de rutas, consulte [Rutas](route.md).
 
 > **Consejo**
 > Si aparece un error 404, abra `config/app.php`, establezca `controller_suffix` en `Controller` y reinicie.
 
-## Sufijo del Controlador
-A partir de la versión 1.3, webman admite configurar un sufijo para el controlador en `config/app.php`. Si `controller_suffix` en `config/app.php` se establece como una cadena vacía `''`, entonces el controlador se verá de la siguiente manera
+## Sufijo del controlador
+A partir de la versión 1.3, webman admite configurar el sufijo del controlador en `config/app.php`. Si `controller_suffix` está configurado como cadena vacía `''`, el controlador tendrá este aspecto:
 
 `app\controller\Foo.php`.
 
@@ -56,25 +56,225 @@ class Foo
 }
 ```
 
-Se recomienda encarecidamente configurar el sufijo del controlador como `Controller` para evitar conflictos de nombres entre controladores y modelos, aumentando así la seguridad.
+Se recomienda encarecidamente establecer el sufijo del controlador en `Controller` para evitar conflictos con nombres de clases de modelos y mejorar la seguridad.
 
-## Notas
- - El framework automáticamente pasa un objeto `support\Request` al controlador, a través del cual se puede obtener los datos de entrada del usuario (get, post, header, cookie, etc.), consulte [Solicitud](request.md)
- - Dentro del controlador, se pueden devolver números, cadenas o un objeto `support\Response`, pero no se pueden devolver otros tipos de datos.
- - El objeto `support\Response` puede crearse mediante las funciones de ayuda `response()`, `json()`, `xml()`, `jsonp()`, `redirect()`, etc.
- 
+## Explicación
+- El framework pasa automáticamente el objeto `support\Request` al controlador, con el que puede obtener datos de entrada del usuario (get, post, header, cookie, etc.), consulte [Solicitud](request.md).
+- El controlador puede devolver números, cadenas u objetos `support\Response`, pero no otros tipos de datos.
+- Los objetos `support\Response` se pueden crear con funciones auxiliares como `response()`, `json()`, `xml()`, `jsonp()`, `redirect()`, etc.
 
-## Ciclo de Vida del Controlador
+## Enlace de parámetros del controlador
 
-Cuando `controller_reuse` en `config/app.php` es `false`, se inicializará una instancia del controlador para cada solicitud, la instancia del controlador se destruirá al finalizar la solicitud, similar al funcionamiento de los frameworks tradicionales.
+#### Ejemplo
+webman permite enlazar automáticamente los parámetros de la solicitud a los parámetros del método del controlador. Por ejemplo:
 
-Cuando `controller_reuse` en `config/app.php` es `true`, todas las solicitudes reutilizarán la instancia del controlador, es decir, una vez creada la instancia del controlador residirá en memoria para todas las solicitudes.
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+
+Puede pasar los valores de `name` y `age` mediante `GET` o `POST`, o a través de parámetros de ruta. Por ejemplo:
+
+```php
+Route::any('/user/{name}/{age}', [app\controller\UserController::class, 'create']);
+```
+
+La prioridad es: `parámetros de ruta` > `GET` > `POST`.
+
+#### Valores por defecto
+
+Al acceder a `/user/create?name=tom`, obtendrá el siguiente error:
+
+```html
+Missing input parameter age
+```
+
+El motivo es que no se pasó el parámetro `age`. Puede solucionarlo definiendo un valor por defecto. Por ejemplo:
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+
+#### Tipos de parámetros
+Al acceder a `/user/create?name=tom&age=not_int`, obtendrá el siguiente error:
+
+> **Consejo**
+> Para facilitar las pruebas, pasamos los parámetros directamente en la barra de direcciones. En desarrollo real, los parámetros deberían pasarse mediante `POST`.
+
+```html
+Input age must be of type int, string given
+```
+
+Los datos recibidos se convierten según el tipo. Si la conversión falla, se lanza la excepción `support\exception\InputTypeException`. Como `age` no puede convertirse a `int`, aparece este error.
+
+#### Mensajes de error personalizados
+Puede personalizar mensajes como `Missing input parameter age` e `Input age must be of type int, string given` mediante traducción. Consulte los siguientes comandos:
+
+```
+composer require symfony/translation
+mkdir resource/translations/zh_CN/ -p
+echo "<?php
+return [
+    'Input :parameter must be of type :exceptType, :actualType given' => 'El parámetro de entrada :parameter debe ser de tipo :exceptType, el tipo recibido es :actualType',
+    'Missing input parameter :parameter' => 'Falta el parámetro de entrada :parameter',
+];" > resource/translations/zh_CN/messages.php
+php start.php restart
+```
+
+#### Otros tipos
+webman admite tipos como `int`, `float`, `string`, `bool`, `array`, `object` e `instancias de clase`. Por ejemplo:
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age, float $balance, bool $vip, array $extension): Response
+    {
+        return json([
+            'name' => $name,
+            'age' => $age,
+            'balance' => $balance,
+            'vip' => $vip,
+            'extension' => $extension,
+        ]);
+    }
+}
+```
+
+Al acceder a `/user/create?name=tom&age=18&balance=100.5&vip=true&extension[foo]=bar`, obtendrá:
+
+```json
+{
+  "name": "tom",
+  "age": 18,
+  "balance": 100.5,
+  "vip": true,
+  "extension": {
+    "foo": "bar"
+  }
+}
+```
+
+#### Instancia de clase
+webman permite pasar instancias de clases mediante type hints. Por ejemplo:
+
+**app\service\Blog.php**
+```php
+<?php
+namespace app\service;
+class Blog
+{
+    private $title;
+    private $content;
+    public function __construct(string $title, string $content)
+    {
+        $this->title = $title;
+        $this->content = $content;
+    }
+    public function get()
+    {
+        return [
+            'title' => $this->title,
+            'content' => $this->content,
+        ];
+    }
+}
+```
+
+**app\controller\BlogController.php**
+```php
+<?php
+namespace app\controller;
+use app\service\Blog;
+use support\Response;
+
+class BlogController
+{
+    public function create(Blog $blog): Response
+    {
+        return json($blog->get());
+    }
+}
+```
+
+Al acceder a `/blog/create?blog[title]=hello&blog[content]=world`, obtendrá:
+
+```json
+{
+  "title": "hello",
+  "content": "world"
+}
+```
+
+#### Instancia de modelo
+
+**app\model\User.php**
+```php
+<?php
+namespace app\model;
+use support\Model;
+class User extends Model
+{
+    protected $connection = 'mysql';
+    protected $table = 'user';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
+    // Definir aquí los campos rellenables para evitar campos inseguros del frontend
+    protected $fillable = ['name', 'age'];
+}
+```
+
+**app\controller\UserController.php**
+```php
+<?php
+namespace app\controller;
+use app\model\User;
+class UserController
+{
+    public function create(User $user): int
+    {
+        $user->save();
+        return $user->id;
+    }
+}
+```
+
+Al acceder a `/user/create?user[name]=tom&user[age]=18`, obtendrá un resultado similar a:
+
+```json
+1
+```
+
+## Ciclo de vida del controlador
+
+Cuando `controller_reuse` en `config/app.php` es `false`, cada solicitud inicializa una vez la instancia del controlador, que se destruye al finalizar. Es el comportamiento típico de frameworks tradicionales.
+
+Cuando `controller_reuse` en `config/app.php` es `true`, todas las solicitudes reutilizan la misma instancia del controlador, que permanece en memoria una vez creada.
 
 > **Nota**
-> Para desactivar la reutilización del controlador, webman>=1.4.0 se requiere, es decir, antes de la versión 1.4.0, el controlador se reutiliza para todas las solicitudes y no se puede cambiar.
-
-> **Nota**
-> Al habilitar la reutilización del controlador, las solicitudes no deben modificar ninguna propiedad del controlador, ya que estos cambios afectarán las solicitudes posteriores, por ejemplo:
+> Con la reutilización activada, las solicitudes no deben modificar propiedades del controlador, ya que afectaría a solicitudes posteriores. Por ejemplo:
 
 ```php
 <?php
@@ -102,8 +302,8 @@ class FooController
     
     protected function getModel($id)
     {
-        // Este método mantendrá el modelo después de la primera solicitud update?id=1
-        // Si se realiza otra solicitud delete?id=2, se eliminará el modelo 1
+        // Este método retiene el modelo tras la primera solicitud update?id=1
+        // Si llega otra solicitud delete?id=2, se eliminarán los datos del id 1
         if (!$this->model) {
             $this->model = Model::find($id);
         }
@@ -113,7 +313,7 @@ class FooController
 ```
 
 > **Consejo**
-> Devolver datos en el constructor `__construct()` del controlador no tendrá ningún efecto, por ejemplo:
+> Devolver datos en el constructor `__construct()` del controlador no tiene efecto. Por ejemplo:
 
 ```php
 <?php
@@ -125,23 +325,22 @@ class FooController
 {
     public function __construct()
     {
-        // Devolver datos en el constructor no tendrá ningún efecto, el navegador no recibirá esta respuesta
-        return response('hello');
+        // El return en el constructor no tiene efecto; el navegador no recibirá esta respuesta
+        return response('hello'); 
     }
 }
 ```
 
+## Diferencia entre no reutilizar y reutilizar el controlador
 
-## Diferencias entre Reutilización y No Reutilización del Controlador
-Las diferencias son las siguientes:
+#### Sin reutilización
+Cada solicitud crea una nueva instancia que se libera al finalizar. Comportamiento habitual en frameworks tradicionales. Rendimiento ligeramente inferior (aprox. 10 % en benchmark helloworld, normalmente insignificante en proyectos reales).
 
-#### No Reutilización del Controlador
-Cada solicitud creará una nueva instancia del controlador, la instancia del controlador se liberará al finalizar la solicitud y se liberará la memoria. No reutilizar el controlador es similar a la mayoría de las prácticas de desarrollo. Debido a la creación y destrucción repetida del controlador, el rendimiento será ligeramente inferior al de la reutilización del controlador (el rendimiento de la prueba de estrés helloworld es aproximadamente un 10% peor, con aplicación de negocio, esto puede ser ignorado en su mayoría).
+#### Con reutilización
+Se crea una instancia por proceso y se mantiene en memoria. Las solicitudes siguientes la reutilizan. Mejor rendimiento, pero menos habitual para muchos desarrolladores.
 
-#### Reutilización del Controlador
-Si se reutiliza el controlador, un proceso solo creará una instancia del controlador, la instancia del controlador no se liberará al finalizar la solicitud, y las solicitudes posteriores en el mismo proceso reutilizarán esta instancia. La reutilización del controlador mejora la rendimiento, pero no es una práctica común entre la mayoría de los desarrolladores.
+#### No es posible reutilizar cuando:
 
-#### Casos en los que no se debe usar la Reutilización del Controlador
-Cuando las solicitudes modifiquen las propiedades del controlador, no se debe habilitar la reutilización del controlador, ya que estos cambios en las propiedades afectarán a las solicitudes posteriores.
+La solicitud modifica propiedades del controlador; esos cambios afectarían a solicitudes posteriores.
 
-A algunos desarrolladores les gusta realizar algunas inicializaciones para cada solicitud en el constructor del controlador `__construct()`, en este caso, no se debe reutilizar el controlador, ya que el constructor del proceso solo se llamará una vez y no se llamará para cada solicitud.
+Se realiza inicialización en `__construct()` para cada solicitud; el constructor solo se ejecuta una vez por proceso, no en cada solicitud.

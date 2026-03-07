@@ -14,36 +14,36 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('test di log');
-        return response('ciao index');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
 
 ## Metodi forniti
 ```php
-Log::log($livello, $messaggio, array $contesto = [])
-Log::debug($messaggio, array $contesto = [])
-Log::info($messaggio, array $contesto = [])
-Log::notice($messaggio, array $contesto = [])
-Log::warning($messaggio, array $contesto = [])
-Log::error($messaggio, array $contesto = [])
-Log::critical($messaggio, array $contesto = [])
-Log::alert($messaggio, array $contesto = [])
-Log::emergency($messaggio, array $contesto = [])
+Log::log($level, $message, array $context = [])
+Log::debug($message, array $context = [])
+Log::info($message, array $context = [])
+Log::notice($message, array $context = [])
+Log::warning($message, array $context = [])
+Log::error($message, array $context = [])
+Log::critical($message, array $context = [])
+Log::alert($message, array $context = [])
+Log::emergency($message, array $context = [])
 ```
 Equivalente a
 ```php
 $log = Log::channel('default');
-$log->log($livello, $messaggio, array $contesto = [])
-$log->debug($messaggio, array $contesto = [])
-$log->info($messaggio, array $contesto = [])
-$log->notice($messaggio, array $contesto = [])
-$log->warning($messaggio, array $contesto = [])
-$log->error($messaggio, array $contesto = [])
-$log->critical($messaggio, array $contesto = [])
-$log->alert($messaggio, array $contesto = [])
-$log->emergency($messaggio, array $contesto = [])
+$log->log($level, $message, array $context = [])
+$log->debug($message, array $context = [])
+$log->info($message, array $context = [])
+$log->notice($message, array $context = [])
+$log->warning($message, array $context = [])
+$log->error($message, array $context = [])
+$log->critical($message, array $context = [])
+$log->alert($message, array $context = [])
+$log->emergency($message, array $context = [])
 ```
 
 ## Configurazione
@@ -102,7 +102,7 @@ return [
     ],
     // Canale log2
     'log2' => [
-        // Gestori del canale predefinito, è possibile impostarne più di uno
+        // Gestori del canale log2, è possibile impostarne più di uno
         'handlers' => [
             [   
                 // Nome della classe del gestore
@@ -138,8 +138,8 @@ class FooController
     public function index(Request $request)
     {
         $log = Log::channel('log2');
-        $log->info('test log2');
-        return response('ciao index');
+        $log->info('log2 test');
+        return response('hello index');
     }
 }
 ```

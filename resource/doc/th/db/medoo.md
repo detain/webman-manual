@@ -1,20 +1,20 @@
-## เมดู
+# ฐานข้อมูล Medoo
 
-เมดูเป็นปลัักอินการดำเนินการฐานข้อมูลที่เบาเบา  [เว็บไซต์เมดู](https://medoo.in/)。
+[webman/medoo](https://github.com/webman-php/medoo) ขยาย [Medoo](https://medoo.in/) ด้วยการสนับสนุน connection pool และทำงานได้ทั้งในสภาพแวดล้อมคอร์รูทีนและไม่ใช่คอร์รูทีน การใช้งานเหมือนกับ Medoo
 
 ## การติดตั้ง
 `composer require webman/medoo`
 
-## การกำหนดค่าฐานข้อมูล
-ตำแหน่งไฟล์การกำหนดค่าอยู่ที่ `config/plugin/webman/medoo/database.php`
+## การกำหนดค่าฐานข้อมูล Medoo
+ตำแหน่งไฟล์การกำหนดค่า: `config/plugin/webman/medoo/database.php`
 
-## การใช้งาน
+## การใช้ฐานข้อมูล Medoo
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use Webman\Medoo\Medoo;
+use support\Medoo;
 
 class Index
 {
@@ -31,10 +31,10 @@ class Index
 > เทียบเท่ากับ
 > `Medoo::instance('default')->get('user', '*', ['uid' => 1]);`
 
-## การกำหนดค่าฐานข้อมูลหลายฐานข้อมูล
+## การกำหนดค่าฐานข้อมูล Medoo หลายฐานข้อมูล
 
-**การกำหนดค่า**  
-ใน `config/plugin/webman/medoo/database.php` เพิ่มการกำหนดค่าหนึ่งโดยใช้ key อะไรก็ได้ ในที่นี้ใช้ 'other' เป็นตัวอย่าง
+**การกำหนดค่า**
+เพิ่มการกำหนดค่าใหม่ใน `config/plugin/webman/medoo/database.php` โดยใช้ key อะไรก็ได้ ที่นี่ใช้ `other`
 
 ```php
 <?php
@@ -56,9 +56,16 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
+        ],
+        'pool' => [ // การกำหนดค่า connection pool
+            'max_connections' => 5, // จำนวนการเชื่อมต่อสูงสุด
+            'min_connections' => 1, // จำนวนการเชื่อมต่อขั้นต่ำ
+            'wait_timeout' => 60,   // เวลารอสูงสุดเมื่อขอการเชื่อมต่อจาก pool; จะเกิด exception ถ้าเกิน
+            'idle_timeout' => 3,    // เวลาว่างสูงสุดของการเชื่อมต่อใน pool; ที่เกินจะถูกปิดจนถึง min_connections
+            'heartbeat_interval' => 50, // ช่วง heartbeat ของ pool (วินาที); แนะนำต่ำกว่า 60 วินาที
         ]
     ],
-    // เพิ่มการกำหนดค่า 'other'
+    // เพิ่มการกำหนดค่า 'other' ที่นี่
     'other' => [
         'type' => 'mysql',
         'host' => 'localhost',
@@ -76,15 +83,21 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
-        ]
+        ],
+        'pool' => [
+            'max_connections' => 5,
+            'min_connections' => 1,
+            'wait_timeout' => 60,
+            'idle_timeout' => 3,
+            'heartbeat_interval' => 50,
+        ],
     ],
 ];
 ```
 
-**การใช้งาน**
+## การใช้ฐานข้อมูล Medoo
 ```php
 $user = Medoo::instance('other')->get('user', '*', ['uid' => 1]);
 ```
 
-## เอกสารอย่างละเอียด
-ดูที่ [เอกสารเมดู](https://medoo.in/api/select) อย่างละเอียด
+ดู [เอกสารอย่างเป็นทางการของ Medoo](https://medoo.in/api/select)

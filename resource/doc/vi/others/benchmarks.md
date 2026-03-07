@@ -11,6 +11,7 @@
 
 ## HTTP keep-alive là gì?
 Cơ chế HTTP Keep-Alive là một công nghệ dùng để gửi nhiều yêu cầu và phản hồi HTTP qua một kết nối TCP duy nhất, điều này ảnh hưởng rất lớn đến kết quả kiểm tra hiệu suất vì nếu tắt keep-alive, QPS có thể giảm đi gấp đôi. Hiện nay, trình duyệt mặc định đều mở keep-alive, tức là sau khi truy cập vào một địa chỉ HTTP, kết nối sẽ được giữ lại và không đóng lại, để sử dụng cho lần yêu cầu tiếp theo, từ đó tăng hiệu suất. Khi kiểm tra áp lực, đề xuất mở keep-alive.
+Ngoài ra, nếu kiểm tra áp lực mà không bật keep-alive, các cổng local của máy khách sẽ nhanh chóng bị cạn kiệt do các kết nối ở trạng thái TIME_WAIT. Điều này biểu hiện là các yêu cầu thất bại khi tổng số yêu cầu vượt quá một ngưỡng nhất định (thường khoảng 28.000).
 
 ## Làm thế nào để mở HTTP keep-alive khi kiểm tra áp lực?
 Nếu sử dụng chương trình kiểm tra ab, cần thêm tham số -k, ví dụ như `ab -n100000 -c200 -k http://127.0.0.1:8787/`. Đối với apipost, cần trả về header nén gzip để mở keep-alive (lỗi của apipost, xem phần dưới) . Các chương trình kiểm tra áp lực khác thường mặc định mở.
@@ -31,7 +32,7 @@ Kết quả kiểm tra áp lực từ [techempower](https://www.techempower.com/
 Dưới đây là một số dữ liệu kiểm tra áp lực
 
 **Môi trường**
-Máy chủ đám mây 4 nhân 4G, trả về một bản ghi JSON ngẫu nhiên từ 100,000 bản ghi.
+Máy chủ đám mây Alibaba 4 nhân 4G, cơ sở dữ liệu MySQL cục bộ, truy vấn ngẫu nhiên một bản ghi từ 100.000 bản ghi và trả về JSON, kiểm tra áp lực cục bộ.
 
 **Nếu sử dụng PDO nguyên bản**
 QPS của webman là 1,78 vạn
@@ -45,7 +46,8 @@ QPS của webman giảm xuống còn 0,72 vạn
 Kết quả của ThinkORM tương tự, không khác biệt lớn.
 
 > **Gợi ý**
-> Mặc dù sử dụng ORM sẽ làm giảm hiệu suất, nhưng với hầu hết các doanh nghiệp, đây là đủ. Chúng ta nên tìm thấy một sự cân bằng giữa hiệu suất, hiệu quả phát triển và khả năng bảo trì thay vì chỉ tập trung vào hiệu suất.
+> Mặc dù sử dụng ORM sẽ làm giảm hiệu suất, nhưng đối với 99% các kịch bản kinh doanh, hiệu suất đã dư thừa. Nếu bạn thuộc 1% còn lại, có thể dễ dàng giải quyết bằng cách thêm CPU hoặc máy chủ.
+> Chúng ta nên tìm sự cân bằng giữa hiệu quả phát triển, khả năng bảo trì và hiệu suất, thay vì chỉ theo đuổi hiệu suất một cách mù quáng.
 
 ## Tại sao QPS rất thấp khi kiểm tra áp lực bằng apipost?
 Mô-đun kiểm tra áp lực của apipost có lỗi, nếu máy chủ không trả về header nén gzip, thì không thể duy trì keep-alive, dẫn đến giảm hiệu suất mạnh mẽ. Phương pháp giải quyết làm trả về dữ liệu sau khi nén và thêm header gzip, ví dụ như
@@ -63,11 +65,11 @@ class IndexController
 Ngoài ra, apipost có những trường hợp không thể tạo áp lực đáng tin cậy, có thể thấy sự giảm QPS khoảng 50% so với ab cùng số lượng kết nối đồng thời. Đề xuất sử dụng ab, wrk hoặc phần mềm kiểm tra áp lực chuyên nghiệp khác thay vì apipost.
 
 ## Thiết lập số quá trình hợp lý
-webman mặc định mở 16 quá trình (4 lần số lõi CPU). Trên thực tế, trong trường hợp không có IO mạng, việc mở số quá trình kiểu helloworld giống với số lõi CPU sẽ có hiệu suất tốt nhất, vì có thể giảm chi phí chuyển đổi quá trình. Nếu là doanh nghiệp có cơ sở dữ liệu, redis hoặc các dịch vụ IO chậm, số quá trình có thể được đặt từ 3-8 lần số lõi CPU, vì lúc này cần nhiều quá trình hơn để tăng số lượng đồng thời, trong khi chi phí chuyển đổi quá trình so với IO chậm gần như có thể bỏ qua.
+webman mặc định mở số quá trình bằng cpu*4. Trên thực tế, trong trường hợp không có IO mạng, việc mở số quá trình kiểu helloworld giống với số lõi CPU sẽ có hiệu suất tốt nhất, vì có thể giảm chi phí chuyển đổi quá trình. Nếu là doanh nghiệp có cơ sở dữ liệu, redis hoặc các dịch vụ IO chậm, số quá trình có thể được đặt từ 3-8 lần số lõi CPU, vì lúc này cần nhiều quá trình hơn để tăng số lượng đồng thời, trong khi chi phí chuyển đổi quá trình so với IO chậm gần như có thể bỏ qua.
 
 ## Một số phạm vi kiểm tra áp lực tham khảo
 
-**Máy chủ đám mây 4 nhân 4G 16 quá trình kiểm tra từ bên ngoại/bên trong mạng nội bộ**
+**Máy chủ đám mây 4 nhân 4G 16 quá trình kiểm tra áp lực cục bộ/mạng nội bộ**
 
 | - | Mở keep-alive | Không mở keep-alive |
 |--|-----|-----|

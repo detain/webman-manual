@@ -1,6 +1,6 @@
-# ควบคุม
+# ตัวควบคุม
 
-สร้างไฟล์ควบคุมใหม่ `app/controller/FooController.php`。
+สร้างไฟล์ตัวควบคุมใหม่ `app/controller/FooController.php`
 
 ```php
 <?php
@@ -22,19 +22,19 @@ class FooController
 }
 ```
 
-เมื่อเข้าถึง `http://127.0.0.1:8787/foo` หน้าเว็บจะแสดง `hello index`。
+เมื่อเข้าถึง `http://127.0.0.1:8787/foo` หน้าเว็บจะคืนค่า `hello index`
 
-เมื่อเข้าถึง `http://127.0.0.1:8787/foo/hello` หน้าเว็บจะแสดง `hello webman`。
+เมื่อเข้าถึง `http://127.0.0.1:8787/foo/hello` หน้าเว็บจะคืนค่า `hello webman`
 
-แน่นอนว่าคุณสามารถเปลี่ยนกฎเส้นทางผ่านการกำหนดค่าเส้นทาง ดูรายละเอียดได้ที่ [เส้นทาง](route.md)。
+คุณสามารถเปลี่ยนกฎเส้นทางผ่านการกำหนดค่าตาม [เส้นทาง](route.md)
 
 > **เคล็ดลับ**
-> หากพบข้อผิดพลาด 404 โปรดเปิด `config/app.php` และตั้งค่า `controller_suffix` เป็น `Controller` และรีสตาร์ท.
+> หากเกิดข้อผิดพลาด 404 กรุณาเปิด `config/app.php` ตั้งค่า `controller_suffix` เป็น `Controller` และรีสตาร์ท
 
-## คำต่อท้ายของควบคุม
-ตั้งแต่ webman เวอร์ชัน 1.3 เป็นต้นมา มีการรองรับการตั้งค่าคำต่อท้ายของควบคุมใน `config/app.php` หากคำต่อท้ายของควบคุมไม่มีการตั้งค่า ดังนี้
+## คำต่อท้ายตัวควบคุม
+ตั้งแต่ webman เวอร์ชัน 1.3 รองรับการตั้งค่าคำต่อท้ายตัวควบคุมใน `config/app.php` หาก `controller_suffix` ตั้งเป็นค่าว่าง `''` ตัวควบคุมจะมีรูปแบบดังนี้
 
-`app\controller\Foo.php` ควบคุมจะมีรูปแบบดังนี้
+`app\controller\Foo.php`
 
 ```php
 <?php
@@ -56,21 +56,225 @@ class Foo
 }
 ```
 
-ขอแนะนำให้ตั้งค่าคำต่อท้ายของควบคุมเป็น `Controller` เพื่อป้องกันควบคุมและรุ่นชื่อรุ่นข้อมูลชนกันและเพิ่มความปลอดภัย
+แนะนำอย่างยิ่งให้ตั้งค่าคำต่อท้ายตัวควบคุมเป็น `Controller` เพื่อหลีกเลี่ยงการชนกันของชื่อระหว่างตัวควบคุมกับโมเดล และเพิ่มความปลอดภัย
 
 ## คำอธิบาย
-- framework จะอัตโนมัติส่ง `support\Request` ออกมาให้ตัวควบคุม ผ่านตัวควบคุมคุณสามารถเข้าถึงข้อมูลที่ผู้ใช้ป้อนเข้า(เช่น get post header cookie) ดูรายละเอียดได้ที่ [เรียก](request.md)
-- ในควบคุมคุณสามารถส่งตัวเลข สตริงหรือ `support\Response` object แต่ไม่สามารถส่งชนิดข้อมูลอื่น ๆ
-- ตัว `support\Response` สามารถสร้างผ่านฟังก์ชั่นตัวอำนวยความช่วย `response()` `json()` `xml()` `jsonp()` `redirect()` และอื่น ๆ
+- เฟรมเวิร์กจะส่งอ็อบเจ็กต์ `support\Request` ให้ตัวควบคุมโดยอัตโนมัติ สามารถดึงข้อมูลที่ผู้ใช้ป้อน (get, post, header, cookie ฯลฯ) ได้ ดูได้ที่ [คำขอ](request.md)
+- ตัวควบคุมสามารถคืนค่าเป็นตัวเลข สตริง หรืออ็อบเจ็กต์ `support\Response` ได้ แต่ไม่สามารถคืนค่าประเภทข้อมูลอื่น
+- อ็อบเจ็กต์ `support\Response` สร้างได้ผ่านฟังก์ชันช่วย เช่น `response()` `json()` `xml()` `jsonp()` `redirect()` ฯลฯ
 
-## รอบชีวิตของควบคุม
-เมื่อ `config/app.php` มีค่า `controller_reuse` เป็น `false` ทุกครั้งที่มีการเรียกร้องแบบเร่งด่วนจะทำการสร้างตัวที่ตัวควบคุมของตัวเอง ขณะที่ `config/app.php` มีค่า `controller_reuse` เป็น `true` ทุกคำที่ใดไปใช้ตัวควบคุมเดียวกัน สำหรับขณะที่ตัวควบคุมไม่ใช้จนกว่าจะจบงานนั้น
+## การผูกพารามิเตอร์ตัวควบคุม
 
-> **โปรดระวัง**
-> การปิดใช้เทคนิคของตัวควบคุมความสามารถ(ควบคุมหากพบพัค) จะต้องใช้อินเทอร์เน็ตwepman>=1.4.0 หรือเป็นตัวย่อยของหลักการอัตโนมัติที่ตัั้งการหยุดถ้าควบคุมความสามารถสูงไม่สามารถเปลี่ยน
+#### ตัวอย่าง
+webman รองรับการผูกพารามิเตอร์คำขอเข้ากับพารามิเตอร์เมธอดตัวควบคุมโดยอัตโนมัติ เช่น
 
-> **โปรดระวัง**
-> การเปลี่ยนการควบคุมความสามารถ การคว้าเชื้อจะไม่ควรเปลี่ยนค่าคุณลักษณะของควบคุม เพราะที่ทำการเปลี่ยนนั้นจะไปผลงานร้อน  ได้เพื่มโชคสำหรับคำที่หลังๆ
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+
+คุณสามารถส่งค่า `name` และ `age` ผ่าน `GET` หรือ `POST` หรือผ่านพารามิเตอร์เส้นทาง เช่น
+
+```php
+Route::any('/user/{name}/{age}', [app\controller\UserController::class, 'create']);
+```
+
+ลำดับความสำคัญ: `พารามิเตอร์เส้นทาง` > `GET` > `POST`
+
+#### ค่าเริ่มต้น
+
+สมมติเราเข้าถึง `/user/create?name=tom` เราจะได้รับข้อผิดพลาดดังนี้
+
+```html
+Missing input parameter age
+```
+
+เนื่องจากเราไม่ได้ส่งพารามิเตอร์ `age` สามารถแก้ได้โดยตั้งค่าเริ่มต้นให้พารามิเตอร์ เช่น
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+
+#### ประเภทพารามิเตอร์
+เมื่อเข้าถึง `/user/create?name=tom&age=not_int` เราจะได้รับข้อผิดพลาดดังนี้
+
+> **เคล็ดลับ**
+> เพื่อความสะดวกในการทดสอบ เราใส่พารามิเตอร์ในแถบที่อยู่ของเบราว์เซอร์โดยตรง ในการพัฒนาจริงควรส่งพารามิเตอร์ผ่าน `POST`
+
+```html
+Input age must be of type int, string given
+```
+
+เนื่องจากการรับข้อมูลจะถูกแปลงตามประเภท หากแปลงไม่ได้จะโยน `support\exception\InputTypeException` เนื่องจากพารามิเตอร์ `age` ที่ส่งมาแปลงเป็น `int` ไม่ได้ จึงเกิดข้อผิดพลาดดังกล่าว
+
+#### ข้อความผิดพลาดแบบกำหนดเอง
+สามารถกำหนดข้อความเช่น `Missing input parameter age` และ `Input age must be of type int, string given` ได้ผ่านระบบหลายภาษา ดูคำสั่งดังนี้
+
+```
+composer require symfony/translation
+mkdir resource/translations/zh_CN/ -p
+echo "<?php
+return [
+    'Input :parameter must be of type :exceptType, :actualType given' => 'พารามิเตอร์ :parameter ต้องเป็นประเภท :exceptType ประเภทที่ส่งมาคือ :actualType',
+    'Missing input parameter :parameter' => 'ขาดพารามิเตอร์ :parameter',
+];" > resource/translations/zh_CN/messages.php
+php start.php restart
+```
+
+#### ประเภทอื่นๆ
+webman รองรับประเภทพารามิเตอร์ ได้แก่ `int` `float` `string` `bool` `array` `object` และ `อินสแตนซ์คลาส` เช่น
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age, float $balance, bool $vip, array $extension): Response
+    {
+        return json([
+            'name' => $name,
+            'age' => $age,
+            'balance' => $balance,
+            'vip' => $vip,
+            'extension' => $extension,
+        ]);
+    }
+}
+```
+
+เมื่อเข้าถึง `/user/create?name=tom&age=18&balance=100.5&vip=true&extension[foo]=bar` เราจะได้ผลลัพธ์ดังนี้
+
+```json
+{
+  "name": "tom",
+  "age": 18,
+  "balance": 100.5,
+  "vip": true,
+  "extension": {
+    "foo": "bar"
+  }
+}
+```
+
+#### อินสแตนซ์คลาส
+webman รองรับการส่งอินสแตนซ์คลาสผ่าน type hint เช่น
+
+**app\service\Blog.php**
+```php
+<?php
+namespace app\service;
+class Blog
+{
+    private $title;
+    private $content;
+    public function __construct(string $title, string $content)
+    {
+        $this->title = $title;
+        $this->content = $content;
+    }
+    public function get()
+    {
+        return [
+            'title' => $this->title,
+            'content' => $this->content,
+        ];
+    }
+}
+```
+
+**app\controller\BlogController.php**
+```php
+<?php
+namespace app\controller;
+use app\service\Blog;
+use support\Response;
+
+class BlogController
+{
+    public function create(Blog $blog): Response
+    {
+        return json($blog->get());
+    }
+}
+```
+
+เมื่อเข้าถึง `/blog/create?blog[title]=hello&blog[content]=world` เราจะได้ผลลัพธ์ดังนี้
+
+```json
+{
+  "title": "hello",
+  "content": "world"
+}
+```
+
+#### อินสแตนซ์โมเดล
+
+**app\model\User.php**
+```php
+<?php
+namespace app\model;
+use support\Model;
+class User extends Model
+{
+    protected $connection = 'mysql';
+    protected $table = 'user';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
+    // ต้องเพิ่มฟิลด์ที่เติมได้ที่นี่ เพื่อป้องกันฟิลด์ที่ไม่ปลอดภัยจากหน้าบ้าน
+    protected $fillable = ['name', 'age'];
+}
+```
+
+**app\controller\UserController.php**
+```php
+<?php
+namespace app\controller;
+use app\model\User;
+class UserController
+{
+    public function create(User $user): int
+    {
+        $user->save();
+        return $user->id;
+    }
+}
+```
+
+เมื่อเข้าถึง `/user/create?user[name]=tom&user[age]=18` เราจะได้ผลลัพธ์คล้ายๆ นี้
+
+```json
+1
+```
+
+## วงจรชีวิตตัวควบคุม
+
+เมื่อ `controller_reuse` ใน `config/app.php` เป็น `false` แต่ละคำขอจะเริ่มต้นอินสแตนซ์ตัวควบคุมครั้งหนึ่ง เมื่อคำขอจบลงอินสแตนซ์ตัวควบคุมจะถูกทำลาย เหมือนกลไกการทำงานของเฟรมเวิร์กทั่วไป
+
+เมื่อ `controller_reuse` ใน `config/app.php` เป็น `true` คำขอทั้งหมดจะใช้อินสแตนซ์ตัวควบคุมเดิม นั่นคืออินสแตนซ์ตัวควบคุมเมื่อสร้างแล้วจะอยู่ในหน่วยความจำ คำนขอทั้งหมดใช้ร่วมกัน
+
+> **หมายเหตุ**
+> เมื่อเปิดใช้การนำตัวควบคุมกลับมาใช้ คำขอไม่ควรเปลี่ยนคุณสมบัติใดๆ ของตัวควบคุม เพราะการเปลี่ยนแปลงดังกล่าวจะส่งผลต่อคำขอถัดไป เช่น
 
 ```php
 <?php
@@ -98,12 +302,9 @@ class FooController
     
     protected function getModel($id)
     {
-        วิธีนี้จะรักควบคุมไว้ก่อนคำขอแรกขอupdate?id=1หน้าเว็บจะเซ็นถูงในสิรจัย
-        หากทำคำขอแรกคราหลังขช้ง่ว่าล่ท์?id=2หน้าเพจเตรองที่จะลบชุดที่หน้าเพจแรก      
-        ถไ้ายอาจหากข help? ตย์5:81 กรสิ์ไม่มำง งูล้มัยงงงงง
-        ง
-        // บทยัน้าปมต้ิดม้ิงวิธีน์้วีเม้้น
-     if (!$this->model) {
+        // เมธอดนี้จะเก็บ model ไว้หลังคำขอแรก update?id=1
+        // หากมีการขอ delete?id=2 อีกครั้ง จะลบข้อมูลของ id 1
+        if (!$this->model) {
             $this->model = Model::find($id);
         }
         return $this->model;
@@ -112,7 +313,7 @@ class FooController
 ```
 
 > **เคล็ดลับ**
-> ในชื่อkังมy้เr้เ่บ[href=https://www.htmldog.com/]{FooController} ไม่มายุคำถได้ปรุันเน้ที่ติดการทำง่์ล่ลื่ออัจไม้ังไู่่น
+> การ return ข้อมูลในคอนสตรัคเตอร์ `__construct()` ของตัวควบคุมจะไม่มีผล เช่น
 
 ```php
 <?php
@@ -124,44 +325,22 @@ class FooController
 {
     public function __construct()
     {
-        // ในการคำลแค่เ้เป็นสำงำไม่ใด้ีามหวเาอเื้บุงหมมันอาหาจ้ํะน่ไย่ดเาเว้่บท้็้ะ
+        // การ return ข้อมูลในคอนสตรัคเตอร์ไม่มีผล เบราว์เซอร์จะไม่ได้รับการตอบสนองนี้
         return response('hello'); 
     }
 }
 ```
 
-## ควบคุมไม่ประยุกต์ใช้และประยุกต์ใช้แตกต่างกันอย่างไร
-จุดแตกต่างคือดังนี้
+## ความแตกต่างระหว่างไม่นำกลับมาใช้กับนำกลับมาใช้
 
-#### ไม่ประยุกต์ใช้ควบคุม
-ทุกคำจะสร้างใหม่ตัวในตัวควบคุมหลังแต่มีการทำงานเสร็จแล้วและสานด้นหลังการสร้างหลัวแล้วปิดตัวนั้น และดึงข้อมูลออกสู่หน่วยความจำ ไม่ควบคุมมแทที นึงและต้งที่ำยางและต้องนี่has tohlenhtoookhto
+#### ไม่นำตัวควบคุมกลับมาใช้
+แต่ละคำขอจะ new อินสแตนซ์ตัวควบคุมใหม่ เมื่อคำขอจบลงจะปล่อยอินสแตนซ์นั้นและคืนหน่วยความจำ การไม่นำตัวควบคุมกลับมาใช้เหมือนเฟรมเวิร์กทั่วไป เหมาะกับพฤติกรรมของนักพัฒนาส่วนใหญ่ เนื่องจากตัวควบคุมถูกสร้างและทำลายซ้ำไปมา ประสิทธิภาพจะแย่กว่าแบบนำกลับมาใช้เล็กน้อย (การทดสอบ helloworld แย่ลงประมาณ 10% ถ้ามีธุรกิจจริงเกือบมองข้ามได้)
 
-#### ประยุกต์ใช้ควบคุม
-ขคำที่ใช้งานตมี์izumii253
+#### นำตัวควบคุมกลับมาใช้
+การนำกลับมาใช้ โปรเซสหนึ่งจะ new ตัวควบคุมเพียงครั้งเดียว เมื่อคำขอจบลงจะไม่ปล่อยอินสแตนซ์ตัวควบคุมนี้ คำขอถัดไปของโปรเซสปัจจุบันจะใช้อินสแตนซ์เดิม ประสิทธิภาพดีกว่า แต่ไม่เหมาะกับพฤติกรรมของนักพัฒนาส่วนใหญ่
 
-#### ไบว์กายใหงค์ี่บันทู้nbtb5ntb5tgtb5ntb5btb5g5whbggvefvf5fvfbafwvfaw
+#### กรณีต่อไปนี้ไม่สามารถนำตัวควบคุมกลับมาใช้ได้
 
-m5vefuwnfvwqfabwvfbwvfwnvwqwvfbwvnwwnwnengevgemwgggngwmefva5acvaqevaegmwcwbgfbcabeaev5fvfdvfa5vfawefwfbawbf5qawaitfawfnawfbawwffwvqwawfnfaw
+เมื่อคำขอจะเปลี่ยนคุณสมบัติของตัวควบคุม จะไม่สามารถเปิดใช้การนำตัวควบคุมกลับมาใช้ได้ เพราะการเปลี่ยนแปลงคุณสมบัติเหล่านั้นจะส่งผลต่อคำขอถัดไป
 
-
-
-## รองข้อมูลTher
-
-สร้างหม่กสร้้tำุ าเ5มหt   
-
-องตึ้แงํมYii//5iovbiouspbvsbbsfpbpfs5bf5b5b
-
-อนั้่ยำ้่นังั้งับบบบบืบำะจ้จจั้ี่b่ำบbำ
-
-็ตt้บ่บบบีบีืบำำำลำำบ<fieldsetfapbridgebfs5fb5obefibe5vfvbwbtnb
-
-ีmfbmfng5fn5fnfnf5nvf5bnbfbsb5b5bnrnbr5fbr5b5b5b5b5b5b5vb
-
-maomtpov5hv5m45b5hlvprht4rb5b5bth4b5b5b5t5t5pt45m5
-
-ี่้mำบมี้่็่้้้็้ำ่Bี่EM5MitRemRnivrebe5f5nv5bcmvcmpwvdf
-
-```js
-<?php
-n4rfhjndukiebemtaibnataiim5tiba3ruegmiwhjhrkebiuajpfnad9hoqi
-```
+นักพัฒนาบางคนชอบทำการเริ่มต้นบางอย่างสำหรับแต่ละคำขอในคอนสตรัคเตอร์ `__construct()` ของตัวควบคุม ในกรณีนี้จะนำตัวควบคุมกลับมาใช้ไม่ได้ เพราะคอนสตรัคเตอร์ของโปรเซสปัจจุบันจะถูกเรียกเพียงครั้งเดียว ไม่ได้ถูกเรียกทุกคำขอ

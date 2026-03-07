@@ -4,8 +4,6 @@
 
 The plugin comes with a web page JS client push.js and a uniapp client `uniapp-push.js`, and other language clients can be downloaded at https://pusher.com/docs/channels/channels_libraries/libraries/
 
-> The plugin requires webman-framework>=1.2.0
-
 ## Installation
 
 ```sh
@@ -169,7 +167,53 @@ var connection = new Push({
 
 2. Import it in the vue page
 ```js
+
+<script lang="ts" setup>
+import {  onMounted } from 'vue'
 import { Push } from '../utils/push-vue'
+
+onMounted(() => {
+  console.log('Component mounted') 
+
+  // Instantiate webman-push
+
+  // Establish connection
+  var connection = new Push({
+    url: 'ws://127.0.0.1:3131', // websocket address
+    app_key: '<app_key, obtained in config/plugin/webman/push/app.php>',
+    auth: '/plugin/webman/push/auth' // subscription authentication (private channel only)
+  });
+
+  // Assuming user uid is 1
+  var uid = 1;
+  // Browser listens for messages on the user-1 channel, i.e. messages for user with uid 1
+  var user_channel = connection.subscribe('user-' + uid);
+
+  // When the user-1 channel has a message event
+  user_channel.on('message', function (data) {
+    // data contains the message content
+    console.log(data);
+  });
+  // When the user-1 channel has a friendApply event
+  user_channel.on('friendApply', function (data) {
+    // data contains information about the friend request
+    console.log(data);
+  });
+
+  // Assuming group id is 2
+  var group_id = 2;
+  // Browser listens for messages on the group-2 channel, i.e. group 2's messages
+  var group_channel = connection.subscribe('group-' + group_id);
+  // When group 2 has a message event
+  group_channel.on('message', function (data) {
+    // data contains the message content
+    console.log(data);
+  });
+
+
+})
+
+</script>
 ```
 
 ## Other Client Addresses

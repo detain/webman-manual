@@ -1,11 +1,10 @@
-# Event Event Handling
-
-`webman/event` provides an elegant event mechanism that allows you to execute some business logic without modifying the code, achieving decoupling between business modules. For example, when a new user is successfully registered, you can simply publish a custom event like `user.register`, and each module can receive the event and execute the corresponding business logic.
+# Event Handling
+`webman/event` provides an elegant event mechanism that allows you to execute business logic without modifying the code, achieving decoupling between business modules. A typical scenario: when a new user is successfully registered, simply publish a custom event such as `user.register`, and each module can receive the event and execute the corresponding business logic.
 
 ## Installation
 `composer require webman/event`
 
-## Subscribe to Events
+## Subscribing to Events
 Event subscriptions are configured through the `config/event.php` file.
 
 ```php
@@ -23,13 +22,13 @@ return [
 ```
 
 **Note:**
-- `user.register` and `user.logout` are event names, which are strings. It's recommended to use lowercase words separated by dots (`.`).
-- An event can have multiple event handling functions, which are executed in the order specified in the configuration.
+- `user.register`, `user.logout`, etc. are event names (string type). It is recommended to use lowercase words separated by dots (`.`).
+- One event can have multiple event handling functions; they are invoked in the order specified in the configuration.
 
 ## Event Handling Functions
-Event handling functions can be any class methods, functions, closure functions, etc. 
+Event handling functions can be any class methods, functions, or closure functions.
 
-For example, create an event handling class `app/event/User.php` (create the directory if it doesn't exist).
+For example, create the event handling class `app/event/User.php` (create the directory if it does not exist).
 
 ```php
 <?php
@@ -48,8 +47,8 @@ class User
 }
 ```
 
-## Publish an Event
-Use `Event::emit($event_name, $data);` to publish an event. For example:
+## Publishing Events
+Use `Event::dispatch($event_name, $data);` or `Event::emit($event_name, $data);` to publish an event. For example:
 
 ```php
 <?php
@@ -64,16 +63,20 @@ class User
             'name' => 'webman',
             'age' => 2
         ];
-        Event::emit('user.register', $user);
+        Event::dispatch('user.register', $user);
     }
 }
 ```
 
-> **Note:**
-> The `$data` parameter of `Event::emit($event_name, $data);` can be any data, such as an array, an object instance, a string, etc.
+There are two functions for publishing events: `Event::dispatch($event_name, $data);` and `Event::emit($event_name, $data);` — both take the same parameters.  
+The difference is that `emit` catches exceptions internally: if one handler throws an exception, other handlers will still run.  
+`dispatch` does not catch exceptions; if any handler throws, execution stops and the exception is propagated upward.
+
+> **Tip**
+> The `$data` parameter can be any data, such as an array, a class instance, or a string.
 
 ## Wildcard Event Listening
-You can use wildcard event subscriptions to handle multiple events on the same listener. For example, in the `config/event.php` file:
+Wildcard registration allows you to handle multiple events with the same listener. For example, in `config/event.php`:
 
 ```php
 <?php
@@ -84,7 +87,7 @@ return [
 ];
 ```
 
-In the event handling function, you can get the specific event name through the second parameter `$event_data`.
+You can obtain the concrete event name via the second parameter `$event_data` of the event handling function.
 
 ```php
 <?php
@@ -93,17 +96,17 @@ class User
 {
     function deal($user, $event_name)
     {
-        echo $event_name; // specific event name, such as user.register, user.logout, etc.
+        echo $event_name; // concrete event name, e.g. user.register, user.logout, etc.
         var_export($user);
     }
 }
 ```
 
 ## Stopping Event Broadcasting
-When we return `false` in the event handling function, the event broadcasting will be stopped.
+When an event handling function returns `false`, broadcasting for that event will stop.
 
-## Closure Function for Event Handling
-The event handling function can also be a closure function. For example:
+## Closure Functions for Event Handling
+Event handling functions can be class methods or closure functions. For example:
 
 ```php
 <?php
@@ -117,7 +120,12 @@ return [
 ```
 
 ## Viewing Events and Listeners
-Use the command `php webman event:list` to view all the events and listeners configured in the project.
+Use the command `php webman event:list` to view all events and listeners configured in the project.
 
-## Note
-Event handling is not asynchronous. Events are not suitable for handling slow business logic, which should be done using message queues. For example, [webman/redis-queue](https://www.workerman.net/plugin/12).
+## Support Scope
+Along with the main project, both [base plugins](../plugin/base.md) and [app plugins](../app/app.md) support `event.php` configuration.
+**Base plugin config file:** `config/plugin/vendor/plugin-name/event.php`
+**App plugin config file:** `plugin/plugin-name/config/event.php`
+
+## Notes
+Event handling is not asynchronous. Events are not suitable for slow operations; slow business logic should be handled with message queues, such as [webman/redis-queue](https://www.workerman.net/plugin/12).

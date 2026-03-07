@@ -1,20 +1,16 @@
 # MongoDB
 
-webman verwendet standardmäßig [jenssegers/mongodb](https://github.com/jenssegers/laravel-mongodb) als MongoDB-Komponente, die aus dem Laravel-Projekt extrahiert wurde und ähnlich wie Laravel verwendet wird.
+webman verwendet standardmäßig [mongodb/laravel-mongodb](https://github.com/mongodb/laravel-mongodb) als MongoDB-Komponente. Diese wurde aus dem Laravel-Projekt extrahiert und funktioniert wie Laravel.
 
-Bevor Sie `jenssegers/mongodb` verwenden können, müssen Sie die MongoDB-Erweiterung für `php-cli` installieren.
+Vor der Verwendung von `mongodb/laravel-mongodb` müssen Sie die MongoDB-Erweiterung für `php-cli` installieren.
 
+> **Hinweis**
 > Verwenden Sie den Befehl `php -m | grep mongodb`, um zu überprüfen, ob die MongoDB-Erweiterung für `php-cli` installiert ist. Beachten Sie: Selbst wenn Sie die MongoDB-Erweiterung für `php-fpm` installiert haben, bedeutet dies nicht, dass Sie sie in `php-cli` verwenden können, da `php-cli` und `php-fpm` unterschiedliche Anwendungen sind und möglicherweise unterschiedliche `php.ini`-Konfigurationen verwenden. Verwenden Sie den Befehl `php --ini`, um festzustellen, welche `php.ini`-Konfigurationsdatei von Ihrem `php-cli` verwendet wird.
 
 ## Installation
 
-Für PHP>7.2
 ```php
-composer require -W illuminate/database jenssegers/mongodb ^3.8.0
-```
-Für PHP=7.2
-```php
-composer require -W illuminate/database jenssegers/mongodb ^3.7.0
+composer require -W webman/database mongodb/laravel-mongodb ^4.8
 ```
 
 Nach der Installation ist ein Neustart erforderlich (reload funktioniert nicht).
@@ -28,7 +24,7 @@ return [
 
     'connections' => [
 
-         ...Andere Konfigurationen hier...
+         ...andere Konfigurationen hier ausgelassen...
 
         'mongodb' => [
             'driver'   => 'mongodb',
@@ -60,12 +56,39 @@ class UserController
 {
     public function db(Request $request)
     {
-        Db::connection('mongodb')->collection('test')->insert([1,2,3]);
-        return json(Db::connection('mongodb')->collection('test')->get());
+        Db::connection('mongodb')->table('test')->insert([1,2,3]);
+        return json(Db::connection('mongodb')->table('test')->get());
+    }
+}
+```
+
+## Modellbeispiel
+```php
+<?php
+namespace app\model;
+
+use DateTimeInterface;
+use support\MongoModel as Model;
+
+class Test extends Model
+{
+    protected $connection = 'mongodb';
+
+    protected $table = 'test';
+
+    public $timestamps = true;
+
+    /**
+     * @param DateTimeInterface $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
     }
 }
 ```
 
 ## Weitere Informationen finden Sie unter
 
-https://github.com/jenssegers/laravel-mongodb
+https://github.com/mongodb/laravel-mongodb

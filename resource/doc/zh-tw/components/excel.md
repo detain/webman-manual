@@ -1,17 +1,17 @@
-# Excel
+# Excel 表格
 
-## phpoffice/phpspreadsheet
-
-### 專案地址
+## 專案地址
 
 https://github.com/PHPOffice/PhpSpreadsheet
   
-### 安裝
-```php
-composer require phpoffice/phpspreadsheet
-```
+## 安裝
+ 
+  ```php
+  composer require phpoffice/phpspreadsheet
+  ```
   
-### 使用
+## 使用
+
 ```php
 <?php
 namespace app\controller;
@@ -37,6 +37,8 @@ class ExcelController
 
 }
 ```
+
+## 更多內容
+
+請參閱 https://phpspreadsheet.readthedocs.io/en/latest/
   
-### 更多內容
-參考 https://phpspreadsheet.readthedocs.io/en/latest/

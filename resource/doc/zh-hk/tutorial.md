@@ -1,4 +1,4 @@
-# 簡單示例
+# webman 快速上手簡單示例
 
 ## 返回字符串
 **新建控制器**
@@ -58,7 +58,7 @@ class UserController
 
 在瀏覽器裡訪問 `http://127.0.0.1:8787/user/hello?name=tom`
 
-瀏覽器將返回 `{"code":0,"msg":"ok","data":"tom""}`
+瀏覽器將返回 `{"code":0,"msg":"ok","data":"tom"}`
 
 使用json助手函數返回數據將自動加上一個header頭 `Content-Type: application/json`
 

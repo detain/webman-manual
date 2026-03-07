@@ -1,4 +1,4 @@
-# Inicio rápido
+# Modelo de base de datos - Uso del Model (estilo Laravel)
 
 El modelo de webman se basa en [Eloquent ORM](https://laravel.com/docs/7.x/eloquent). Cada tabla de la base de datos tiene un "modelo" correspondiente para interactuar con esa tabla. Puedes utilizar el modelo para consultar datos de la tabla, así como para insertar nuevos registros en la tabla.
 
@@ -6,7 +6,7 @@ Antes de comenzar, asegúrate de configurar la conexión de la base de datos en 
 
 > Nota: Para que Eloquent ORM admita observadores de modelos, se necesita importar adicionalmente `composer require "illuminate/events"` [Ejemplo](#Model-Observers)
 
-## Ejemplo
+## Ejemplo de modelo de base de datos
 ```php
 <?php
 namespace app\model;
@@ -192,7 +192,7 @@ $usuario = app\model\User::where('name', 'tom')->first();
 
 $usuario->name = 'jerry';
 
-$usuario = $usuario->fresh();
+$usuario->refresh();
 
 $usuario->name; // "tom"
 ```
@@ -537,7 +537,7 @@ if ($post->is($anotherPost)) {
 ## Observadores de modelo
 Consulta [Eventos de modelo y observadores en Laravel](https://learnku.com/articles/6657/model-events-and-observer-in-laravel) para obtener más información sobre cómo utilizar observadores de modelo en Laravel.
 
-Nota: Para que Eloquent ORM admita observadores de modelo, se debe importar adicionalmente con composer require "illuminate/events"
+Nota: Para que Eloquent ORM admita observadores de modelo, se debe importar adicionalmente con `composer require "illuminate/events"`
 
 ```php
 <?php
@@ -555,3 +555,6 @@ class User extends Model
     }
 }
 ```
+
+## Transacciones
+Consulte [Transacciones de base de datos](../others/transaction.md)

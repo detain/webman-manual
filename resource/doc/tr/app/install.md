@@ -1,21 +1,22 @@
 # Kurulum
 
-Uygulama eklentisi kurulumu için iki yöntem bulunmaktadır:
+Uygulama eklentisi kurmanın iki yolu vardır:
 
-## Eklenti Pazarından Kurulum
-[Resmi yönetim paneli webman-admin](https://www.workerman.net/plugin/82)'e gidin ve uygulama eklentileri sayfasına tıklayarak ilgili uygulama eklentisini kurmak için kurulum düğmesini tıklayın.
+## Eklenti pazarından kurulum
+[Resmi yönetim paneli webman-admin](https://www.workerman.net/plugin/82) sayfasına gidin, uygulama eklentileri sayfasını açın ve ilgili eklentiyi kurmak için kurulum düğmesine tıklayın.
 
-## Kaynak Kodu Kurulumu
-Uygulama pazarından uygulama eklentisi sıkıştırılmış dosyasını indirin, açın ve açılan dizini `{ana proje}/plugin/` dizini içine yükleyin (plugin dizini yoksa elle oluşturmanız gerekebilir). Daha sonra `php webman app-plugin:install eklentiadı` komutunu çalıştırarak kurulumu tamamlayın.
+## Kaynak paketinden kurulum
+Uygulama pazarından eklenti arşivini indirin, açın ve açılan klasörü `{ana proje}/plugin/` dizinine yükleyin (plugin klasörü yoksa elle oluşturun). `php webman app-plugin:install eklenti_adı` komutunu çalıştırarak kurulumu tamamlayın.
 
-Örneğin, indirilen sıkıştırılmış dosyanın adı `ai.zip` ise, bu dosyayı `{ana proje}/plugin/ai` klasörüne açın ve `php webman app-plugin:install ai` komutunu kullanarak kurulumu tamamlayın.
+Örnek: İndirilen arşiv ai.zip adlıysa, `{ana proje}/plugin/ai` dizinine açın ve `php webman app-plugin:install ai` ile kurulumu tamamlayın.
+
 
 # Kaldırma
 
-Aynı şekilde, uygulama eklentisi kaldırma işlemi de iki şekilde gerçekleştirilebilir:
+Uygulama eklentisini kaldırmanın da iki yolu vardır:
 
-## Eklenti Pazarından Kaldırma
-[Resmi yönetim paneli webman-admin](https://www.workerman.net/plugin/82)'e gidin ve uygulama eklentileri sayfasına tıklayarak ilgili uygulama eklentisini kaldırmak için kaldırma düğmesini tıklayın.
+## Eklenti pazarından kaldırma
+[Resmi yönetim paneli webman-admin](https://www.workerman.net/plugin/82) sayfasına gidin, uygulama eklentileri sayfasını açın ve ilgili eklentiyi kaldırmak için kaldırma düğmesine tıklayın.
 
-## Kaynak Kodu Kaldırma
-Kaldırma işlemi için `php webman app-plugin:uninstall eklentiadı` komutunu çalıştırarak kaldırma işlemini tamamlayın; ardından el ile `{ana proje}/plugin/` dizini altındaki ilgili eklenti dizinini silin.
+## Kaynak paketinden kaldırma
+`php webman app-plugin:uninstall eklenti_adı` komutunu çalıştırarak kaldırmayı tamamlayın. Ardından `{ana proje}/plugin/` dizinindeki ilgili eklenti klasörünü elle silin.

@@ -1,33 +1,47 @@
 # About Memory Leaks
-webman is a resident memory framework, so we need to pay attention to memory leaks. However, developers do not need to worry too much, because memory leaks occur under very extreme conditions and are easy to avoid. The development experience with webman is basically the same as that with traditional frameworks, and there is no need to perform unnecessary operations for memory management.
+Webman is a resident memory framework, so we need to pay some attention to memory leaks. However, developers need not worry too much, because memory leaks occur only under very extreme conditions and are easy to avoid. The development experience with webman is basically the same as with traditional frameworks; there is no need to perform extra operations for memory management.
 
 > **Tip**
-> The monitor process built into webman monitors the memory usage of all processes. If a process's memory usage is about to reach the value set in `memory_limit` in php.ini, the corresponding process will be automatically safely restarted, leading to the release of memory. This process has no impact on the business. 
+> Webman's built-in monitor process monitors memory usage of all processes. When a process's memory usage is about to reach the value set by `memory_limit` in php.ini, it will automatically and safely restart the corresponding process to free memory, with no impact on your application.
 
 ## Memory Leak Definition
-As the number of requests increases, the memory used by webman also **increases infinitely** (note that it is **infinitely increasing**), reaching several hundred megabytes or even more, which is a memory leak. If the memory usage increases but then stops increasing, it is not considered a memory leak.
+As the number of requests increases, continuous growth of webman's memory usage is normal. In general, once a process reaches a certain request volume (typically in the millions), memory will stop growing or occasionally increase slightly.
 
-It is quite normal for a process to use tens of megabytes of memory. When a process is handling super-large requests or maintaining a massive number of connections, it is common for a single process's memory usage to reach over a hundred megabytes. After this, PHP may not immediately return all of the used memory to the operating system. Instead, it may retain it for reuse, so it is normal for the memory usage to increase after processing a large request and not release memory. This is a normal phenomenon. (Calling the gc_mem_caches() method can release some idle memory)
+For most applications, a single process's memory usage will eventually stabilize at around 10M–100M. There is no need to worry if single-process memory stays under 100M.
+
+Additionally, when handling large files, large requests, or reading large amounts of data from a database, PHP will allocate substantial memory. PHP may retain some of this memory for reuse instead of returning it all to the operating system, which can lead to high memory usage. Since the memory is reused, there is no need for concern.
+
+> **Tip**
+> For phar or binary-packed projects, if the package size is large, it is normal for the packaged project's memory usage to exceed 100M.
+
+## How to Confirm a Memory Leak
+If a process has handled over a million requests, memory usage exceeds 100M, and memory still grows after each request, a memory leak may be occurring.
+
+## How to Locate a Memory Leak
+A simple approach is to stress-test each API and identify which one continues to increase memory usage after millions of requests.
+
+Once a problematic API is found, use a binary search approach: comment out half of the business logic at a time until you narrow down the exact code causing the issue.
 
 ## How Memory Leaks Occur
-**Memory leaks occur when the following two conditions are met:**
-1. There is an array with a **long life cycle** (note that it is a long life cycle array, ordinary arrays are fine)
-2. And this array with a **long life cycle** expands infinitely (the business infinitely inserts data into it and never cleans it up)
+**A memory leak occurs only when both of the following conditions are met:**
+1. There exists an array with a **long life cycle** (note: a long life cycle array; ordinary arrays are fine)
+2. And this **long life cycle** array keeps growing indefinitely (the application keeps inserting data into it and never cleans it up)
 
-If conditions 1 and 2 are **simultaneously met** (note that this is simultaneously met), a memory leak will occur. If either of the above conditions is not met or only one of the conditions is met, it is not a memory leak.
+A memory leak occurs only when **both** conditions are satisfied. If either condition is not met or only one is met, it is not a memory leak.
 
-## Arrays with Long Life Cycle
-In webman, arrays with long life cycles include:
-1. Arrays with the static keyword
-2. Arrays as properties in singletons
-3. Arrays with the global keyword
+## Long Life Cycle Arrays
+
+In webman, long life cycle arrays include:
+1. Arrays with the `static` keyword
+2. Array properties of singletons
+3. Arrays with the `global` keyword
 
 > **Note**
-> webman allows the use of data with long life cycles, but it needs to be ensured that the data within the data is finite and the number of elements will not infinitely expand.
+> Long life cycle data is allowed in webman, but you must ensure that the data remains bounded and the number of elements does not grow indefinitely.
 
-Here are specific examples:
+The following examples illustrate each case.
 
-#### Infinitely expanding static array
+### Infinitely Expanding static Array
 ```php
 class Foo
 {
@@ -40,9 +54,9 @@ class Foo
 }
 ```
 
-The `$data` array defined with the `static` keyword is an array with a long life cycle. In the example, the `$data` array constantly expands with each request, leading to a memory leak.
+The `$data` array defined with the `static` keyword is a long life cycle array. In this example, the `$data` array keeps expanding with each request, causing a memory leak.
 
-#### Infinitely expanding singleton array property
+### Infinitely Expanding Singleton Array Property
 ```php
 class Cache
 {
@@ -76,12 +90,12 @@ class Foo
 }
 ```
 
-`Cache::instance()` returns a Cache singleton, which is an instance with a long life cycle. Although its `$data` property does not use the `static` keyword, because the class itself has a long life cycle, `$data` is also an array with a long life cycle. As different keys are constantly added to the `$data` array, the memory used by the program also increases, leading to a memory leak.
+`Cache::instance()` returns a Cache singleton, which is a long life cycle instance. Although its `$data` property does not use the `static` keyword, because the class itself has a long life cycle, `$data` is also a long life cycle array. As different keys are continuously added to the `$data` array, the program's memory usage grows, causing a memory leak.
 
 > **Note**
-> If the keys added by `Cache::instance()->set(key, value)` are limited in number, there will be no memory leak because the `$data` array does not infinitely expand.
+> If the keys added by `Cache::instance()->set(key, value)` are limited in number, there will be no memory leak, because the `$data` array does not expand indefinitely.
 
-#### Infinitely expanding global array
+### Infinitely Expanding global Array
 ```php
 class Index
 {
@@ -93,7 +107,7 @@ class Index
     }
 }
 ```
-Arrays defined with the global keyword do not get recycled after a function or class method completes, so they have a long life cycle. In the above code, a memory leak occurs as the requests continue to increase. Likewise, arrays defined within functions or methods with the static keyword are also long life cycle arrays, and if the array infinitely expands, there will be a memory leak. For example:
+Arrays defined with the `global` keyword are not reclaimed when a function or class method completes, so they have a long life cycle. The above code will cause a memory leak as requests keep increasing. Similarly, arrays defined with the `static` keyword inside a function or method are also long life cycle arrays; if such an array keeps expanding, it will cause a memory leak, for example:
 ```php
 class Index
 {
@@ -106,9 +120,9 @@ class Index
 }
 ```
 
-## Suggestions
-It is recommended that developers do not focus too much on memory leaks because they rarely occur. If they unfortunately occur, we can use stress testing to find the code causing the leak and determine the problem. Even if developers cannot locate the leak, webman's built-in monitor service will timely and safely restart the process experiencing the memory leak to release memory.
+## Recommendations
+Developers are advised not to focus excessively on memory leaks, as they rarely occur. If one does occur, stress testing can help find the code that causes the leak. Even if developers cannot locate the leak, webman's built-in monitor service will safely restart the affected process when appropriate, freeing memory.
 
-If you really want to avoid memory leaks as much as possible, you can consider the following suggestions:
-1. Try not to use arrays with the `global` and `static` keywords, and if used, ensure that they do not infinitely expand.
-2. For unfamiliar classes, try not to use singletons; instead, initialize with the `new` keyword. If a singleton is necessary, check if it has array properties that infinitely expand.
+If you do want to minimize the risk of memory leaks, consider these recommendations:
+1. Avoid using arrays with the `global` or `static` keyword where possible; if you use them, ensure they do not grow indefinitely.
+2. For unfamiliar classes, prefer initializing with the `new` keyword rather than using singletons. If a singleton is needed, check whether it has array properties that can grow indefinitely.

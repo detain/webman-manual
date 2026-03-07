@@ -128,7 +128,7 @@ class User extends Model
 ```
 
 ## 数据库连接
-认情况下，Eloquent 模型将使用你的应用程序配置的默认数据库连接。如果你想为模型指定一个不同的连接，设置 $connection 属性：
+默认情况下，Eloquent 模型将使用你的应用程序配置的默认数据库连接。如果你想为模型指定一个不同的连接，设置 $connection 属性：
 ```php
 class User extends Model
 {
@@ -191,7 +191,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -340,7 +340,7 @@ $user->save();
 ## 批量更新
 ```php
 app\model\User::where('uid', '>', 10)
-          ->update(['name' => 'tom'']);
+          ->update(['name' => 'tom']);
 ```
 
 ## 检查属性变化

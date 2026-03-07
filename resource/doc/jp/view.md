@@ -287,10 +287,28 @@ class UserController
 #### コントローラー
 コントローラーが`view('テンプレート名',[]);`を呼び出すとき、ビューファイルは以下の規則に従って検索されます：
 
-1. 複数のアプリケーションを持たない場合、`app/view/`に対応するビューファイルを使用します。
-2. [複数のアプリケーション](multiapp.md)を持つ場合、`app/アプリ名/view/`に対応するビューファイルを使用します。
+1. `/`で始まる場合、そのパスを直接使用してビューファイルを検索します。
+2. `/`で始まらず、かつ単一アプリケーションの場合、`app/view/`に対応するビューファイルを使用します。
+3. `/`で始まらず、かつ[複数アプリケーション](multiapp.md)の場合、`app/アプリ名/view/`に対応するビューファイルを使用します。
+4. テンプレートパラメータを渡さない場合、規則2・3に従ってテンプレートファイルを自動検索します。
 
-つまり、`$request->app`が空の場合は、`app/view/`以下のビューファイルが、空ではない場合は`app/{$request->app}/view/`以下のビューファイルが使用されます。
+例：
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // return view('user/hello', ['name' => 'webman']); と同等
+        // return view('/app/view/user/hello', ['name' => 'webman']); と同等
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### 無名関数
 無名関数の場合、`$request->app`が空であり、どのアプリケーションにも属さないため、`app/view/`以下のビューファイルが使用されます。たとえば `config/route.php`でルートを定義する場合、
@@ -304,6 +322,25 @@ Route::any('/admin/user/get', function (Reqeust $reqeust) {
 
 #### アプリの指定
 複数のアプリケーションモードでテンプレートを再利用できるようにするために、`view($template, $data, $app = null)`には第三引数`$app`が提供されており、どのアプリケーションディレクトリのテンプレートを使用するかを指定できます。例えば `view('user', [], 'admin');`は`app/admin/view/`以下のビューファイルが強制的に使用されます。
+
+#### テンプレートパラメータの省略
+クラスベースのコントローラーでは、テンプレートパラメータを省略できます。例えば：
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // return view('user/hello', ['name' => 'webman']); と同等
+        // return view('/app/view/user/hello', ['name' => 'webman']); と同等
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## Twigの拡張
 

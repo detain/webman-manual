@@ -1,20 +1,18 @@
-# 이미지 처리 구성 요소
+# 이미지 처리 컴포넌트
 
-## intervention/image
-
-### 프로젝트 주소
+## 프로젝트 주소
 
 https://github.com/Intervention/image
-
-### 설치
-
+  
+## 설치
+ 
 ```php
 composer require intervention/image
 ```
+  
+## 사용법
 
-### 사용
-
-**업로드 페이지 조각**
+**업로드 페이지 스니펫**
 
 ```html
   <form method="post" action="/user/img" enctype="multipart/form-data">
@@ -23,13 +21,14 @@ composer require intervention/image
   </form>
 ```
 
-**`app/controller/UserController.php`에서 새로 만들기**
+**`app/controller/UserController.php` 새로 만들기**
 
 ```php
 <?php
 namespace app\controller;
 use support\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class UserController
 {
@@ -37,14 +36,20 @@ class UserController
     {
         $file = $request->file('file');
         if ($file && $file->isValid()) {
-            $image = Image::make($file)->resize(100, 100);
-            return response($image->encode('png'), 200, ['Content-Type' => 'image/png']);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file)->scale(100, 100);
+            return response($image->encode(), 200, ['Content-Type' => 'image/png']);
         }
-        return response('파일을 찾을 수 없음');
+        return response('file not found');
     }
+    
 }
 ```
 
-### 더 많은 내용
+> **참고**
+> 위 예제는 v3 버전 사용법입니다
 
-http://image.intervention.io/getting_started/introduction을 방문하세요.
+## 자세한 내용
+
+https://image.intervention.io/v3 를 방문하세요
+  

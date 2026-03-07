@@ -1,18 +1,18 @@
-# 分页组件
+# مكون التصفح
 
-## 项目地址
+## عنوان المشروع
 
 https://github.com/jasongrimes/php-paginator
   
-## 安装
+## التثبيت
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-## 使用
+## الاستخدام
 
-新建 `app/controller/UserController.php`
+إنشاء ملف جديد `app/controller/UserController.php`
 ```php
 <?php
 namespace app\controller;
@@ -23,7 +23,7 @@ use JasonGrimes\Paginator;
 class UserController
 {
     /**
-     * 用户列表
+     * قائمة المستخدمين
      */
     public function get(Request $request)
     {
@@ -37,12 +37,12 @@ class UserController
     
 }
 ```
-**模板(php原生)**
-新建模版 app/view/user/get.html
+**القالب (PHP الأصلي)**
+إنشاء قالب جديد `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- 内置支持 Bootstrap 分页样式 -->
+  <!-- دعم مدمج لتصميمات تصفح Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -53,12 +53,12 @@ class UserController
 </html>
 ```
 
-**模板(twig)**
-新建模版 app/view/user/get.html
+**القالب (Twig)**
+إنشاء قالب جديد `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- 内置支持 Bootstrap 分页样式 -->
+  <!-- دعم مدمج لتصميمات تصفح Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -71,12 +71,12 @@ class UserController
 </html>
 ```
 
-**模板(blade)**
-新建模版 app/view/user/get.blade.php
+**القالب (Blade)**
+إنشاء قالب جديد `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-  <!-- 内置支持 Bootstrap 分页样式 -->
+  <!-- دعم مدمج لتصميمات تصفح Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -87,12 +87,12 @@ class UserController
 </html>
 ```
 
-**模板(thinkphp)**
-新建模版 app/view/user/get.blade.php
+**القالب (ThinkPHP)**
+إنشاء قالب جديد `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-    <!-- 内置支持 Bootstrap 分页样式 -->
+    <!-- دعم مدمج لتصميمات تصفح Bootstrap -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -103,11 +103,10 @@ class UserController
 </html>
 ```
 
-效果如下：
+النتيجة كما يلي:
 ![](../../assets/img/paginator.png)
   
-## 更多内容
+## مزيد من المعلومات
 
-访问 https://github.com/jasongrimes/php-paginator
+قم بزيارة https://github.com/jasongrimes/php-paginator
   
-

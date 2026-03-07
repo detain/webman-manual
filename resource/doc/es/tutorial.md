@@ -1,4 +1,4 @@
-# Ejemplo simple
+# Ejemplo simple de inicio rápido con webman
 
 ## Devolución de una cadena
 **Crear un controlador**
@@ -58,7 +58,7 @@ class UserController
 
 Acceder a `http://127.0.0.1:8787/user/hello?name=tom` en el navegador
 
-El navegador devolverá `{"code":0,"msg":"ok","data":"tom""}`
+El navegador devolverá `{"code":0,"msg":"ok","data":"tom"}`
 
 El uso de la función de ayuda json para devolver datos automáticamente agrega la cabecera `Content-Type: application/json`
 

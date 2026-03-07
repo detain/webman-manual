@@ -7,7 +7,6 @@
 - 快速开始
   
   - [安装](install.md)
-  - [宝塔安装](bt-install.md)
   - [目录结构](directory.md)
   - [简单示例](tutorial.md)
 
@@ -25,7 +24,7 @@
   - [日志](log.md)
   - [配置文件](config.md)
   - [多应用](multiapp.md)
-  - [协程](coroutine/coroutine.md)
+  - [الكوروتينات](coroutine/coroutine.md)
 
 - 数据库
 
@@ -97,7 +96,7 @@
   
 - 其它
   - [安全](others/security.md)
-  - [数据库事务](others/transaction.md)
+  - [معاملات قاعدة البيانات](others/transaction.md)
   - [函数禁用检查](others/disable-function-check.md)
   - [自定义脚本](others/scripts.md)
   - [自定义404 500](others/custom-error-page.md)
@@ -120,6 +119,7 @@
   - [1.6](upgrade/1-6.md)
   - [2.0](upgrade/2-0.md)
   - [2.1](upgrade/2-1.md)
+  - [2.2](upgrade/2-2.md)
   - [致谢](thanks.md)
   
  

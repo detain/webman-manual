@@ -283,10 +283,28 @@ class UserController
 #### Controladores
 Quando os controladores chamam `view('template',[])`, os arquivos de visualização são pesquisados de acordo com as seguintes regras:
 
-1. Se não houver múltiplos aplicativos, utilize os arquivos de visualização em `app/view/`.
-2. Para [múltiplos aplicativos](multiapp.md), utilize os arquivos de visualização em `app/nome_do_aplicativo/view/`.
+1. Se o caminho começar com `/`, use esse caminho diretamente para localizar o arquivo de visualização.
+2. Se não começar com `/` e não for um aplicativo múltiplo, use o arquivo de visualização correspondente em `app/view/`.
+3. Se não começar com `/` e for um [aplicativo múltiplo](multiapp.md), use o arquivo de visualização correspondente em `app/nome_do_aplicativo/view/`.
+4. Se nenhum parâmetro de modelo for passado, o arquivo de modelo será localizado automaticamente de acordo com as regras 2 e 3.
 
-Resumindo, se `$request->app` estiver vazio, utilize os arquivos de visualização em `app/view/`; caso contrário, utilize os arquivos de visualização em `app/{$request->app}/view/`.
+Exemplo:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Equivalente a return view('user/hello', ['name' => 'webman']);
+        // Equivalente a return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### Funções de fechamento
 Como `$request->app` está vazio, não pertence a nenhum aplicativo, então as funções de fechamento utilizam os arquivos de visualização em `app/view/`, por exemplo, a definição de rota em `config/route.php`:
@@ -301,6 +319,25 @@ Usará o arquivo `app/view/user.html` como modelo (quando usando o modelo blade,
 
 #### Aplicativo especificado
 Para reutilizar modelos em modos de aplicativos múltiplos, a função `view($template, $data, $app = null)` fornece o terceiro parâmetro `$app` para especificar qual aplicativo utilizar para os arquivos de visualização. Por exemplo, `view('user', [], 'admin')` utilizará os arquivos de visualização em `app/admin/view/`.
+
+#### Omitir o parâmetro de modelo
+Nos controladores baseados em classes, você pode omitir o parâmetro de modelo. Por exemplo:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Equivalente a return view('user/hello', ['name' => 'webman']);
+        // Equivalente a return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## Estendendo o twig
 

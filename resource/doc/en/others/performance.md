@@ -1,6 +1,7 @@
 # webman Performance
 
-### Traditional Framework Request Processing Flow
+
+## Traditional Framework Request Processing Flow
 
 1. Nginx/Apache receives the request.
 2. Nginx/Apache passes the request to php-fpm.
@@ -18,9 +19,9 @@
 14. Php-fpm forwards the result to Nginx/Apache.
 15. Nginx/Apache returns the result to the client.
 
-### webman Request Processing Flow
+## webman Request Processing Flow
 1. The framework receives the request.
-2. The framework executes the business logic.
+2. The framework executes the business logic (opcode bytecode).
 3. The framework returns the result to the client.
 
 That's right, in the case of no Nginx reverse proxy, the framework only has these 3 steps. It can be said that this is the ultimate for a PHP framework, which makes webman's performance several times or even tens of times better than traditional frameworks.

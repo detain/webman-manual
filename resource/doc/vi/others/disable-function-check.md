@@ -38,6 +38,7 @@ pcntl_signal_dispatch
 pcntl_signal
 pcntl_alarm
 pcntl_fork
+pcntl_wait
 posix_getuid
 posix_getpwuid
 posix_kill
@@ -54,4 +55,7 @@ proc_open
 proc_get_status
 proc_close
 shell_exec
+exec
+putenv
+getenv
 ```

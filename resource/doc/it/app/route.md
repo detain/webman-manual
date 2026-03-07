@@ -1,17 +1,17 @@
-## File di configurazione del percorso
-Il file di configurazione del percorso per il plugin si trova in `plugin/nome_plugin/config/route.php`
+# File di configurazione delle route
+Il file di configurazione delle route dei plugin si trova in `plugin/nome_plugin/config/route.php`.
 
-## Percorso predefinito
-Il percorso degli URL dell'applicazione del plugin inizia sempre con `/app`, ad esempio l'URL del controller `UserController` del plugin `foo` è `http://127.0.0.1:8787/app/foo/user`
+## Route predefinita
+Tutti i percorsi URL dei plugin applicazione iniziano con `/app`, ad esempio l'URL di `plugin\foo\app\controller\UserController` è `http://127.0.0.1:8787/app/foo/user`.
 
-## Disabilita percorso predefinito
-Se si desidera disabilitare il percorso predefinito di un certo plugin dell'applicazione, è possibile farlo nel file di configurazione del percorso in questo modo
+## Disabilitare la route predefinita
+Per disabilitare la route predefinita di un plugin applicazione, aggiungere quanto segue nella configurazione delle route:
 ```php
 Route::disableDefaultRoute('foo');
 ```
 
-## Gestisci il callback 404
-Se si desidera impostare un fallback per un certo plugin dell'applicazione, è necessario passare il nome del plugin come secondo parametro, ad esempio
+## Gestire il callback 404
+Per impostare un fallback per un plugin applicazione, è necessario passare il nome del plugin come secondo parametro. Esempio:
 ```php
 Route::fallback(function(){
     return redirect('/');

@@ -1,41 +1,39 @@
 # crontab zamanlanmış görev bileşeni
 
-## workerman/crontab
+## Açıklama
 
-### Açıklama
+`workerman/crontab`, Linux crontab'ına benzer; fark olarak saniye düzeyinde zamanlama destekler.
 
-`workerman/crontab`, linux'un crontab'ına benzer, ancak `workerman/crontab` saniyelik zamanlamayı destekler.
+Zaman formatı:
 
-Zaman açıklaması:
-
-```plaintext
+```
 0   1   2   3   4   5
 |   |   |   |   |   |
-|   |   |   |   |   +------ haftanın günü (0 - 6) (Pazar=0)
-|   |   |   |   +------ ay (1 - 12)
-|   |   |   +-------- ayın günü (1 - 31)
-|   |   +---------- saat (0 - 23)
-|   +------------ dakika (0 - 59)
-+-------------- saniye (0-59)[isteğe bağlı, 0 pozisyonu olmadığında, minimum zaman bir dakikadır]
+|   |   |   |   |   +------ day of week (0 - 6) (Sunday=0)
+|   |   |   |   +------ month (1 - 12)
+|   |   |   +-------- day of month (1 - 31)
+|   |   +---------- hour (0 - 23)
+|   +------------ min (0 - 59)
++-------------- sec (0-59)[isteğe bağlı; yoksa minimum birim dakikadır]
 ```
 
-### Proje bağlantısı
+## Proje URL'si
 
 https://github.com/walkor/crontab
-
-### Kurulum
-
+  
+## Kurulum
+ 
 ```php
 composer require workerman/crontab
 ```
+  
+## Kullanım
 
-### Kullanım
-
-**Adım 1: `process/Task.php` adlı yeni bir işlem dosyası oluşturun**
+**Adım 1: `app/process/Task.php` işlem dosyasını oluşturun**
 
 ```php
 <?php
-namespace process;
+namespace app\process;
 
 use Workerman\Crontab\Crontab;
 
@@ -43,23 +41,23 @@ class Task
 {
     public function onWorkerStart()
     {
-    
-        // Her saniyede bir çalıştır
+
+        // Her saniye çalıştır
         new Crontab('*/1 * * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
         
-        // Her 5 saniyede bir çalıştır
+        // Her 5 saniyede çalıştır
         new Crontab('*/5 * * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
         
-        // Her dakikada bir çalıştır
+        // Her dakika çalıştır
         new Crontab('0 */1 * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
         
-        // Her 5 dakikada bir çalıştır
+        // Her 5 dakikada çalıştır
         new Crontab('0 */5 * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -69,7 +67,7 @@ class Task
             echo date('Y-m-d H:i:s')."\n";
         });
       
-        // Günde bir kez saat 7:50'de çalıştır, burada saniye pozisyonu atlandı
+        // Her gün 7:50'de çalıştır (saniye burada atlandı)
         new Crontab('50 7 * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -77,32 +75,32 @@ class Task
     }
 }
 ```
-
-**Adım 2: İşlem dosyasını webman'in başlatılmasıyla yapılandırın**
   
-`config/process.php` dosyasını açın ve aşağıdaki yapılandırmayı ekleyin
+**Adım 2: İşlemi webman ile birlikte başlatacak şekilde yapılandırın**
+  
+`config/process.php` dosyasını açıp aşağıdakini ekleyin:
 
 ```php
 return [
-    ....diğer yapılandırmalar burada atlanmıştır....
+    ....diğer yapılandırma atlandı....
   
     'task'  => [
-        'handler'  => process\Task::class
+        'handler'  => app\process\Task::class
     ],
 ];
 ```
+  
+**Adım 3: webman'i yeniden başlatın**
 
-**Adım 3: Webman'i yeniden başlatın**
+> Not: Zamanlanmış görevler hemen çalışmaz; sonraki dakikadan itibaren sayılmaya ve çalıştırılmaya başlar.
 
-> Not: Zamanlanmış görevler hemen çalıştırılmaz, tüm zamanlanmış görevler bir sonraki dakikada başlayacak şekilde zamanlanır
-
-### Açıklama
-crontab asenkron değildir, örneğin, bir işlem dosyasında A ve B olmak üzere iki zamanlayıcı ayarlanmış olsun, her ikisi de her saniye bir kez görevi çalıştırır, ancak A görevi 10 saniye sürerse, B'nin çalıştırılması için A'nın tamamlanmasını beklemesi gerekir, bu da B'nin gecikmeli olarak çalışmasına neden olur.
-Zaman aralığı iş için hassas ise, hassas zamanlanmış görevi ayrı bir işlemde çalıştırmak için diğer zamanlanmış görevlerden etkilenmesini önlemek önemlidir. Örneğin, aşağıdaki gibi `config/process.php` dosyasına yapılandırma yapın
+## Açıklama
+crontab asenkron değildir. Örnek: Bir task işleminde A ve B iki zamanlayıcı var, ikisi de her saniye çalışıyor. A görevi 10 saniye sürerse B, A bitene kadar beklemek zorunda kalır, B'nin çalışması gecikir.
+Zaman aralığına duyarlıysa, hassas zamanlanmış görevleri diğerlerinden etkilenmemesi için ayrı işlemde çalıştırın. Örnek `config/process.php` yapılandırması:
 
 ```php
 return [
-    ....diğer yapılandırmalar burada atlanmıştır....
+    ....diğer yapılandırma atlandı....
   
     'task1'  => [
         'handler'  => process\Task1::class
@@ -112,7 +110,6 @@ return [
     ],
 ];
 ```
-Zaman hassasiyeti gerektiren zamanlanmış görevleri `process/Task1.php` dosyasına, diğer zamanlanmış görevleri `process/Task2.php` dosyasına yerleştirin.
+Zamana duyarlı zamanlanmış görevleri `process/Task1.php` içine, diğerlerini `process/Task2.php` içine koyun.
 
-### Daha fazlası
-Daha fazla `config/process.php` yapılandırma açıklaması için, [Özel İşlem](../process.md) bağlantısına bakın
+`config/process.php` hakkında daha fazlası için [Özel İşlem](../process.md) bölümüne bakın.

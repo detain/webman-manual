@@ -1,12 +1,13 @@
-# 分页
+# التقسيم إلى صفحات
 
-# 基于Laravel的ORM的分页方式
-Laravel的`illuminate/database`提供了方便的分页功能。
+# التقسيم إلى صفحات باستخدام ORM Laravel
 
-## 安装
+توفر حزمة `illuminate/database` من Laravel وظيفة تقسيم صفحات مريحة.
+
+## التثبيت
 `composer require illuminate/pagination`
 
-## 使用
+## الاستخدام
 ```php
 public function index(Request $request)
 {
@@ -16,39 +17,38 @@ public function index(Request $request)
 }
 ```
 
-## 分页器实例方法
-|  方法   | 描述  |
+## طرق مثيل المقسم
+|  الطريقة   | الوصف  |
 |  ----  |-----|
-|$paginator->count()|获取当前页的数据总数|
-|$paginator->currentPage()|获取当前页码|
-|$paginator->firstItem()|获取结果集中第一个数据的编号|
-|$paginator->getOptions()|获取分页器选项|
-|$paginator->getUrlRange($start, $end)|创建指定页数范围的 URL|
-|$paginator->hasPages()|是否有足够多的数据来创建多个页面|
-|$paginator->hasMorePages()|是否有更多的页面可供展示|
-|$paginator->items()|获取当前页的数据项|
-|$paginator->lastItem()|获取结果集中最后一个数据的编号|
-|$paginator->lastPage()|获取最后一页的页码（在 simplePaginate 中不可用）|
-|$paginator->nextPageUrl()|获取下一页的 URL|
-|$paginator->onFirstPage()|当前页是否为第一页|
-|$paginator->perPage()|获取每一页显示的数量总数|
-|$paginator->previousPageUrl()|获取上一页的 URL|
-|$paginator->total()|获取结果集中的数据总数（在 simplePaginate 中不可用）|
-|$paginator->url($page)|获取指定页的 URL|
-|$paginator->getPageName()|获取用于储存页码的查询参数名|
-|$paginator->setPageName($name)|设置用于储存页码的查询参数名|
+|$paginator->count()|الحصول على إجمالي البيانات في الصفحة الحالية|
+|$paginator->currentPage()|الحصول على رقم الصفحة الحالية|
+|$paginator->firstItem()|الحصول على رقم أول عنصر في مجموعة النتائج|
+|$paginator->getOptions()|الحصول على خيارات المقسم|
+|$paginator->getUrlRange($start, $end)|إنشاء URLs لنطاق صفحات محدد|
+|$paginator->hasPages()|هل توجد بيانات كافية لإنشاء صفحات متعددة|
+|$paginator->hasMorePages()|هل توجد المزيد من الصفحات للعرض|
+|$paginator->items()|الحصول على عناصر البيانات في الصفحة الحالية|
+|$paginator->lastItem()|الحصول على رقم آخر عنصر في مجموعة النتائج|
+|$paginator->lastPage()|الحصول على رقم آخر صفحة (غير متاح في simplePaginate)|
+|$paginator->nextPageUrl()|الحصول على رابط الصفحة التالية|
+|$paginator->onFirstPage()|هل الصفحة الحالية هي الأولى|
+|$paginator->perPage()|الحصول على العدد الإجمالي للعناصر في كل صفحة|
+|$paginator->previousPageUrl()|الحصول على رابط الصفحة السابقة|
+|$paginator->total()|الحصول على إجمالي البيانات في مجموعة النتائج (غير متاح في simplePaginate)|
+|$paginator->url($page)|الحصول على رابط صفحة محددة|
+|$paginator->getPageName()|الحصول على اسم معامل الاستعلام المستخدم لتخزين رقم الصفحة|
+|$paginator->setPageName($name)|تعيين اسم معامل الاستعلام المستخدم لتخزين رقم الصفحة|
 
-> **注意**
-> 不支持 `$paginator->links()` 方法
+> **ملاحظة**
+> الطريقة `$paginator->links()` غير مدعومة
 
-## 分页组件
-webman中无法使用 `$paginator->links()` 方法渲染分页按钮，不过我们可以使用其他组件来渲染，例如 `jasongrimes/php-paginator` 。
+## مكون التقسيم إلى صفحات
+في webman لا يمكن استخدام الطريقة `$paginator->links()` لعرض أزرار التقسيم، ولكن يمكننا استخدام مكونات أخرى للعرض، مثل `jasongrimes/php-paginator`.
 
-**安装**
+**التثبيت**
 `composer require "jasongrimes/paginator:~1.0"`
 
-
-**后端**
+**الخادم**
 ```php
 <?php
 namespace app\controller;
@@ -70,12 +70,12 @@ class UserController
 }
 ```
 
-**模板(php原生)**
-新建模版 app/view/user/get.html
+**القالب (PHP الأصلي)**
+إنشاء قالب جديد app/view/user/get.html
 ```html
 <html>
 <head>
-  <!-- 内置支持 Bootstrap 分页样式 -->
+  <!-- دعم مدمج لأنماط التقسيم Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -86,12 +86,12 @@ class UserController
 </html>
 ```
 
-**模板(twig)** 
-新建模版 app/view/user/get.html
+**القالب (twig)**
+إنشاء قالب جديد app/view/user/get.html
 ```html
 <html>
 <head>
-  <!-- 内置支持 Bootstrap 分页样式 -->
+  <!-- دعم مدمج لأنماط التقسيم Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -104,12 +104,12 @@ class UserController
 </html>
 ```
 
-**模板(blade)** 
-新建模版 app/view/user/get.blade.php
+**القالب (blade)**
+إنشاء قالب جديد app/view/user/get.blade.php
 ```html
 <html>
 <head>
-  <!-- 内置支持 Bootstrap 分页样式 -->
+  <!-- دعم مدمج لأنماط التقسيم Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -120,12 +120,12 @@ class UserController
 </html>
 ```
 
-**模板(thinkphp)**
-新建模版 app/view/user/get.html
+**القالب (thinkphp)**
+إنشاء قالب جديد app/view/user/get.html
 ```html
 <html>
 <head>
-    <!-- 内置支持 Bootstrap 分页样式 -->
+    <!-- دعم مدمج لأنماط التقسيم Bootstrap -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -136,12 +136,14 @@ class UserController
 </html>
 ```
 
-效果如下：
+النتيجة كما يلي:
 ![](../../assets/img/paginator.png)
 
-# 基于Thinkphp的ORM的分页方式
-无须额外安装类库,只要安装过think-orm即可
-## 使用
+# التقسيم إلى صفحات باستخدام ORM ThinkPHP
+
+لا حاجة لتثبيت مكتبات إضافية؛ يكفي تثبيت think-orm فقط.
+
+## الاستخدام
 ```php
 public function index(Request $request)
 {
@@ -151,11 +153,11 @@ public function index(Request $request)
 }
 ```
 
-**模板(thinkphp)**
+**القالب (thinkphp)**
 ```html
 <html>
 <head>
-    <!-- 内置支持 Bootstrap 分页样式 -->
+    <!-- دعم مدمج لأنماط التقسيم Bootstrap -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>

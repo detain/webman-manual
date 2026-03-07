@@ -1,18 +1,16 @@
 # Thành phần phân trang
 
-## jasongrimes/php-paginator
-
-### Địa chỉ dự án
+## Địa chỉ dự án
 
 https://github.com/jasongrimes/php-paginator
   
-### Cài đặt
+## Cài đặt
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### Sử dụng
+## Sử dụng
 
 Tạo mới `app/controller/UserController.php`
 ```php
@@ -39,12 +37,12 @@ class UserController
     
 }
 ```
-**Mẫu (nguyên tố PHP)**
-Tạo mới mẫu app/view/user/get.html
+**Mẫu (PHP thuần)**
+Tạo mới mẫu `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- Hỗ trợ tích hợp kiểu dáng phân trang Bootstrap -->
+  <!-- Hỗ trợ sẵn có cho kiểu dáng phân trang Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -55,12 +53,12 @@ Tạo mới mẫu app/view/user/get.html
 </html>
 ```
 
-**Mẫu (twig)**
-Tạo mới mẫu app/view/user/get.html
+**Mẫu (Twig)**
+Tạo mới mẫu `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- Hỗ trợ tích hợp kiểu dáng phân trang Bootstrap -->
+  <!-- Hỗ trợ sẵn có cho kiểu dáng phân trang Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -73,12 +71,12 @@ Tạo mới mẫu app/view/user/get.html
 </html>
 ```
 
-**Mẫu (blade)**
-Tạo mới mẫu app/view/user/get.blade.php
+**Mẫu (Blade)**
+Tạo mới mẫu `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-  <!-- Hỗ trợ tích hợp kiểu dáng phân trang Bootstrap -->
+  <!-- Hỗ trợ sẵn có cho kiểu dáng phân trang Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -89,12 +87,12 @@ Tạo mới mẫu app/view/user/get.blade.php
 </html>
 ```
 
-**Mẫu (thinkphp)**
-Tạo mới mẫu app/view/user/get.blade.php
+**Mẫu (ThinkPHP)**
+Tạo mới mẫu `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-    <!-- Hỗ trợ tích hợp kiểu dáng phân trang Bootstrap -->
+    <!-- Hỗ trợ sẵn có cho kiểu dáng phân trang Bootstrap -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -105,9 +103,10 @@ Tạo mới mẫu app/view/user/get.blade.php
 </html>
 ```
 
-Hiệu ứng như sau:
+Kết quả như sau:
 ![](../../assets/img/paginator.png)
   
-### Thêm nội dung
+## Thêm thông tin
 
 Truy cập https://github.com/jasongrimes/php-paginator
+  

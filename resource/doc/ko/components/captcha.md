@@ -1,14 +1,15 @@
-# 인증 코드 관련 구성 요소
+# 인증 코드 컴포넌트
 
-## webman/captcha
 프로젝트 주소 https://github.com/webman-php/captcha
 
-### 설치
-```composer require webman/captcha```
+## 설치
+```
+composer require webman/captcha
+```
 
-### 사용
+## 사용
 
-** 파일 만들기 `app/controller/LoginController.php`**
+**파일 `app/controller/LoginController.php` 생성**
 
 ```php
 <?php
@@ -36,11 +37,11 @@ class LoginController
         $builder = new CaptchaBuilder;
         // 인증 코드 생성
         $builder->build();
-        // 인증 코드 값 세션에 저장
+        // 인증 코드 값을 세션에 저장
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // 인증 코드 이미지 이진 데이터 가져오기
+        // 인증 코드 이미지 바이너리 데이터 가져오기
         $img_content = $builder->get();
-        // 인증 코드 이진 데이터 출력
+        // 인증 코드 바이너리 데이터 출력
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
@@ -49,11 +50,11 @@ class LoginController
      */
     public function check(Request $request)
     {
-        // 포스트 요청에서 captcha 필드 가져오기
+        // POST 요청에서 captcha 필드 가져오기
         $captcha = $request->post('captcha');
-        // 세션에 있는 captcha 값과 비교
+        // 세션의 captcha 값과 비교
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
-            return json(['code' => 400, 'msg' => '잘못된 인증 코드 입력']);
+            return json(['code' => 400, 'msg' => '입력한 인증 코드가 올바르지 않습니다']);
         }
         return json(['code' => 0, 'msg' => 'ok']);
     }
@@ -61,7 +62,7 @@ class LoginController
 }
 ```
 
-** 템플릿 파일 만들기 `app/view/login/index.html`**
+**템플릿 파일 `app/view/login/index.html` 생성**
 
 ```html
 <!doctype html>
@@ -80,33 +81,23 @@ class LoginController
 </html>
 ```
 
-`http://127.0.0.1:8787/login` 페이지로 이동하면 아래와 같은 화면이 나타납니다:
+페이지 `http://127.0.0.1:8787/login` 에 접속하면 아래와 같은 화면이 표시됩니다:
   ![](../../assets/img/captcha.png)
 
-### 일반적인 매개변수 설정
+## 일반적인 매개변수 설정
 ```php
     /**
      * 인증 코드 이미지 출력
      */
     public function captcha(Request $request)
     {
-        // 인증 코드 클래스 초기화
-        $builder = new CaptchaBuilder;
-        // 인증 코드 길이
-        $length = 4;
-        // 어떤 문자가 포함되는지
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // 인증 코드 생성
-        $builder->build();
-        // 인증 코드 값 세션에 저장
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // 인증 코드 이미지 이진 데이터 가져오기
-        $img_content = $builder->get();
-        // 인증 코드 이진 데이터 출력
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```
 
-더 많은 API와 매개변수에 대한 정보는 https://github.com/webman-php/captcha 를 참조하세요.
+추가 API 및 매개변수는 https://github.com/webman-php/captcha 를 참조하세요.

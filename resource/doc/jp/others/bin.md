@@ -1,104 +1,60 @@
 # バイナリパッケージング
 
-webmanはプロジェクトをバイナリファイルにパッケージ化することができます。これにより、webmanはPHP環境なしでもLinuxシステムで実行できます。
+webmanはプロジェクトを1つのバイナリファイルにパッケージ化でき、PHP環境がなくてもLinuxで動作します。
 
 > **注意**
-> パッケージ化されたファイルは現在x86_64アーキテクチャのLinuxシステムでのみ実行でき、Macシステムはサポートされていません
-> `php.ini`のphar構成オプションを無効にする必要があります。つまり、`phar.readonly = 0` を設定します。
+> パッケージ化されたファイルは現在x86_64アーキテクチャのLinuxでのみ動作し、WindowsとmacOSはサポートされていません
+> `php.ini`のpharオプションを無効にする必要があります（`phar.readonly = 0` を設定）
 
 ## コマンドラインツールのインストール
-`composer require webman/console ^1.2.24`
-
-## 設定
-`config/plugin/webman/console/app.php` ファイルを開き、次のように設定します
-```php
-'exclude_pattern'   => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$#'
-```
-これにより、パッケージ化時にいくつかの不要なディレクトリとファイルが除外され、パッケージサイズが大きくならないようにします。
+`composer require webman/console`
 
 ## パッケージ化
 次のコマンドを実行します
-```bash
+```
 php webman build:bin
 ```
-同時に、どのPHPバージョンでパッケージ化するかを指定することもできます。例えば
-```bash
+使用するPHPバージョンを指定することもできます。例：
+```
 php webman build:bin 8.1
 ```
 
-パッケージ化した後、`build`ディレクトリに`webman.bin`ファイルが生成されます。
+パッケージ化後、buildディレクトリに`webman.bin`ファイルが生成されます。
 
 ## 起動
-webman.binをLinuxサーバーにアップロードし、`./webman.bin start` または `./webman.bin start -d` を実行すると起動します。
+webman.binをLinuxサーバーにアップロードし、`./webman.bin start` または `./webman.bin start -d` で起動します。
 
 ## 原理
-* 最初に、ローカルのwebmanプロジェクトをpharファイルにパッケージ化します
-* 次に、リモートからphp8.x.micro.sfxをダウンロードします
-* 最後に、php8.x.micro.sfxとpharファイルを結合してバイナリファイルを作成します
+* まず、ローカルのwebmanプロジェクトをpharファイルにパッケージ化します
+* 次に、php8.x.micro.sfxをリモートからダウンロードします
+* php8.x.micro.sfxとpharファイルを結合して1つのバイナリファイルを作成します
 
 ## 注意事項
-* ローカルのPHPバージョンが7.2以上であればパッケージ化コマンドを実行できます
-* ただし、PHP8のバイナリファイルのみを作成できます
-* ローカルのPHPバージョンとパッケージ化バージョンが一致することを強くお勧めします。つまり、ローカルがphp8.0であれば、パッケージ化もphp8.0を使用することで互換性の問題を回避できます
-* パッケージ化中にphp8のソースコードがダウンロードされますが、ローカルにインストールされるわけではなく、ローカルのPHP環境に影響を与えません
-* webman.binは現時点ではx86_64アーキテクチャのLinuxシステムでのみ実行できます。Macシステムではサポートされていません
-* デフォルトではenvファイルをバンドル化しません(`/config/plugin/webman/console/app.php`のexclude_filesで制御)、そのため起動時にはenvファイルを`webman.bin`と同じディレクトリに配置する必要があります
-* 実行中には`webman.bin`があるディレクトリに`runtime`ディレクトリが生成され、ログファイルがそこに保存されます
-* 現在、`webman.bin`は外部のphp.iniファイルを読み込まないため、カスタムのphp.iniが必要な場合は`/config/plugin/webman/console/app.php`ファイルでcustom_iniを設定してください
+* 互換性の問題を避けるため、ローカルとパッケージ化で同じPHPバージョン（例：両方PHP 8.1）を使用することを強く推奨します
+* パッケージ化時にPHP 8のソースがダウンロードされますが、ローカルにはインストールされず、ローカルPHP環境には影響しません
+* webman.binは現在x86_64 Linuxでのみ動作し、macOSはサポートされていません
+* パッケージ化されたプロジェクトはreload非対応で、コード更新時は再起動が必要です
+* デフォルトではenvファイルはパッケージに含まれません（`config/plugin/webman/console/app.php`のexclude_filesで制御）。起動時にenvファイルはwebman.binと同じディレクトリに配置してください
+* 実行中、webman.binのディレクトリにruntimeディレクトリが作成され、ログが保存されます
+* 現在、webman.binは外部のphp.iniを読みません。php.iniをカスタマイズする場合は、`config/plugin/webman/console/app.php`のcustom_iniで設定してください
+* 不要なファイルは`config/plugin/webman/console/app.php`で除外でき、パッケージ肥大化を防げます
+* バイナリパッケージではSwooleコルーチンは使用できません
+* ユーザーアップロードファイルをバイナリパッケージ内に保存しないでください。`phar://`プロトコルでの操作は危険です（pharデシリアライズ脆弱性）。アップロードファイルはパッケージ外のディスクに保存してください
+* publicディレクトリへアップロードする場合は、publicディレクトリをwebman.binと同じ場所に配置し、`config/app.php`を次のように設定してから再パッケージ化してください：
+```
+'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
+```
 
-## 単独で静的PHPをダウンロード
-時々、PHP環境をデプロイしたくない場合があります。その場合は、単にPHPの実行可能ファイルが必要です。[こちらから静的phpをダウンロード](https://www.workerman.net/download)
+## 静的PHPの単独ダウンロード
+PHP環境を導入せず、PHP実行ファイルだけが必要な場合は、[静的PHPをダウンロード](https://www.workerman.net/download)してください。
 
 > **ヒント**
-> 静的PHPに独自のphp.iniファイルを指定する必要がある場合は、以下のコマンドを使用してください `php -c /your/path/php.ini start.php start -d`
+> 静的PHPにphp.iniを指定する場合：`php -c /your/path/php.ini start.php start -d`
 
-## サポートされている拡張機能
-bcmath
-calendar
-Core
-ctype
-curl
-date
-dom
-event
-exif
-FFI
-fileinfo
-filter
-gd
-hash
-iconv
-json
-libxml
-mbstring
-mongodb
-mysqlnd
-openssl
-pcntl
-pcre
-PDO
-pdo_mysql
-pdo_sqlite
-Phar
-posix
-readline
-redis
-Reflection
-session
-shmop
-SimpleXML
-soap
-sockets
-SPL
-sqlite3
-standard
-tokenizer
-xml
-xmlreader
-xmlwriter
-zip
-zlib
+## サポート拡張モジュール
+apcu, bcmath, bz2, calendar, Core, ctype, curl, date, dba, dom, event, exif, fileinfo, filter, ftp, gd, gmp, hash, iconv, imagick, imap, intl, json, libxml, mbstring, mysqli, mysqlnd, openssl, pcntl, pcre, PDO, pdo_mysql, pgsql, Phar, posix, protobuf, readline, redis, Reflection, session, shmop, SimpleXML, soap, sockets, sodium, SPL, sqlite3, standard, swoole, sysvmsg, sysvsem, sysvshm, tokenizer, xml, xmlreader, xmlwriter, xsl, Zend OPcache, zip, zlib
 
-## プロジェクトの出処
+## プロジェクト出典
+
 https://github.com/crazywhalecc/static-php-cli
 https://github.com/walkor/static-php-cli

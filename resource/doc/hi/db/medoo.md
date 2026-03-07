@@ -1,20 +1,20 @@
-## मेडू
+# Medoo डेटाबेस
 
-मेडू एक हल्के भार के डेटाबेस ऑपरेशन प्लगइन है, [मेडू वेबसाइट](https://medoo.in/)।
+[webman/medoo](https://github.com/webman-php/medoo) [Medoo](https://medoo.in/) को कनेक्शन पूल समर्थन के साथ विस्तारित करता है और कोरूटीन तथा गैर-कोरूटीन दोनों वातावरणों में काम करता है। उपयोग Medoo के समान है।
 
 ## स्थापना
 `composer require webman/medoo`
 
-## डेटाबेस सेटअप
-कॉन्फ़िग फ़ाइल का स्थान है `config/plugin/webman/medoo/database.php`
+## Medoo डेटाबेस विन्यास
+विन्यास फ़ाइल स्थान: `config/plugin/webman/medoo/database.php`
 
-## उपयोग
+## Medoo डेटाबेस उपयोग
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use Webman\Medoo\Medoo;
+use support\Medoo;
 
 class Index
 {
@@ -27,14 +27,14 @@ class Index
 ```
 
 > **संकेत**
->`Medoo::get('user', '*', ['uid' => 1]);`
->तुलनात्मक है
->`Medoo::instance('default')->get('user', '*', ['uid' => 1]);`
+> `Medoo::get('user', '*', ['uid' => 1]);`
+> के बराबर है
+> `Medoo::instance('default')->get('user', '*', ['uid' => 1]);`
 
-## एकाधिक डेटाबेस सेटअप
+## Medoo कई डेटाबेस विन्यास
 
-**सेटअप**  
-`config/plugin/webman/medoo/database.php` में एक नया सेटअप जोड़ें, कुंजी कोई भी, यहाँ `other` का उपयोग किया गया है।
+**विन्यास**
+`config/plugin/webman/medoo/database.php` में नया विन्यास जोड़ें; कुंजी कोई भी हो सकती है, यहाँ `other` का उपयोग किया गया है।
 
 ```php
 <?php
@@ -56,9 +56,16 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
+        ],
+        'pool' => [ // कनेक्शन पूल विन्यास
+            'max_connections' => 5, // अधिकतम कनेक्शन संख्या
+            'min_connections' => 1, // न्यूनतम कनेक्शन संख्या
+            'wait_timeout' => 60,   // पूल से कनेक्शन प्राप्त करने की अधिकतम प्रतीक्षा समय; समय सीमा पार होने पर अपवाद
+            'idle_timeout' => 3,    // पूल में कनेक्शन की अधिकतम निष्क्रिय समय; पार होने पर बंद होकर min_connections तक कम
+            'heartbeat_interval' => 50, // पूल हार्टबीट अंतराल (सेकंड में); 60 सेकंड से कम की सिफारिश
         ]
     ],
-    // यहाँ एक अन्य सेटअप जोड़ा गया है
+    // यहाँ 'other' विन्यास जोड़ें
     'other' => [
         'type' => 'mysql',
         'host' => 'localhost',
@@ -76,15 +83,21 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
-        ]
+        ],
+        'pool' => [
+            'max_connections' => 5,
+            'min_connections' => 1,
+            'wait_timeout' => 60,
+            'idle_timeout' => 3,
+            'heartbeat_interval' => 50,
+        ],
     ],
 ];
 ```
 
-**उपयोग**
+## Medoo डेटाबेस उपयोग
 ```php
 $user = Medoo::instance('other')->get('user', '*', ['uid' => 1]);
 ```
 
-## विस्तृत दस्तावेज़
-देखें [मेडू आधिकारिक दस्तावेज़](https://medoo.in/api/select)
+देखें [Medoo आधिकारिक दस्तावेज़](https://medoo.in/api/select)

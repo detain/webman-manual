@@ -1,18 +1,16 @@
-# Excel
+# Excel 스프레드시트
 
-## phpoffice/phpspreadsheet
-
-### 프로젝트 주소
+## 프로젝트 주소
 
 https://github.com/PHPOffice/PhpSpreadsheet
   
-### 설치
+## 설치
  
   ```php
   composer require phpoffice/phpspreadsheet
   ```
   
-### 사용
+## 사용법
 
 ```php
 <?php
@@ -38,7 +36,9 @@ class ExcelController
     }
 
 }
-``` 
-### 추가 정보
+```
 
-https://phpspreadsheet.readthedocs.io/en/latest/
+## 더 많은 정보
+
+https://phpspreadsheet.readthedocs.io/en/latest/ 방문
+  

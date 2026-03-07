@@ -1,34 +1,47 @@
 # À propos des fuites de mémoire
-Webman est un framework résident en mémoire, donc nous devons être un peu attentifs aux fuites de mémoire. Cependant, les développeurs n'ont pas besoin de s'inquiéter outre mesure, car les fuites de mémoire se produisent dans des conditions extrêmes et sont facilement évitables. Le développement avec webman offre une expérience similaire à celle des frameworks traditionnels, sans nécessiter d'opérations de gestion de la mémoire superflues.
+Webman est un framework résident en mémoire, il faut donc porter une certaine attention aux fuites de mémoire. Les développeurs n’ont toutefois pas lieu de s’inquiéter outre mesure, car les fuites surviennent uniquement dans des conditions très extrêmes et sont faciles à éviter. L’expérience de développement avec webman est essentiellement la même qu’avec les frameworks traditionnels ; aucune opération supplémentaire n’est nécessaire pour la gestion de la mémoire.
 
 > **Remarque**
-> Le processus de surveillance intégré de webman vérifie l'utilisation de la mémoire de tous les processus. Si la mémoire utilisée par un processus est sur le point d'atteindre la valeur définie dans `memory_limit` de php.ini, le processus correspondant redémarrera automatiquement en toute sécurité, libérant ainsi la mémoire, sans impact sur les opérations commerciales.
+> Le processus moniteur intégré de webman surveille l’utilisation mémoire de tous les processus. Lorsque l’utilisation mémoire d’un processus est sur le point d’atteindre la valeur définie dans `memory_limit` de php.ini, le processus correspondant sera redémarré automatiquement et de manière sécurisée pour libérer la mémoire, sans impact sur l’application.
 
-## Définition des fuites de mémoire
-Avec l'augmentation continue des requêtes, la mémoire utilisée par webman augmente également **indéfiniment** (notez bien, **indéfiniment**), atteignant plusieurs centaines de mégaoctets, voire plus, ce qui constitue une fuite de mémoire.
-Si la mémoire augmente mais ne continue pas à augmenter par la suite, elle n'est pas considérée comme une fuite de mémoire.
+## Définition d’une fuite de mémoire
+Que l’utilisation mémoire de webman augmente avec le nombre de requêtes est normal. En général, une fois qu’un processus atteint un certain volume de requêtes (typiquement de l’ordre du million), la mémoire se stabilise ou n’augmente plus que légèrement et occasionnellement.
 
-Il est normal qu'un processus utilise plusieurs dizaines de mégaoctets de mémoire. Lorsqu'un processus gère des requêtes très volumineuses ou maintient un grand nombre de connexions, il est courant que la mémoire utilisée par un seul processus atteigne plusieurs centaines de mégaoctets. Cette utilisation de mémoire n'est peut-être pas entièrement retournée au système d'exploitation par PHP, mais est conservée pour être réutilisée. Par conséquent, il peut arriver que la mémoire utilisée augmente après le traitement d'une grosse requête sans être libérée, ce qui est un phénomène normal. (Appeler la méthode gc_mem_caches() peut libérer une partie de la mémoire inutilisée)
+Pour la plupart des applications, la mémoire utilisée par un processus finit par se stabiliser autour de 10 M–100 M. Pas de quoi s’inquiéter tant que la mémoire par processus reste sous 100 M.
 
-## Comment se produit une fuite de mémoire
-**Pour qu'une fuite de mémoire se produise, les deux conditions suivantes doivent être remplies :**
-1. Il existe un tableau à **longue durée de vie** (notez qu'il s'agit d'un tableau à **longue durée de vie**, les tableaux normaux ne posent pas de problème)
-2. Et ce tableau à **longue durée de vie** se développe indéfiniment (le système insère sans fin des données dans ce tableau sans jamais les nettoyer)
+De plus, lors du traitement de gros fichiers, de grosses requêtes ou de lectures importantes depuis la base de données, PHP alloue une quantité importante de mémoire. PHP peut conserver une partie de cette mémoire pour la réutiliser plutôt que de la restituer au système d’exploitation, ce qui peut entraîner une utilisation élevée. Comme cette mémoire est réutilisée, il n’y a pas lieu de s’inquiéter.
 
-Si les conditions 1 et 2 sont **simultanément remplies** (notez bien qu'il s'agit d'un **simultanément**), une fuite de mémoire se produira. Dans le cas contraire, si ces conditions ne sont pas remplies ou si l'une seulement est remplie, il ne s'agit pas d'une fuite de mémoire.
+> **Remarque**
+> Pour les projets empaquetés en phar ou en binaire, si la taille du paquet est importante, une utilisation mémoire supérieure à 100 M est normale.
 
-## Tableaux à longue durée de vie
-Dans webman, les tableaux à longue durée de vie incluent :
+## Comment confirmer une fuite de mémoire
+Si un processus a traité plus d’un million de requêtes, que l’utilisation mémoire dépasse 100 M et que la mémoire continue à augmenter après chaque requête, une fuite de mémoire est possible.
+
+## Comment localiser une fuite de mémoire
+Une approche simple consiste à soumettre chaque API à des tests de charge et à identifier celle dont l’utilisation mémoire continue à augmenter après des millions de requêtes.
+
+Une fois l’API concernée identifiée, on peut procéder par dichotomie : commenter à chaque fois la moitié du code métier jusqu’à isoler le code en cause.
+
+## Comment se produisent les fuites de mémoire
+**Une fuite de mémoire ne se produit que lorsque les deux conditions suivantes sont remplies :**
+1. Il existe un tableau à **cycle de vie long** (les tableaux ordinaires ne posent pas de problème)
+2. Et ce tableau à **cycle de vie long** grandit indéfiniment (l’application continue à y insérer des données sans jamais les nettoyer)
+
+Une fuite ne survient que si **les deux** conditions sont remplies. Si l’une manque ou qu’une seule est remplie, il ne s’agit pas d’une fuite.
+
+## Tableaux à cycle de vie long
+
+Dans webman, les tableaux à cycle de vie long incluent :
 1. Les tableaux avec le mot-clé `static`
-2. Les propriétés de tableau des singletons
+2. Les propriétés de type tableau des singletons
 3. Les tableaux avec le mot-clé `global`
 
 > **Remarque**
-> Webman autorise l'utilisation de données à longue durée de vie, mais il est nécessaire de s'assurer que les données à l'intérieur de ces données sont limitées, c'est-à-dire que le nombre d'éléments ne va pas augmenter indéfiniment.
+> Les données à cycle de vie long sont autorisées dans webman, mais il faut s’assurer que les données restent bornées et que le nombre d’éléments ne grandit pas indéfiniment.
 
-Voici des exemples explicatifs :
+Voici des exemples pour chaque cas.
 
-#### Tableau `static` à expansion infinie
+### Tableau static à expansion infinie
 ```php
 class Foo
 {
@@ -41,9 +54,9 @@ class Foo
 }
 ```
 
-Le tableau `$data` défini avec le mot-clé `static` est un tableau à longue durée de vie, et dans l'exemple, le tableau `$data` continue de se développer avec chaque requête, ce qui provoque une fuite de mémoire.
+Le tableau `$data` défini avec `static` a un cycle de vie long. Dans l’exemple, `$data` grandit à chaque requête, ce qui provoque une fuite de mémoire.
 
-#### Propriété de tableau de singleton à expansion infinie
+### Propriété de tableau de singleton à expansion infinie
 ```php
 class Cache
 {
@@ -65,7 +78,7 @@ class Cache
 }
 ```
 
-Code d'appel :
+Code d’appel
 ```php
 class Foo
 {
@@ -77,12 +90,12 @@ class Foo
 }
 ```
 
-L'appel `Cache::instance()` renvoie un singleton de Cache, qui est une instance de classe à longue durée de vie. Bien que sa propriété `$data` n'utilise pas le mot-clé `static`, en raison de la longue durée de vie de la classe elle-même, `$data` est également un tableau à longue durée de vie. À mesure que de nouvelles clés de données sont ajoutées au tableau `$data`, la mémoire utilisée par le programme augmente, ce qui provoque une fuite de mémoire.
+`Cache::instance()` renvoie un singleton Cache à cycle de vie long. Même si la propriété `$data` n’utilise pas `static`, la classe ayant un cycle de vie long, `$data` est aussi un tableau à cycle de vie long. À mesure que des clés différentes sont ajoutées à `$data`, l’utilisation mémoire augmente et une fuite se produit.
 
 > **Remarque**
-> Si les clés ajoutées avec `Cache::instance()->set(key, value)` sont d'une quantité limitée, il n'y aura pas de fuite de mémoire, car le tableau `$data` n'augmente pas indéfiniment.
+> Si les clés ajoutées par `Cache::instance()->set(key, value)` sont en nombre limité, il n’y a pas de fuite, car le tableau `$data` ne grandit pas indéfiniment.
 
-#### Tableau `global` à expansion infinie
+### Tableau global à expansion infinie
 ```php
 class Index
 {
@@ -94,7 +107,7 @@ class Index
     }
 }
 ```
-Les tableaux définis avec le mot-clé global ne sont pas libérés une fois la fonction ou la méthode terminée, ce sont donc des tableaux à longue durée de vie. Le code ci-dessus, avec l'augmentation continue des requêtes, entraînera une fuite de mémoire. De même, les tableaux définis à l'intérieur d'une fonction ou d'une méthode avec le mot-clé `static` seront également des tableaux à longue durée de vie, et s'ils se développent indéfiniment, cela pourrait entraîner une fuite de mémoire, par exemple :
+Les tableaux définis avec `global` ne sont pas libérés à la fin de la fonction ou de la méthode ; ils ont donc un cycle de vie long. Le code ci-dessus provoque une fuite à mesure que les requêtes augmentent. De même, les tableaux définis avec `static` à l’intérieur d’une fonction ou d’une méthode sont aussi des tableaux à cycle de vie long ; s’ils grandissent indéfiniment, une fuite se produit, par exemple :
 ```php
 class Index
 {
@@ -108,8 +121,8 @@ class Index
 ```
 
 ## Recommandations
-Il est recommandé aux développeurs de ne pas se concentrer particulièrement sur les fuites de mémoire, car elles sont très rares. En cas de malheur, nous pouvons trouver quel segment de code provoque la fuite en effectuant des tests de charge, ce qui nous permet de localiser le problème. Même si les développeurs ne trouvent pas le point de fuite, le service de surveillance intégré à webman redémarrera de manière sécurisée les processus présentant une fuite de mémoire, libérant ainsi la mémoire.
+Il est conseillé de ne pas trop se concentrer sur les fuites de mémoire, car elles sont rares. Si une fuite survient, des tests de charge permettent de retrouver le code responsable. Même si le développeur ne trouve pas la cause, le service moniteur intégré à webman redémarrera à temps le processus concerné pour libérer la mémoire.
 
-Si vous souhaitez éviter autant que possible les fuites de mémoire, voici quelques conseils :
-1. Évitez autant que possible d'utiliser des tableaux avec les mots-clés `global` et `static`. Si vous les utilisez, assurez-vous qu'ils ne se développent pas indéfiniment.
-2. Pour les classes que vous ne connaissez pas bien, évitez autant que possible d'utiliser des singletons et préférez l'initialisation avec le mot-clé `new`. Si vous avez besoin d'un singleton, assurez-vous qu'il n'y a pas de propriété de tableau à expansion infinie.
+Si vous souhaitez réduire les risques de fuite, vous pouvez suivre ces recommandations :
+1. Éviter autant que possible les tableaux avec `global` ou `static` ; si vous les utilisez, assurez-vous qu’ils ne grandissent pas indéfiniment.
+2. Pour les classes peu connues, privilégier l’initialisation avec `new` plutôt que des singletons. Si un singleton est nécessaire, vérifier s’il a des propriétés de tableau susceptibles de grandir indéfiniment.

@@ -1,18 +1,16 @@
 # 分頁組件
 
-## jasongrimes/php-paginator
-
-### 項目地址
+## 項目地址
 
 https://github.com/jasongrimes/php-paginator
   
-### 安裝
+## 安裝
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### 使用
+## 使用
 
 新建 `app/controller/UserController.php`
 ```php
@@ -108,6 +106,7 @@ class UserController
 效果如下：
 ![](../../assets/img/paginator.png)
   
-### 更多內容
+## 更多內容
 
 訪問 https://github.com/jasongrimes/php-paginator
+  

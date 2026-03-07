@@ -1,16 +1,16 @@
 # Monitoraggio dei processi
-webman è dotato di un processo di monitoraggio predefinito che supporta due funzionalità:
-
-1. Monitoraggio dell'aggiornamento dei file e ricarica automatica del nuovo codice di business (generalmente utilizzato durante lo sviluppo)
-2. Monitoraggio della memoria utilizzata da tutti i processi; se la memoria utilizzata da un processo sta per superare il limite impostato in `php.ini` come `memory_limit`, il processo viene riavviato in modo sicuro (senza influenzare il business)
+webman include un processo di monitoraggio integrato che supporta due funzionalità:
+1. Monitora gli aggiornamenti dei file e ricarica automaticamente il nuovo codice di business (generalmente usato durante lo sviluppo).
+2. Monitora l'utilizzo della memoria di tutti i processi; se un processo sta per superare il limite `memory_limit` in `php.ini`, viene riavviato automaticamente in modo sicuro (senza impatto sul business).
 
 ## Configurazione del monitoraggio
-Il file di configurazione è `config/process.php` all'interno della configurazione `monitor`
+Configurazione di `monitor` in `config/process.php`:
 ```php
+
 global $argv;
 
 return [
-    // Rilevamento dell'aggiornamento dei file e ricarica automatica
+    // Rilevamento aggiornamenti file e ricarica automatica
     'monitor' => [
         'handler' => process\Monitor::class,
         'reloadable' => false,
@@ -24,23 +24,22 @@ return [
                 base_path() . '/resource',
                 base_path() . '/.env',
             ], glob(base_path() . '/plugin/*/app'), glob(base_path() . '/plugin/*/config'), glob(base_path() . '/plugin/*/api')),
-            // I file con queste estensioni verranno monitorati
+            // I file con queste estensioni saranno monitorati
             'monitorExtensions' => [
                 'php', 'html', 'htm', 'env'
             ],
             'options' => [
-                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // Abilita il monitoraggio dei file
-                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // Abilita il monitoraggio della memoria
+                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // Abilitare il monitoraggio dei file
+                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // Abilitare il monitoraggio della memoria
             ]
         ]
     ]
 ];
 ```
+`monitorDir` configura quali directory monitorare per gli aggiornamenti (non è consigliabile avere troppi file nelle directory monitorate).
+`monitorExtensions` configura quali estensioni di file monitorare nelle directory `monitorDir`.
+Quando `options.enable_file_monitor` è `true`, si abilita il monitoraggio degli aggiornamenti dei file (di default su Linux in modalità debug).
+Quando `options.enable_memory_monitor` è `true`, si abilita il monitoraggio della memoria (non supportato su Windows).
 
-`monitorDir` serve per configurare quali directory monitorare (non è consigliabile monitorare troppe file nelle directory).
-`monitorExtensions` serve per configurare le estensioni dei file all'interno di `monitorDir` che devono essere monitorate.
-Il valore di `options.enable_file_monitor` impostato su `true` abilita il monitoraggio degli aggiornamenti dei file (in esecuzione sul sistema Linux con l'opzione debug abilitata, il monitoraggio dei file è abilitato per impostazione predefinita).
-Il valore di `options.enable_memory_monitor` impostato su `true` abilita il monitoraggio della memoria utilizzata (il monitoraggio della memoria non è supportato dal sistema Windows).
-
-> **Nota**
-> Nel sistema Windows, il monitoraggio degli aggiornamenti dei file può essere abilitato solo quando si esegue `windows.bat` o `php windows.php`.
+> **Suggerimento**
+> Su Windows, il monitoraggio degli aggiornamenti dei file è abilitato solo eseguendo `windows.bat` o `php windows.php`.

@@ -1,9 +1,8 @@
-## กำหนด404เอง
-เมื่อเกิด404ใน webman จะถูกตั้งค่าให้คืนค่าเนื้อหาจาก `public/404.html` ดังนั้นนักพัฒนาสามารถแก้ไขไฟล์ `public/404.html` ได้โดยตรง
+# กำหนด 404 เอง
 
-หากคุณต้องการควบคุมเนื้อหา404แบบไดนามิก เช่น เมื่อร้องขอ ajax จะคืนค่าjson `{"code:"404", "msg":"404 not found"}` และเมื่อร้องขอหน้าจะคืนค่าแม่แบบ `app/view/404.html` โปรดดูตัวอย่างด้านล่าง
+หากคุณต้องการควบคุมเนื้อหา 404 แบบไดนามิก เช่น เมื่อร้องขอ ajax ให้คืนค่า json `{"code:"404", "msg":"404 not found"}` และเมื่อร้องขอหน้าให้คืนค่าเทมเพลต `app/view/404.html` โปรดดูตัวอย่างด้านล่าง
 
-> ตัวอย่างด้านล่างใช้แม่แบบ php และแม่แบบอื่นๆ เช่น `twig` `blade` `think-tmplate` จะเป็นการใช้หลักการเดิมกัน
+> ตัวอย่างด้านล่างใช้เทมเพลต php แบบเนทีฟ เทมเพลตอื่น ๆ เช่น `twig` `blade` `think-template` ใช้หลักการเดียวกัน
 
 **สร้างไฟล์ `app/view/404.html`**
 ```html
@@ -19,23 +18,41 @@
 </html>
 ```
 
-**ใน`config/route.php` เพิ่มโค้ดดังนี้:**
+**ใน `config/route.php` เพิ่มโค้ดดังนี้:**
 ```php
 use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // คืนค่าjson เมื่อร้องขอ ajax
+    // คืนค่า json เมื่อร้องขอ ajax
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
-    // คืนค่าแม่แบบ404.html เมื่อร้องขอหน้า
+    // คืนค่าเทมเพลต 404.html เมื่อร้องขอหน้า
     return view('404', ['error' => 'some error'])->withStatus(404);
 });
 ```
 
-## กำหนด500เอง
-**สร้าง `app/view/500.html` ใหม่**
+# กำหนด 405 เอง
+
+ตั้งแต่ webman-framework 1.5.23 คอลแบ็กฟอลแบ็กรองรับพารามิเตอร์ `status` ค่า 404 หมายถึงไม่พบคำขอ 405 หมายถึงไม่รองรับวิธีคำขอปัจจุบัน (เช่น เข้าถึงเส้นทางที่กำหนดด้วย `Route::post()` ผ่าน GET)
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# กำหนด 500 เอง
+
+**สร้าง `app/view/500.html`**
 
 ```html
 <!doctype html>
@@ -45,14 +62,13 @@ Route::fallback(function(Request $request){
     <title>500 Internal Server Error</title>
 </head>
 <body>
-กำหนดแม่แบบข้อผิดพลาดเอง:
+เทมเพลตข้อผิดพลาดที่กำหนดเอง:
 <?=htmlspecialchars($exception)?>
 </body>
 </html>
 ```
 
-**สร้างไฟล์** `app/exception/Handler.php` **(หากไม่มีไดเรกทอรีโปรดสร้างขึ้นเอง)**
-
+**สร้าง `app/exception/Handler.php`** (หากไม่มีไดเรกทอรีโปรดสร้างเอง)
 ```php
 <?php
 
@@ -65,7 +81,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * แสดงผล
+     * แสดงผลและคืนค่า
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -73,17 +89,17 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // คืนค่าjson เมื่อร้องขอ ajax
+        // คืนค่า json เมื่อร้องขอ ajax
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
-        // คืนค่าแม่แบบ500.html เมื่อร้องขอหน้า
+        // คืนค่าเทมเพลต 500.html เมื่อร้องขอหน้า
         return view('500', ['exception' => $exception], '')->withStatus(500);
     }
 }
 ```
 
-**กำหนดค่า`config/exception.php`**
+**กำหนดค่า `config/exception.php`**
 ```php
 return [
     '' => \app\exception\Handler::class,

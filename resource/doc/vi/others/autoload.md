@@ -1,26 +1,26 @@
 # Tự động tải
 
-## Tải tệp theo chuẩn PSR-0 bằng Composer
-webman tuân theo chuẩn tải tự động `PSR-4`. Nếu doanh nghiệp của bạn cần tải thư viện mã nguồn theo chuẩn `PSR-0`, hãy tham khảo các thao tác sau đây.
+## Tải file theo chuẩn PSR-0 qua Composer
+webman tuân theo chuẩn tự động tải `PSR-4`. Nếu dự án của bạn cần tải thư viện tương thích PSR-0, thực hiện các bước sau:
 
-- Tạo thư mục `extend` để lưu trữ mã nguồn theo chuẩn `PSR-0`
-- Chỉnh sửa `composer.json`, thêm nội dung sau đây vào phần `autoload`
+- Tạo thư mục `extend` để chứa thư viện PSR-0
+- Chỉnh sửa `composer.json` và thêm nội dung sau vào `autoload`:
 
-```js
-"psr-0": {
+```json
+"psr-0" : {
     "": "extend/"
 }
 ```
-Kết quả cuối cùng sẽ tương tự như sau
+Kết quả cuối cùng sẽ tương tự như sau:
 ![](../../assets/img/psr0.png)
 
 - Chạy lệnh `composer dumpautoload`
-- Chạy lệnh `php start.php restart` để khởi động lại webman (lưu ý, phải khởi động lại mới có hiệu lực) 
+- Chạy lệnh `php start.php restart` để khởi động lại webman (lưu ý: phải khởi động lại mới có hiệu lực)
 
-## Tải một số tệp bằng Composer
+## Tải một số file qua Composer
 
-- Chỉnh sửa `composer.json`, thêm các tệp cần tải vào phần `autoload.files`
-```js
+- Chỉnh sửa `composer.json` và thêm các file cần tải vào `autoload.files`:
+```
 "files": [
     "./support/helpers.php",
     "./app/helpers.php"
@@ -28,15 +28,14 @@ Kết quả cuối cùng sẽ tương tự như sau
 ```
 
 - Chạy lệnh `composer dumpautoload`
-- Chạy lệnh `php start.php restart` để khởi động lại webman (lưu ý, phải khởi động lại mới có hiệu lực) 
+- Chạy lệnh `php start.php restart` để khởi động lại webman (lưu ý: phải khởi động lại mới có hiệu lực)
 
-> **Ghi chú**
-> Các tệp được cấu hình trong `autoload.files` của tập tin `composer.json` sẽ được tải trước khi webman khởi động. Còn tệp được tải thông qua `config/autoload.php` của framework sẽ được tải sau khi webman khởi động.
-> Khi thay đổi tệp được tải thông qua `autoload.files` trong tập tin `composer.json`, cần khởi động lại để có hiệu lực, việc reload không có hiệu lực. Còn việc thay đổi và reload tệp được tải thông qua `config/autoload.php` có hiệu lực ngay lập tức.
+> **Lưu ý**
+> Các file được cấu hình trong `autoload.files` của composer.json sẽ được tải trước khi webman khởi động. Các file được tải qua `config/autoload.php` của framework sẽ được tải sau khi webman khởi động.
+> Các file trong `autoload.files` của composer.json khi thay đổi cần restart mới có hiệu lực; reload không có hiệu lực. Các file được tải qua `config/autoload.php` của framework hỗ trợ hot-reload; thay đổi sẽ có hiệu lực sau khi reload.
 
-## Tải tệp bằng framework
-Một số tệp có thể không tuân theo chuẩn SPR, không thể tải tự động. Chúng ta có thể tải các tệp này thông qua cấu hình `config/autoload.php`, ví dụ:
-
+## Tải một số file qua framework
+Một số file có thể không tuân theo chuẩn PSR và không thể tự động tải. Bạn có thể tải chúng bằng cách cấu hình `config/autoload.php`, ví dụ:
 ```php
 return [
     'files' => [
@@ -46,5 +45,5 @@ return [
     ]
 ];
 ```
- > **Ghi chú**
- > Chúng ta có thể thấy rằng `autoload.php` đã cấu hình để tải hai tệp `support/Request.php` và `support/Response.php`. Điều này là do trong thư mục `vendor/workerman/webman-framework/src/support/` cũng có hai tệp tương tự. Chúng ta sử dụng `autoload.php` để ưu tiên tải hai tệp từ thư mục gốc của dự án là `support/Request.php` và `support/Response.php`, điều này giúp chúng ta có thể tùy chỉnh nội dung của hai tệp này mà không cần sửa đổi tệp trong `vendor`. Nếu bạn không cần tùy chỉnh chúng, bạn có thể bỏ qua cấu hình này.
+ > **Lưu ý**
+ > Trong `autoload.php` đã thiết lập tải hai file `support/Request.php` và `support/Response.php` vì trong `vendor/workerman/webman-framework/src/support/` cũng có file cùng tên. Qua `autoload.php` chúng ta ưu tiên tải hai file ở thư mục gốc dự án, cho phép tùy chỉnh nội dung mà không cần sửa file trong `vendor`. Nếu bạn không cần tùy chỉnh, có thể bỏ qua hai cấu hình này.

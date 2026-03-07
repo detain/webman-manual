@@ -1,4 +1,4 @@
-# Bắt đầu nhanh chóng
+# Mô hình cơ sở dữ liệu - Cách sử dụng Model (phong cách Laravel)
 
 Mô hình webman dựa trên [Eloquent ORM](https://laravel.com/docs/7.x/eloquent). Mỗi bảng cơ sở dữ liệu đều có một "mô hình" tương ứng để tương tác với bảng đó. Bạn có thể truy vấn dữ liệu trong bảng bằng mô hình và chèn bản ghi mới vào bảng.
 
@@ -6,7 +6,7 @@ Trước khi bắt đầu, hãy đảm bảo rằng bạn đã cấu hình kết
 
 > Lưu ý: Eloquent ORM cần import bổ sung để hỗ trợ trình quan sát mô hình `composer require "illuminate/events"` [Ví dụ](#điều_kiện_mô_hình)
 
-## Ví dụ
+## Ví dụ mô hình cơ sở dữ liệu
 ```php
 <?php
 namespace app\model;
@@ -192,7 +192,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -523,7 +523,8 @@ if ($post->is($anotherPost)) {
 ## Người quan sát mô hình
 Sử dụng tham khảo [Sự kiện mô hình và Người quan sát trong Laravel](https://learnku.com/articles/6657/model-events-and-observer-in-laravel)
 
-Chú ý: Eloquent ORM cần hỗ trợ người quan sát mô hình, bạn cần phải nhập thêm bằng cách sử dụng composer require "illuminate/events".
+Chú ý: Eloquent ORM cần hỗ trợ người quan sát mô hình, bạn cần phải nhập thêm bằng cách sử dụng `composer require "illuminate/events"`.
+
 ```php
 <?php
 namespace app\model;
@@ -540,3 +541,6 @@ class User extends Model
     }
 }
 ```
+
+## Giao dịch
+Xem [Giao dịch cơ sở dữ liệu](../others/transaction.md)

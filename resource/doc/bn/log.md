@@ -13,8 +13,8 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('লগ পরীক্ষা');
-        return response('হ্যালো ইন্ডেক্স');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
@@ -31,7 +31,7 @@ Log::critical($message, array $context = [])
 Log::alert($message, array $context = [])
 Log::emergency($message, array $context = [])
 ```
-একইভাবে যেমন
+এর সমতুল্য
 ```php
 $log = Log::channel('default');
 $log->log($level, $message, array $context = [])
@@ -74,7 +74,7 @@ return [
 ```
 
 ## মাল্টি চ্যানেল
-monolog মাল্টি চ্যানেল সাপোর্ট করে, ডিফল্ট হল `ডিফল্ট` চ্যানেল ব্যবহার করে। যদি `লগ2` চ্যানেল যোগ করতে চান, তাহলে নিম্নলিখিতভাবে কনফিগার করা হবে:
+monolog একাধিক চ্যানেল সমর্থন করে, ডিফল্ট হিসেবে `default` চ্যানেল ব্যবহার করা হয়। আপনি `log2` চ্যানেল যুক্ত করতে চাইলে, কনফিগারেশন নিম্নরূপ হবে:
 ```php
 return [
     // ডিফল্ট লগ চ্যানেল
@@ -99,9 +99,9 @@ return [
             ]
         ],
     ],
-    // লগ2 চ্যানেল
+    // log2 চ্যানেল
     'log2' => [
-        // ডিফল্ট চ্যানেলে হ্যান্ডলার প্রসেস করার, এটা অনেক সেট করা যাবে
+        // log2 চ্যানেলের হ্যান্ডলার প্রসেস করার জন্য, একাধিক সেট করা যাবে
         'handlers' => [
             [   
                 // হ্যান্ডলার ক্লাসের নাম
@@ -124,7 +124,7 @@ return [
 ];
 ```
 
-`লগ2` চ্যানেল ব্যবহার করার স্থানে ব্যবহার সিদ্ধান্তটি নিম্নলিখিত প্রকারে থাকবে:
+`log2` চ্যানেল ব্যবহার করার পদ্ধতি নিম্নরূপ:
 ```php
 <?php
 namespace app\controller;
@@ -137,8 +137,8 @@ class FooController
     public function index(Request $request)
     {
         $log = Log::channel('log2');
-        $log->info('লগ2 পরীক্ষা');
-        return response('হ্যালো ইন্ডেক্স');
+        $log->info('log2 test');
+        return response('hello index');
     }
 }
 ```

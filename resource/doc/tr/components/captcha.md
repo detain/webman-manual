@@ -1,15 +1,15 @@
-# CAPTCHA İlgili Bileşenler
+# Captcha bileşeni
 
+Proje adresi https://github.com/webman-php/captcha
 
-## webman/captcha
-Proje bağlantısı https://github.com/webman-php/captcha
+## Kurulum
+```
+composer require webman/captcha
+```
 
-### Kurulum
-```composer require webman/captcha```
+## Kullanım
 
-### Kullanım
-
-**Dosya oluştur ```app/controller/LoginController.php```**
+**Dosya oluştur `app/controller/LoginController.php`**
 
 ```php
 <?php
@@ -29,24 +29,24 @@ class LoginController
     }
     
     /**
-     * CAPTCHA görüntüsü çıkart
+     * Captcha görüntüsü oluştur
      */
     public function captcha(Request $request)
     {
-        // CAPTCHA oluşturucuyu başlat
+        // Captcha sınıfını başlat
         $builder = new CaptchaBuilder;
-        // CAPTCHA oluştur
+        // Captcha oluştur
         $builder->build();
-        // CAPTCHA değerini oturuma kaydet
+        // Captcha değerini oturuma kaydet
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // CAPTCHA görüntüsünün ikili verilerini al
+        // Captcha görüntüsünün ikili verilerini al
         $img_content = $builder->get();
-        // CAPTCHA ikili verilerini çıkart
+        // Captcha ikili verilerini döndür
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
     /**
-     * CAPTCHA'yı kontrol et
+     * Captcha'yı kontrol et
      */
     public function check(Request $request)
     {
@@ -54,10 +54,11 @@ class LoginController
         $captcha = $request->post('captcha');
         // Oturumdaki captcha değeriyle karşılaştır
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
-            return json(['code' => 400, 'msg' => 'Girilen CAPTCHA doğru değil']);
+            return json(['code' => 400, 'msg' => 'Girilen captcha doğru değil']);
         }
-        return json(['code' => 0, 'msg' => 'tamam']);
+        return json(['code' => 0, 'msg' => 'ok']);
     }
+
 }
 ```
 
@@ -68,7 +69,7 @@ class LoginController
 <html>
 <head>
     <meta charset="utf-8">
-    <title>CAPTCHA Test</title>  
+    <title>Captcha Testi</title>  
 </head>
 <body>
     <form method="post" action="/login/check">
@@ -80,33 +81,23 @@ class LoginController
 </html>
 ```
 
-`http://127.0.0.1:8787/login` adresine girildiğinde, sayfa aşağıdaki gibi görünecektir:
+`http://127.0.0.1:8787/login` sayfasına gidildiğinde arayüz şu şekilde görünecektir:
   ![](../../assets/img/captcha.png)
 
-### Sık Kullanılan Parametre Ayarları
+## Sık kullanılan parametre ayarları
 ```php
     /**
-     * CAPTCHA görüntüsü çıkart
+     * Captcha görüntüsü oluştur
      */
     public function captcha(Request $request)
     {
-        // CAPTCHA oluşturucuyu başlat
-        $builder = new CaptchaBuilder;
-        // CAPTCHA uzunluğu
-        $length = 4;
-        // Hangi karakterleri içersin
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // CAPTCHA oluştur
-        $builder->build();
-        // CAPTCHA değerini oturuma kaydet
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // CAPTCHA görüntüsünün ikili verilerini al
-        $img_content = $builder->get();
-        // CAPTCHA ikili verilerini çıkart
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```
 
-Daha fazla API ve parametre için https://github.com/webman-php/captcha adresine bakabilirsiniz.
+Daha fazla arayüz ve parametre için https://github.com/webman-php/captcha adresine bakabilirsiniz.

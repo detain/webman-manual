@@ -1,20 +1,18 @@
-# ชุดคอมโพเนนต์
+# คอมโพเนนต์การแบ่งหน้า
 
-## jasongrimes/php-paginator
-
-### ที่อยู่โปรเจค
+## ที่อยู่โปรเจกต์
 
 https://github.com/jasongrimes/php-paginator
   
-### การติดตั้ง
+## การติดตั้ง
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### การใช้งาน
+## การใช้งาน
 
-สร้าง `app/controller/UserController.php`
+สร้างไฟล์ `app/controller/UserController.php`
 ```php
 <?php
 namespace app\controller;
@@ -39,12 +37,12 @@ class UserController
     
 }
 ```
-**เทมเพลต (php ต้นฉบับ)**
-สร้างเทมเพลต app/view/user/get.html
+**เทมเพลต (PHP แบบดั้งเดิม)**
+สร้างเทมเพลต `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- รองรับสไตล์แบบ Bootstrap ในตัวเดียว -->
+  <!-- รองรับสไตล์การแบ่งหน้า Bootstrap ในตัว -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -55,12 +53,12 @@ class UserController
 </html>
 ```
 
-**เทมเพลต (twig)**
-สร้างเทมเพลต app/view/user/get.html
+**เทมเพลต (Twig)**
+สร้างเทมเพลต `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- รองรับสไตล์แบบ Bootstrap ในตัวเดียว -->
+  <!-- รองรับสไตล์การแบ่งหน้า Bootstrap ในตัว -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -73,12 +71,12 @@ class UserController
 </html>
 ```
 
-**เทมเพลต (blade)**
-สร้างเทมเพลต app/view/user/get.blade.php
+**เทมเพลต (Blade)**
+สร้างเทมเพลต `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-  <!-- รองรับสไตล์แบบ Bootstrap ในตัวเดียว -->
+  <!-- รองรับสไตล์การแบ่งหน้า Bootstrap ในตัว -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -89,12 +87,12 @@ class UserController
 </html>
 ```
 
-**เทมเพลต (thinkphp)**
-สร้างเทมเพลต app/view/user/get.blade.php
+**เทมเพลต (ThinkPHP)**
+สร้างเทมเพลต `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-    <!-- รองรับสไตล์แบบ Bootstrap ในตัวเดียว -->
+    <!-- รองรับสไตล์การแบ่งหน้า Bootstrap ในตัว -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -105,9 +103,10 @@ class UserController
 </html>
 ```
 
-สามารถดูผลลัพธ์ได้ดังนี้：
+ผลลัพธ์ดังนี้:
 ![](../../assets/img/paginator.png)
   
-### ข้อมูลเพิ่มเติม
+## ข้อมูลเพิ่มเติม
 
-เยี่ยมชม https://github.com/jasongrimes/php-paginator
+เข้าชม https://github.com/jasongrimes/php-paginator
+  

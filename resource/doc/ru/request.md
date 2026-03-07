@@ -64,6 +64,21 @@ $request->post('name');
 $request->post('name', 'tom');
 ```
 
+## Вспомогательная функция input()
+Аналогично `$request->input()`, вспомогательная функция `input()` позволяет получить все параметры. Она имеет два параметра:
+1. name: имя получаемого параметра (если пустое, возвращает массив всех параметров)
+2. default: значение по умолчанию (используется, когда параметр из первого аргумента не найден)
+
+**Пример**
+```php
+// Получить параметр name
+$name = input('name');
+// Получить параметр name, при отсутствии использовать значение по умолчанию
+$name = input('name', 'Иван');
+// Получить все параметры
+$all_params = input();
+```
+
 ## Получение исходного тела запроса POST
 ```php
 $post = $request->rawBody();
@@ -127,15 +142,53 @@ $only = $request->only(['username', 'password']);
 $except = $request->except(['avatar', 'age']);
 ```
 
-## Получение загруженного файла
+## Получение ввода через параметры контроллера
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Вышеуказанная логика эквивалентна:
+```php
+<?php
+namespace app\controller;
+use support\Request;
+use support\Response;
+
+class UserController
+{
+    public function create(Request $request): Response
+    {
+        $name = $request->input('name');
+        $age = (int)$request->input('age', 18);
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Подробнее см. [Привязка параметров контроллера](controller.md#привязка-параметров-контроллера).
+
+## Получение загруженных файлов
+
+> **Подсказка**
+> Для загрузки файлов требуется форма с кодировкой `multipart/form-data`.
+
 **Получение всего массива загруженных файлов**
 ```php
 $request->file();
 ```
 
-Форма аналогична:
+Пример формы:
 ```html
-<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
+<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data">
 <input name="file1" multiple="multiple" type="file">
 <input name="file2" multiple="multiple" type="file">
 <input type="submit">
@@ -303,7 +356,7 @@ $request->getRealIp($safe_mode=true);
 
 Когда используется прокси-сервер (например, nginx), использование `$request->getRemoteIp()` часто возвращает IP прокси-сервера (например, `127.0.0.1` `192.168.x.x`), а не реальный IP клиента. В этом случае можно попробовать использовать `$request->getRealIp()` для получения реального IP клиента.
 
-`$request->getRealIp()` попытается получить реальный IP из заголовков HTTP `x-real-ip`, `x-forwarded-for`, `client-ip`, `x-client-ip`, `via`.
+`$request->getRealIp()` попытается получить реальный IP из заголовков HTTP `x-forwarded-for`, `x-real-ip`, `client-ip`, `x-client-ip`, `via`.
 
 > Поскольку заголовки HTTP легко подделать, поэтому метод получения IP клиента не является 100% надежным, особенно при `$safe_mode=false`. Наиболее надежный способ получения реального IP клиента через прокси - знание безопасного IP адреса прокси-сервера и явное указание, через какой заголовок HTTP передается реальный IP. Если IP, возвращенный `$request->getRemoteIp()`, соответствует известному безопасному IP прокси-сервера, затем через `$request->header('заголовок HTTP, содержащий реальный IP')` можно получить реальный IP.
 
@@ -352,7 +405,7 @@ $request->app;
 ```
 
 > Поскольку замыкание функций не относятся ни к одному приложению, поэтому для запросов из замыканий маршрутов `$request->app` всегда возвращает пустую строку `''`
-> См. замыкание маршрутов [Маршрут](route.md)
+> См. [Маршруты](route.md) для замыкания маршрутов
 
 ## Получение имени класса контроллера запроса
 Получает имя класса, соответствующего контроллеру
@@ -362,7 +415,7 @@ $request->controller;
 Возвращает что-то вроде `app\controller\IndexController`.
 
 > Поскольку замыкание функций не относятся ни к одному контроллеру, поэтому для запросов из замыканий маршрутов `$request->controller` всегда возвращает пустую строку `''`
-> См. замыкание маршрутов [Маршрут](route.md)
+> См. [Маршруты](route.md) для замыкания маршрутов
 
 ## Получение имени метода запроса
 Получает имя метода контроллера запроса
@@ -372,4 +425,34 @@ $request->action;
 Возвращает что-то вроде `index`.
 
 > Поскольку замыкание функций не относятся ни к одному контроллеру, поэтому для запросов из замыканий маршрутов `$request->action` всегда возвращает пустую строку `''`
-> См. замыкание маршрутов [Маршрут](route.md)
+> См. [Маршруты](route.md) для замыкания маршрутов
+
+## Перезапись параметров
+
+Иногда необходимо перезаписать параметры запроса, например, отфильтровать запрос и переназначить значения объекту запроса. В таких случаях можно использовать методы `setGet()`, `setPost()` и `setHeader()`.
+
+#### Перезапись GET-параметров
+```php
+$request->get(); // Предположим, результат ['name' => 'tom', 'age' => 18]
+$request->setGet(['name' => 'tom']);
+$request->get(); // Итоговый результат ['name' => 'tom']
+```
+
+> **Примечание**
+> Как показано в примере, `setGet()` перезаписывает все GET-параметры. `setPost()` и `setHeader()` работают аналогично.
+
+#### Перезапись POST-параметров
+```php
+$post = $request->post();
+foreach ($post as $key => $value) {
+    $post[$key] = htmlspecialchars($value);
+}
+$request->setPost($post);
+$request->post(); // Получить отфильтрованные post-параметры
+```
+
+#### Перезапись HEADER-параметров
+```php
+$request->setHeader(['host' => 'example.com']);
+$request->header('host'); // Вывод: example.com
+```

@@ -13,8 +13,8 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('日誌測試');
-        return response('你好，這裡是首頁');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
@@ -137,8 +137,8 @@ class FooController
     public function index(Request $request)
     {
         $log = Log::channel('log2');
-        $log->info('log2 測試');
-        return response('你好，這裡是首頁');
+        $log->info('log2 test');
+        return response('hello index');
     }
 }
 ```

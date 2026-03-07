@@ -1,41 +1,41 @@
 # Cấu trúc thư mục
-```plaintext
+```
 .
 ├── app                           Thư mục ứng dụng
-│   ├── controller                Thư mục điều khiển
-│   ├── model                     Thư mục mô hình
-│   ├── view                      Thư mục xem
+│   ├── controller                Thư mục điều khiển
+│   ├── model                     Thư mục mô hình
+│   ├── view                      Thư mục giao diện
 │   ├── middleware                Thư mục middleware
-│   │   └── StaticFile.php        Middleware tập tin tĩnh tích hợp sẵn
-|   └── functions.php             Viết các hàm tùy chỉnh của doanh nghiệp vào tệp này
-|
+│   │   └── StaticFile.php        Middleware tệp tĩnh tích hợp sẵn
+│   ├── process                   Thư mục tiến trình tùy chỉnh
+│   │   ├── Http.php              Tiến trình Http
+│   │   └── Monitor.php           Tiến trình giám sát
+│   └── functions.php             Các hàm tùy chỉnh nghiệp vụ viết vào tệp này
 ├── config                        Thư mục cấu hình
-│   ├── app.php                   Cấu hình ứng dụng
-│   ├── autoload.php              Các tệp được cấu hình ở đây sẽ tự động tải
-│   ├── bootstrap.php             Cấu hình gọi lại chạy khi tiến trình bắt đầu onWorkerStart
-│   ├── container.php             Cấu hình container
-│   ├── dependence.php            Cấu hình phụ thuộc của container
-│   ├── database.php              Cấu hình cơ sở dữ liệu
-│   ├── exception.php             Cấu hình ngoại lệ
-│   ├── log.php                   Cấu hình nhật ký
-│   ├── middleware.php            Cấu hình middleware
-│   ├── process.php               Cấu hình tiến trình tùy chỉnh
-│   ├── redis.php                 Cấu hình redis
-│   ├── route.php                 Cấu hình định tuyến
-│   ├── server.php                Cấu hình máy chủ bao gồm cổng, số tiến trình, vv.
-│   ├── view.php                  Cấu hình xem
-│   ├── static.php                Cấu hình tắt/mở tệp tĩnh và cấu hình middleware tệp tĩnh
-│   ├── translation.php           Cấu hình đa ngôn ngữ
-│   └── session.php               Cấu hình phiên
+│   ├── app.php                   Cấu hình ứng dụng
+│   ├── autoload.php              Các tệp cấu hình tại đây sẽ được tự động tải
+│   ├── bootstrap.php             Cấu hình callback chạy khi tiến trình khởi động (onWorkerStart)
+│   ├── container.php             Cấu hình container
+│   ├── dependence.php            Cấu hình phụ thuộc của container
+│   ├── database.php              Cấu hình cơ sở dữ liệu
+│   ├── exception.php             Cấu hình ngoại lệ
+│   ├── log.php                   Cấu hình nhật ký
+│   ├── middleware.php            Cấu hình middleware
+│   ├── process.php               Cấu hình tiến trình tùy chỉnh
+│   ├── redis.php                 Cấu hình Redis
+│   ├── route.php                 Cấu hình định tuyến
+│   ├── server.php                Cấu hình máy chủ (cổng, số tiến trình, v.v.)
+│   ├── view.php                  Cấu hình giao diện
+│   ├── static.php                Cấu hình tệp tĩnh và middleware tệp tĩnh
+│   ├── translation.php           Cấu hình đa ngôn ngữ
+│   └── session.php               Cấu hình phiên
 ├── public                        Thư mục tài nguyên tĩnh
-├── process                       Thư mục tiến trình tùy chỉnh
-├── runtime                       Thư mục thời gian chạy của ứng dụng, cần có quyền ghi
+├── runtime                       Thư mục thời gian chạy của ứng dụng, cần quyền ghi
 ├── start.php                     Tệp khởi động dịch vụ
-├── vendor                        Thư mục thư viện của bên thứ ba được cài đặt bởi composer
-└── support                       Thư viện điều chỉnh (bao gồm các thư viện của bên thứ ba)
+├── vendor                        Thư mục thư viện bên thứ ba cài đặt bởi Composer
+└── support                       Điều chỉnh thư viện (bao gồm thư viện bên thứ ba)
     ├── Request.php               Lớp yêu cầu
     ├── Response.php              Lớp phản hồi
-    ├── Plugin.php                Kịch bản cài đặt và gỡ bỏ plugin
-    ├── helpers.php               Hàm trợ giúp (vui lòng viết các hàm tùy chỉnh của doanh nghiệp vào app/functions.php)
-    └── bootstrap.php             Kịch bản khởi chạy sau khi tiến trình bắt đầu
+    ├── Setup.php                 Tệp kịch bản hướng dẫn cài đặt
+    └── bootstrap.php             Tệp kịch bản khởi tạo sau khi tiến trình khởi động
 ```

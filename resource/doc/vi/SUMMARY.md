@@ -24,6 +24,7 @@
   - [Nhật ký](log.md)
   - [Tập tin cấu hình](config.md)
   - [Nhiều ứng dụng](multiapp.md)
+  - [Coroutine](coroutine/coroutine.md)
 
 - Cơ sở dữ liệu
 
@@ -49,6 +50,7 @@
 - Các thành phần phổ biến
 
   - [Trình xác thực](components/validation.md)
+  - [Bộ giới hạn tốc độ](components/rate-limiter.md)
   - [Trình phân trang](components/paginator.md)
   - [Đa ngôn ngữ](components/translation.md)
   - [Xử lý hình ảnh](components/image.md)
@@ -95,18 +97,19 @@
 
   - [Tiến trình tùy chỉnh](process.md)
   - [Tiêm phụ thuộc](di.md)
+  - [Đóng gói nhị phân](others/bin.md)
   - [AOP](aop.md)
 
 - Khác
 
   - [Bảo mật](others/security.md)
+  - [Giao dịch cơ sở dữ liệu](others/transaction.md)
   - [Kiểm tra cấm chức năng](others/disable-function-check.md)
   - [Tùy chỉnh tập lệnh](others/scripts.md)
   - [Tùy chỉnh 404 500](others/custom-error-page.md)
   - [Phương pháp nâng cấp](others/upgrade.md)
   - [Proxy nginx](others/nginx-proxy.md)
   - [Đóng gói phar](others/phar.md)
-  - [Đóng gói nhị phân](others/bin.md)
   - [Quy trình khởi động](others/process.md)
   - [Vòng đời](others/lifecycle.md)
   - [Rò rỉ bộ nhớ](others/memory-leak.md)
@@ -120,4 +123,9 @@
 - Nâng cấp
 
   - [1.4](upgrade/1-4.md)
+  - [1.5](upgrade/1-5.md)
+  - [1.6](upgrade/1-6.md)
+  - [2.0](upgrade/2-0.md)
+  - [2.1](upgrade/2-1.md)
+  - [2.2](upgrade/2-2.md)
   - [Cảm ơn](thanks.md)

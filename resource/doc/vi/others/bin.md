@@ -1,104 +1,60 @@
 # Đóng gói nhị phân
 
-webman hỗ trợ việc đóng gói dự án thành một tệp nhị phân, cho phép webman chạy trên hệ thống linux mà không cần môi trường php.
+webman hỗ trợ đóng gói dự án thành một tệp nhị phân duy nhất, giúp webman chạy trên Linux mà không cần môi trường PHP.
 
-> **Chú ý**
-> Tệp đã được đóng gói hiện chỉ hỗ trợ chạy trên hệ thống linux kiến trúc x86_64, không hỗ trợ hệ thống mac
-> Cần tắt tinh chỉnh phar trong `php.ini`, cụ thể là đặt `phar.readonly = 0`
+> **Lưu ý**
+> Tệp đã đóng gói hiện chỉ hỗ trợ chạy trên Linux kiến trúc x86_64. Không hỗ trợ Windows và macOS.
+> Cần tắt tùy chọn phar trong `php.ini`, tức là đặt `phar.readonly = 0`.
 
 ## Cài đặt công cụ dòng lệnh
-`composer require webman/console ^1.2.24`
-
-## Cấu hình
-Mở tệp `config/plugin/webman/console/app.php`, thiết lập 
-```php
-'exclude_pattern'   => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$#'
-```
-để loại bỏ một số thư mục và tệp không cần thiết khi đóng gói, tránh tình trạng tệp đóng gói quá lớn
+`composer require webman/console`
 
 ## Đóng gói
 Chạy lệnh
-```shell
+```
 php webman build:bin
 ```
-Cũng có thể chỉ định phiên bản php để đóng gói, ví dụ
-```shell
+Có thể chỉ định phiên bản PHP để đóng gói, ví dụ
+```
 php webman build:bin 8.1
 ```
 
-Sau khi đóng gói sẽ tạo ra tệp `webman.bin` trong thư mục build
+Sau khi đóng gói sẽ tạo ra tệp `webman.bin` trong thư mục build.
 
 ## Khởi động
-Tải webman.bin lên máy chủ linux, chạy `./webman.bin start` hoặc `./webman.bin start -d` để khởi động.
+Tải webman.bin lên máy chủ Linux, chạy `./webman.bin start` hoặc `./webman.bin start -d` để khởi động.
 
 ## Nguyên lý
-* Đầu tiên, dự án webman cục bộ sẽ được đóng gói thành một tệp phar
+* Đầu tiên, dự án webman cục bộ được đóng gói thành tệp phar
 * Tiếp theo, tải php8.x.micro.sfx từ xa về máy cục bộ
-* Ghép php8.x.micro.sfx và tệp phar lại với nhau thành một tệp nhị phân
+* Ghép php8.x.micro.sfx và tệp phar thành một tệp nhị phân duy nhất
 
 ## Lưu ý
-* Phiên bản php cục bộ >=7.2 đều có thể thực hiện lệnh đóng gói
-* Tuy nhiên, chỉ có thể đóng gói thành tệp nhị phân của php8
-* Đề xuất sử dụng cùng phiên bản php cho lệnh đóng gói và môi trường cục bộ, tránh sự không tương thích
-* Lệnh đóng gói sẽ tải về mã nguồn của php8, nhưng không cài đặt trên máy cục bộ, không ảnh hưởng đến môi trường php cục bộ
-* Hiện tại tệp webman.bin chỉ hỗ trợ chạy trên hệ thống linux kiến trúc x86_64, không hỗ trợ trên hệ thống mac
-* Mặc định không đóng gói tệp env (`config/plugin/webman/console/app.php` thiết lập exclude_files), do đó tệp env cần được đặt trong cùng thư mục với webman.bin
-* Trong quá trình chạy sẽ tạo ra thư mục runtime trong thư mục chứa webman.bin, dùng để lưu trữ tệp nhật ký
-* Hiện tại webman.bin không đọc tệp php.ini ngoài, nếu cần tùy chỉnh php.ini, vui lòng thiết lập trong tệp `/config/plugin/webman/console/app.php` custom_ini
+* Nên dùng cùng phiên bản PHP cho môi trường cục bộ và khi đóng gói (ví dụ đều dùng PHP 8.1) để tránh xung đột tương thích
+* Khi đóng gói sẽ tải mã nguồn PHP 8 nhưng không cài đặt cục bộ, không ảnh hưởng môi trường PHP cục bộ
+* webman.bin hiện chỉ chạy trên Linux x86_64 và không hỗ trợ macOS
+* Dự án đã đóng gói không hỗ trợ reload; mỗi lần cập nhật mã cần restart
+* Mặc định không đóng gói tệp env (do exclude_files trong `config/plugin/webman/console/app.php` điều khiển). Khi khởi động, tệp env phải đặt cùng thư mục với webman.bin
+* Trong lúc chạy sẽ tạo thư mục runtime trong thư mục chứa webman.bin để lưu nhật ký
+* Hiện webman.bin không đọc tệp php.ini bên ngoài. Để tùy chỉnh php.ini, thiết lập trong custom_ini của `config/plugin/webman/console/app.php`
+* Một số tệp không cần đóng gói; có thể cấu hình loại trừ trong `config/plugin/webman/console/app.php` để tránh gói quá lớn
+* Đóng gói nhị phân không hỗ trợ coroutine Swoole
+* Tuyệt đối không lưu tệp người dùng tải lên trong gói nhị phân. Thao tác tệp tải lên qua giao thức `phar://` rất nguy hiểm (lỗ hổng deserialization phar). Tệp tải lên phải lưu riêng trên đĩa ngoài gói
+* Nếu ứng dụng cần tải tệp lên thư mục public, hãy tách thư mục public ra đặt cùng vị trí với webman.bin, cấu hình `config/app.php` như sau rồi đóng gói lại:
+```
+'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
+```
 
-## Tải về Tĩnh PHP riêng lẻ
-Đôi khi bạn chỉ cần tải xuống một tệp thực thi PHP mà không cần triển khai môi trường PHP, vui lòng nhấp vào đây để tải về [Tải về PHP tĩnh](https://www.workerman.net/download)
+## Tải PHP tĩnh riêng lẻ
+Đôi khi bạn chỉ cần tệp thực thi PHP mà không cần triển khai môi trường PHP. [Tải PHP tĩnh tại đây](https://www.workerman.net/download).
 
 > **Gợi ý**
-> Nếu bạn cần chỉ định tệp php.ini cho PHP tĩnh, xin vui lòng sử dụng lệnh sau `php -c /your/path/php.ini start.php start -d`
+> Để chỉ định tệp php.ini cho PHP tĩnh: `php -c /your/path/php.ini start.php start -d`
 
-## Các tiện ích hỗ trợ
-bcmath
-calendar
-Core
-ctype
-curl
-date
-dom
-event
-exif
-FFI
-fileinfo
-filter
-gd
-hash
-iconv
-json
-libxml
-mbstring
-mongodb
-mysqlnd
-openssl
-pcntl
-pcre
-PDO
-pdo_mysql
-pdo_sqlite
-Phar
-posix
-readline
-redis
-Reflection
-session
-shmop
-SimpleXML
-soap
-sockets
-SPL
-sqlite3
-standard
-tokenizer
-xml
-xmlreader
-xmlwriter
-zip
-zlib
+## Tiện ích mở rộng hỗ trợ
+apcu, bcmath, bz2, calendar, Core, ctype, curl, date, dba, dom, event, exif, fileinfo, filter, ftp, gd, gmp, hash, iconv, imagick, imap, intl, json, libxml, mbstring, mysqli, mysqlnd, openssl, pcntl, pcre, PDO, pdo_mysql, pgsql, Phar, posix, protobuf, readline, redis, Reflection, session, shmop, SimpleXML, soap, sockets, sodium, SPL, sqlite3, standard, swoole, sysvmsg, sysvsem, sysvshm, tokenizer, xml, xmlreader, xmlwriter, xsl, Zend OPcache, zip, zlib
 
 ## Nguồn dự án
+
 https://github.com/crazywhalecc/static-php-cli
 https://github.com/walkor/static-php-cli

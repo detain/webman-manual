@@ -1,16 +1,15 @@
-# キャプチャ関連コンポーネント
+# 認証コードコンポーネント
 
-## webman/captcha
 プロジェクトリンク https://github.com/webman-php/captcha
 
-### インストール
-```php
+## インストール
+```
 composer require webman/captcha
 ```
 
-### 使用方法
+## 使用方法
 
-**`app/controller/LoginController.php` ファイルを作成**
+**ファイル `app/controller/LoginController.php` を作成**
 
 ```php
 <?php
@@ -30,24 +29,24 @@ class LoginController
     }
     
     /**
-     * キャプチャ画像を出力
+     * 認証コード画像を出力
      */
     public function captcha(Request $request)
     {
-        // キャプチャクラスを初期化
+        // 認証コードクラスを初期化
         $builder = new CaptchaBuilder;
-        // キャプチャ生成
+        // 認証コードを生成
         $builder->build();
-        // キャプチャの値をセッションに保存
+        // 認証コードの値をセッションに保存
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // キャプチャ画像のバイナリデータを取得
+        // 認証コード画像のバイナリデータを取得
         $img_content = $builder->get();
-        // キャプチャのバイナリデータを出力
+        // 認証コードのバイナリデータを出力
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
     /**
-     * キャプチャをチェック
+     * 認証コードをチェック
      */
     public function check(Request $request)
     {
@@ -55,7 +54,7 @@ class LoginController
         $captcha = $request->post('captcha');
         // セッション内のcaptcha値と比較
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
-            return json(['code' => 400, 'msg' => '入力したキャプチャが正しくありません']);
+            return json(['code' => 400, 'msg' => '入力した認証コードが正しくありません']);
         }
         return json(['code' => 0, 'msg' => 'ok']);
     }
@@ -63,52 +62,42 @@ class LoginController
 }
 ```
 
-**`app/view/login/index.html` テンプレートファイルを作成**
+**テンプレートファイル `app/view/login/index.html` を作成**
 
 ```html
 <!doctype html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>キャプチャテスト</title>  
+    <title>認証コードテスト</title>  
 </head>
 <body>
     <form method="post" action="/login/check">
        <img src="/login/captcha" /><br>
         <input type="text" name="captcha" />
-        <input type="submit" value="提出" />
+        <input type="submit" value="送信" />
     </form>
 </body>
 </html>
 ```
 
-`http://127.0.0.1:8787/login` ページに入ると以下のような画面が表示されます：
+ページ `http://127.0.0.1:8787/login` にアクセスすると、以下のような画面が表示されます：
   ![](../../assets/img/captcha.png)
 
-### よくある設定パラメータ
+## よくあるパラメータ設定
 ```php
     /**
-     * キャプチャ画像を出力
+     * 認証コード画像を出力
      */
     public function captcha(Request $request)
     {
-        // キャプチャクラスを初期化
-        $builder = new CaptchaBuilder;
-        // キャプチャの長さ
-        $length = 4;
-        // 含まれる文字
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // キャプチャ生成
-        $builder->build();
-        // キャプチャの値をセッションに保存
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // キャプチャ画像のバイナリデータを取得
-        $img_content = $builder->get();
-        // キャプチャのバイナリデータを出力
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```
 
-その他のAPIおよびパラメータについては、 https://github.com/webman-php/captcha を参照してください。
+その他のAPIおよびパラメータについては https://github.com/webman-php/captcha を参照してください。

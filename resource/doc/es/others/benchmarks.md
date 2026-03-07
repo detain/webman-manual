@@ -10,6 +10,7 @@
 
 ### ¿Qué es HTTP keep-alive?
 El mecanismo de HTTP Keep-Alive es una técnica para enviar múltiples solicitudes y respuestas HTTP a través de una única conexión TCP, y tiene un gran impacto en los resultados de la prueba de rendimiento. Deshabilitar el keep-alive puede disminuir el rendimiento, ya que necesario realizar múltiples conexiones. La mayoría de los navegadores tienen activado por defecto el keep-alive para mejorar el rendimiento. Se recomienda activar el keep-alive durante las pruebas de rendimiento.
+Además, si se realizan pruebas de estrés sin keep-alive habilitado, los puertos locales del cliente se agotarán rápidamente por conexiones en estado TIME_WAIT. Esto se manifiesta como solicitudes fallidas una vez que el número total de solicitudes supera un cierto umbral (normalmente alrededor de 28.000).
 
 ### ¿Cómo activar el HTTP keep-alive durante las pruebas de rendimiento?
 Si se utiliza el programa ab para las pruebas, es necesario agregar el parámetro -k, por ejemplo: `ab -n100000 -c200 -k http://127.0.0.1:8787/`.
@@ -36,7 +37,7 @@ Si los resultados no son similares, podría ser porque se usa un ORM en webman q
 Aquí hay un conjunto de datos de pruebas
 
 **Entorno**
-Servidor de nube de Alibaba con 4 núcleos y 4 GB de RAM, consulta aleatoria de un registro de 100,000 para devolver un dato JSON.
+Servidor de nube Alibaba 4 núcleos 4 GB, base de datos MySQL local, consulta aleatoria de un registro de 100.000 y devolución en JSON, pruebas de estrés locales.
 
 **Si se usa PDO nativo**
 El QPS de webman es de 17,800.
@@ -50,7 +51,8 @@ El QPS de webman disminuye a 7,200.
 Los resultados son similares con thinkORM.
 
 > **Nota**
-> Aunque el uso de un ORM puede disminuir el rendimiento, para la mayoría de los negocios es suficiente. Deberíamos encontrar un equilibrio entre la eficiencia de desarrollo, la mantenibilidad, el rendimiento y otros criterios, en lugar de buscar solo el rendimiento.
+> Aunque el uso de un ORM puede disminuir el rendimiento, para el 99 % de los escenarios de negocio el rendimiento ya es más que suficiente. Si forma parte del 1 % restante, puede solucionarlo fácilmente añadiendo más CPUs o servidores.
+> Deberíamos encontrar un equilibrio entre la eficiencia de desarrollo, la mantenibilidad, el rendimiento y otros criterios, en lugar de buscar solo el rendimiento.
 
 ### ¿Por qué la presión de apipost muestra un QPS tan bajo?
 El módulo de pruebas de presión de apipost tiene un error, si el servidor no devuelve el encabezado gzip, no se puede mantener el keep-alive, lo que resulta en una disminución significativa del rendimiento.

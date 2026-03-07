@@ -1,3 +1,3 @@
 # プラグインマーケット
 
-[アプリマーケットに進む](https://www.workerman.net/apps)
+[ここをクリックしてアプリマーケットに入る](https://www.workerman.net/apps)

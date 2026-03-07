@@ -1,7 +1,7 @@
 # Performance de webman
 
 
-### Processus de traitement des requêtes des frameworks traditionnels
+## Processus de traitement des requêtes des frameworks traditionnels
 
 1. nginx/apache reçoit la demande
 2. nginx/apache transmet la demande à php-fpm
@@ -20,9 +20,9 @@
 15. nginx/apache renvoie les résultats au client
 
 
-### Processus de traitement de la demande de webman
+## Processus de traitement de la demande de webman
 1. Le framework reçoit la demande
-2. Le framework exécute la logique métier
+2. Le framework exécute la logique métier (bytecode opcode)
 3. Le framework renvoie les résultats au client
 
 Oui, sans la possibilité de reverse proxy avec nginx, le framework se déroule en seulement ces 3 étapes. On peut dire que c'est déjà l'apogée des frameworks PHP, ce qui fait que les performances de webman sont plusieurs fois voire plusieurs dizaines de fois supérieures à celles des frameworks traditionnels.

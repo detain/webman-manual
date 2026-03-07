@@ -1,40 +1,40 @@
 # Casbin
 
-## 说明
+## 說明
 
-Casbin是一个强大的、高效的开源访问控制框架，其权限管理机制支持多种访问控制模型。
-  
-## 项目地址
+Casbin 是一個強大的、高效的開源訪問控制框架，其權限管理機制支援多種訪問控制模型。
+
+## 專案地址
 
 https://github.com/teamones-open/casbin
 
-## 安装
- 
-  ```php
-  composer require teamones/casbin
-  ```
+## 安裝
 
-## Casbin官网
+```php
+composer require teamones/casbin
+```
 
-详细使用可以去看官方中文文档，这里只讲怎么在webman中配置使用
+## Casbin 官網
+
+詳細使用可以去看官方中文文檔，這裡只講怎麼在 webman 中配置使用
 
 https://casbin.org/docs/zh-CN/overview
 
-## 目录结构
+## 目錄結構
 
 ```
 .
-├── config                        配置目录
-│   ├── casbin-restful-model.conf 使用的权限模型配置文件
-│   ├── casbin.php                casbin配置
+├── config                        配置目錄
+│   ├── casbin-restful-model.conf 使用的權限模型配置檔案
+│   ├── casbin.php                casbin 配置
 ......
-├── database                      数据库文件
-│   ├── migrations                迁移文件
-│   │   └── 20210218074218_create_rule_table.php
+├── database                      資料庫檔案
+│   ├── migrations                遷移檔案
+│   │   └── 20210218074218_create_rule_table.php
 ......
 ```
 
-## 数据库迁移文件
+## 資料庫遷移檔案
 
 ```php
 <?php
@@ -70,11 +70,11 @@ class CreateRuleTable extends AbstractMigration
      */
     public function change()
     {
-        $table = $this->table('rule', ['id' => false, 'primary_key' => ['id'], 'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '规则表']);
+        $table = $this->table('rule', ['id' => false, 'primary_key' => ['id'], 'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '規則表']);
 
-        //添加数据字段
-        $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => '主键ID'])
-            ->addColumn('ptype', 'char', ['default' => '', 'limit' => 8, 'comment' => '规则类型'])
+        // 新增資料欄位
+        $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => '主鍵 ID'])
+            ->addColumn('ptype', 'char', ['default' => '', 'limit' => 8, 'comment' => '規則類型'])
             ->addColumn('v0', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v1', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v2', 'string', ['default' => '', 'limit' => 128])
@@ -82,26 +82,24 @@ class CreateRuleTable extends AbstractMigration
             ->addColumn('v4', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v5', 'string', ['default' => '', 'limit' => 128]);
 
-        //执行创建
+        // 執行建立
         $table->create();
     }
 }
-
 ```
 
 ## casbin 配置
 
-权限规则模型配置语法请看：https://casbin.org/docs/zh-CN/syntax-for-models
+權限規則模型配置語法請看：https://casbin.org/docs/zh-CN/syntax-for-models
 
 ```php
-
 <?php
 
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // 权限规则模型配置文件
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // 權限規則模型配置檔案
             'config_text' => '',
         ],
         'adapter' => [
@@ -109,11 +107,11 @@ return [
             'class' => \app\model\Rule::class,
         ],
     ],
-    // 可以配置多个权限model
+    // 可以配置多個權限 model
     'rbac' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // 权限规则模型配置文件
+            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // 權限規則模型配置檔案
             'config_text' => '',
         ],
         'adapter' => [
@@ -124,29 +122,29 @@ return [
 ];
 ```
 
-### 适配器
+### 適配器
 
-当前composer封装中适配的是 think-orm 的model方法，其他 orm 请参考 vendor/teamones/src/adapters/DatabaseAdapter.php
+目前 composer 封裝中適配的是 think-orm 的 model 方法，其他 orm 請參考 vendor/teamones/src/adapters/DatabaseAdapter.php
 
-然后修改配置
+然後修改配置
 
 ```php
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // 权限规则模型配置文件
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // 權限規則模型配置檔案
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'adapter', // 这里类型配置成适配器模式
+            'type' => 'adapter', // 這裡類型配置成適配器模式
             'class' => \app\adapter\DatabaseAdapter::class,
         ],
     ],
 ];
 ```
 
-## 使用说明
+## 使用說明
 
 ### 引入
 
@@ -155,84 +153,82 @@ return [
 use teamones\casbin\Enforcer;
 ```
 
-### 两种用法
+### 兩種用法
 
 ```php
-# 1. 默认使用 default 配置
+# 1. 預設使用 default 配置
 Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# 1. 使用自定义的 rbac 配置
+# 2. 使用自訂的 rbac 配置
 Enforcer::instance('rbac')->addPermissionForUser('user1', '/user', 'read');
 ```
 
-### 常用API介绍
+### 常用 API 介紹
 
-更多API用法请去官方查看
+更多 API 用法請去官方查看
 
-- 管理API： https://casbin.org/docs/zh-CN/management-api
+- 管理 API： https://casbin.org/docs/zh-CN/management-api
 - RBAC API： https://casbin.org/docs/zh-CN/rbac-api
 
 ```php
-# 为用户添加权限
+# 為用戶新增權限
 
 Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# 删除一个用户的权限
+# 刪除用戶的權限
 
 Enforcer::deletePermissionForUser('user1', '/user', 'read');
 
-# 获取用户所有权限
+# 取得用戶所有權限
 
-Enforcer::getPermissionsForUser('user1'); 
+Enforcer::getPermissionsForUser('user1');
 
-# 为用户添加角色
+# 為用戶新增角色
 
 Enforcer::addRoleForUser('user1', 'role1');
 
-# 为角色添加权限
+# 為角色新增權限
 
 Enforcer::addPermissionForUser('role1', '/user', 'edit');
 
-# 获取所有角色
+# 取得所有角色
 
 Enforcer::getAllRoles();
 
-# 获取用户所有角色
+# 取得用戶所有角色
 
 Enforcer::getRolesForUser('user1');
 
-# 根据角色获取用户
+# 根據角色取得用戶
 
 Enforcer::getUsersForRole('role1');
 
-# 判断用户是否属于一个角色
+# 判斷用戶是否屬於一個角色
 
-Enforcer::hasRoleForUser('use1', 'role1');
+Enforcer::hasRoleForUser('user1', 'role1');
 
-# 删除用户角色
+# 刪除用戶角色
 
-Enforcer::deleteRoleForUser('use1', 'role1');
+Enforcer::deleteRoleForUser('user1', 'role1');
 
-# 删除用户所有角色
+# 刪除用戶所有角色
 
-Enforcer::deleteRolesForUser('use1');
+Enforcer::deleteRolesForUser('user1');
 
-# 删除角色
+# 刪除角色
 
 Enforcer::deleteRole('role1');
 
-# 删除权限
+# 刪除權限
 
 Enforcer::deletePermission('/user', 'read');
 
-# 删除用户或者角色的所有权限
+# 刪除用戶或角色的所有權限
 
 Enforcer::deletePermissionsForUser('user1');
 Enforcer::deletePermissionsForUser('role1');
 
-# 检查权限，返回 true or false
+# 檢查權限，回傳 true 或 false
 
 Enforcer::enforce("user1", "/user", "edit");
 ```
-
-

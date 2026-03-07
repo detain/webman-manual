@@ -82,7 +82,7 @@ class MemReport implements Bootstrap
         }
 
         // 只在webman的0号进程执行
-        if ($worker->name != 'webman' && $worker->id != 0) {
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

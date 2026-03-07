@@ -1,14 +1,14 @@
-# Özel Süreçler
+# Özel süreçler
 
-webman'de, workerman'da olduğu gibi özel dinleme veya süreçler oluşturabilirsiniz.
+webman'de, workerman'da olduğu gibi özel dinleyiciler veya süreçler oluşturabilirsiniz.
 
 > **Not**
-> Windows kullanıcıları, özel bir süreci başlatmak için webman'ı başlatmak için `php windows.php` kullanmalıdır.
+> Windows kullanıcılarının özel süreçleri çalıştırmak için webman'ı `php windows.php` ile başlatmaları gerekir.
 
-## Özel HTTP Sunucusu
-Bazı özel gereksinimleriniz olabilir ve webman HTTP sunucusunun çekirdek kodunu değiştirmeniz gerekebilir, bu durumda özel süreçleri kullanabilirsiniz.
+## Özel HTTP servisi
+Bazen webman HTTP servisinin temel kodunu değiştirmenizi gerektiren özel bir ihtiyacınız olabilir. Bu durumda özel süreç kullanabilirsiniz.
 
-Örneğin, yeni bir tane oluşturun app\Server.php
+Örneğin, `app\Server.php` dosyasını oluşturun.
 
 ```php
 <?php
@@ -19,18 +19,18 @@ use Webman\App;
 
 class Server extends App
 {
-    // Bu, Webman\App içindeki yöntemleri yeniden yazmaktadır.
+    // Burada Webman\App içindeki yöntemleri geçersiz kılın
 }
 ```
 
-`config/process.php` içine aşağıdaki yapılandırmayı ekleyin
+`config/process.php` içine aşağıdaki yapılandırmayı ekleyin.
 
 ```php
 use Workerman\Worker;
 
 return [
-    // ... Diğer yapılandırmalar buraya bırakılır...
-
+    // ... diğer yapılandırmalar atlandı ...
+    
     'my-http' => [
         'handler' => app\Server::class,
         'listen' => 'http://0.0.0.0:8686',
@@ -39,21 +39,22 @@ return [
         'group' => '',
         'reusePort' => true,
         'constructor' => [
-            'request_class' => \support\Request::class, // İstek sınıfı ayarı
+            'requestClass' => \support\Request::class, // İstek sınıfını ayarlayın
             'logger' => \support\Log::channel('default'), // Günlük örneği
-            'app_path' => app_path(), // app dizini konumu
-            'public_path' => public_path() // public dizini konumu
+            'appPath' => app_path(), // app dizini konumu
+            'publicPath' => public_path() // public dizini konumu
         ]
     ]
 ];
 ```
 
 > **İpucu**
-> Webman'ın kendi HTTP sürecini kapatmak istiyorsanız, sadece config/server.php içinde `listen=>''` ayarını yapmanız yeterlidir.
+> webman'ın yerleşik HTTP sürecini kapatmak için config/server.php içinde `listen=>''` ayarlamanız yeterlidir.
 
-## Özel Websocket Dinleyici Örneği
+## Özel WebSocket dinleyici örneği
 
-`app/Pusher.php` dosyasını oluşturun
+`app/Pusher.php` dosyasını oluşturun.
+
 ```php
 <?php
 namespace app;
@@ -83,16 +84,18 @@ class Pusher
     }
 }
 ```
-> Not: onXXX özellikleri hepsi public olarak tanımlanmalıdır.
 
-`config/process.php` içine aşağıdaki yapılandırmayı ekleyin
+> Not: Tüm onXXX yöntemleri public olmalıdır.
+
+`config/process.php` içine aşağıdaki yapılandırmayı ekleyin.
+
 ```php
 return [
-    // ... Diğer süreç yapılandırmaları buraya bırakılır...
+    // ... diğer süreç yapılandırmaları atlandı ...
     
-    // websocket_test sürecinin adı
+    // websocket_test sürecin adıdır
     'websocket_test' => [
-        // Burada süreç sınıfını belirtin, yukarıda tanımlanan Pusher sınıfıdır
+        // Burada süreç sınıfını belirtin, yukarıda tanımlanan Pusher sınıfı
         'handler' => app\Pusher::class,
         'listen'  => 'websocket://0.0.0.0:8888',
         'count'   => 1,
@@ -100,8 +103,10 @@ return [
 ];
 ```
 
-## Özel Olmayan Dinleme Süreci Örneği
-`app/TaskTest.php` dosyasını oluşturun
+## Özel dinlemesiz süreç örneği
+
+`app/TaskTest.php` dosyasını oluşturun.
+
 ```php
 <?php
 namespace app;
@@ -114,7 +119,7 @@ class TaskTest
   
     public function onWorkerStart()
     {
-        // Her 10 saniyede bir veritabanını kontrol et, yeni bir kullanıcı kaydı yapılmış mı?
+        // Her 10 saniyede veritabanında yeni kullanıcı kayıtlarını kontrol edin
         Timer::add(10, function(){
             Db::table('users')->where('regist_timestamp', '>', time()-10)->get();
         });
@@ -122,10 +127,12 @@ class TaskTest
     
 }
 ```
-`config/process.php` içine aşağıdaki yapılandırmayı ekleyin
+
+`config/process.php` içine aşağıdaki yapılandırmayı ekleyin.
+
 ```php
 return [
-    // ... Diğer süreç yapılandırmaları buraya bırakılır...
+    // ... diğer süreç yapılandırmaları atlandı ...
     
     'task' => [
         'handler'  => app\TaskTest::class
@@ -133,40 +140,44 @@ return [
 ];
 ```
 
-> Not: Dinleme ayarı yapılmadığında herhangi bir port dinlenmez, süreç sayısı belirtilmezse varsayılan olarak 1 olur.
+> Not: listen atlanırsa hiçbir port dinlenmez; count atlanırsa varsayılan süreç sayısı 1 olur.
 
-## Yapılandırma Dosyası Açıklaması
+## Yapılandırma dosyası açıklaması
 
-Bir sürecin tam yapılandırma tanımı aşağıdaki gibidir:
+Bir sürecin tam yapılandırması şu şekilde tanımlanır:
+
 ```php
 return [
     // ... 
     
-    // websocket_test sürecinin adı
+    // websocket_test sürecin adıdır
     'websocket_test' => [
-        // Burada sürece sınıfını belirtin
+        // Burada süreç sınıfını belirtin
         'handler' => app\Pusher::class,
-        // Dinlenen protokol, ip ve port numarası (isteğe bağlı)
+        // Dinlenecek protokol, IP ve port (isteğe bağlı)
         'listen'  => 'websocket://0.0.0.0:8888',
         // Süreç sayısı (isteğe bağlı, varsayılan 1)
         'count'   => 2,
-        // Süreç çalıştırma kullanıcısı (isteğe bağlı, varsayılan mevcut kullanıcı)
+        // Süreci çalıştıracak kullanıcı (isteğe bağlı, varsayılan mevcut kullanıcı)
         'user'    => '',
-        // Süreç çalıştırma kullanıcı grubu (isteğe bağlı, varsayılan mevcut kullanıcı grubu)
+        // Süreci çalıştıracak kullanıcı grubu (isteğe bağlı, varsayılan mevcut grup)
         'group'   => '',
-        // Mevcut sürecin reload işlemini destekleyip desteklemediği (isteğe bağlı, varsayılan true)
+        // Mevcut sürecin reload destekleyip desteklemediği (isteğe bağlı, varsayılan true)
         'reloadable' => true,
-        // reusePort seçeneğini etkinleştirmek isteyenler (isteğe bağlı, bu seçenek php> = 7.0 gerektirir, varsayılan true'dur)
+        // reusePort etkinleştir
         'reusePort'  => true,
-        // taşıma (isteğe bağlı, ssl açmak gerektiğinde ssl olarak ayarlayın, varsayılan tcp'dir)
+        // Transport (isteğe bağlı, SSL gerektiğinde 'ssl' olarak ayarlayın, varsayılan 'tcp')
         'transport'  => 'tcp',
-        // bağlam (isteğe bağlı, taşıma ssl olarak ayarlandığında sertifika yolunu geçirmeniz gerekir)
+        // Context (isteğe bağlı, transport 'ssl' olduğunda sertifika yolu geçirin)
         'context'    => [], 
-        // Süreç sınıfının yapılandırıcı işlev parametreleri, burada process\Pusher::class sınıfının yapılandırıcı parametreleri (isteğe bağlı)
+        // Süreç sınıfı yapıcı parametreleri (isteğe bağlı)
         'constructor' => [],
+        // Bu süreç etkin mi
+        'enable' => true
     ],
 ];
 ```
 
 ## Sonuç
-Webman'ın özel süreçleri aslında workerman'ın basitleştirilmiş bir sardır, bu, yapılandırmayı işleve ayırır ve workerman'ın `onXXX` geri aramasını sınıf yöntemleri aracılığıyla gerçekleştirir; diğer kullanımlar tamamen workerman ile aynıdır.
+
+webman'ın özel süreçleri aslında workerman'ın basit bir sarmalayıcısıdır. Yapılandırmayı iş mantığından ayırır ve workerman'ın `onXXX` geri çağrılarını sınıf yöntemleriyle uygular. Diğer tüm kullanımlar workerman ile tamamen aynıdır.

@@ -1,31 +1,28 @@
-# 遅延処理
+# 遅い業務処理
 
-時には、遅延処理を行う必要があります。Webmanの他のリクエスト処理に影響を与えないようにするために、これらのビジネスは異なるケースに応じて異なる処理方法を使用することができます。
+ときに、遅い業務を処理する必要があります。遅い業務が webman の他のリクエスト処理に影響しないようにするため、状況に応じて異なる処理方法を使用できます。
 
-## メッセージキューの使用
+## 方法1：メッセージキューの使用
 [Redisキュー](../queue/redis.md) [STOMPキュー](../queue/stomp.md)を参照してください
 
-### 利点
-突発的な大量のビジネス処理リクエストに対応できます
+#### 利点
+突発的な大量の業務処理リクエストに対応できます
 
-### 欠点
-クライアントに直接結果を返すことはできません。結果をプッシュする必要がある場合は、[webman/push](https://www.workerman.net/plugin/2)を使用して結果をプッシュするなど、他のサービスと連携する必要があります。
+#### 欠点
+クライアントに直接結果を返すことはできません。結果をプッシュする必要がある場合は、[webman/push](https://www.workerman.net/plugin/2)で処理結果をプッシュするなど、他のサービスと連携する必要があります。
 
-## 新しいHTTPポートの追加
+## 方法2：新しいHTTPポートの追加
 
-> **注意**
-> この機能は、webman-framework>=1.4が必要です
+新しいHTTPポートを追加して遅いリクエストを処理します。これらの遅いリクエストは、このポートにアクセスすることで特定のプロセスグループで処理され、処理後に結果が直接クライアントに返されます。
 
-新しいHTTPポートを追加して、遅いリクエストを処理します。これらの遅いリクエストは、このポートにアクセスすることで特定の一連のプロセスによって処理され、処理された後に結果がクライアントに直接返されます。
-
-### 利点
+#### 利点
 データを直接クライアントに返すことができます
 
-### 欠点
-突発的な大量のリクエストに対応することができません
+#### 欠点
+突発的な大量のリクエストに対応できません
 
-### 実施手順
-`config/process.php`に以下の設定を追加します。
+#### 実施手順
+`config/process.php` に以下の設定を追加します。
 ```php
 return [
     // ... 他の設定は省略 ...
@@ -38,26 +35,25 @@ return [
         'group' => '',
         'reusePort' => true,
         'constructor' => [
-            'request_class' => \support\Request::class, // リクエストクラスの設定
+            'requestClass' => \support\Request::class, // リクエストクラスの設定
             'logger' => \support\Log::channel('default'), // ログインスタンス
-            'app_path' => app_path(), // appディレクトリの場所
-            'public_path' => public_path() // publicディレクトリの場所
+            'appPath' => app_path(), // appディレクトリの場所
+            'publicPath' => public_path() // publicディレクトリの場所
         ]
     ]
 ];
 ```
 
-これにより、遅いインターフェースは`http://127.0.0.1:8686/`のプロセス群を通り、他のプロセスのビジネス処理に影響を与えません。
+これにより、遅いインターフェースは `http://127.0.0.1:8686/` のプロセスグループを通じて処理され、他のプロセスの業務処理に影響しません。
 
-フロントエンドがポートの違いに気づかないようにするために、8686ポートへのリクエストを処理するためにnginxにプロキシを追加することができます。遅いインターフェースのリクエストパスが大体`/tast`で始まると仮定し、nginxの設定全体は次のようになります：
-
+フロントエンドがポートの違いを認識しないようにするため、nginx に 8686 ポートへのプロキシを追加できます。遅いインターフェースのリクエストパスが `/task` で始まると仮定すると、nginx の設定は以下のようになります：
 ```
 upstream webman {
     server 127.0.0.1:8787;
     keepalive 10240;
 }
 
-# 新しい8686 upstreamを追加
+# 新しい 8686 の upstream を追加
 upstream task {
    server 127.0.0.1:8686;
    keepalive 10240;
@@ -69,8 +65,8 @@ server {
   access_log off;
   root /path/webman/public;
 
-  # /tastで始まるリクエストは8686ポートに流す。必要に応じて/tastを必要なプレフィックスに変更してください
-  location /tast {
+  # /task で始まるリクエストは 8686 ポートへ、必要に応じて /task を必要なプレフィックスに変更してください
+  location /task {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header Host $host;
       proxy_http_version 1.1;
@@ -78,7 +74,7 @@ server {
       proxy_pass http://task;
   }
 
-  # 他のリクエストは元の8787ポートに流す
+  # その他のリクエストは元の 8787 ポートへ
   location / {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header Host $host;
@@ -91,4 +87,45 @@ server {
 }
 ```
 
-これにより、クライアントは`域名.com/tast/xxx`にアクセスする際に、個別の8686ポートで処理されるようになり、8787ポートのリクエスト処理に影響を与えません。
+これにより、クライアントが `ドメイン.com/task/xxx` にアクセスすると、別の 8686 ポートで処理され、8787 ポートのリクエスト処理に影響しません。
+
+## 方法3：HTTP Chunked による非同期セグメント送信
+
+#### 利点
+データを直接クライアントに返すことができます
+
+**workerman/http-client のインストール**
+
+```
+composer require workerman/http-client
+```
+
+**app/controller/IndexController.php**
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+
+class IndexController
+{
+    public function index(Request $request)
+    {
+        $connection = $request->connection;
+        $http = new \Workerman\Http\Client();
+        $http->get('https://example.com/', function ($response) use ($connection) {
+            $connection->send(new Chunk($response->getBody()));
+            $connection->send(new Chunk('')); // 空の chunk を送信してレスポンスの終了を示す
+        });
+        // 先に HTTP ヘッダーを送信し、その後のデータは非同期で送信
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+}
+```
+
+> **ヒント**
+> 本例では `workerman/http-client` クライアントで HTTP 結果を非同期取得してデータを返しています。[AsyncTcpConnection](https://www.workerman.net/doc/workerman/async-tcp-connection/construct.html) などの他の非同期クライアントも使用できます。

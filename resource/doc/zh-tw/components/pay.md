@@ -1,17 +1,17 @@
 # 付款SDK
 
 
-### 專案地址
+## 專案地址
 
  https://github.com/yansongda/pay
 
-### 安裝
+## 安裝
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### 使用
+## 使用
 
 **支付寶**
 
@@ -164,6 +164,6 @@ class PayController
 }
 ```
 
-### 更多內容
+## 更多內容
 
-訪問https://pay.yanda.net.cn/docs/2.x/overview
+訪問 https://pay.yanda.net.cn/docs/2.x/overview

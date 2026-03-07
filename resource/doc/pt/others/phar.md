@@ -10,11 +10,8 @@ Phar é um tipo de arquivo de empacotamento semelhante ao JAR no PHP. Você pode
 ## Instale a ferramenta de linha de comando
 `composer require webman/console`
 
-## Configurações
-Abra o arquivo `config/plugin/webman/console/app.php` e defina `'exclude_pattern'   => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$#'`. Isso permite excluir alguns diretórios e arquivos desnecessários durante o empacotamento, evitando um tamanho excessivo.
-
 ## Empacotamento
-No diretório raiz do projeto webman, execute o comando `php webman phar:pack`. Isso criará um arquivo `webman.phar` no diretório "build".
+No diretório raiz do projeto webman, execute o comando `php webman build:phar`. Isso criará um arquivo `webman.phar` no diretório `build`.
 
 > As configurações relacionadas ao empacotamento estão em `config/plugin/webman/console/app.php`.
 
@@ -35,14 +32,20 @@ No diretório raiz do projeto webman, execute o comando `php webman phar:pack`. 
 `php webman.phar restart` ou `php webman.phar restart -d`
 
 ## Observações
-* Após executar o webman.phar, um diretório "runtime" será criado no mesmo diretório que o webman.phar, usado para armazenar arquivos temporários, como logs.
+* Projetos empacotados não suportam reload; é necessário reiniciar para atualizar o código.
+
+* Para evitar tamanho excessivo do pacote e uso de memória, você pode configurar as opções `exclude_pattern` e `exclude_files` em `config/plugin/webman/console/app.php` para excluir arquivos desnecessários.
+
+* Após executar o webman.phar, um diretório `runtime` será criado no mesmo diretório que o webman.phar, usado para armazenar arquivos temporários, como logs.
 
 * Se o seu projeto usa um arquivo .env, você precisará colocar o arquivo .env no mesmo diretório que o webman.phar.
+
+* Nunca armazene arquivos enviados por usuários dentro do pacote Phar, pois operar com esses arquivos via o protocolo `phar://` é muito perigoso (vulnerabilidade de desserialização Phar). Os arquivos enviados por usuários devem ser armazenados separadamente em disco, fora do pacote Phar. Veja abaixo.
 
 * Se o seu negócio precisa fazer upload de arquivos para o diretório "public", você precisará separar o diretório "public" e colocá-lo no mesmo diretório que o webman.phar. Nesse caso, você precisará configurar `config/app.php`.
 ```php
 'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
 ```
-O negócio pode usar a função auxiliar `public_path()` para encontrar a localização real do diretório "public".
+O negócio pode usar a função auxiliar `public_path($caminho_relativo)` para encontrar a localização real do diretório "public".
 
 * O webman.phar não suporta a execução de processos personalizados no Windows.

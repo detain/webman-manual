@@ -1,4 +1,4 @@
-## रूटिंग
+# रूटिंग
 ## डिफ़ॉल्ट रूटिंग नियम
 webman का डिफ़ॉल्ट रूटिंग नियम है `http://127.0.0.1:8787/{कंट्रोलर}/{क्रिया}`। 
 
@@ -37,7 +37,8 @@ Route::disableDefaultRoute();
 ## क्लोजर रूटिंग
 `config/route.php` में निम्न रूटिंग कोड जोड़ें
 ```php
-Route::any('/test', function ($request) {
+use support\Request;
+Route::any('/test', function (Request $request) {
     return response('test');
 });
 
@@ -51,13 +52,14 @@ Route::any('/test', function ($request) {
 > रूट पथ को स्लैश (`/`) से शुरू करना आवश्यक है, उदाहरण के लिए
 
 ```php
+use support\Request;
 // गलत तरीका
-Route::any('test', function ($request) {
+Route::any('test', function (Request $request) {
     return response('test');
 });
 
 // सही तरीका
-Route::any('/test', function ($request) {
+Route::any('/test', function (Request $request) {
     return response('test');
 });
 ```
@@ -71,6 +73,153 @@ Route::any('/testclass', [app\controller\IndexController::class, 'test']);
 पता `http://127.0.0.1:8787/testclass` जाते वक़्त, `app\controller\IndexController` की `test` मेथड का उत्तर मिलेगा।
 
 
+## एनोटेशन रूटिंग
+
+कंट्रोलर मेथड पर एनोटेशन का उपयोग करके रूट परिभाषित करें, `config/route.php` में कॉन्फ़िगर करने की आवश्यकता नहीं है।
+
+> **ध्यान दें**
+> इस सुविधा के लिए webman-framework >= v2.2.0 आवश्यक है
+
+### मूल उपयोग
+
+```php
+namespace app\controller;
+use support\annotation\route\DisableDefaultRoute;
+use support\annotation\route\Get;
+use support\annotation\route\Post;
+use support\annotation\route\Route;
+
+#[DisableDefaultRoute]
+class UserController
+{
+    #[Get('/user/{id}')]
+    public function show($id)
+    {
+        return "user $id";
+    }
+
+    #[Post('/user')]
+    public function store()
+    {
+        return 'created';
+    }
+
+    #[Route('/user/form', ['GET', 'POST'], 'user.form')]
+    public function form()
+    {
+        return 'form';
+    }
+}
+```
+
+उपलब्ध एनोटेशन: `#[Get]` `#[Post]` `#[Put]` `#[Delete]` `#[Patch]` `#[Head]` `#[Options]` `#[Any]` (कोई भी मेथड)। पथ `/` से शुरू होना चाहिए। दूसरा पैरामीटर `route()` URL जनरेशन के लिए रूट नाम निर्दिष्ट कर सकता है।
+
+`#[DisableDefaultRoute]` इस कंट्रोलर के लिए डिफ़ॉल्ट रूटिंग अक्षम करता है (वैकल्पिक); केवल एनोटेशन द्वारा परिभाषित रूट ही पहुंच योग्य हैं।
+
+**`#[Route]` पूर्ण सिंटैक्स**: `#[Route(path, methods, name)]`
+- `path`: रूट पथ, `/` से शुरू; `null` होने पर केवल डिफ़ॉल्ट रूट के HTTP मेथड प्रतिबंधित करता है, नया रूट पंजीकृत नहीं करता
+- `methods`: HTTP मेथड(स), स्ट्रिंग या स्ट्रिंग सरणी, जैसे `'GET'` या `['GET','POST']`
+- `name`: `route('name')` URL जनरेशन के लिए रूट नाम, छोड़ा जा सकता है
+
+### पैरामीटर रहित एनोटेशन: डिफ़ॉल्ट रूट के HTTP मेथड प्रतिबंधित करना
+
+जब पथ निर्दिष्ट नहीं होता, तो केवल उस एक्शन के लिए अनुमत HTTP मेथड प्रतिबंधित होते हैं; डिफ़ॉल्ट रूट पथ उपयोग होता रहता है:
+
+```php
+#[Post]
+public function create() { ... }  // केवल POST, पथ अभी भी /user/create
+
+#[Get]
+public function index() { ... }   // केवल GET
+```
+
+कई एनोटेशन संयोजित करके कई मेथड अनुमत कर सकते हैं:
+
+```php
+#[Get]
+#[Post]
+public function form() { ... }  // GET और POST अनुमत
+```
+
+अघोषित HTTP मेथड 405 लौटाएंगे।
+
+कई पथ एनोटेशन अलग-अलग रूट के रूप में पंजीकृत होंगे: `#[Get('/a')] #[Post('/b')]` GET /a और POST /b दोनों रूट बनाता है।
+
+### रूट समूह उपसर्ग
+
+कक्षा पर `#[RouteGroup]` उपयोग करके सभी मेथड रूट में उपसर्ग जोड़ें:
+
+```php
+use support\annotation\route\RouteGroup;
+use support\annotation\route\Get;
+
+#[RouteGroup('/api/v1')]
+class UserController
+{
+    #[Get('/user/{id}')]  // वास्तविक पथ: /api/v1/user/{id}
+    public function show($id) { ... }
+}
+```
+
+### कस्टम HTTP मेथड और रूट नाम
+
+`#[Route]` एकाधिक HTTP मेथड और रूट नाम का समर्थन करता है:
+
+```php
+use support\annotation\route\Route;
+
+#[Route('/user', ['GET', 'POST'], 'user.form')]
+public function form() { ... }
+
+// केवल पथ और मेथड, रूट नाम के बिना
+#[Route('/user/update', 'PUT')]
+public function update() { ... }
+```
+
+### पथ पैरामीटर और regex
+
+एनोटेशन रूट पथ `config/route.php` के समान पैरामीटर सिंटैक्स समर्थन करते हैं, regex और वैकल्पिक पैरामीटर सहित:
+
+```php
+#[Get('/user/{id:\d+}')]           // केवल संख्यात्मक id
+public function show($id) { ... }
+
+#[Get('/user[/{name}]')]           // name वैकल्पिक: /user या /user/xxx
+public function list($name = null) { ... }
+
+#[Any('/user/[{path:.+}]')]        // /user और /user/ किसी भी प्रत्यय के साथ मेल खाता है
+public function catchAll($path = null) { ... }
+```
+
+इस दस्तावेज़ में「रूटिंग पैरामीटर」अनुभाग देखें।
+
+### मिडलवेयर
+
+कंट्रोलर या मेथड पर `#[Middleware]` एनोटेशन रूट पर लागू होता है; `support\annotation\Middleware` के समान उपयोग:
+
+```php
+use support\annotation\Middleware;
+
+#[Middleware(\app\middleware\AuthMiddleware::class)]
+class UserController { ... }
+
+#[Get('/user/{id}')]
+#[Middleware(\app\middleware\RateLimitMiddleware::class)]
+public function show($id) { ... }
+```
+
+### route() के साथ URL जनरेशन
+
+जब एनोटेशन में रूट नाम निर्दिष्ट हो, URL जनरेट करने के लिए `route('name', $params)` उपयोग करें:
+
+```php
+#[Get('/user/{id}', 'user.show')]
+public function show($id) { ... }
+
+// उपयोग: route('user.show', ['id' => 123])  =>  /user/123
+```
+
+
 ## रूटिंग पैरामीटर
 अगर रूटिंग में पैरामीटर हैं, तो `{key}` का उपयोग करके मैच किया जाएगा, मैचिंग परिणाम को संबंधित कंट्रोलर मेथड पैरामीटर में पास किया जाएगा(दूसरे पैरामीटर से शुरू होकर)। उदाहरण:
 ```php
@@ -79,9 +228,11 @@ Route::any('/user/{id}', [app\controller\UserController::class, 'get']);
 ``` 
 ```php
 namespace app\controller;
+use support\Request;
+
 class UserController
 {
-    public function get($request, $id)
+    public function get(Request $request, $id)
     {
         return response('पैरामीटर '.$id.' प्राप्त किया गया है');
     }
@@ -90,26 +241,37 @@ class UserController
 
 अधिक उदाहरण:
 ```php
+use support\Request;
 // मैच करेगा /user/123, /user/abc मैच नहीं करेगा
-Route::any('/user/{id:\d+}', function ($request, $id) {
+Route::any('/user/{id:\d+}', function (Request $request, $id) {
     return response($id);
 });
 
 // मैच करेगा /user/foobar, /user/foo/bar मैच नहीं करेगा
-Route::any('/user/{name}', function ($request, $name) {
+Route::any('/user/{name}', function (Request $request, $name) {
    return response($name);
 });
 
-// मैच करेगा /user, /user/123 और /user/abc
-Route::any('/user[/{name}]', function ($request, $name = null) {
+// मैच करेगा /user, /user/123 और /user/abc   [] वैकल्पिक दर्शाता है
+Route::any('/user[/{name}]', function (Request $request, $name = null) {
    return response($name ?? 'tom');
 });
 
-// सभी options अनुरोध को मैच करेगा
+// /user/ उपसर्ग वाले सभी अनुरोध मैच करेगा
+Route::any('/user/[{path:.+}]', function (Request $request) {
+    return $request->path();
+});
+
+// सभी options अनुरोध मैच करेगा   : के बाद regex नामित पैरामीटर के पैटर्न को निर्दिष्ट करता है
 Route::options('[{path:.+}]', function () {
     return response('');
 });
 ```
+उन्नत उपयोग सारांश
+
+> Webman रूटिंग में `[]` सिंटैक्स मुख्य रूप से वैकल्पिक पथ भागों या डायनामिक रूट मैचिंग को संसाधित करने के लिए उपयोग होता है, आपको अधिक जटिल पथ संरचना और मैचिंग नियम परिभाषित करने में सक्षम बनाता है
+>
+> `:` नियमित अभिव्यक्ति निर्दिष्ट करने के लिए उपयोग होता है
 
 
 ## रूटिंग समूह
@@ -117,27 +279,27 @@ Route::options('[{path:.+}]', function () {
 
 ```php
 Route::group('/blog', function () {
-   Route::any('/create', function ($request) {return response('create');});
-   Route::any('/edit', function ($request) {return response('edit');});
-   Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
+   Route::any('/create', function (Request $request) {return response('create');});
+   Route::any('/edit', function (Request $request) {return response('edit');});
+   Route::any('/view/{id}', function (Request $request, $id) {return response("view $id");});
 });
 ```
-इसका मतलब है
+इसके बराबर
 
 ```php
-Route::any('/blog/create', function ($request) {return response('create');});
-Route::any('/blog/edit', function ($request) {return response('edit');});
-Route::any('/blog/view/{id}', function ($request, $id) {return response("view $id");});
+Route::any('/blog/create', function (Request $request) {return response('create');});
+Route::any('/blog/edit', function (Request $request) {return response('edit');});
+Route::any('/blog/view/{id}', function (Request $request, $id) {return response("view $id");});
 ```
 
-
 समूह नेस्टिंग का उपयोग करना
+
 ```php
 Route::group('/blog', function () {
    Route::group('/v1', function () {
-      Route::any('/create', function ($request) {return response('create');});
-      Route::any('/edit', function ($request) {return response('edit');});
-      Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
+      Route::any('/create', function (Request $request) {return response('create');});
+      Route::any('/edit', function (Request $request) {return response('edit');});
+      Route::any('/view/{id}', function (Request $request, $id) {return response("view $id");});
    });  
 });
 ```
@@ -155,23 +317,20 @@ Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->mi
 Route::group('/blog', function () {
    Route::any('/create', function () {return response('create');});
    Route::any('/edit', function () {return response('edit');});
-   Route::any('/view/{id}', function ($request, $id) {response("view $id");});
+   Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
 })->middleware([
     app\middleware\MiddlewareA::class,
     app\middleware\MiddlewareB::class,
 ]);
 ``` 
 
-> **ध्यान दें**: 
-> webman-framework <= 1.5.6  के बाद `->middleware()` रूट मिडलवेयर ग्रुप समूह के बाद कार्य करता है, तो वर्तमान रूट को वर्तमान समूह के अंदर प्राप्त होना आवश्यक है।
-
 ```php
-# गलत उपयोग (webman-framework >= 1.5.7 में यह उपयोग वैध होता है)
+# गलत उपयोग उदाहरण (webman-framework >= 1.5.7 में यह उपयोग वैध है)
 Route::group('/blog', function () {
    Route::group('/v1', function () {
-      Route::any('/create', function ($request) {return response('create');});
-      Route::any('/edit', function ($request) {return response('edit');});
-      Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
+      Route::any('/create', function (Request $request) {return response('create');});
+      Route::any('/edit', function (Request $request) {return response('edit');});
+      Route::any('/view/{id}', function (Request $request, $id) {return response("view $id");});
    });  
 })->middleware([
     app\middleware\MiddlewareA::class,
@@ -180,12 +339,12 @@ Route::group('/blog', function () {
 ``` 
 
 ```php
-# सही उपयोग
+# सही उपयोग उदाहरण
 Route::group('/blog', function () {
    Route::group('/v1', function () {
-      Route::any('/create', function ($request) {return response('create');});
-      Route::any('/edit', function ($request) {return response('edit');});
-      Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
+      Route::any('/create', function (Request $request) {return response('create');});
+      Route::any('/edit', function (Request $request) {return response('edit');});
+      Route::any('/view/{id}', function (Request $request, $id) {return response("view $id");});
    })->middleware([
         app\middleware\MiddlewareA::class,
         app\middleware\MiddlewareB::class,
@@ -234,11 +393,9 @@ route('blog.view', ['id' => 100]); // परिणाम /blog/100 होगा
 रूटिंग का url उपयोग करते समय इस तरह का उपयोग कर सकते हैं, इससे वेब रूट के किनारे के बदलाव से यह स्वत: उत्पन्न हो जाएगा, जिससे स्थिति फ़ाइलों को बदलने के कारण बड़ी संख्या में दृश्य फ़ाइलों का बदलाव रिक्त हो सकता है।
 
 
-## पथ प्राप्त करें
-> **नोट:**
-> webman-framework >= 1.3.2 आवश्यक है
+## रूट जानकारी प्राप्त करें
 
-`$request->route` ऑब्जेक्ट के माध्यम से हम वर्तमान अनुरोध के रूट की जानकारी प्राप्त कर सकते हैं, जैसे
+`$request->route` ऑब्जेक्ट के माध्यम से हम वर्तमान अनुरोध के रूट की जानकारी प्राप्त कर सकते हैं, जैसे:
 
 ```php
 $route = $request->route; // $route = request()->route; के समान
@@ -248,7 +405,7 @@ if ($route) {
     var_export($route->getName());
     var_export($route->getMiddleware());
     var_export($route->getCallback());
-    var_export($route->param()); // यह सुविधा webman-framework >= 1.3.16 की आवश्यकता है
+    var_export($route->param());
 }
 ```
 
@@ -256,7 +413,7 @@ if ($route) {
 > यदि वर्तमान अनुरोध config/route.php में किसी भी रूट से मेल नहीं खाता है, तो `$request->route` null होगा, अर्थात डिफ़ॉल्ट रूट को चलाने पर `$request->route` null होगा।
 
 ## 404 संसाधित करना
-जब रूट नहीं मिलता है तो डिफ़ॉल्ट रूट `public/404.html` फ़ाइल की सामग्री डाल कर 404 स्थिति को लौटाया जाता है।
+जब रूट नहीं मिलता है तो डिफ़ॉल्ट रूप से 404 स्थिति कोड लौटाया जाता है और 404 सामग्री आउटपुट होती है।
 
 यदि डेवलपर को रूट नहीं मिलने पर रूट प्राप्त नहीं होते वाली व्यवस्था में हस्तक्षेप करना चाहते हैं, तो वेबमैन द्वारा प्रदान की गई फिर रूट `Route::fallback($callback)` विधि का उपयोग किया जा सकता है। उदाहरण के तौर पर नीचे की गई कोड तर्क है जब रूट नहीं मिलता है तो होमपेज पर रीडायरेक्ट करें।
 
@@ -273,7 +430,68 @@ Route::fallback(function(){
 });
 ```
 
+## 404 में मिडलवेयर जोड़ें
+
+डिफ़ॉल्ट रूप से 404 अनुरोध किसी मिडलवेयर से नहीं गुजरते। यदि 404 अनुरोध में मिडलवेयर जोड़ने की आवश्यकता हो, तो निम्नलिखित कोड देखें:
+```php
+Route::fallback(function(){
+    return json(['code' => 404, 'msg' => '404 not found']);
+})->middleware([
+    app\middleware\MiddlewareA::class,
+    app\middleware\MiddlewareB::class,
+]);
+```
+
 संबंधित लिंक [कस्टम 404 500 पेज](others/custom-error-page.md)
+
+## डिफ़ॉल्ट रूट अक्षम करें
+
+```php
+// मुख्य प्रोजेक्ट डिफ़ॉल्ट रूट अक्षम करें, एप्लिकेशन प्लगइन को प्रभावित नहीं करता
+Route::disableDefaultRoute();
+// मुख्य प्रोजेक्ट के admin एप्लिकेशन रूट अक्षम करें, एप्लिकेशन प्लगइन को प्रभावित नहीं करता
+Route::disableDefaultRoute('', 'admin');
+// foo प्लगइन का डिफ़ॉल्ट रूट अक्षम करें, मुख्य प्रोजेक्ट को प्रभावित नहीं करता
+Route::disableDefaultRoute('foo');
+// foo प्लगइन के admin एप्लिकेशन का डिफ़ॉल्ट रूट अक्षम करें, मुख्य प्रोजेक्ट को प्रभावित नहीं करता
+Route::disableDefaultRoute('foo', 'admin');
+// कंट्रोलर [\app\controller\IndexController::class, 'index'] का डिफ़ॉल्ट रूट अक्षम करें
+Route::disableDefaultRoute([\app\controller\IndexController::class, 'index']);
+```
+
+## एनोटेशन द्वारा डिफ़ॉल्ट रूट अक्षम करें
+
+एनोटेशन द्वारा किसी कंट्रोलर का डिफ़ॉल्ट रूट अक्षम कर सकते हैं, उदाहरण:
+
+```php
+namespace app\controller;
+use support\annotation\DisableDefaultRoute;
+
+#[DisableDefaultRoute]
+class IndexController
+{
+    public function index()
+    {
+        return 'index';
+    }
+}
+```
+
+इसी तरह, एनोटेशन द्वारा किसी कंट्रोलर मेथड का डिफ़ॉल्ट रूट अक्षम कर सकते हैं, उदाहरण:
+
+```php
+namespace app\controller;
+use support\annotation\DisableDefaultRoute;
+
+class IndexController
+{
+    #[DisableDefaultRoute]
+    public function index()
+    {
+        return 'index';
+    }
+}
+```
 
 ## रूट इंटरफ़ेस
 ```php
@@ -291,6 +509,8 @@ Route::patch($uri, $callback);
 Route::delete($uri, $callback);
 // $uri के हेड अनुरोध के रूट सेट करें
 Route::head($uri, $callback);
+// $uri के options अनुरोध के रूट सेट करें
+Route::options($uri, $callback);
 // एक साथ कई प्रकार के अनुरोध प्रकार के रूट सेट करें
 Route::add(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'], $uri, $callback);
 // समूह रूट
@@ -301,6 +521,8 @@ Route::resource($path, $callback, [$options]);
 Route::disableDefaultRoute($plugin = '');
 // फिर रूट, डिफ़ॉल्ट रूट को पूरा करने के लिए
 Route::fallback($callback, $plugin = '');
+// सभी रूट जानकारी प्राप्त करें
+Route::getRoutes();
 ```
 यदि uri के कोई भी रूट (डिफ़ॉल्ट रूट सहित) नहीं है, और फिर रूट भी सेट नहीं है, तो 404 लौटाया जाएगा।
 

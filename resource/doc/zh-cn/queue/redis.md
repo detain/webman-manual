@@ -25,7 +25,7 @@ return [
 
 ### 消费失败重试
 如果消费失败(发生了异常)，则消息会放入延迟队列，等待下次重试。重试次数通过参数 `max_attempts` 控制，重试间隔由
-`retry_seconds` 和 `max_attempts`共同控制。比如`max_attempts`为5，`retry_seconds`为10，第1次重试间隔为`1*10`秒，第2次重试时间间隔为 `2*10秒`，第3次重试时间间隔为`3*10秒`，以此类推直到重试5次。如果超过了`max_attempts`设置测重试次数，则消息放入key为`{redis-queue}-failed`的失败队列。
+`retry_seconds` 和 `max_attempts`共同控制。比如`max_attempts`为5，`retry_seconds`为10，第1次重试间隔为`1*10`秒，第2次重试时间间隔为 `2*10秒`，第3次重试时间间隔为`3*10秒`，以此类推直到重试5次。如果超过了`max_attempts`设置的重试次数，则消息放入key为`{redis-queue}-failed`的失败队列。
 
 ## 投递消息(同步)
 
@@ -85,7 +85,7 @@ class Index
 
 }
 ```
-`Client::send()` 没有返回值，它属于异步推送，它不保证消息%100送达redis。
+`Client::send()` 没有返回值，它属于异步推送，它不保证消息100%送达redis。
 
 > **提示**
 > `Client::send()`原理是在本地内存建立一个内存队列，异步将消息同步到redis(同步速度很快，每秒大概1万笔消息)。如果进程重启，恰好本地内存队列里数据没有同步完毕，会造成消息丢失。`Client::send()`异步投递适合投递不重要的消息。
@@ -124,7 +124,7 @@ $redis->connect('127.0.0.1', 6379);
 $queue = 'user-1';
 $data= ['some', 'data'];
 redis_queue_send($redis, $queue, $data);
-````
+```
 
 ## 消费
 消费进程配置文件在 `{主项目}/config/plugin/webman/redis-queue/process.php`。

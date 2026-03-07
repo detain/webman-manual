@@ -1,33 +1,47 @@
 # Riguardo alle perdite di memoria
-webman è un framework in memoria persistente, quindi è necessario prestare un po' di attenzione alle perdite di memoria. Tuttavia, gli sviluppatori non devono preoccuparsi troppo, poiché le perdite di memoria avvengono in condizioni estreme e sono facilmente evitabili. Lo sviluppo con webman è praticamente simile allo sviluppo con framework tradizionali e non richiede operazioni di gestione della memoria inutili.
+Webman è un framework residente in memoria, quindi è necessario prestare una certa attenzione alle perdite di memoria. Tuttavia, gli sviluppatori non devono preoccuparsi eccessivamente, poiché le perdite si verificano solo in condizioni molto estreme e sono facili da evitare. Lo sviluppo con webman è sostanzialmente uguale a quello con framework tradizionali; non sono necessarie operazioni extra per la gestione della memoria.
 
 > **Nota**
-> Il processo di monitoraggio incluso in webman controllerà l'utilizzo della memoria di tutti i processi. Se l'utilizzo della memoria di un processo sta per raggiungere il valore impostato dalla direttiva `memory_limit` nel file php.ini, il processo verrà riavviato in modo sicuro per liberare memoria. Questa operazione non ha alcun impatto sul business.
+> Il processo di monitoraggio integrato di webman controlla l'utilizzo della memoria di tutti i processi. Quando l'utilizzo della memoria di un processo sta per raggiungere il valore impostato in `memory_limit` in php.ini, il processo corrispondente viene riavviato automaticamente in modo sicuro per liberare memoria, senza impatto sull'applicazione.
 
 ## Definizione di perdita di memoria
-Con l'aumento continuo delle richieste, la memoria utilizzata da webman **cresce illimitatamente** (attenzione, cresce **illimitatamente**) fino a raggiungere centinaia di megabyte o addirittura di più, questo è considerato una perdita di memoria. Se la memoria continua a crescere e poi smette di farlo, non si tratta di una perdita di memoria.
+È normale che l'utilizzo della memoria di webman aumenti con il numero di richieste. In generale, quando un processo raggiunge un certo volume di richieste (tipicamente nell'ordine dei milioni), la memoria si stabilizza o aumenta solo occasionalmente.
 
-In generale, è normale che un processo utilizzi decine di megabyte di memoria. Quando un processo gestisce richieste molto grandi o mantiene un gran numero di connessioni, l'occupazione di memoria in un singolo processo può raggiungere anche diverse centinaia di megabyte. In questo caso, potrebbe non essere restituita l'intera memoria al sistema operativo dopo l'uso da parte di PHP. Alcune parti della memoria potrebbero non essere liberate dopo l'elaborazione di una grande richiesta, è una situazione normale. (È possibile liberare parte della memoria inattiva chiamando il metodo `gc_mem_caches()`)
+Nella maggior parte delle applicazioni, l'utilizzo della memoria per processo finisce per stabilizzarsi intorno a 10M–100M. Non c'è motivo di preoccupazione finché l'utilizzo per processo resta sotto i 100M.
+
+Inoltre, durante l'elaborazione di file grandi, richieste pesanti o letture di grandi quantità di dati dal database, PHP alloca molta memoria. PHP può conservare parte di questa memoria per riutilizzarla invece di restituirla tutta al sistema operativo, il che può portare a un utilizzo di memoria elevato. Poiché la memoria viene riutilizzata, non c'è motivo di preoccupazione.
+
+> **Nota**
+> Per progetti impacchettati in phar o binario, se la dimensione del pacchetto è grande, è normale che l'utilizzo della memoria superi i 100M.
+
+## Come confermare una perdita di memoria
+Se un processo ha gestito più di un milione di richieste, l'utilizzo della memoria supera i 100M e la memoria continua ad aumentare dopo ogni richiesta, potrebbe verificarsi una perdita di memoria.
+
+## Come individuare una perdita di memoria
+Un approccio semplice è sottoporre ogni API a test di carico e individuare quale continua ad aumentare l'utilizzo della memoria dopo milioni di richieste.
+
+Una volta trovata l'API problematica, si può usare una ricerca binaria: commentare metà del codice di business alla volta fino a individuare il codice che causa il problema.
 
 ## Come si verificano le perdite di memoria
-**Perché avvengono le perdite di memoria? Le perdite di memoria avvengono solo se si verificano entrambe le seguenti condizioni:**
-1. Esiste un array con **lunga durata** (attenzione, lunga durata, non è valido per gli array normali)
-2. Questo array con **lunga durata** si espande all'infinito (il business ci inserisce dati senza mai pulirli)
+**Una perdita di memoria si verifica solo quando entrambe le seguenti condizioni sono soddisfatte:**
+1. Esiste un array con **ciclo di vita lungo** (gli array normali non sono un problema)
+2. E questo array con **ciclo di vita lungo** cresce indefinitamente (l'applicazione continua a inserire dati e non li elimina mai)
 
-Se le condizioni 1 e 2 sono entrambe valide **allo stesso tempo** (attenzione, nello stesso momento), allora si verificherà una perdita di memoria. Altrimenti, se non vengono soddisfatte entrambe le condizioni o se vengono soddisfatte solo una delle due, non si avrà una perdita di memoria.
+Solo quando **entrambe** le condizioni sono soddisfatte si ha una perdita. Se una condizione non è soddisfatta o ne è soddisfatta solo una, non c'è perdita.
 
-## Array con lunga durata
-Gli array con lunga durata in webman includono:
+## Array con ciclo di vita lungo
+
+In webman gli array con ciclo di vita lungo includono:
 1. Array con la parola chiave `static`
-2. Proprietà array singleton
+2. Proprietà di tipo array dei singleton
 3. Array con la parola chiave `global`
 
-> **Attenzione**
-> In webman è consentito l'uso di dati a lunga durata, ma è necessario garantire che i dati all'interno siano limitati e che il numero di elementi non cresca all'infinito.
+> **Nota**
+> webman consente dati con ciclo di vita lungo, ma bisogna garantire che i dati siano limitati e che il numero di elementi non cresca indefinitamente.
 
-Di seguito sono riportati esempi illustrati:
+Di seguito esempi per ogni caso.
 
-#### Array `static` che si espande all'infinito
+### Array static che cresce indefinitamente
 ```php
 class Foo
 {
@@ -40,9 +54,9 @@ class Foo
 }
 ```
 
-L'array `$data` definito con la parola chiave `static` è un array con lunga durata. Nel caso di esempio, l'array `$data` si espande continuamente con le richieste, causando perdite di memoria.
+L'array `$data` definito con `static` ha un ciclo di vita lungo. Nell'esempio, `$data` continua a crescere con ogni richiesta, provocando una perdita di memoria.
 
-#### Proprietà array singleton che si espande all'infinito
+### Proprietà di array di singleton che cresce indefinitamente
 ```php
 class Cache
 {
@@ -76,12 +90,12 @@ class Foo
 }
 ```
 
-`Cache::instance()` restituisce un singleton Cache, che ha una lunga durata come istanza di classe. Anche se la proprietà `$data` non utilizza la parola chiave `static`, poiché la classe stessa ha una lunga durata, anche `$data` diventa un array con lunga durata. Con l'aggiunta continua di dati con chiavi diverse all'array `$data`, il consumo di memoria del programma aumenta sempre di più, causando perdite di memoria.
+`Cache::instance()` restituisce un singleton Cache con ciclo di vita lungo. Anche se la proprietà `$data` non usa `static`, poiché la classe ha ciclo di vita lungo, anche `$data` è un array con ciclo di vita lungo. Man mano che si aggiungono chiavi diverse a `$data`, l'utilizzo della memoria del programma aumenta e si verifica la perdita.
 
-> **Attenzione**
-> Se la chiave passata a `Cache::instance()->set(key, value)` è di quantità limitata, non si verificheranno perdite di memoria, poiché l'array `$data` non si espanderà all'infinito.
+> **Nota**
+> Se le chiavi aggiunte con `Cache::instance()->set(key, value)` sono in numero limitato, non c'è perdita, perché l'array `$data` non cresce indefinitamente.
 
-#### Array `global` che si espande all'infinito
+### Array global che cresce indefinitamente
 ```php
 class Index
 {
@@ -93,8 +107,7 @@ class Index
     }
 }
 ```
-
-Un array definito con la parola chiave `global` non verrà liberato dopo l'esecuzione di una funzione o di un metodo di una classe, quindi è un array con lunga durata. Con il codice precedente, con l'aumento delle richieste, si verificheranno perdite di memoria. Allo stesso modo, un array definito all'interno di una funzione o di un metodo con la parola chiave `static` è un array con lunga durata, che causerà perdite di memoria se si espande all'infinito, ad esempio:
+Gli array definiti con `global` non vengono liberati al termine della funzione o del metodo, quindi hanno ciclo di vita lungo. Il codice sopra provoca una perdita man mano che aumentano le richieste. Allo stesso modo, gli array definiti con `static` dentro una funzione o un metodo hanno anch'essi ciclo di vita lungo; se crescono indefinitamente, provocano una perdita, ad esempio:
 ```php
 class Index
 {
@@ -107,9 +120,9 @@ class Index
 }
 ```
 
-## Suggerimenti
-Si consiglia agli sviluppatori di non concentrarsi in modo eccessivo sulle perdite di memoria, poiché sono rare. Se sfortunatamente si verificano, è possibile individuare il punto in cui si verificano le perdite di memoria tramite test di carico, e quindi risolvere il problema. Anche se gli sviluppatori non trovano il punto di perdita, il servizio di monitoraggio incluso in webman riavvierà in modo sicuro i processi con perdite di memoria, liberando memoria al momento opportuno.
+## Raccomandazioni
+Si consiglia di non prestare eccessiva attenzione alle perdite di memoria, perché sono rare. Se ne compare una, i test di carico consentono di individuare il codice che la provoca. Anche se lo sviluppatore non trova la causa, il servizio di monitoraggio integrato di webman riavvierà in tempo il processo interessato per liberare memoria.
 
-Se si desidera evitare il più possibile le perdite di memoria, si possono seguire i seguenti suggerimenti:
-1. Evitare l'uso delle parole chiave `global` e `static` per gli array. Se vengono utilizzate, assicurarsi che non si espandano all'infinito.
-2. Evitare di utilizzare i singleton per le classi non conosciute, preferire l'inizializzazione con la parola chiave `new`. Se è necessario un singleton, verificare se ha proprietà array che si espandono all'infinito.
+Se desiderate ridurre al minimo il rischio di perdite, potete seguire queste raccomandazioni:
+1. Evitare, quando possibile, array con `global` o `static`; se li usate, assicuratevi che non crescano indefinitamente.
+2. Per classi poco conosciute, preferire l'inizializzazione con `new` invece dei singleton. Se usate un singleton, verificare se ha proprietà di tipo array che possono crescere indefinitamente.

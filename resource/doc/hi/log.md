@@ -13,8 +13,8 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('लॉग परीक्षण');
-        return response('नमस्ते इंडेक्स');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
@@ -101,7 +101,7 @@ return [
     ],
     // log2 चैनल
     'log2' => [
-        // डिफ़ॉल्ट चैनल के हैंडलर को संसाधित करें, एक से अधिक सेट किया जा सकता है
+        // log2 चैनल के हैंडलर को संसाधित करें, एक से अधिक सेट किया जा सकता है
         'handlers' => [
             [   
                 // हैंडलर की नाम
@@ -137,8 +137,8 @@ class FooController
     public function index(Request $request)
     {
         $log = Log::channel('log2');
-        $log->info('log2 परीक्षण');
-        return response('नमस्ते इंडेक्स');
+        $log->info('log2 test');
+        return response('hello index');
     }
 }
 ```

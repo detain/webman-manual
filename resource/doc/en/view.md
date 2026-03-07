@@ -265,10 +265,28 @@ In some scenarios, `View::assign()` is very useful. For example, if the user inf
 #### Controller
 When the controller calls `view('templateName', [])`, the view file is searched according to the following rules:
 
-1. In a single application, use the corresponding view file under `app/view/`.
-2. [In a multi-application](multiapp.md), use the corresponding view file under `app/applicationName/view/`.
+1. If the path starts with `/`, use that path directly to locate the view file.
+2. If it does not start with `/` and it is not a multi-application, use the corresponding view file under `app/view/`.
+3. If it does not start with `/` and it is a [multi-application](multiapp.md), use the corresponding view file under `app/applicationName/view/`.
+4. If no template parameter is passed, the template file is automatically located according to rules 2 and 3.
 
-In summary, if `$request->app` is empty, use the view file under `app/view/`, otherwise use the view file under `app/{$request->app}/view/`.
+Example:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Equivalent to return view('user/hello', ['name' => 'webman']);
+        // Equivalent to return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### Closure Function
 Since the closure function `$request->app` is empty and does not belong to any application, the closure function uses the view file under `app/view/`. For example, defining a route in `config/route.php` as follows:
@@ -281,6 +299,25 @@ This will use `app/view/user.html` as the template file (if using blade template
 
 #### Specify Application
 In order for templates to be reusable in a multi-application mode, the `view($template, $data, $app = null)` function provides a third parameter `$app` to specify which application directory's template to use. For example, `view('user', [], 'admin')` will force the use of the view files under `app/admin/view/`.
+
+#### Omit Template Parameter
+In class-based controllers, you can omit the template parameter. For example:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Equivalent to return view('user/hello', ['name' => 'webman']);
+        // Equivalent to return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ### Extend Twig
 

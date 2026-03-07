@@ -1,7 +1,7 @@
 # webman Performansı
 
 
-### Geleneksel çerçeve istek işleme süreci
+## Geleneksel çerçeve istek işleme süreci
 
 1. Nginx/apache isteği alır
 2. Nginx/apache isteği php-fpm'ye iletilir
@@ -20,9 +20,9 @@
 15. Nginx/apache sonucu istemciye geri gönderir
 
 
-### webman'in istek işleme süreci
+## webman'in istek işleme süreci
 1. Çerçeve isteği alır
-2. Çerçeve iş mantığını yürütür
+2. Çerçeve iş mantığını yürütür (opcode bytecode)
 3. Çerçeve sonucu istemciye geri gönderir
 
 Evet, nginx'in ters proxy olmadığı durumlarda, çerçeve sadece bu 3 adıma sahiptir. Bu, webman'in performansının geleneksel çerçevelerin birkaç katı hatta onlarca katı olduğu anlamına gelebilir.

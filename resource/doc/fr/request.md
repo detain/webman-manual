@@ -64,6 +64,21 @@ Comme pour la méthode get, vous pouvez également fournir une valeur par défau
 $request->post('name', 'tom');
 ```
 
+## Fonction helper input()
+Comme `$request->input()`, la fonction helper `input()` peut récupérer tous les paramètres. Elle accepte deux paramètres :
+1. name : le nom du paramètre à récupérer (si vide, retourne un tableau de tous les paramètres)
+2. default : valeur par défaut (utilisée lorsque le paramètre du premier argument n'est pas trouvé)
+
+**Exemple**
+```php
+// Récupérer le paramètre name
+$name = input('name');
+// Récupérer le paramètre name, utiliser la valeur par défaut s'il n'existe pas
+$name = input('name', 'Pierre');
+// Récupérer tous les paramètres
+$all_params = input();
+```
+
 ## Obtenir le corps brut de la requête post
 ```php
 $post = $request->rawBody();
@@ -127,15 +142,53 @@ $only = $request->only(['username', 'password']);
 $except = $request->except(['avatar', 'age']);
 ```
 
+## Obtenir les entrées via les paramètres du contrôleur
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+La logique ci-dessus est équivalente à :
+```php
+<?php
+namespace app\controller;
+use support\Request;
+use support\Response;
+
+class UserController
+{
+    public function create(Request $request): Response
+    {
+        $name = $request->input('name');
+        $age = (int)$request->input('age', 18);
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Pour plus d'informations, voir [Liaison des paramètres du contrôleur](controller.md#liaison-des-paramètres-du-contrôleur).
+
 ## Obtenir des fichiers téléchargés
+
+> **Remarque**
+> Le téléchargement de fichiers nécessite un formulaire au format `multipart/form-data`.
+
 **Obtenir tous les fichiers téléchargés**
 ```php
 $request->file();
 ```
 
-Exemple de formulaire:
+Exemple de formulaire :
 ```html
-<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
+<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data">
 <input name="file1" multiple="multiple" type="file">
 <input name="file2" multiple="multiple" type="file">
 <input type="submit">
@@ -296,7 +349,7 @@ $request->getRealIp($safe_mode=true);
 
 Lorsque le projet utilise un proxy (comme nginx), l'utilisation de `$request->getRemoteIp()` renvoie souvent l'adresse IP du serveur proxy (comme `127.0.0.1` `192.168.x.x`) plutôt que l'adresse IP réelle du client. Dans ce cas, vous pouvez essayer d'utiliser `$request->getRealIp()` pour obtenir la véritable adresse IP du client.
 
-`$request->getRealIp()` tentera d'obtenir la véritable adresse IP à partir des en-têtes HTTP `x-real-ip`, `x-forwarded-for`, `client-ip`, `x-client-ip`, `via`.
+`$request->getRealIp()` tentera d'obtenir la véritable adresse IP à partir des en-têtes HTTP `x-forwarded-for`, `x-real-ip`, `client-ip`, `x-client-ip`, `via`.
 
 > Étant donné que les en-têtes HTTP peuvent être facilement falsifiés, la méthode n'obtient pas l'adresse IP du client à 100 % de manière fiable, en particulier lorsque `$safe_mode` est désactivé. Une méthode plus fiable pour obtenir l'adresse IP réelle du client à travers un proxy est de connaître l'adresse IP sûre du serveur proxy et de savoir clairement quel en-tête HTTP contient l'adresse IP réelle. Si l'IP renvoyée par `$request->getRemoteIp()` est confirmée comme étant celle d'un serveur proxy sûr connu, alors utilisez `$request->header('en-tête HTTP contenant l'IP réelle')` pour obtenir l'adresse IP réelle.
 
@@ -335,7 +388,6 @@ Renvoie une chaîne vide `''` pour une requête non liée à un plugin.
 ```php
 $request->plugin;
 ```
-> Cette fonctionnalité requiert webman>=1.4.0
 
 ## Obtenir le nom de l'application de la requête
 Pour une seule application, cela renvoie toujours une chaîne vide `''`, pour [plusieurs applications](multiapp.md), cela renvoie le nom de l'application.
@@ -364,3 +416,33 @@ Renvoie quelque chose comme `index`
 
 > Comme les fonctions de fermeture ne sont pas liées à une méthode de contrôleur, la requête de routes de fermeture `$request->action` renverra toujours une chaîne vide `''`
 > Voir les routes de fermeture [Routes](route.md)
+
+## Réécriture des paramètres
+
+Parfois, nous souhaitons réécrire les paramètres de la requête, par exemple pour filtrer la requête puis réaffecter les valeurs à l'objet requête. Dans ce cas, nous pouvons utiliser les méthodes `setGet()`, `setPost()` et `setHeader()`.
+
+#### Réécrire les paramètres GET
+```php
+$request->get(); // Supposons que le résultat soit ['name' => 'tom', 'age' => 18]
+$request->setGet(['name' => 'tom']);
+$request->get(); // Le résultat final est ['name' => 'tom']
+```
+
+> **Remarque**
+> Comme le montre l'exemple, `setGet()` réécrit tous les paramètres GET. `setPost()` et `setHeader()` se comportent de la même manière.
+
+#### Réécrire les paramètres POST
+```php
+$post = $request->post();
+foreach ($post as $key => $value) {
+    $post[$key] = htmlspecialchars($value);
+}
+$request->setPost($post);
+$request->post(); // Obtenir les paramètres post filtrés
+```
+
+#### Réécrire les paramètres HEADER
+```php
+$request->setHeader(['host' => 'example.com']);
+$request->header('host'); // Affiche: example.com
+```

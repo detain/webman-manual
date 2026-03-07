@@ -1,12 +1,12 @@
-# event Olay İşleme
+# Olay İşleme
+`webman/event`, kodla uğraşmadan iş mantığını çalıştırmanıza ve modüller arasında gevşek bağ sağlamanıza imkân veren zarif bir olay mekanizması sunar. Tipik senaryo: Yeni bir kullanıcı başarıyla kayıt olduğunda, `user.register` gibi özel bir olay yayınlamanız yeterli; her modül bu olayı alıp ilgili mantığı çalıştırabilir.
 
-`webman/event`, iş koduna müdahale etmeden bazı iş mantığını gerçekleştirmenizi ve iş modülleri arasındaki bağı çözmenizi sağlayan zarif bir olay mekanizması sunar.
-
-## Yükleme
+## Kurulum
 `composer require webman/event`
 
-## Olayı Abone Olma
-Olaylara abone olma, `config/event.php` dosyası aracılığıyla yapılandırılır:
+## Olaylara Abone Olma
+Olay abonelikleri `config/event.php` dosyası üzerinden merkezi olarak yapılandırılır.
+
 ```php
 <?php
 return [
@@ -20,13 +20,16 @@ return [
     ]
 ];
 ```
-**Açıklama:**
-- `user.register`, `user.logout` vb. birinci dereceden olay isimleridir. String türündedir, küçük harflerle ve nokta (.) ile ayrılmış şekilde önerilir.
-- Bir olayın birden fazla olay işleme fonksiyonu olabilir. Çağrı sırası yapılandırmaya göredir.
+
+**Not:**
+- `user.register`, `user.logout` vb. olay adlarıdır (string türü). Küçük harfli kelimeler ve nokta (`.`) ile ayrım önerilir.
+- Bir olayın birden fazla işleme fonksiyonu olabilir; yapılandırma sırasına göre çağrılır.
 
 ## Olay İşleme Fonksiyonları
-Olay işleme fonksiyonları herhangi bir sınıf yöntemi, fonksiyon, kapanış fonksiyonu vb. olabilir.
-Örneğin `app/event/User.php` adında bir olay işleme sınıfı oluşturulabilir (dizin mevcut değilse kendiniz oluşturun):
+İşleme fonksiyonları sınıf metodu, fonksiyon veya closure olabilir.
+
+Örnek: `app/event/User.php` sınıfını oluşturun (dizin yoksa oluşturun).
+
 ```php
 <?php
 namespace app\event;
@@ -44,8 +47,9 @@ class User
 }
 ```
 
-## Olayı Yayınlama
-`Event::emit($event_name, $data);` kullanarak olayı yayınlama, örneğin:
+## Olay Yayınlama
+Olay yayınlamak için `Event::dispatch($event_name, $data);` veya `Event::emit($event_name, $data);` kullanın. Örnek:
+
 ```php
 <?php
 namespace app\controller;
@@ -59,15 +63,19 @@ class User
             'name' => 'webman',
             'age' => 2
         ];
-        Event::emit('user.register', $user);
+        Event::dispatch('user.register', $user);
     }
 }
 ```
-> **İpucu**
-> `Event::emit($event_name, $data);` parametre olan `$data`, dizi, sınıf örneği, dize vb. olabilir.
 
-## Jokar Olay Dinleme
-Jokar abonelik dinleyicisi aynı dinleyiciye birden fazla olayı işlemek için izin verir, örneğin `config/event.php` içinde yapılandırılmıştır:
+Yayınlama için iki fonksiyon var: `Event::dispatch($event_name, $data);` ve `Event::emit($event_name, $data);` — parametreler aynı. Fark: `emit` istisnaları dahilde yakalar; bir işleyicide istisna oluşursa diğerleri çalışmaya devam eder. `dispatch` istisnaları yakalamaz; herhangi bir işleyicide istisna oluşursa yürütme durur ve istisna yukarı iletilir.
+
+> **İpucu**
+> `$data` parametresi dizi, sınıf örneği, dize vb. herhangi bir veri olabilir.
+
+## Joker Karakter ile Olay Dinleme
+Joker karakter kaydı, aynı dinleyicide birden çok olayı işlemenize izin verir. Örnek `config/event.php` içinde:
+
 ```php
 <?php
 return [
@@ -76,7 +84,9 @@ return [
     ],
 ];
 ```
-Olay işleme fonksiyonu ikinci parametre olan `$event_data` ile belirli olay adını alabilir:
+
+İşleme fonksiyonunun ikinci parametresi `$event_data` ile somut olay adı alınabilir:
+
 ```php
 <?php
 namespace app\event;
@@ -84,16 +94,18 @@ class User
 {
     function deal($user, $event_name)
     {
-        echo $event_name; // Özel olay adı, örneğin user.register user.logout vb.
+        echo $event_name; // Somut olay adı, örn. user.register, user.logout vb.
         var_export($user);
     }
 }
 ```
-## Olay Yayınını Durdurma
-Olay işleme fonksiyonu içinde `false` döndürdüğümüzde, olay yayını durur.
 
-## Kapanış İşleviyle Olay İşleme
-Olay işleme fonksiyonları bir sınıf yöntemi olabilir, aynı zamanda kapanış fonksiyonu da olabilir, örneğin:
+## Olay Yayınını Durdurma
+İşleme fonksiyonunda `false` döndürüldüğünde, o olayın yayını durur.
+
+## Closure ile Olay İşleme
+İşleme fonksiyonu sınıf metodu veya closure olabilir. Örnek:
+
 ```php
 <?php
 return [
@@ -104,8 +116,14 @@ return [
     ]
 ];
 ```
+
 ## Olayları ve Dinleyicileri Görüntüleme
-`php webman event:list` komutunu kullanarak proje yapılandırmasında bulunan tüm olayları ve dinleyicileri görebilirsiniz.
+Projede yapılandırılan tüm olayları ve dinleyicileri görmek için `php webman event:list` komutunu kullanın.
+
+## Destek Kapsamı
+Ana projenin yanı sıra [temel eklentiler](../plugin/base.md) ve [uygulama eklentileri](../app/app.md) de `event.php` yapılandırmasını destekler.
+**Temel eklenti config dosyası:** `config/plugin/sağlayıcı/eklenti-adı/event.php`
+**Uygulama eklentisi config dosyası:** `plugin/eklenti-adı/config/event.php`
 
 ## Dikkat Edilmesi Gerekenler
-Olay işleme asenkronik değildir; dolayısıyla yavaş işlemler için uygun değildir. Yavaş işlemler için [webman/redis-queue](https://www.workerman.net/plugin/12) gibi bir mesaj kuyruğu kullanılmalıdır.
+Olay işleme asenkron değildir; yavaş işler için uygun değildir. Yavaş işler için [webman/redis-queue](https://www.workerman.net/plugin/12) gibi mesaj kuyruğu kullanılmalıdır.

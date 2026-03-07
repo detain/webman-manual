@@ -11,7 +11,7 @@ return [
 В режиме множественных приложений вы можете настраивать отдельный класс обработки исключений для каждого приложения, см. [Множественные приложения](multiapp.md).
 
 ## Класс обработки исключений по умолчанию
-В webman исключения по умолчанию обрабатываются классом `support\exception\Handler`. Можно изменить класс обработки исключений по уумолчанию, изменив файл настроек `config/exception.php`. Класс обработки исключений должен реализовывать интерфейс `Webman\Exception\ExceptionHandlerInterface`.
+В webman исключения по умолчанию обрабатываются классом `support\exception\Handler`. Можно изменить класс обработки исключений по умолчанию, изменив файл настроек `config/exception.php`. Класс обработки исключений должен реализовывать интерфейс `Webman\Exception\ExceptionHandlerInterface`.
 ```php
 interface ExceptionHandlerInterface
 {
@@ -63,11 +63,11 @@ class FooController
 {
     public function index(Request $request)
     {
-        $this->chackInpout($request->post());
+        $this->checkInput($request->post());
         return response('hello index');
     }
     
-    protected function chackInpout($input)
+    protected function checkInput($input)
     {
         if (!isset($input['token'])) {
             throw new BusinessException('Ошибка параметра', 3000);

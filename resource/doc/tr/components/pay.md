@@ -1,17 +1,17 @@
 # Ödeme SDK
 
 
-### Proje Adresi
+## Proje Adresi
 
  https://github.com/yansongda/pay
 
-### Kurulum
+## Kurulum
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### Kullanım
+## Kullanım
 
 **Alipay**
 
@@ -94,7 +94,7 @@ class PayController
 }
 ```
 
-**Wechat**
+**WeChat**
 
 ```php
 <?php
@@ -164,5 +164,6 @@ class PayController
 }
 ```
 
-### Daha Fazla İçerik
- https://pay.yanda.net.cn/docs/2.x/overview adresini ziyaret edin
+## Daha fazla bilgi
+
+https://pay.yanda.net.cn/docs/2.x/overview adresini ziyaret edin

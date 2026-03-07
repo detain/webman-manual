@@ -1,19 +1,23 @@
-## Statik Dosyaların İşlenmesi
-webman, statik dosya erişimini destekler. Statik dosyalar genellikle `public` dizini altına yerleştirilir, örneğin `http://127.0.0.8787/upload/avatar.png` adresine yapılan istek aslında `{ana_proje_dizini}/public/upload/avatar.png`'e erişim sağlar.
+# webman Statik Dosya İşleme
+
+webman statik dosya erişimini destekler. Statik dosyalar `public` dizinine yerleştirilir. Örneğin `http://127.0.0.8787/upload/avatar.png` adresine yapılan istek aslında `{ana_proje_dizini}/public/upload/avatar.png` dosyasına erişim sağlar.
 
 > **Not**
-> webman 1.4 sürümünden itibaren uygulama eklentilerini desteklemektedir. `/app/xx/dosya_adı` ile başlayan statik dosya erişimi aslında uygulama eklentisinin `public` dizinine erişim sağlar. Başka bir deyişle, webman >=1.4.0 sürümü, `{ana_proje_dizini}/public/app/` altındaki dizinlere erişim sağlamamaktadır.
+> `/app/xx/dosya_adı` ile başlayan statik dosya erişimi aslında uygulama eklentisinin `public` dizinine erişim sağlar. Başka bir deyişle, `{ana_proje_dizini}/public/app/` altındaki dizinlere erişim desteklenmemektedir.
 > Daha fazlası için [Uygulama Eklentileri](./plugin/app.md)'ne bakınız.
 
-### Statik Dosya Desteğini Kapatma
-Eğer statik dosya desteğine ihtiyaç duymuyorsanız, `config/static.php` dosyasını açarak `enable` seçeneğini `false` olarak değiştirin. Kapatıldığında tüm statik dosya erişimi 404 hatası döndürecektir.
+## Statik Dosya Desteğini Kapatma
 
-### Statik Dosya Dizini Değiştirme
-webman, varsayılan olarak statik dosyalar için public dizinini kullanır. Değiştirmek istiyorsanız, `support/helpers.php` dosyasındaki `public_path()` yardımcı işlevini değiştirmeniz gerekmektedir.
+Statik dosya desteğine ihtiyaç duyulmuyorsa, `config/static.php` dosyasını açarak `enable` seçeneğini `false` olarak değiştirin. Kapatıldığında tüm statik dosya erişimi 404 hatası döndürecektir.
 
-### Statik Dosya Ara Yazılımı
-webman'in kendi içinde bir statik dosya ara yazılımı vardır, konumu `app/middleware/StaticFile.php`.
-Bazen statik dosyalar üzerinde bazı işlemler yapmamız gerekebilir, örneğin statik dosyalara çapraz kaynak (CORS) başlığı eklemek, nokta (`.`) ile başlayan dosyalara erişimi engellemek için bu ara yazılımı kullanabiliriz.
+## Statik Dosya Dizini Değiştirme
+
+webman varsayılan olarak statik dosyalar için `public` dizinini kullanır. Değiştirmek istiyorsanız, `support/helpers.php` dosyasındaki `public_path()` yardımcı işlevini düzenleyin.
+
+## Statik Dosya Ara Yazılımı
+
+webman, `app/middleware/StaticFile.php` konumunda bir statik dosya ara yazılımı ile birlikte gelir.
+Bazen statik dosyalar üzerinde bazı işlemler yapmamız gerekebilir (örneğin çapraz kaynak HTTP başlığı eklemek veya nokta (`.`) ile başlayan dosyalara erişimi engellemek). Bu ara yazılım bu tür işlemler için kullanılabilir.
 
 `app/middleware/StaticFile.php` dosyası aşağıdaki gibi olabilir:
 ```php
@@ -43,4 +47,4 @@ class StaticFile implements MiddlewareInterface
     }
 }
 ```
-Bu ara yazılımı gerektiğinde `config/static.php` dosyasındaki `middleware` seçeneğini etkinleştirmeniz gerekmektedir.
+Bu ara yazılıma ihtiyaç duyulduğunda `config/static.php` dosyasındaki `middleware` seçeneğini etkinleştirmeniz gerekir.

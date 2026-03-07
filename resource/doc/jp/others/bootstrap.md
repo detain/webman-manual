@@ -62,7 +62,7 @@ return [
 これでビジネスの初期化フローを完成させました。
 
 ## 補足説明
-[カスタムプロセス](../process.md)は起動後に`config/bootstrap.php`で設定されたstartメソッドも実行されます。私たちは`$worker->name`を使用して現在のプロセスがどのプロセスかを判断し、そのプロセスでビジネスの初期化コードを実行するかどうかを決定することができます。例えば、monitorプロセスを監視する必要がない場合、`MemReport.php`の内容は以下のようになります。
+[カスタムプロセス](../process.md)は起動後に`config/bootstrap.php`で設定されたstartメソッドも実行されます。私たちは`$worker->name`を使用して現在のプロセスがどのプロセスかを判断し、さらに`$worker->id`でプロセス番号を判断できます。それに基づいて、そのプロセスでビジネスの初期化コードを実行するかどうかを決定できます。例えば、webmanの0番プロセスでのみ実行する必要がある場合、`MemReport.php`の内容は以下のようになります。
 ```php
 <?php
 
@@ -80,9 +80,9 @@ class MemReport implements Bootstrap
             // コマンドライン環境でこの初期化を実行したくない場合は、ここで直接戻ります
             return;
         }
-        
-        // monitorプロセスはタイマーを実行しない
-        if ($worker->name == 'monitor') {
+
+        // webmanの0番プロセスでのみ実行
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

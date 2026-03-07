@@ -1,26 +1,22 @@
 # MongoDB
 
-webman預設使用 [jenssegers/mongodb](https://github.com/jenssegers/laravel-mongodb) 作為MongoDB組件，它是從laravel項目中抽離出來的，用法與laravel相同。
+webman 預設使用 [mongodb/laravel-mongodb](https://github.com/mongodb/laravel-mongodb) 作為 MongoDB 組件，它是從 Laravel 專案中抽離出來的，用法與 Laravel 相同。
 
-在使用`jenssegers/mongodb`之前，必須先給`php-cli`安裝MongoDB擴展。
+在使用 `mongodb/laravel-mongodb` 之前，必須先給 `php-cli` 安裝 MongoDB 擴展。
 
-> 使用命令`php -m | grep mongodb`檢查`php-cli`是否安裝了MongoDB擴展。注意：即使你在`php-fpm`安裝了MongoDB擴展，不代表你在`php-cli`可以使用它，因為`php-cli`和`php-fpm`是不同的應用程式，可能使用的是不同的`php.ini`配置。使用命令`php --ini`來查看你的`php-cli`使用的是哪個`php.ini`配置文件。
+> **注意**
+> 使用命令 `php -m | grep mongodb` 檢查 `php-cli` 是否安裝了 MongoDB 擴展。注意：即使你在 `php-fpm` 安裝了 MongoDB 擴展，不代表你在 `php-cli` 可以使用它，因為 `php-cli` 和 `php-fpm` 是不同的應用程式，可能使用的是不同的 `php.ini` 配置。使用命令 `php --ini` 來查看你的 `php-cli` 使用的是哪個 `php.ini` 配置檔案。
 
 ## 安裝
 
-PHP>7.2時
 ```php
-composer require -W illuminate/database jenssegers/mongodb ^3.8.0
-```
-PHP=7.2時
-```php
-composer require -W illuminate/database jenssegers/mongodb ^3.7.0
+composer require -W webman/database mongodb/laravel-mongodb ^4.8
 ```
 
-安裝後需要restart重啟(reload無效)
+安裝後需要 restart 重啟（reload 無效）
 
 ## 配置
-在 `config/database.php` 裡增加 `mongodb` connection， 類似如下：
+在 `config/database.php` 裡增加 `mongodb` connection，類似如下：
 ```php
 return [
 
@@ -60,12 +56,39 @@ class UserController
 {
     public function db(Request $request)
     {
-        Db::connection('mongodb')->collection('test')->insert([1,2,3]);
-        return json(Db::connection('mongodb')->collection('test')->get());
+        Db::connection('mongodb')->table('test')->insert([1,2,3]);
+        return json(Db::connection('mongodb')->table('test')->get());
+    }
+}
+```
+
+## 模型示例
+```php
+<?php
+namespace app\model;
+
+use DateTimeInterface;
+use support\MongoModel as Model;
+
+class Test extends Model
+{
+    protected $connection = 'mongodb';
+
+    protected $table = 'test';
+
+    public $timestamps = true;
+
+    /**
+     * @param DateTimeInterface $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
     }
 }
 ```
 
 ## 更多內容請訪問
 
-https://github.com/jenssegers/laravel-mongodb
+https://github.com/mongodb/laravel-mongodb

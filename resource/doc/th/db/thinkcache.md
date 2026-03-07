@@ -1,39 +1,76 @@
-## ThinkCache
+# think-cache
 
-### ติดตั้ง ThinkCache  
+think-cache เป็นคอมโพเนนต์ที่แยกออกมาจากเฟรมเวิร์ก thinkphp โดยเพิ่มการสนับสนุนคอนเนคชันพูล และรองรับทั้งสภาพแวดล้อมแบบ coroutine และ non-coroutine โดยอัตโนมัติ
+
+## การติดตั้ง
 `composer require -W webman/think-cache`
 
-หลังจากติดตั้งจะต้องรีสตาร์ท (การโหลดใหม่ไม่สามารถใช้งานได้)
-
-> [webman/think-cache](https://www.workerman.net/plugin/15) เป็นเสมือนการติดตั้งปลั๊กอิน `toptink/think-cache` โดยอัตโนมัติ
-
-> **ข้อควรระวัง**
-> toptink/think-cache ไม่รองรับ PHP 8.1
+หลังการติดตั้งต้อง restart (reload ไม่มีผล)
 
 ### ไฟล์การกำหนดค่า
 
-ไฟล์การกำหนดค่าอยู่ที่ `config/thinkcache.php`
+ไฟล์การกำหนดค่าคือ `config/think-cache.php`
 
-### การใช้งาน
+## การใช้งาน
 
-```php
-<?php
-namespace app\controller;
+  ```php
+  <?php
+  namespace app\controller;
+    
+  use support\Request;
+  use support\think\Cache;
   
-use support\Request;
-use think\facade\Cache;
+  class UserController
+  {
+      public function db(Request $request)
+      {
+          $key = 'test_key';
+          Cache::set($key, rand());
+          return response(Cache::get($key));
+      }
+  }
+  ```
+## API ที่ให้มา
+```php
+// ตั้งค่าแคช
+Cache::set('val','value',600);
+// ตรวจสอบว่าแคชมีอยู่หรือไม่
+Cache::has('val');
+// ดึงแคช
+Cache::get('val');
+// ลบแคช
+Cache::delete('val');
+// ล้างแคช
+Cache::clear();
+// อ่านและลบแคช
+Cache::pull('val');
+// เขียนถ้าไม่มีอยู่
+Cache::remember('val',10);
 
-class UserController
-{
-    public function db(Request $request)
-    {
-        $key = 'test_key';
-        Cache::set($key, rand());
-        return response(Cache::get($key));
-    }
-}
+// สำหรับข้อมูลแคชที่เป็นตัวเลข
+// เพิ่มแคชทีละ 1
+Cache::inc('val');
+// เพิ่มแคชทีละ 5
+Cache::inc('val',5);
+// ลดแคชทีละ 1
+Cache::dec('val');
+// ลดแคชทีละ 5
+Cache::dec('val',5);
+
+// ใช้แท็กแคช
+Cache::tag('tag_name')->set('val','value',600);
+// ลบแคชภายใต้แท็กที่ระบุ
+Cache::tag('tag_name')->clear();
+// รองรับหลายแท็ก
+Cache::tag(['tag1','tag2'])->set('val2','value',600);
+// ลบแคชภายใต้หลายแท็ก
+Cache::tag(['tag1','tag2'])->clear();
+
+// ใช้สโตร์แคชแบบต่าง ๆ
+$redis = Cache::store('redis');
+
+$redis->set('var','value',600);
+$redis->get('var');
 ```
 
-### เอกสารการใช้งาน Think-Cache
 
-[ที่อยู่เอกสาร ThinkCache](https://github.com/top-think/think-cache)

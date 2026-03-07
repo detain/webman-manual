@@ -1,12 +1,49 @@
 # 단위 테스트
 
 ## 설치
+
 ```php
 composer require --dev phpunit/phpunit
 ```
 
+## 설정
+
+프로젝트 루트 디렉토리에 설정 파일 `phpunit.xml`을 추가하세요. 프로젝트 요구 사항에 맞게 사용자 지정할 수 있습니다. [phpunit.xml 설정 옵션 문서](https://docs.phpunit.de/en/12.4/configuration.html)를 참조하세요.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="support/bootstrap.php"
+    cacheDirectory=".phpunit.cache"
+    executionOrder="depends,defects"
+    shortenArraysForExportThreshold="10"
+    requireCoverageMetadata="false"
+    beStrictAboutCoverageMetadata="true"
+    beStrictAboutOutputDuringTests="true"
+    displayDetailsOnPhpunitDeprecations="true"
+    failOnPhpunitDeprecation="true"
+    failOnRisky="true"
+    failOnWarning="true"
+    colors="true">
+    <testsuites>
+        <testsuite name="tests">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </source>
+</phpunit>
+
+```
+
 ## 사용
-새 파일 `tests/TestConfig.php`을 만들어 데이터베이스 구성을 테스트하는 데 사용합니다.
+
+애플리케이션 설정 테스트용으로 `tests/TestConfig.php` 파일을 새로 만드세요:
+
 ```php
 <?php
 use PHPUnit\Framework\TestCase;
@@ -24,11 +61,23 @@ class TestConfig extends TestCase
     }
 }
 ```
-
+  
 ## 실행
-프로젝트 루트 디렉토리에서 `./vendor/bin/phpunit --bootstrap support/bootstrap.php tests/TestConfig.php`을 실행합니다.
 
-다음은 결과입니다:
+프로젝트 루트 디렉토리에서 모든 테스트 케이스를 실행합니다:
+
+```bash
+./vendor/bin/phpunit
+```
+
+프로젝트 루트 디렉토리에서 특정 테스트 케이스를 실행합니다:
+
+```bash
+./vendor/bin/phpunit tests/TestConfig.php
+```
+
+결과는 다음과 유사합니다:
+
 ```
 PHPUnit 9.5.10 by Sebastian Bergmann and contributors.
 

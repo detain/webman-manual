@@ -1,18 +1,16 @@
 # Компонент обработки изображений
 
-## intervention/image
-
-### Адрес проекта
+## Адрес проекта
 
 https://github.com/Intervention/image
-
-### Установка
-
+  
+## Установка
+ 
 ```php
 composer require intervention/image
 ```
-
-### Использование
+  
+## Использование
 
 **Фрагмент страницы загрузки**
 
@@ -23,13 +21,14 @@ composer require intervention/image
   </form>
 ```
 
-**Создание `app/controller/UserController.php`**
+**Создать `app/controller/UserController.php`**
 
 ```php
 <?php
 namespace app\controller;
 use support\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class UserController
 {
@@ -37,15 +36,20 @@ class UserController
     {
         $file = $request->file('file');
         if ($file && $file->isValid()) {
-            $image = Image::make($file)->resize(100, 100);
-            return response($image->encode('png'), 200, ['Content-Type' => 'image/png']);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file)->scale(100, 100);
+            return response($image->encode(), 200, ['Content-Type' => 'image/png']);
         }
-        return response('файл не найден');
+        return response('file not found');
     }
     
 }
 ```
 
-### Дополнительная информация
+> **Примечание**
+> Приведённый выше пример использует API v3.
 
-Посетите http://image.intervention.io/getting_started/introduction
+## Подробнее
+
+Посетите https://image.intervention.io/v3
+  

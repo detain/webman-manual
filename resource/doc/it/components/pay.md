@@ -1,14 +1,16 @@
 # SDK di pagamento
 
-### Indirizzo del progetto
+
+## Indirizzo del progetto
+
  https://github.com/yansongda/pay
 
-### Installazione
+## Installazione
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### Utilizzo
+## Utilizzo
 
 **Alipay**
 
@@ -105,8 +107,8 @@ class PayController
 {
     protected $config = [
         'appid' => 'wxb3fxxxxxxxxxxx', // APP APPID
-        'app_id' => 'wxb3fxxxxxxxxxxx', // APPID del pubblico
-        'miniapp_id' => 'wxb3fxxxxxxxxxxx', // APPID dell'applicazione
+        'app_id' => 'wxb3fxxxxxxxxxxx', // APPID dell'account ufficiale
+        'miniapp_id' => 'wxb3fxxxxxxxxxxx', // APPID del mini programma
         'mch_id' => '14577xxxx',
         'key' => 'mF2suE9sU6Mk1Cxxxxxxxxxxx',
         'notify_url' => 'http://yanda.net.cn/notify.php',
@@ -161,6 +163,6 @@ class PayController
 }
 ```
 
-### Per ulteriori informazioni
+## Ulteriori informazioni
 
 Visita https://pay.yanda.net.cn/docs/2.x/overview

@@ -1,41 +1,43 @@
 # webmanとは
 
-webmanは、[workerman](https://www.workerman.net)に基づいて開発された高性能なHTTPサービスフレームワークです。webmanは従来のphp-fpmアーキテクチャを置き換え、超高性能かつ拡張可能なHTTPサービスを提供します。webmanを使用すると、ウェブサイトの開発やHTTPインターフェース、マイクロサービスの開発が可能です。
+webmanはWorkermanをベースに構築された高性能サービスフレームワークで、HTTP、WebSocket、TCP、UDPなど複数のモジュールを統合しています。常駐メモリ、コルーチン、コネクションプールといった先進技術により、webmanは従来のPHPのパフォーマンスボトルネックを突破するだけでなく、その応用範囲も大きく広げています。
 
-さらに、webmanはカスタムプロセスをサポートし、websocketサービス、IoT、ゲーム、TCPサービス、UDPサービス、Unixソケットサービスなど、workermanが行うことができるすべてのことを実行することができます。
+また、webmanは強力なプラグイン機構を備えており、開発者は他の開発者が作成した機能モジュールを素早く統合・再利用できます。ウェブサイト構築、HTTP API開発、インスタントメッセージング、IoTシステム、ゲーム、TCP/UDPサービス、Unix Socketサービスなど、あらゆる用途に対応し、優れたパフォーマンスと柔軟性を発揮します。
 
 # webmanのコンセプト
-**最小のカーネルで最大の拡張性と最高のパフォーマンスを提供する。**
+**最小のコアで最大の拡張性と最高のパフォーマンスを提供する。**
 
-webmanは最も基本的な機能（ルーティング、ミドルウェア、セッション、カスタムプロセスインターフェース）だけを提供します。その他の機能はすべて、composerエコシステムを再利用します。つまり、webmanで最も馴染みのある機能コンポーネントを使用することができます。例えば、データベースの部分では、開発者はLaravelの`illuminate/database`、またはThinkPHPの`ThinkORM`、あるいは他のコンポーネント如`Medoo`を選択することができます。それらをwebmanに統合することは非常に簡単です。
+webmanは最も基本的な機能（ルーティング、ミドルウェア、セッション、カスタムプロセスインターフェース）のみを提供し、その他はすべてComposerエコシステムを再利用します。つまり、webmanではお馴染みのコンポーネントを使えます。例として、データベースにはLaravelの[illuminate/database](./db/tutorial.md)、ThinkPHPの[ThinkORM](./db/thinkorm.md)、あるいは`Medoo`などを選べます。webmanへの統合も簡単です。
 
 # webmanの特徴
 
-1. 高い安定性。webmanはworkermanに基づいており、業界でほとんどバグのない高い安定性のソケットフレームワークです。
+1. 高い安定性。webmanはworkermanをベースにしており、業界でも数少ないバグで高い安定性を持つソケットフレームワークです。
 
-2. 超高性能。webmanの性能は従来のphp-fpmフレームワークよりも10〜100倍高く、goのginやechoなどのフレームワークよりも約2倍高いです。
+2. 超高性能。webmanのパフォーマンスは従来のphp-fpmフレームワークより10〜100倍高く、Goのginやechoより約2倍高いです。
 
-3. 高い再利用性。ほとんどのcomposerコンポーネントやライブラリを変更することなく再利用できます。
+3. 高い再利用性。既存のComposerエコシステムをそのまま再利用できます。
 
-4. 高い拡張性。カスタムプロセスをサポートし、workermanができることは何でも行うことができます。
+4. 高い拡張性。カスタムプロセスをサポートし、workermanでできることは何でも可能です。
 
-5. 非常にシンプルかつ使いやすく、学習コストが非常に低く、コードの書き方は従来のフレームワークと同じです。
+5. 非常にシンプルで使いやすく、学習コストが低く、コードの書き方は従来フレームワークと変わりません。
 
-6. 最も寛大で友好的なMITオープンソースライセンスを使用しています。
+6. [バイナリパッケージング](./others/bin.md)に対応し、PHP環境なしで直接実行できます。
 
-# プロジェクトのURL
-GitHub: https://github.com/walkor/webman **ぜひ星をたくさんつけてくださいね**
+7. 最も緩やかで開発者フレンドリーなMITオープンソースライセンスを採用しています。
 
-码云: https://gitee.com/walkor/webman **ぜひ星をたくさんつけてくださいね**
+# プロジェクトURL
+GitHub: https://github.com/walkor/webman **星を忘れずに！**
 
-# 第三者による信頼性のあるベンチマークデータ
+Gitee: https://gitee.com/walkor/webman **星を忘れずに！**
 
-![](../assets/img/benchmark1.png)
+# 第三者によるベンチマークデータ
 
-データベースクエリを含む業務において、webmanの単一サーバーのスループットは39万QPSに達し、従来のphp-fpmアーキテクチャのlaravelフレームワークよりも約80倍高いです。
+[![](../assets/img/benchmark1.png)](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)
 
-![](../assets/img/benchmarks-go.png)
+データベースクエリ業務では、webmanは単一マシンで最大39万QPSを達成し、従来のphp-fpmアーキテクチャのLaravelフレームワークと比較して約80倍です。
 
-データベースクエリを含む業務において、同様のタイプのgo言語のwebフレームワークよりも、webmanの性能が約2倍高いです。
+[![](../assets/img/benchmarks-go.png)](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)
 
-以上のデータは[techempower.com](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)より引用されています。
+データベースクエリ業務では、webmanは同種のGo Webフレームワークより約2倍のパフォーマンスを発揮します。
+
+上記データは[techempower.com](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)より。

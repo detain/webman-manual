@@ -1,27 +1,24 @@
-## ThinkCache
+# think-cache
 
-### Cài đặt ThinkCache  
+think-cache là một thành phần được tách ra từ framework thinkphp, có thêm hỗ trợ connection pool. Tự động hỗ trợ cả môi trường coroutine và non-coroutine.
+
+## Cài đặt
 `composer require -W webman/think-cache`
 
-Sau khi cài đặt cần restart để tải lại (reload không có hiệu lực)
+Cần khởi động lại (restart) sau khi cài đặt (reload không có hiệu lực)
 
-> [webman/think-cache](https://www.workerman.net/plugin/15) thực tế là một plugin tự động cài đặt `toptink/think-cache`.
+### File cấu hình
 
-> **Chú ý**
-> toptink/think-cache không hỗ trợ php8.1
+File cấu hình là `config/think-cache.php`
 
-### Tệp cấu hình
-
-Tệp cấu hình là `config/thinkcache.php`
-
-### Sử dụng
+## Sử dụng
 
   ```php
   <?php
   namespace app\controller;
     
   use support\Request;
-  use think\facade\Cache;
+  use support\think\Cache;
   
   class UserController
   {
@@ -33,7 +30,47 @@ Tệp cấu hình là `config/thinkcache.php`
       }
   }
   ```
+## API cung cấp
+```php
+// Thiết lập cache
+Cache::set('val','value',600);
+// Kiểm tra cache có tồn tại
+Cache::has('val');
+// Lấy cache
+Cache::get('val');
+// Xóa cache
+Cache::delete('val');
+// Xóa sạch cache
+Cache::clear();
+// Đọc và xóa cache
+Cache::pull('val');
+// Ghi nếu chưa tồn tại
+Cache::remember('val',10);
 
-### Tài liệu sử dụng Think-Cache
+// Cho dữ liệu cache dạng số
+// Tăng cache thêm 1
+Cache::inc('val');
+// Tăng cache thêm 5
+Cache::inc('val',5);
+// Giảm cache đi 1
+Cache::dec('val');
+// Giảm cache đi 5
+Cache::dec('val',5);
 
-[Địa chỉ tài liệu ThinkCache](https://github.com/top-think/think-cache)
+// Sử dụng tag cache
+Cache::tag('tag_name')->set('val','value',600);
+// Xóa cache dưới một tag
+Cache::tag('tag_name')->clear();
+// Hỗ trợ nhiều tag
+Cache::tag(['tag1','tag2'])->set('val2','value',600);
+// Xóa cache dưới nhiều tag
+Cache::tag(['tag1','tag2'])->clear();
+
+// Sử dụng nhiều loại cache store
+$redis = Cache::store('redis');
+
+$redis->set('var','value',600);
+$redis->get('var');
+```
+
+

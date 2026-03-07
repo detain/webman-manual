@@ -58,7 +58,7 @@ class FooController
 ```
 
 ## 多应用中间件配置
-有时候你想为不同应用配置不同的中间件，例如`api`应用可能需要一个跨域中间件，`admin`需要一个检查管理员登录的中间件，则配置`config/midlleware.php`可能类似下面这样：
+有时候你想为不同应用配置不同的中间件，例如`api`应用可能需要一个跨域中间件，`admin`需要一个检查管理员登录的中间件，则配置`config/middleware.php`可能类似下面这样：
 ```php
 return [
     // 全局中间件

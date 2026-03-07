@@ -1,33 +1,31 @@
-# Redis队列
+# قائمة انتظار Redis
 
-基于Redis的消息队列，支持消息延迟处理。
+قائمة انتظار رسائل مبنية على Redis، تدعم معالجة الرسائل المؤجلة.
 
-
-## 安装
+## التثبيت
 `composer require webman/redis-queue`
 
-## 配置文件
-redis配置文件自动生成在 `{主项目}/config/plugin/webman/redis-queue/redis.php`，内容类似如下：
+## ملف التكوين
+يتم إنشاء ملف تكوين Redis تلقائياً في `{المشروع-الرئيسي}/config/plugin/webman/redis-queue/redis.php`، ومحتواه مشابه لما يلي:
 ```php
 <?php
 return [
     'default' => [
         'host' => 'redis://127.0.0.1:6379',
         'options' => [
-            'auth' => '',         // 密码，可选参数
-            'db' => 0,            // 数据库
-            'max_attempts'  => 5, // 消费失败后，重试次数
-            'retry_seconds' => 5, // 重试间隔，单位秒
+            'auth' => '',         // كلمة المرور، اختياري
+            'db' => 0,            // قاعدة البيانات
+            'max_attempts'  => 5, // عدد إعادة المحاولة بعد فشل الاستهلاك
+            'retry_seconds' => 5, // الفاصل الزمني لإعادة المحاولة بالثواني
         ]
     ],
 ];
 ```
 
-### 消费失败重试
-如果消费失败(发生了异常)，则消息会放入延迟队列，等待下次重试。重试次数通过参数 `max_attempts` 控制，重试间隔由
-`retry_seconds` 和 `max_attempts`共同控制。比如`max_attempts`为5，`retry_seconds`为10，第1次重试间隔为`1*10`秒，第2次重试时间间隔为 `2*10秒`，第3次重试时间间隔为`3*10秒`，以此类推直到重试5次。如果超过了`max_attempts`设置测重试次数，则消息放入key为`{redis-queue}-failed`的失败队列。
+### إعادة المحاولة عند فشل الاستهلاك
+إذا فشل الاستهلاك (حدث استثناء)، ستُوضع الرسالة في قائمة الانتظار المؤجلة وستنتظر المحاولة التالية. يتم التحكم في عدد إعادة المحاولة بواسطة `max_attempts`، والفاصل الزمني يُتحكم به مشتركاً من `retry_seconds` و`max_attempts`. مثلاً إذا كان `max_attempts` يساوي 5 و`retry_seconds` يساوي 10، ففاصل إعادة المحاولة الأولى هو `1*10` ثانية، والثانية `2*10` ثانية، والثالثة `3*10` ثانية، وهكذا حتى 5 محاولات. إذا تجاوز عدد إعادة المحاولة إعداد `max_attempts`، ستُوضع الرسالة في قائمة الفشل بالمفتاح `{redis-queue}-failed`.
 
-## 投递消息(同步)
+## إرسال الرسائل (متزامن)
 
 ```php
 <?php
@@ -40,13 +38,13 @@ class Index
 {
     public function queue(Request $request)
     {
-        // 队列名
+        // اسم القائمة
         $queue = 'send-mail';
-        // 数据，可以直接传数组，无需序列化
+        // البيانات، يمكن تمرير مصفوفة مباشرة بدون تسلسل
         $data = ['to' => 'tom@gmail.com', 'content' => 'hello'];
-        // 投递消息
+        // إرسال الرسالة
         Redis::send($queue, $data);
-        // 投递延迟消息，消息会在60秒后处理
+        // إرسال رسالة مؤجلة، تُعالج بعد 60 ثانية
         Redis::send($queue, $data, 60);
 
         return response('redis queue test');
@@ -54,12 +52,12 @@ class Index
 
 }
 ```
-投递成功`Redis::send()` 返回true，否则返回false或者抛出异常。
+عند النجاح يُرجع `Redis::send()` true، وإلا يُرجع false أو يرمي استثناءً.
 
-> **提示**
-> 延迟队列消费时间可能会出现误差，例如消费速度小于生产速度导致队列积压，进而导致消费延迟，缓解办法是多开一些消费进程。
+> **تلميح**
+> قد يكون هناك انحراف في وقت استهلاك قائمة الانتظار المؤجلة. مثلاً عندما تكون سرعة الاستهلاك أبطأ من سرعة الإنتاج، قد يسبب تراكم القائمة وتأخر الاستهلاك. الحل هو تشغيل المزيد من عمليات الاستهلاك.
 
-## 投递消息(异步)
+## إرسال الرسائل (غير متزامن)
 ```php
 <?php
 namespace app\controller;
@@ -71,13 +69,13 @@ class Index
 {
     public function queue(Request $request)
     {
-        // 队列名
+        // اسم القائمة
         $queue = 'send-mail';
-        // 数据，可以直接传数组，无需序列化
+        // البيانات، يمكن تمرير مصفوفة مباشرة بدون تسلسل
         $data = ['to' => 'tom@gmail.com', 'content' => 'hello'];
-        // 投递消息
+        // إرسال الرسالة
         Client::send($queue, $data);
-        // 投递延迟消息，消息会在60秒后处理
+        // إرسال رسالة مؤجلة، تُعالج بعد 60 ثانية
         Client::send($queue, $data, 60);
 
         return response('redis queue test');
@@ -85,17 +83,16 @@ class Index
 
 }
 ```
-`Client::send()` 没有返回值，它属于异步推送，它不保证消息%100送达redis。
+`Client::send()` لا يُرجع قيمة. إنه إرسال غير متزامن ولا يضمن وصول الرسائل 100٪ إلى Redis.
 
-> **提示**
-> `Client::send()`原理是在本地内存建立一个内存队列，异步将消息同步到redis(同步速度很快，每秒大概1万笔消息)。如果进程重启，恰好本地内存队列里数据没有同步完毕，会造成消息丢失。`Client::send()`异步投递适合投递不重要的消息。
+> **تلميح**
+> مبدأ `Client::send()` هو إنشاء قائمة انتظار في الذاكرة المحلية ومزامنة الرسائل بشكل غير متزامن مع Redis (المزامنة سريعة، حوالي 10000 رسالة في الثانية). إذا أعيد تشغيل العملية ولم تُكمّل مزامنة البيانات في قائمة الذاكرة المحلية، قد يحدث فقدان رسائل. إرسال `Client::send()` غير المتزامن مناسب للرسائل غير الحرجة.
 
-> **提示**
-> `Client::send()`是异步的，它只能在workerman的运行环境中使用，命令行脚本请使用同步接口`Redis::send()`
+> **تلميح**
+> `Client::send()` غير متزامن ولا يمكن استخدامه إلا في بيئة تشغيل Workerman. لسكريبتات سطر الأوامر استخدم الواجهة المتزامنة `Redis::send()`.
 
-
-## 在其他项目投递消息
-有时候你需要在其它项目中投递消息并且无法使用`webman\redis-queue`，则可以参考以下函数向队列投递消息。
+## إرسال الرسائل من مشاريع أخرى
+أحياناً تحتاج لإرسال رسائل من مشاريع أخرى ولا يمكنك استخدام `webman\redis-queue`. في هذه الحالات يمكنك الرجوع للدالة التالية لإرسال الرسائل للقائمة.
 
 ```php
 function redis_queue_send($redis, $queue, $data, $delay = 0) {
@@ -117,23 +114,23 @@ function redis_queue_send($redis, $queue, $data, $delay = 0) {
 }
 ```
 
-其中，参数`$redis`为redis实例。例如redis扩展用法类似如下：
+هنا المعامل `$redis` هو مثيل Redis. مثلاً استخدام امتداد redis شبيه بـ:
+
 ```php
 $redis = new Redis;
 $redis->connect('127.0.0.1', 6379);
 $queue = 'user-1';
 $data= ['some', 'data'];
 redis_queue_send($redis, $queue, $data);
-````
+```
 
-## 消费
-消费进程配置文件在 `{主项目}/config/plugin/webman/redis-queue/process.php`。
-消费者目录在 `{主项目}/app/queue/redis/` 下。
+## الاستهلاك
+ملف تكوين عملية الاستهلاك في `{المشروع-الرئيسي}/config/plugin/webman/redis-queue/process.php`. مجلد المستهلك تحت `{المشروع-الرئيسي}/app/queue/redis/`.
 
-执行命令`php webman redis-queue:consumer my-send-mail`则会生成文件`{主项目}/app/queue/redis/MyMailSend.php`
+تنفيذ الأمر `php webman redis-queue:consumer my-send-mail` سيُنشئ الملف `{المشروع-الرئيسي}/app/queue/redis/MyMailSend.php`.
 
-> **提示**
-> 如果命令不存在也可以手动生成
+> **تلميح**
+> يتطلب هذا الأمر تثبيت إضافة [الأوامر](../plugin/console.md). إذا لم ترغب بالتثبيت يمكنك إنشاء ملف يدوياً مشابه لما يلي:
 
 ```php
 <?php
@@ -144,86 +141,85 @@ use Webman\RedisQueue\Consumer;
 
 class MyMailSend implements Consumer
 {
-    // 要消费的队列名
+    // اسم القائمة للاستهلاك
     public $queue = 'send-mail';
 
-    // 连接名，对应 plugin/webman/redis-queue/redis.php 里的连接`
+    // اسم الاتصال، مطابق للاتصال في plugin/webman/redis-queue/redis.php
     public $connection = 'default';
 
-    // 消费
+    // الاستهلاك
     public function consume($data)
     {
-        // 无需反序列化
-        var_export($data); // 输出 ['to' => 'tom@gmail.com', 'content' => 'hello']
+        // لا حاجة لإلغاء التسلسل
+        var_export($data); // يطبع ['to' => 'tom@gmail.com', 'content' => 'hello']
     }
-    // 消费失败回调
+    // رد استدعاء فشل الاستهلاك
     /* 
     $package = [
-        'id' => 1357277951, // 消息ID
-        'time' => 1709170510, // 消息时间
-        'delay' => 0, // 延迟时间
-        'attempts' => 2, // 消费次数
-        'queue' => 'send-mail', // 队列名
-        'data' => ['to' => 'tom@gmail.com', 'content' => 'hello'], // 消息内容
-        'max_attempts' => 5, // 最大重试次数
-        'error' => '错误信息' // 错误信息
+        'id' => 1357277951, // معرف الرسالة
+        'time' => 1709170510, // وقت الرسالة
+        'delay' => 0, // وقت التأخير
+        'attempts' => 2, // عدد مرات الاستهلاك
+        'queue' => 'send-mail', // اسم القائمة
+        'data' => ['to' => 'tom@gmail.com', 'content' => 'hello'], // محتوى الرسالة
+        'max_attempts' => 5, // الحد الأقصى لإعادة المحاولة
+        'error' => 'رسالة الخطأ' // رسالة الخطأ
     ]
     */
     public function onConsumeFailure(\Throwable $e, $package)
     {
         echo "consume failure\n";
         echo $e->getMessage() . "\n";
-        // 无需反序列化
+        // لا حاجة لإلغاء التسلسل
         var_export($package); 
     }
 }
 ```
 
-> **注意**
-> 消费过程中没有抛出异常和Error视为消费成功，否则消费失败，进入重试队列。
-> redis-queue没有ack机制，你可以把它看作是自动ack(没有产生异常或Error)。如果消费过程中想标记当前消息消费不成功，可以手动抛出异常，让当前消息进入重试队列。这实际上和ack机制没有区别。
+> **ملاحظة**
+> يُعتبر الاستهلاك ناجحاً عندما لا يُرمى أي استثناء أو Error أثناء الاستهلاك؛ وإلا فهو فشل وستدخل الرسالة قائمة إعادة المحاولة. redis-queue لا يملك آلية ack؛ يمكن اعتباره ack تلقائي (عند عدم حدوث استثناء أو Error). لتعليم الرسالة الحالية بأنها لم تُستهلك بنجاح، ارمِ استثناءً يدوياً لإرسال الرسالة لقائمة إعادة المحاولة. عملياً هذا لا يختلف عن آلية ack.
 
-> **提示**
-> 消费者支持多服务器多进程，并且同一条消息**不会**被重复消费。消费过的消息会自动从队列删除，无需手动删除。
+> **تلميح**
+> المستهلكون يدعمون خوادم وعمليات متعددة، والرسالة نفسها **لن** تُستهلك مرتين. الرسائل المستهلكة تُحذف تلقائياً من القائمة؛ لا حاجة للحذف اليدوي.
 
-> **提示**
-> 消费进程可以同时消费多种不同的队列，新增队列不需要修改`process.php`中的配置，新增队列消费者时只需要在`app/queue/redis`下新增对应的`Consumer`类即可，并用类属性`$queue`指定要消费的队列名
+> **تلميح**
+> عمليات الاستهلاك يمكنها استهلاك قوائم متعددة مختلفة في وقت واحد. إضافة قائمة جديدة لا تتطلب تغيير التكوين في `process.php`. عند إضافة مستهلك قائمة جديد، يُضاف صنف `Consumer` المقابل تحت `app/queue/redis` فحسب، ويُستخدم الخاصية `$queue` لتحديد اسم القائمة للاستهلاك.
 
-> **提示**
-> windows用户需要执行php windows.php 启动webman，否则不会启动消费进程
+> **تلميح**
+> مستخدمو Windows يحتاجون لتشغيل `php windows.php` لبدء webman، وإلا لن تبدأ عملية الاستهلاك.
 
-> **提示**
-> onConsumeFailure回调会在每次消费失败时触发，你可以在这里处理失败后的逻辑。（此特性需要`webman/redis-queue>=1.3.2` `workerman/redis-queue>=1.2.1`）
+> **تلميح**
+> يُستدعى رد استدعاء onConsumeFailure في كل مرة يفشل فيها الاستهلاك. يمكنك معالجة منطق ما بعد الفشل هنا. (هذه الميزة تتطلب `webman/redis-queue>=1.3.2` و`workerman/redis-queue>=1.2.1`)
 
-## 为不同的队列设置不同的消费进程
-默认情况下，所有的消费者共用相同的消费进程。但有时我们需要将一些队列的消费独立出来，例如消费慢的业务放到一组进程中消费，消费快的业务放到另外一组进程消费。为此我们可以将消费者分为两个目录，例如 `app_path() . '/queue/redis/fast'` 和 `app_path() . '/queue/redis/slow'` （注意消费类的命名空间需要做相应的更改），则配置如下：
+## ضبط عمليات استهلاك مختلفة لقوائم مختلفة
+افتراضياً، كل المستهلكين يشتركون بنفس عملية الاستهلاك. لكن أحياناً نحتاج عزل استهلاك بعض القوائم—مثلاً وضع الأعمال بطيئة الاستهلاك في مجموعة عمليات والأعمال سريعة الاستهلاك في مجموعة أخرى. للقيام بذلك، يمكننا تقسيم المستهلكين إلى مجلدين، مثلاً `app_path() . '/queue/redis/fast'` و`app_path() . '/queue/redis/slow'` (لاحظ أنه يجب تحديث نطاق صنف المستهلك وفقاً لذلك). التكوين كالتالي:
 ```php
 return [
-    ...这里省略了其它配置...
+    ...تكوينات أخرى محذوفة...
     
-    'redis_consumer_fast'  => [ // key是自定义的，没有格式限制，这里取名redis_consumer_fast
+    'redis_consumer_fast'  => [ // المفتاح مخصص، لا قيد على الشكل، هنا سمي redis_consumer_fast
         'handler'     => Webman\RedisQueue\Process\Consumer::class,
         'count'       => 8,
         'constructor' => [
-            // 消费者类目录
+            // مجلد أصناف المستهلك
             'consumer_dir' => app_path() . '/queue/redis/fast'
         ]
     ],
-    'redis_consumer_slow'  => [  // key是自定义的，没有格式限制，这里取名redis_consumer_slow
+    'redis_consumer_slow'  => [  // المفتاح مخصص، لا قيد على الشكل، هنا سمي redis_consumer_slow
         'handler'     => Webman\RedisQueue\Process\Consumer::class,
         'count'       => 8,
         'constructor' => [
-            // 消费者类目录
+            // مجلد أصناف المستهلك
             'consumer_dir' => app_path() . '/queue/redis/slow'
         ]
     ]
 ];
 ```
 
-这样快业务消费者放到`queue/redis/fast`目录下，慢业务消费者放到`queue/redis/slow`目录下达到给队列指定消费进程的目的。
+بهذا الشكل، مستهلكو الأعمال السريعة يذهبون لمجلد `queue/redis/fast` ومستهلكو الأعمال البطيئة لمجلد `queue/redis/slow`، محققين الهدف من تعيين عمليات استهلاك للقوائم.
 
-## 多redis配置
-#### 配置
+## تكوين Redis متعدد
+#### التكوين
 `config/plugin/webman/redis-queue/redis.php`
 ```php
 <?php
@@ -231,43 +227,43 @@ return [
     'default' => [
         'host' => 'redis://192.168.0.1:6379',
         'options' => [
-            'auth' => null,       // 密码，字符串类型，可选参数
-            'db' => 0,            // 数据库
-            'max_attempts'  => 5, // 消费失败后，重试次数
-            'retry_seconds' => 5, // 重试间隔，单位秒
+            'auth' => null,       // كلمة المرور، نوع سلسلة، اختياري
+            'db' => 0,           // قاعدة البيانات
+            'max_attempts'  => 5, // عدد إعادة المحاولة بعد فشل الاستهلاك
+            'retry_seconds' => 5, // الفاصل الزمني لإعادة المحاولة بالثواني
         ]
     ],
     'other' => [
         'host' => 'redis://192.168.0.2:6379',
         'options' => [
-            'auth' => null,       // 密码，字符串类型，可选参数
-            'db' => 0,             // 数据库
-            'max_attempts'  => 5, // 消费失败后，重试次数
-            'retry_seconds' => 5, // 重试间隔，单位秒
+            'auth' => null,       // كلمة المرور، نوع سلسلة، اختياري
+            'db' => 0,            // قاعدة البيانات
+            'max_attempts'  => 5, // عدد إعادة المحاولة بعد فشل الاستهلاك
+            'retry_seconds' => 5, // الفاصل الزمني لإعادة المحاولة بالثواني
         ]
     ],
 ];
 ```
 
-注意配置里增加了一个`other`为key的redis配置
+لاحظ أنه تمت إضافة تكوين Redis إضافي بالمفتاح `other`.
 
-####  多redis投递消息
+#### إرسال الرسائل إلى Redis متعدد
 
 ```php
-// 向 `default` 为key的队列投递消息
+// إرسال رسالة للقائمة بالمفتاح `default`
 Client::connection('default')->send($queue, $data);
 Redis::connection('default')->send($queue, $data);
-//  等同于
+// نفس
 Client::send($queue, $data);
 Redis::send($queue, $data);
 
-// 向 `other` 为key的队列投递消息
+// إرسال رسالة للقائمة بالمفتاح `other`
 Client::connection('other')->send($queue, $data);
 Redis::connection('other')->send($queue, $data);
 ```
 
-#### 多redis消费
-消费配置里`other` 为key的队列投递消息
+#### الاستهلاك من Redis متعدد
+استهلاك الرسائل من القائمة بالمفتاح `other` في التكوين:
 ```php
 namespace app\queue\redis;
 
@@ -275,25 +271,25 @@ use Webman\RedisQueue\Consumer;
 
 class SendMail implements Consumer
 {
-    // 要消费的队列名
+    // اسم القائمة للاستهلاك
     public $queue = 'send-mail';
 
-    // === 这里设置为other，代表消费配置里other为key的队列 ===
+    // === ضبط 'other' هنا للاستهلاك من القائمة بالمفتاح 'other' في التكوين ===
     public $connection = 'other';
 
-    // 消费
+    // الاستهلاك
     public function consume($data)
     {
-        // 无需反序列化
+        // لا حاجة لإلغاء التسلسل
         var_export($data);
     }
 }
 ```
 
-## 常见问题
+## الأسئلة الشائعة
 
-**为什么会有报错 `Workerman\Redis\Exception: Workerman Redis Wait Timeout (600 seconds)`**
+**لماذا يحدث الخطأ `Workerman\Redis\Exception: Workerman Redis Wait Timeout (600 seconds)`؟**
 
-这个错误只会存在于异步投递接口`Client::send()`中。异步投递首先会将消息保存在本地内存中，当进程空闲时将消息发送给redis。如果redis接收速度慢于消息生产速度，或者进程一直忙于其它业务没有足够的时间将内存的消息同步给redis，就会导致消息挤压。如果有消息挤压超过600秒，就会触发此错误。
+يحدث هذا الخطأ فقط مع واجهة الإرسال غير المتزامن `Client::send()`. الإرسال غير المتزامن يحفظ الرسائل أولاً في الذاكرة المحلية ثم يرسلها إلى Redis عندما تكون العملية خاملة. إذا كان Redis يستقبل الرسائل أبطأ من إنتاجها، أو كانت العملية مشغولة بمهام أخرى ولا تملك وقتاً كافياً لمزامنة الرسائل من الذاكرة إلى Redis، قد يحدث تراكم رسائل. إذا استمر التراكم أكثر من 600 ثانية، يُثار هذا الخطأ.
 
-解决方案：投递消息使用同步投递接口`Redis::send()`。
+الحل: استخدم واجهة الإرسال المتزامن `Redis::send()` لإرسال الرسائل.

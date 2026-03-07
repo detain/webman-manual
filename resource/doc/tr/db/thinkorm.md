@@ -1,27 +1,29 @@
-## ThinkORM
+# think-orm
 
-### ThinkORM'un Kurulumu
+[webman/think-orm](https://github.com/webman-php/think-orm), [top-think/think-orm](https://github.com/top-think/think-orm) tabanlı bir veritabanı bileşenidir. Bağlantı havuzunu destekler ve hem korutin hem de korutin dışı ortamlarda çalışır.
+
+## Kurulum
 
 `composer require -W webman/think-orm`
 
-Kurulumdan sonra restart(reload geçersiz) yapmanız gereklidir.
+Kurulumdan sonra restart (yeniden başlatma) gereklidir (reload geçerli değildir).
 
-> **İpucu**
-> Kurulum başarısız olursa, muhtemelen composer proxy kullandığınızdan kaynaklanmıştır, deneyin `composer config -g --unset repos.packagist` komutunu çalıştırarak composer proxy'yi kaldırın.
+## Yapılandırma dosyası
 
-> [webman/think-orm](https://www.workerman.net/plugin/14) aslında `toptink/think-orm`'ın otomatik olarak kurulması için bir eklentidir. Eğer webman sürümünüz `1.2`'den düşükse bu eklentiyi kullanamazsınız, bu durumda [think-orm'u manuel olarak kurma ve yapılandırma](https://www.workerman.net/a/1289) yazısına bakabilirsiniz.
+Gerçek ihtiyaçlarınıza göre `config/think-orm.php` yapılandırma dosyasını düzenleyin.
 
-### Yapılandırma Dosyası
-Gerçek duruma göre `config/thinkorm.php` yapılandırma dosyasını düzenleyin.
+## Belgeler
 
-### Kullanım
+https://www.kancloud.cn/manual/think-orm
+
+## Kullanım
 
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use think\facade\Db;
+use support\think\Db;
 
 class FooController
 {
@@ -33,15 +35,15 @@ class FooController
 }
 ```
 
-### Model Oluşturma
+## Model oluşturma
 
-ThinkOrm modeli `think\Model`'den miras alır, aşağıdaki gibi bir örnekle;
+think-orm modelleri `support\think\Model` sınıfından türetilir, aşağıdaki gibi:
 
-```php
+```
 <?php
 namespace app\model;
 
-use think\Model;
+use support\think\Model;
 
 class User extends Model
 {
@@ -59,18 +61,17 @@ class User extends Model
      */
     protected $pk = 'id';
 
-    
 }
 ```
 
-Ayrıca aşağıdaki komutu kullanarak thinkorm tabanlı model oluşturabilirsiniz;
+Aşağıdaki komutla da think-orm modelleri oluşturabilirsiniz:
 
-```shell
-php webman make:model tablo_adı
+```
+php webman make:model tablo_adi
 ```
 
 > **İpucu**
-> Bu komut için `webman/console`'ın yüklenmesi gereklidir, kurulum komutu `composer require webman/console ^1.2.13` şeklindedir.
+> Bu komut için `webman/console` gereklidir. Kurulum: `composer require webman/console ^1.2.13`
 
 > **Dikkat**
-> make:model komutu ana projenin `illuminate/database` kullandığını algılarsa, `illuminate/database` tabanlı model dosyaları oluşturur, think-orm tabanlı oluşturmak için tp parametresini ekleyerek komutu şu şekilde çalıştırabilirsiniz `php webman make:model tablo_adı tp` (Eğer çalışmazsa `webman/console`'ı güncelleyin)
+> make:model komutu ana projenin `illuminate/database` kullandığını algılarsa, think-orm yerine Illuminate tabanlı model dosyaları oluşturur. Bu durumda `tp` parametresini ekleyin: `php webman make:model tablo_adi tp` (çalışmazsa `webman/console` güncelleyin)

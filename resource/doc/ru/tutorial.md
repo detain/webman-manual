@@ -1,4 +1,4 @@
-# Простой пример
+# Простой пример быстрого старта webman
 
 ## Возвращение строки
 **Создание контроллера**
@@ -19,7 +19,7 @@ class UserController
         // Получение параметра name из GET-запроса, если параметр name не передается, возвращается $default_name
         $name = $request->get('name', $default_name);
         // Возвращение строки в браузер
-        return response('Привет, ' . $name);
+        return response('hello ' . $name);
     }
 }
 ```
@@ -28,7 +28,7 @@ class UserController
 
 Откройте браузер и перейдите по ссылке `http://127.0.0.1:8787/user/hello?name=tom`
 
-Браузер вернет `Привет, tom`
+Браузер вернет `hello tom`
 
 ## Возвращение JSON
 Измените файл `app/controller/UserController.php` следующим образом
@@ -100,13 +100,13 @@ class UserController
     <title>webman</title>
 </head>
 <body>
-Привет <?=htmlspecialchars($name)?>
+hello <?=htmlspecialchars($name)?>
 </body>
 </html>
 ```
 
 Откройте браузер и перейдите по ссылке `http://127.0.0.1:8787/user/hello?name=tom`
 
-Браузер вернет HTML-страницу с содержимым `Привет, tom`.
+Браузер вернет HTML-страницу с содержимым `hello tom`.
 
 Примечание: По умолчанию webman использует стандартный синтаксис PHP в качестве шаблонов. Если вы хотите использовать другие представления, ознакомьтесь с [представлением](view.md).

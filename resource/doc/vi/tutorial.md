@@ -1,4 +1,4 @@
-# Ví dụ đơn giản
+# Ví dụ đơn giản bắt đầu nhanh với webman
 
 ## Trả về chuỗi
 **Tạo controller mới**
@@ -58,7 +58,7 @@ class UserController
 
 Truy cập vào trình duyệt `http://127.0.0.1:8787/user/hello?name=tom`
 
-Trình duyệt sẽ trả về `{"code":0,"msg":"ok","data":"tom""}`
+Trình duyệt sẽ trả về `{"code":0,"msg":"ok","data":"tom"}`
 
 Sử dụng hàm trợ giúp json sẽ tự động thêm header `Content-Type: application/json` vào phản hồi.
 
@@ -108,4 +108,4 @@ hello <?=htmlspecialchars($name)?>
 Truy cập vào trình duyệt `http://127.0.0.1:8787/user/hello?name=tom`
 sẽ trả về một trang html có nội dung `hello tom`.
 
-Lưu ý: webman mặc định sử dụng cú pháp gốc của php làm mẫu. Để sử dụng các mẫu khác, xem chi tiết tại [view](view.md).
+Lưu ý: webman mặc định sử dụng cú pháp PHP gốc làm mẫu. Để sử dụng các view khác, xem [View](view.md).

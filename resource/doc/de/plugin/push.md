@@ -4,8 +4,6 @@
 
 Das Plugin enthält einen eigenen Web-JS-Client push.js sowie den uniapp-Client `uniapp-push.js`. Andere Sprachen-Clients können unter https://pusher.com/docs/channels/channels_libraries/libraries/ heruntergeladen werden.
 
-> Das Plugin benötigt webman-framework >= 1.2.0
-
 ## Installation
 
 ```sh

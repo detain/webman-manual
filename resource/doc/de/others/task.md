@@ -1,35 +1,32 @@
-# Langsamer Geschäftsverkehr
+# Langsame Geschäftsverarbeitung
 
-Manchmal müssen wir langsame Geschäftsaktivitäten bewältigen, um zu vermeiden, dass sie die Verarbeitung anderer Anfragen von webman beeinträchtigen. Je nach Bedarf können diese Aktivitäten mit verschiedenen Ansätzen behandelt werden.
+Manchmal müssen wir langsame Geschäftsprozesse bewältigen. Um zu vermeiden, dass langsame Geschäftsprozesse andere Anfrageverarbeitungen in webman beeinträchtigen, können je nach Situation unterschiedliche Verarbeitungslösungen eingesetzt werden.
 
-## Verwendung von Warteschlangen
-Siehe [Redis Warteschlange](../queue/redis.md) und [Stomp-Warteschlange](../queue/stomp.md).
+## Lösung 1: Verwendung von Nachrichten-Warteschlangen
+Siehe [Redis-Warteschlange](../queue/redis.md) [Stomp-Warteschlange](../queue/stomp.md)
 
-### Vorteile
-Es können plötzliche Anfragen zur Verarbeitung großer Geschäftsvolumina bewältigt werden.
+#### Vorteile
+Kann plötzliche Flut von Geschäftsverarbeitungsanfragen bewältigen
 
-### Nachteile
-Es ist nicht möglich, die Ergebnisse direkt an den Client zurückzugeben. Für die Ergebnisbereitstellung muss mit anderen Diensten zusammengearbeitet werden, z. B. die Verwendung von [webman/push](https://www.workerman.net/plugin/2) zum Versenden der Verarbeitungsergebnisse.
+#### Nachteile
+Ergebnisse können nicht direkt an den Client zurückgegeben werden. Wenn Ergebnisse übertragen werden müssen, ist die Zusammenarbeit mit anderen Diensten erforderlich, z. B. die Verwendung von [webman/push](https://www.workerman.net/plugin/2) zum Versenden der Verarbeitungsergebnisse.
 
-## Hinzufügen eines HTTP-Ports
+## Lösung 2: Hinzufügen eines neuen HTTP-Ports
 
-> **Hinweis:**
-> Diese Funktion erfordert webman-framework>=1.4
+Hinzufügen eines neuen HTTP-Ports zur Verarbeitung langsamer Anfragen. Diese langsamen Anfragen werden durch Zugriff auf diesen Port von einer bestimmten Gruppe von Prozessen verarbeitet, und die Ergebnisse werden nach der Verarbeitung direkt an den Client zurückgegeben.
 
-Durch das Hinzufügen eines HTTP-Ports können langsame Anfragen über diesen Port von einer bestimmten Gruppe von Prozessen verarbeitet werden, und die Ergebnisse werden direkt an den Client zurückgegeben.
+#### Vorteile
+Daten können direkt an den Client zurückgegeben werden
 
-### Vorteile
-Die Daten können direkt an den Client zurückgegeben werden.
+#### Nachteile
+Kann plötzliche Flut von Anfragen nicht bewältigen
 
-### Nachteile
-Es ist nicht möglich, auf plötzliche Anfragen zur Verarbeitung großer Volumina zu reagieren.
-
-### Implementierungsschritte
-Fügen Sie die folgende Konfiguration zur Datei `config/process.php` hinzu.
+#### Implementierungsschritte
+Fügen Sie die folgende Konfiguration in `config/process.php` hinzu.
 ```php
 return [
-    // ... Andere Konfigurationen hier ausgelassen ...
-
+    // ... Andere Konfigurationen sind hier ausgelassen ...
+    
     'task' => [
         'handler' => \Webman\App::class,
         'listen' => 'http://0.0.0.0:8686',
@@ -38,56 +35,97 @@ return [
         'group' => '',
         'reusePort' => true,
         'constructor' => [
-            'request_class' => \support\Request::class, // Einstellung der Request-Klasse
-            'logger' => \support\Log::channel('default'), // Instanz des Protokolls
-            'app_path' => app_path(), // Position des app-Verzeichnisses
-            'public_path' => public_path() // Position des public-Verzeichnisses
+            'requestClass' => \support\Request::class, // Einstellung der Request-Klasse
+            'logger' => \support\Log::channel('default'), // Logger-Instanz
+            'appPath' => app_path(), // Speicherort des App-Verzeichnisses
+            'publicPath' => public_path() // Speicherort des public-Verzeichnisses
         ]
     ]
 ];
 ```
 
-Auf diese Weise können langsame Schnittstellen über die Gruppe von Prozessen unter `http://127.0.0.1:8686/` ausgeführt werden, ohne die Verarbeitung anderer Prozesse zu beeinträchtigen.
+So können langsame Schnittstellen über die Prozessgruppe unter `http://127.0.0.1:8686/` laufen, ohne die Geschäftsverarbeitung anderer Prozesse zu beeinträchtigen.
 
-Um sicherzustellen, dass der Front-End-Benutzer keine Unterschiede beim Port spürt, kann ein Proxy zum 8686-Port in nginx hinzugefügt werden. Angenommen, die Pfade der langsamen Schnittstellen beginnen alle mit `/task`, dann wäre eine ähnliche nginx-Konfiguration wie folgt:
-```conf
+Damit das Frontend den Portunterschied nicht bemerkt, können Sie in nginx einen Proxy zum Port 8686 hinzufügen. Wenn die Pfade der langsamen Schnittstellenanfragen alle mit `/task` beginnen, sieht die nginx-Konfiguration ähnlich wie folgt aus:
+```
 upstream webman {
     server 127.0.0.1:8787;
     keepalive 10240;
 }
 
-# Hinzufügen eines 8686 Upstreams
+# Neuen 8686-Upstream hinzufügen
 upstream task {
-    server 127.0.0.1:8686;
-    keepalive 10240;
+   server 127.0.0.1:8686;
+   keepalive 10240;
 }
 
 server {
-    server_name webman.com;
-    listen 80;
-    access_log off;
-    root /path/webman/public;
+  server_name webman.com;
+  listen 80;
+  access_log off;
+  root /path/webman/public;
 
-    # Anfragen, die mit /task beginnen, werden zum 8686-Port geroutet. Bitte passen Sie den /task-Pfad entsprechend Ihren Anforderungen an.
-    location /task {
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header Host $host;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_pass http://task;
-    }
+  # Anfragen, die mit /task beginnen, gehen an Port 8686; ändern Sie /task bei Bedarf in Ihr gewünschtes Präfix
+  location /task {
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header Host $host;
+      proxy_http_version 1.1;
+      proxy_set_header Connection "";
+      proxy_pass http://task;
+  }
 
-    # Andere Anfragen werden über den originalen 8787-Port geroutet
-    location / {
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header Host $host;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        if (!-f $request_filename){
-            proxy_pass http://webman;
-        }
+  # Andere Anfragen gehen an den ursprünglichen Port 8787
+  location / {
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header Host $host;
+      proxy_http_version 1.1;
+      proxy_set_header Connection "";
+      if (!-f $request_filename){
+          proxy_pass http://webman;
+      }
+  }
+}
+```
+
+So wird beim Client-Zugriff auf `domain.com/task/xxx` die Anfrage über den separaten Port 8686 verarbeitet, ohne die Anfrageverarbeitung auf Port 8787 zu beeinträchtigen.
+
+## Lösung 3: Nutzung von HTTP Chunked für asynchrone segmentierte Datenubertragung
+
+#### Vorteile
+Daten können direkt an den Client zurückgegeben werden
+
+**Installation von workerman/http-client**
+
+```
+composer require workerman/http-client
+```
+
+**app/controller/IndexController.php**
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+
+class IndexController
+{
+    public function index(Request $request)
+    {
+        $connection = $request->connection;
+        $http = new \Workerman\Http\Client();
+        $http->get('https://example.com/', function ($response) use ($connection) {
+            $connection->send(new Chunk($response->getBody()));
+            $connection->send(new Chunk('')); // Leeren Chunk senden, um Ende der Antwort zu signalisieren
+        });
+        // Zuerst HTTP-Header senden, Daten werden asynchron nachgeliefert
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
     }
 }
 ```
 
-Auf diese Weise werden Anfragen, die mit `domain.com/tast/xxx` beginnen, über den separaten 8686-Port verarbeitet, ohne die Verarbeitung der Anfragen über den 8787-Port zu beeinträchtigen.
+> **Hinweis**
+> Dieses Beispiel verwendet den `workerman/http-client`, um HTTP-Ergebnisse asynchron abzurufen und zurückzugeben. Sie können auch andere asynchrone Clients verwenden, z. B. [AsyncTcpConnection](https://www.workerman.net/doc/workerman/async-tcp-connection/construct.html).

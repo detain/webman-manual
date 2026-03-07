@@ -10,6 +10,7 @@
 
 ### Qu'est-ce que le keep-alive HTTP ?
 Le mécanisme de keep-alive HTTP est une technique utilisée pour envoyer plusieurs requêtes et réponses HTTP via une seule connexion TCP. Il a un impact significatif sur les résultats des tests de performance, et la désactivation du keep-alive peut entraîner une réduction significative des QPS. Actuellement, les navigateurs sont tous configurés par défaut pour activer le keep-alive, ce qui signifie qu'après une première requête à une URL HTTP, la connexion est maintenue ouverte temporairement, et est réutilisée pour les requêtes suivantes, améliorant ainsi les performances. Il est recommandé d'activer le keep-alive lors des tests de stress.
+En outre, si vous effectuez des tests de stress sans keep-alive activé, les ports locaux du client seront rapidement épuisés par des connexions à l'état TIME_WAIT. Cela se traduit par des requêtes en échec une fois que le nombre total de requêtes dépasse un certain seuil (généralement autour de 28 000).
 
 ### Comment activer le keep-alive HTTP lors des tests de stress ?
 Si vous utilisez le programme ab pour effectuer les tests de stress, vous devez ajouter le paramètre -k, par exemple `ab -n100000 -c200 -k http://127.0.0.1:8787/`. Pour apipost, vous devez renvoyer en-tête gzip dans la réponse pour activer le keep-alive (problème connu d'apipost, voir ci-dessous). La plupart des autres programmes de test de stress sont généralement configurés pour activer le keep-alive par défaut.
@@ -28,14 +29,17 @@ Les tests menés par [techempower](https://www.techempower.com/benchmarks/#secti
 
 ### De combien de performances la base de données ORM peut-elle réduire les performances dans webman ?
 Voici un ensemble de données de test :
-**Environnement** : Serveur Alibaba Cloud 4 cœurs 4 Go, retourne un enregistrement JSON aléatoire à partir de 100 000 enregistrements lors de la requête.
+**Environnement**
+Serveur Alibaba Cloud 4 cœurs 4 Go, base de données MySQL locale, requête aléatoire d'un enregistrement parmi 100 000 et retour en JSON, test de stress local.
 
 **Utilisation de PDO natif** : QPS de webman 17 800
 **Utilisation de Db::table() de Laravel** : QPS de webman réduit à 9 400
 **Utilisation de Model de Laravel** : QPS de webman réduit à 7 200
 
 Les résultats de thinkORM sont similaires, avec peu de variations.
-> **Remarque** : Bien que l'utilisation d'ORM puisse entraîner une certaine diminution des performances, elle est généralement suffisante pour la plupart des cas d'utilisation. Il est important de trouver un équilibre entre l'efficacité de développement, la maintenabilité, les performances, et d'autres critères, plutôt que de poursuivre aveuglément la performance seule.
+> **Remarque**
+> Bien que l'utilisation d'ORM puisse entraîner une certaine diminution des performances, pour 99 % des scénarios métier les performances sont déjà largement suffisantes. Si vous faites partie du 1 % restant, vous pouvez facilement y remédier en ajoutant des CPUs ou des serveurs.
+> Il est important de trouver un équilibre entre l'efficacité de développement, la maintenabilité, les performances et d'autres critères, plutôt que de poursuivre aveuglément la performance seule.
 
 ### Pourquoi le QPS est-il si faible lors des tests de stress avec apipost ?
 Le module de test de stress d'apipost a un bug : si le serveur ne renvoie pas d'en-tête gzip, le keep-alive ne peut pas être maintenu, ce qui entraîne une baisse significative des performances. La solution consiste à compresser les données lors du renvoi et à ajouter l'en-tête gzip, par exemple :

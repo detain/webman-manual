@@ -1,34 +1,50 @@
 # Redis
 
-webman'ın redis bileşeni varsayılan olarak [illuminate/redis](https://github.com/illuminate/redis) kullanır, yani laravel'in redis kütüphanesini kullanır. Kullanımı laravel ile aynıdır.
+[webman/redis](https://github.com/webman-php/redis), [illuminate/redis](https://github.com/illuminate/redis) üzerine bağlantı havuzu ekleyerek genişletir; hem coroutine hem de coroutine olmayan ortamlarda çalışır. Kullanımı Laravel ile aynıdır.
 
-`illuminate/redis` kullanmadan önce `php-cli`'ye redis eklentisini kurmalısınız.
+`illuminate/redis` kullanmadan önce `php-cli` için redis eklentisini kurmanız gerekir.
 
-> **Dikkat**
-> `php-cli`'de redis eklentisinin yüklü olup olmadığını kontrol etmek için `php -m | grep redis` komutunu kullanın. Lütfen unutmayın: Eğer `php-fpm`'e redis eklentisi kurduysanız, bu `php-cli`'de de kullanabileceğiniz anlamına gelmez çünkü `php-cli` ve `php-fpm` farklı uygulamalardır ve farklı `php.ini` yapılandırmaları kullanabilir. Kullandığınız `php-cli`'nin hangi `php.ini` yapılandırma dosyasını kullandığını görmek için `php --ini` komutunu kullanın.
-
-## Yükleme
+## Kurulum
 
 ```php
-composer require -W illuminate/redis illuminate/events
+composer require -W webman/redis illuminate/events
 ```
 
-Yükledikten sonra, reload işlemi yeterli olmayacaktır, restart işlemi yapmalısınız.
+Kurulumdan sonra yeniden başlatma (restart) gerekir (reload yeterli değildir).
 
 ## Yapılandırma
-redis yapılandırma dosyası `config/redis.php` içinde bulunur.
+
+Redis yapılandırma dosyası `config/redis.php` içindedir:
+
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
+        'pool' => [ // Bağlantı havuzu ayarları
+            'max_connections' => 10,     // Havuzdaki maksimum bağlantı sayısı
+            'min_connections' => 1,      // Havuzdaki minimum bağlantı sayısı
+            'wait_timeout' => 3,         // Bağlantı alma için maksimum bekleme süresi (saniye)
+            'idle_timeout' => 50,        // Boşta kalma süresi; sonrasında min_connections'a kadar serbest bırakılır
+            'heartbeat_interval' => 50,  // Heartbeat aralığı (60 saniyeyi aşmamalı)
+        ],
     ]
 ];
 ```
 
+## Bağlantı havuzu
+
+* Her işlemin kendi havuzu vardır; havuzlar işlemler arasında paylaşılmaz.
+* Coroutine kapalıyken çalışma sıralı olduğundan en fazla bir bağlantı kullanılır.
+* Coroutine açıkken çalışma paraleldir ve havuz `min_connections` ile `max_connections` arasında ölçeklenir.
+* Redis kullanan coroutine sayısı `max_connections`ı aşarsa en fazla `wait_timeout` saniye beklenir; sonrasında istisna fırlatılır.
+* Boşta (coroutine olsun olmasın) bağlantılar `idle_timeout` sonrası `min_connections`a kadar serbest bırakılır (0 kabul edilir).
+
 ## Örnek
+
 ```php
 <?php
 namespace app\controller;
@@ -48,6 +64,7 @@ class UserController
 ```
 
 ## Redis API
+
 ```php
 Redis::append($key, $value)
 Redis::bitCount($key)
@@ -77,7 +94,9 @@ Redis::expire($key, $ttl)
 Redis::expireAt($key, $timestamp)
 Redis::select($dbIndex)
 ```
-Şu şekilde karşılık gelir:
+
+Şununla eşdeğerdir:
+
 ```php
 $redis = Redis::connection('default');
 $redis->append($key, $value)
@@ -90,14 +109,17 @@ $redis->getBit($key, $offset)
 ```
 
 > **Dikkat**
-> `Redis::select($db)` arabirimini dikkatli kullanın, webman sürekli bellekte olan bir çerçeve olduğundan, bir istek belirli bir veritabanını seçtikten sonra diğer istekleri etkileyebilir. Birden fazla veritabanı kullanılması durumunda, farklı `db`'leri farklı Redis bağlantı yapılandırmalarına ayarlamanız önerilir.
+> `Redis::select($db)` arayüzünü dikkatli kullanın. webman sürekli bellekte çalışan bir çerçeve olduğundan, bir istekte veritabanı değiştirmek sonraki istekleri etkiler. Birden fazla veritabanı için her `$db` için ayrı Redis bağlantıları yapılandırmanız önerilir.
 
-## Birden Çok Redis Bağlantısının Kullanımı
-Örneğin, yapılandırma dosyası `config/redis.php` şu şekilde olabilir:
+## Birden fazla Redis bağlantısı kullanma
+
+`config/redis.php` yapılandırma dosyasında örnek:
+
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
@@ -109,22 +131,28 @@ return [
         'port'     => 6379,
         'database' => 1,
     ],
+
 ]
 ```
-Varsayılan olarak `default` bağlantısını kullanır, isterseniz `Redis::connection()` yöntemini kullanarak hangi redis bağlantısını kullanmak istediğinizi seçebilirsiniz.
+
+Varsayılan olarak `default` altındaki bağlantı kullanılır. `Redis::connection()` ile hangi Redis bağlantısının kullanılacağını seçebilirsiniz:
+
 ```php
 $redis = Redis::connection('cache');
 $redis->get('test_key');
 ```
 
-## Küme Yapılandırması
-Uygulamanız Redis sunucusu kümeleri kullanıyorsa, bu kümeleri tanımlamak için redis yapılandırma dosyasında `clusters` anahtarını kullanmalısınız:
+## Küme yapılandırması
+
+Uygulamanız Redis kümesi kullanıyorsa, yapılandırmada `clusters` anahtarı altında tanımlayın:
+
 ```php
 return [
     'clusters' => [
         'default' => [
             [
                 'host'     => 'localhost',
+                'username' => null,
                 'password' => null,
                 'port'     => 6379,
                 'database' => 0,
@@ -134,7 +162,9 @@ return [
 
 ];
 ```
-Varsayılan olarak, küme, bir istemci kesmesi sunucusunda gerçekleştirilebilir, böylece bir düğüm havuzu oluşturabilir ve büyük miktarda kullanılabilir bellek oluşturabilirsiniz. Bununla birlikte, müşteri tarafı başarısızlık durumlarıyla başa çıkmaz; bu nedenle, bu özellik genellikle başka bir ana veritabanından önbellek verisi almak için kullanılır. Redis'in doğal kümesini kullanmak istiyorsanız, yapılandırma dosyasındaki `options` anahtarı aşağıdaki gibi belirtilmelidir:
+
+Varsayılan olarak küme, düğümlerde istemci tarafı parçalama yapabilir; havuz oluşturma ve büyük bellek kullanımı sağlar. İstemci parçalama hata durumlarını ele almaz; özellikle başka bir ana veritabanından önbellek verisi almak için uygundur. Redis yerel kümesi için yapılandırmada `options` altında şunu belirtin:
+
 ```php
 return[
     'options' => [
@@ -147,8 +177,10 @@ return[
 ];
 ```
 
-## Pipeline Komutu
-Sunucuya birden çok komut göndermeniz gerektiğinde, pipeline komutunu kullanmanızı öneririz. pipeline yöntemi bir Redis örneğinin bir kapanış fonksiyonunu kabul eder. Tüm komutları Redis örneğine gönderebilir ve hepsi bir işlemde tamamlanacaktır:
+## Pipeline komutları
+
+Tek bir işlemde sunucuya çok sayıda komut göndermeniz gerektiğinde pipeline kullanın. `pipeline` metodu bir closure alır; tüm komutlar tek işlemde çalıştırılır:
+
 ```php
 Redis::pipeline(function ($pipe) {
     for ($i = 0; $i < 1000; $i++) {

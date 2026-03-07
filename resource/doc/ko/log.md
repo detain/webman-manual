@@ -13,8 +13,8 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('로그 테스트');
-        return response('안녕하세요 인덱스');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
@@ -101,7 +101,7 @@ return [
     ],
     // log2 채널
     'log2' => [
-        // 기본 채널을 처리하는 핸들러, 여러 개 설정할 수 있음
+        // log2 채널을 처리하는 핸들러, 여러 개 설정할 수 있음
         'handlers' => [
             [   
                 // 핸들러 클래스 이름
@@ -137,8 +137,8 @@ class FooController
     public function index(Request $request)
     {
         $log = Log::channel('log2');
-        $log->info('log2 테스트');
-        return response('안녕하세요 인덱스');
+        $log->info('log2 test');
+        return response('hello index');
     }
 }
 ```

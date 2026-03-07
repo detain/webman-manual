@@ -1,10 +1,10 @@
-# Quản lý tiến trình
-Webman đi kèm với một tiến trình giám sát (monitor) để hỗ trợ hai chức năng
-1. Giám sát cập nhật tệp và tự động tải lại mã kinh doanh mới (thường được sử dụng trong quá trình phát triển)
-2. Giám sát việc tiêu thụ bộ nhớ của tất cả các tiến trình, nếu một tiến trình nào đó tiêu thụ bộ nhớ gần sát giới hạn `memory_limit` trong tệp `php.ini` thì sẽ tự động khởi động lại tiến trình đó một cách an toàn (không ảnh hưởng đến kinh doanh)
+# Giám sát tiến trình
+webman đi kèm với một tiến trình giám sát (monitor) tích hợp sẵn, hỗ trợ hai chức năng:
+1. Giám sát cập nhật tệp và tự động tải lại mã nghiệp vụ mới (thường dùng trong quá trình phát triển)
+2. Giám sát mức tiêu thụ bộ nhớ của tất cả tiến trình; nếu một tiến trình sắp vượt giới hạn `memory_limit` trong `php.ini` thì sẽ tự động khởi động lại tiến trình đó an toàn (không ảnh hưởng nghiệp vụ)
 
 ## Cấu hình giám sát
-Tệp cấu hình `config/process.php` có phần cấu hình `monitor` như sau:
+Cấu hình `monitor` trong `config/process.php`:
 ```php
 
 global $argv;
@@ -16,7 +16,7 @@ return [
         'reloadable' => false,
         'constructor' => [
             // Giám sát các thư mục này
-            'monitorDir' => array_merge([    // Các thư mục nào cần giám sát cập nhật tệp
+            'monitorDir' => array_merge([    // Thư mục nào cần giám sát tệp
                 app_path(),
                 config_path(),
                 base_path() . '/process',
@@ -29,17 +29,17 @@ return [
                 'php', 'html', 'htm', 'env'
             ],
             'options' => [
-                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // Cho phép giám sát cập nhật tệp
-                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // Cho phép giám sát tiêu thụ bộ nhớ
+                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // Bật giám sát tệp
+                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // Bật giám sát bộ nhớ
             ]
         ]
     ]
 ];
 ```
-`monitorDir` dùng để cấu hình giám sát cập nhật tại những thư mục nào (không nên giám sát quá nhiều tệp trong thư mục giám sát).
-`monitorExtensions` dùng để cấu hình những tệp có phần mở rộng nào trong thư mục `monitorDir` cần phải được giám sát.
-`options.enable_file_monitor` có giá trị `true`, thì giám sát cập nhật tệp sẽ được bật (mặc định trong khi chạy ở chế độ debug trên hệ điều hành Linux).
-`options.enable_memory_monitor` có giá trị `true`, thì giám sát việc tiêu thụ bộ nhớ sẽ được bật (giám sát tiêu thụ bộ nhớ không hỗ trợ trên hệ điều hành Windows).
+`monitorDir` dùng để cấu hình giám sát cập nhật ở những thư mục nào (không nên có quá nhiều tệp trong thư mục được giám sát)
+`monitorExtensions` dùng để cấu hình phần mở rộng tệp cần giám sát trong các thư mục `monitorDir`
+Khi `options.enable_file_monitor` là `true` thì bật giám sát cập nhật tệp (trên Linux bật mặc định khi chạy ở chế độ debug)
+Khi `options.enable_memory_monitor` là `true` thì bật giám sát bộ nhớ (không hỗ trợ trên Windows)
 
-> **Lưu ý**
-> Trên hệ điều hành Windows, giám sát cập nhật tệp chỉ được bật khi chạy `windows.bat` hoặc `php windows.php`.
+> **Mẹo**
+> Trên Windows, giám sát cập nhật tệp chỉ được bật khi chạy `windows.bat` hoặc `php windows.php`

@@ -4,8 +4,6 @@
 
 Il plugin include anche un client web in js chiamato push.js e un client uniapp `uniapp-push.js`, mentre altri client di linguaggi possono essere scaricati da https://pusher.com/docs/channels/channels_libraries/libraries/
 
-> Il plugin richiede webman-framework >= 1.2.0
-
 ## Installazione
 
 ```sh
@@ -156,6 +154,7 @@ var connection = new Push({
     url: 'wss://example.com',
     app_key: '<app_key, ottenibile da config/plugin/webman/push/app.php>',
     auth: '/plugin/webman/push/auth' // autorizzazione dell'abbonamento (solo per canali privati)
+});
 ```
 > **Nota**
 > 1. L'indirizzo della richiesta ha un wss iniziale

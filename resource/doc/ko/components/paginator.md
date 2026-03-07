@@ -1,20 +1,18 @@
-# 페이징 구성 요소
+# 페이지네이션 컴포넌트
 
-## jasongrimes/php-paginator
-
-### 프로젝트 주소
+## 프로젝트 주소
 
 https://github.com/jasongrimes/php-paginator
   
-### 설치
+## 설치
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### 사용
+## 사용법
 
-`app/controller/UserController.php` 파일을 만듭니다.
+`app/controller/UserController.php` 파일 생성
 ```php
 <?php
 namespace app\controller;
@@ -39,12 +37,12 @@ class UserController
     
 }
 ```
-**템플릿 (php 기본)**
-`app/view/user/get.html` 파일을 만듭니다.
+**템플릿 (네이티브 PHP)**
+템플릿 생성 `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- 내장된 부트스트랩 페이지 스타일 지원 -->
+  <!-- Bootstrap 페이지네이션 스타일 내장 지원 -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -55,13 +53,12 @@ class UserController
 </html>
 ```
 
-
-**템플릿 (twig)**
-`app/view/user/get.html` 파일을 만듭니다.
+**템플릿 (Twig)**
+템플릿 생성 `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- 내장된 부트스트랩 페이지 스타일 지원 -->
+  <!-- Bootstrap 페이지네이션 스타일 내장 지원 -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -74,13 +71,12 @@ class UserController
 </html>
 ```
 
-
-**템플릿 (blade)**
-`app/view/user/get.blade.php` 파일을 만듭니다.
+**템플릿 (Blade)**
+템플릿 생성 `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-  <!-- 내장된 부트스트랩 페이지 스타일 지원 -->
+  <!-- Bootstrap 페이지네이션 스타일 내장 지원 -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -91,12 +87,12 @@ class UserController
 </html>
 ```
 
-**템플릿 (thinkphp)**
-`app/view/user/get.blade.php` 파일을 만듭니다.
+**템플릿 (ThinkPHP)**
+템플릿 생성 `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-    <!-- 내장된 부트스트랩 페이지 스타일 지원 -->
+    <!-- Bootstrap 페이지네이션 스타일 내장 지원 -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -107,10 +103,10 @@ class UserController
 </html>
 ```
 
-아래는 결과입니다:
-
+결과는 다음과 같습니다:
 ![](../../assets/img/paginator.png)
   
-### 더 많은 내용
+## 자세한 정보
 
-https://github.com/jasongrimes/php-paginator를 방문하세요.
+https://github.com/jasongrimes/php-paginator 방문
+  

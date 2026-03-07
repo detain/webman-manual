@@ -254,10 +254,28 @@ class UserController
 #### Controladores
 Cuando un controlador llama a `view('nombre_plantilla', [])`, el archivo de vista se busca de acuerdo con las siguientes reglas:
 
-1. Si no hay múltiples aplicaciones, se utilizará el archivo de vista correspondiente en `app/view/`.
-2. En el caso de [múltiples aplicaciones](multiapp.md), se utilizará el archivo de vista correspondiente en `app/nombre_aplicacion/view/`.
+1. Si la ruta comienza con `/`, utilice esa ruta directamente para localizar el archivo de vista.
+2. Si no comienza con `/` y no es una aplicación múltiple, utilice el archivo de vista correspondiente en `app/view/`.
+3. Si no comienza con `/` y es una [aplicación múltiple](multiapp.md), utilice el archivo de vista correspondiente en `app/nombre_aplicacion/view/`.
+4. Si no se pasa el parámetro de plantilla, el archivo de plantilla se localiza automáticamente según las reglas 2 y 3.
 
-En resumen, si `$request->app` está vacío, se utilizarán los archivos de vista en `app/view/`, de lo contrario, se utilizarán los archivos de vista en `app/{$request->app}/view/`.
+Ejemplo:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Equivalente a return view('user/hello', ['name' => 'webman']);
+        // Equivalente a return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### Funciones de cierre
 La variable `$request->app` estará vacía para las funciones de cierre, ya que no pertenecen a ninguna aplicación en particular. Por lo tanto, las funciones de cierre utilizarán los archivos de vista en `app/view/`, por ejemplo, al definir rutas en el archivo `config/route.php` de la siguiente manera
@@ -270,6 +288,25 @@ Se utilizará el archivo de vista `app/view/user.html` como plantilla (si se est
 
 #### Especificar aplicación
 Para reutilizar plantillas en el modo de múltiples aplicaciones, el método `view($template, $data, $app = null)` proporciona un tercer parámetro `$app` que se puede utilizar para especificar qué directorio de aplicación se debe utilizar para las plantillas. Por ejemplo, `view('user', [], 'admin')` forzará el uso de archivos de vista en `app/admin/view/`.
+
+#### Omitir el parámetro de plantilla
+En los controladores basados en clases, puede omitir el parámetro de plantilla. Por ejemplo:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Equivalente a return view('user/hello', ['name' => 'webman']);
+        // Equivalente a return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## Ampliar Twig
 > **Nota**

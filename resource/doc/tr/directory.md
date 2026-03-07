@@ -1,41 +1,41 @@
-# Dosya Yapısı
+# Dizin Yapısı
 ```
 .
 ├── app                           Uygulama dizini
-│   ├── controller                Kontrolcü dizini
+│   ├── controller                Denetleyici dizini
 │   ├── model                     Model dizini
 │   ├── view                      Görünüm dizini
 │   ├── middleware                Ara yazılım dizini
-│   │   └── StaticFile.php        Kendi statik dosya ara yazılımı
-|   └── functions.php             İşlev özelleştirme fonksiyonları bu dosyada yazılır
-|
+│   │   └── StaticFile.php        Dahili statik dosya ara yazılımı
+│   ├── process                   Özel işlem dizini
+│   │   ├── Http.php              Http işlemi
+│   │   └── Monitor.php          İzleme işlemi
+│   └── functions.php             İş özel işlevleri bu dosyada yazılır
 ├── config                        Yapılandırma dizini
 │   ├── app.php                   Uygulama yapılandırması
-│   ├── autoload.php              Otomatik yüklenecek dosyaların yapılandırılması
-│   ├── bootstrap.php             İşlem başlatıldığında onWorkerStart işlemine göre yapılandırma gerçekleştirme
+│   ├── autoload.php              Burada yapılandırılan dosyalar otomatik yüklenecektir
+│   ├── bootstrap.php             İşlem başlatıldığında onWorkerStart'ta çalışan geri çağırma yapılandırması
 │   ├── container.php             Konteyner yapılandırması
 │   ├── dependence.php            Konteyner bağımlılığı yapılandırması
-│   ├── database.php              Veritabanı yapılandırması
+│   ├── database.php             Veritabanı yapılandırması
 │   ├── exception.php             İstisna yapılandırması
-│   ├── log.php                   Günlükleme yapılandırması
+│   ├── log.php                   Günlük yapılandırması
 │   ├── middleware.php            Ara yazılım yapılandırması
 │   ├── process.php               Özel işlem yapılandırması
-│   ├── redis.php                 redis yapılandırması
+│   ├── redis.php                 Redis yapılandırması
 │   ├── route.php                 Rota yapılandırması
 │   ├── server.php                Port, işlem sayısı vb. sunucu yapılandırması
 │   ├── view.php                  Görünüm yapılandırması
-│   ├── static.php                Statik dosya açma/kapama ve statik dosya ara yazılımı yapılandırması
+│   ├── static.php                Statik dosya anahtarı ve statik dosya ara yazılımı yapılandırması
 │   ├── translation.php           Çoklu dil yapılandırması
 │   └── session.php               Oturum yapılandırması
 ├── public                        Statik kaynak dizini
-├── process                       Özel işlem dizini
-├── runtime                       Uygulama çalışma zamanı dizini, yazma iznine ihtiyaç duyar
+├── runtime                       Uygulama çalışma zamanı dizini, yazma izni gerekir
 ├── start.php                     Hizmet başlatma dosyası
-├── vendor                        Composer tarafından kurulan üçüncü taraf kitaplık dizini
-└── support                       Kitaplık uyumluluğu (üçüncü taraf kitaplıkları içerir)
+├── vendor                        Composer ile yüklenen üçüncü taraf kitaplık dizini
+└── support                       Kitaplık uyarlaması (üçüncü taraf kitaplıkları dahil)
     ├── Request.php               İstek sınıfı
     ├── Response.php              Yanıt sınıfı
-    ├── Plugin.php                Eklenti yükleme/kaldırma betiği
-    ├── helpers.php               Yardımcı fonksiyonlar (işlev özelleştirme fonksiyonları app/functions.php içine yazılmalıdır)
-    └── bootstrap.php             İşlem başladıktan sonra başlatılma betiği
+    ├── Setup.php                 Kurulum sihirbazı betiği
+    └── bootstrap.php             İşlem başladıktan sonra başlatma betiği
 ```

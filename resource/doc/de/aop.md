@@ -1,18 +1,18 @@
 # AOP
 
-> Thanks to the author of Hyperf for the contribution
+> Dank an den Autor von Hyperf für den Beitrag.
 
-### Installation
+## Installation
 
-- Install aop-integration
+- aop-integration installieren
 
 ```shell
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### Add AOP related configuration
+## AOP-Konfiguration hinzufügen
 
-We need to add the `config.php` configuration in the `config` directory
+Die `config.php` Konfigurationsdatei muss im `config` Verzeichnis angelegt werden.
 
 ```php
 <?php
@@ -36,31 +36,31 @@ return [
         ],
     ],
     'aspects' => [
-        // Here write the corresponding Aspect
+        // Hier den entsprechenden Aspect eintragen
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### Configure the entry file start.php
+## Einstiegsdatei start.php konfigurieren
 
-> We will place the initialization method below the timezone, and the other code is omitted below
+> Die Initialisierung wird unter der timezone-Einstellung platziert. Anderer Code wird im Folgenden weggelassen.
 
-```php
+```
 use Hyperf\AopIntegration\ClassLoader;
 
 if ($timezone = config('app.default_timezone')) {
     date_default_timezone_set($timezone);
 }
 
-// Initialize
+// Initialisierung
 ClassLoader::init();
 ```
 
-### Test
+## Testen
 
-First, let's write the class to be intercepted
+Zuerst erstellen wir die zu interceptende Klasse:
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-Secondly, add the corresponding `DebugAspect`
+Dann fügen wir den entsprechenden `DebugAspect` hinzu:
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-Next, edit the controller `app/controller/IndexController.php`
+Anschließend den Controller `app/controller/IndexController.php` bearbeiten:
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-Then configure the route
+Dann die Route konfigurieren:
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-Finally, start the service and test it.
+Zum Schluss den Dienst starten und testen:
 
 ```shell
 php start.php start

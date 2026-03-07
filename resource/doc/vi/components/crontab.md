@@ -1,41 +1,39 @@
 # Bộ lập lịch crontab
 
-## workerman/crontab
+## Mô tả
 
-### Giới thiệu
+`workerman/crontab` tương tự như crontab của Linux, khác biệt là hỗ trợ lập lịch theo giây.
 
-`workerman/crontab` tương tự như crontab của Linux, khác biệt là `workerman/crontab` hỗ trợ lập lịch theo giây.
+Định dạng thời gian:
 
-Mô tả thời gian:
-
-``` 
+```
 0   1   2   3   4   5
 |   |   |   |   |   |
-|   |   |   |   |   +------ ngày trong tuần (0 - 6) (Chủ nhật=0)
-|   |   |   |   +------ tháng (1 - 12)
-|   |   |   +-------- ngày trong tháng (1 - 31)
-|   |   +---------- giờ (0 - 23)
-|   +------------ phút (0 - 59)
-+-------------- giây (0-59)[Có thể bỏ qua, nếu không có số 0, đơn vị thời gian nhỏ nhất sẽ là phút]
+|   |   |   |   |   +------ day of week (0 - 6) (Sunday=0)
+|   |   |   |   +------ month (1 - 12)
+|   |   |   +-------- day of month (1 - 31)
+|   |   +---------- hour (0 - 23)
+|   +------------ min (0 - 59)
++-------------- sec (0-59)[Có thể bỏ qua, nếu không có vị trí 0 thì đơn vị nhỏ nhất là phút]
 ```
 
-### Địa chỉ dự án
+## Địa chỉ dự án
 
 https://github.com/walkor/crontab
-
-### Cài đặt
-
+  
+## Cài đặt
+ 
 ```php
 composer require workerman/crontab
 ```
+  
+## Sử dụng
 
-### Sử dụng
-
-**Bước 1: Tạo tệp tiến trình mới `process/Task.php`**
+**Bước 1: Tạo tệp tiến trình `app/process/Task.php`**
 
 ```php
 <?php
-namespace process;
+namespace app\process;
 
 use Workerman\Crontab\Crontab;
 
@@ -64,12 +62,12 @@ class Task
             echo date('Y-m-d H:i:s')."\n";
         });
         
-        // Thực hiện mỗi giây đầu tiên của mỗi phút
+        // Thực hiện ở giây đầu tiên của mỗi phút
         new Crontab('1 * * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
       
-        // Thực hiện vào 7 giờ 50 phút hàng ngày, lưu ý ở đây bỏ qua đơn vị giây
+        // Thực hiện lúc 7:50 hàng ngày (vị trí giây được bỏ qua ở đây)
         new Crontab('50 7 * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -77,9 +75,9 @@ class Task
     }
 }
 ```
-
-**Bước 2: Cấu hình để tiến trình chạy cùng với webman**
-
+  
+**Bước 2: Cấu hình tiến trình khởi động cùng webman**
+  
 Mở tệp cấu hình `config/process.php`, thêm cấu hình sau:
 
 ```php
@@ -87,19 +85,18 @@ return [
     ....Cấu hình khác, ở đây lược bỏ....
   
     'task'  => [
-        'handler'  => process\Task::class
+        'handler'  => app\process\Task::class
     ],
 ];
 ```
-
+  
 **Bước 3: Khởi động lại webman**
 
-> Chú ý: Công việc được lập lịch không sẽ thực hiện ngay lập tức, tất cả các công việc được lập lịch sẽ bắt đầu đếm thời gian từ phút tiếp theo.
+> Chú ý: Công việc lập lịch không thực hiện ngay; tất cả bắt đầu đếm và thực hiện từ phút tiếp theo.
 
-### Giải thích
-
-Crontab không phải là không đồng bộ. Ví dụ, trong một tiến trình task, đặt hai viên đồng hồ A và B, cả hai đều thực hiện mỗi giây, nhưng nhiệm vụ A mất 10 giây, thì nhiệm vụ B cần phải đợi cho đến khi nhiệm vụ A hoàn thành mới được thực hiện, dẫn đến việc trì hoãn thực hiện của nhiệm vụ B.
-Nếu doanh nghiệp cảm thấy nhạy cảm với khoảng thời gian, cần đặt các công việc lập lịch nhạy cảm thời gian vào một tiến trình riêng biệt để chạy, ngăn không cho các công việc lập lịch khác ảnh hưởng. Ví dụ `config/process.php` thiết lập như sau:
+## Giải thích
+Crontab không phải bất đồng bộ. Ví dụ: trong một tiến trình task đặt hai bộ đếm A và B, cả hai đều thực hiện mỗi giây, nhưng nhiệm vụ A mất 10 giây thì B phải chờ A hoàn thành mới chạy được, gây trì hoãn cho B.
+Nếu logic nhạy với khoảng thời gian, cần chạy các công việc lập lịch nhạy cảm thời gian trong tiến trình riêng để tránh bị ảnh hưởng. Ví dụ cấu hình `config/process.php` như sau:
 
 ```php
 return [
@@ -113,9 +110,6 @@ return [
     ],
 ];
 ```
+Đặt các công việc nhạy cảm thời gian vào `process/Task1.php`, các công việc khác vào `process/Task2.php`.
 
-Đặt các công việc lập lịch nhạy cảm thời gian vào tệp `process/Task1.php`, các công việc lập lịch khác vào `process/Task2.php`.
-
-### Thêm thông tin
-
-Để biết thêm thông tin cấu hình `config/process.php`, vui lòng tham khảo [Tiến trình tùy chỉnh](../process.md)
+Chi tiết cấu hình `config/process.php`, xem [Tiến trình tùy chỉnh](../process.md).

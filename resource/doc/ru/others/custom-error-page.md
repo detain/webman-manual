@@ -1,11 +1,10 @@
-## Пользовательская 404
-Когда возникает ошибка 404, webman автоматически возвращает содержимое файла `public/404.html`, поэтому разработчики могут изменить файл `public/404.html` напрямую.
+# Пользовательская 404
 
-Если вы хотите динамически управлять содержимым ошибки 404, например, возвращать JSON-данные `{"code:"404", "msg":"404 not found"}` для ajax-запроса и возвращать шаблон `app/view/404.html` для запросов страниц, пожалуйста, ознакомьтесь со следующим примером.
+Если вы хотите динамически управлять содержимым 404, например возвращать JSON-данные `{"code:"404", "msg":"404 not found"}` при AJAX-запросах и возвращать шаблон `app/view/404.html` при запросах страниц, ознакомьтесь со следующим примером.
 
-> Ниже приведен пример на чистом PHP, но принципы работы с другими шаблонами `twig`, `blade`, `think-tmplate` аналогичны.
+> Ниже приведён пример на нативных PHP-шаблонах. Другие шаблоны `twig`, `blade`, `think-template` работают по тому же принципу.
 
-**Создание файла `app/view/404.html`**
+**Создать файл `app/view/404.html`**
 ```html
 <!doctype html>
 <html>
@@ -19,23 +18,42 @@
 </html>
 ```
 
-**Добавление следующего кода в файл `config/route.php`:**
+**Добавить следующий код в `config/route.php`:**
 ```php
 use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // возвратить JSON для ajax-запроса
+    // Возвращать JSON при AJAX-запросах
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
-    // вернуть шаблон 404.html для запроса страницы
+    // Возвращать шаблон 404.html при запросах страницы
     return view('404', ['error' => 'some error'])->withStatus(404);
 });
 ```
 
-## Пользовательская 500
-**Создание `app/view/500.html`**
+# Пользовательская 405
+
+Начиная с webman-framework 1.5.23, callback fallback поддерживает параметр `status`. 404 означает, что запрос не существует; 405 — что текущий метод запроса не поддерживается (например, доступ по GET к маршруту, определённому через `Route::post()`).
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# Пользовательская 500
+
+**Создать `app/view/500.html`**
+
 ```html
 <!doctype html>
 <html>
@@ -50,7 +68,7 @@ Route::fallback(function(Request $request){
 </html>
 ```
 
-**Создание `app/exception/Handler.php` (если каталога не существует, создайте его самостоятельно)**
+**Создать `app/exception/Handler.php`** (создать каталог, если его нет)
 ```php
 <?php
 
@@ -63,7 +81,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * Рендеринг и возврат
+     * Рендеринг и возврат ответа
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -71,17 +89,17 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // возврат JSON для ajax-запроса
+        // Возвращать JSON-данные при AJAX-запросах
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
-        // вернуть шаблон 500.html для запроса страницы
+        // Возвращать шаблон 500.html при запросах страницы
         return view('500', ['exception' => $exception], '')->withStatus(500);
     }
 }
 ```
 
-**Настройка `config/exception.php`**
+**Настроить `config/exception.php`**
 ```php
 return [
     '' => \app\exception\Handler::class,

@@ -1,14 +1,15 @@
-# Captcha-bezogene Komponenten
+# Captcha-Komponente
 
-## webman/captcha
 Projektadresse https://github.com/webman-php/captcha
 
-### Installation
-```composer require webman/captcha```
+## Installation
+```
+composer require webman/captcha
+```
 
-### Verwendung
+## Verwendung
 
-**Erstellen Sie die Datei `app/controller/LoginController.php`**
+**Datei `app/controller/LoginController.php` anlegen**
 
 ```php
 <?php
@@ -28,7 +29,7 @@ class LoginController
     }
     
     /**
-     * Generieren des Captcha-Bildes
+     * Captcha-Bild ausgeben
      */
     public function captcha(Request $request)
     {
@@ -38,22 +39,22 @@ class LoginController
         $builder->build();
         // Captcha-Wert in der Sitzung speichern
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Binärdaten des Captcha-Bildes erhalten
+        // Binärdaten des Captcha-Bildes abrufen
         $img_content = $builder->get();
-        // Binärdaten des Captcha ausgeben
+        // Captcha-Binärdaten ausgeben
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
     /**
-     * Captcha überprüfen
+     * Captcha prüfen
      */
     public function check(Request $request)
     {
         // captcha-Feld aus dem POST-Request abrufen
         $captcha = $request->post('captcha');
-        // Captcha-Wert in der Sitzung vergleichen
+        // Mit dem Captcha-Wert in der Sitzung vergleichen
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
-            return json(['code' => 400, 'msg' => 'Eingegebene Captcha ist nicht korrekt']);
+            return json(['code' => 400, 'msg' => 'Die eingegebene Captcha ist nicht korrekt']);
         }
         return json(['code' => 0, 'msg' => 'ok']);
     }
@@ -61,7 +62,7 @@ class LoginController
 }
 ```
 
-**Erstellen Sie die Template-Datei `app/view/login/index.html`**
+**Template-Datei `app/view/login/index.html` anlegen**
 
 ```html
 <!doctype html>
@@ -74,37 +75,27 @@ class LoginController
     <form method="post" action="/login/check">
        <img src="/login/captcha" /><br>
         <input type="text" name="captcha" />
-        <input type="submit" value="Einreichen" />
+        <input type="submit" value="Absenden" />
     </form>
 </body>
 </html>
 ```
 
-Rufe die Seite `http://127.0.0.1:8787/login` auf, das Interface ähnelt dem folgenden:
-![](../../assets/img/captcha.png)
+Die Seite `http://127.0.0.1:8787/login` aufrufen – die Oberfläche sieht in etwa wie folgt aus:
+  ![](../../assets/img/captcha.png)
 
-### Häufige Parameterkonfiguration
+## Häufige Parameterkonfiguration
 ```php
     /**
-     * Generieren des Captcha-Bildes
+     * Captcha-Bild ausgeben
      */
     public function captcha(Request $request)
     {
-        // Captcha-Klasse initialisieren
-        $builder = new CaptchaBuilder;
-        // Captchalänge
-        $length = 4;
-        // Enthaltene Zeichen
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // Captcha generieren
-        $builder->build();
-        // Captcha-Wert in der Sitzung speichern
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Binärdaten des Captcha-Bildes erhalten
-        $img_content = $builder->get();
-        // Binärdaten des Captcha ausgeben
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```

@@ -349,7 +349,97 @@ class ImageController
         $image = ob_get_clean();
         
         // Resmi gönder
-        return response($image)->header('Content-Type', 'resim/jpeg');
+        return response($image)->header('Content-Type', 'image/jpeg');
+    }
+}
+```
+
+## Parçalı Yanıt
+
+Bazen yanıtları parçalar halinde göndermek isteriz. Aşağıdaki örneğe bakabilirsiniz.
+
+```php
+<?php
+
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+use Workerman\Timer;
+
+class IndexController
+{
+    public function index(Request $request): Response
+    {
+        // Bağlantıyı al
+        $connection = $request->connection;
+        // HTTP gövdesini periyodik olarak gönder
+        $timer = Timer::add(1, function () use ($connection, &$timer) {
+            static $i = 0;
+            if ($i++ < 10) {
+                // HTTP gövdesini gönder
+                $connection->send(new Chunk($i));
+            } else {
+                // Bellek sızıntısını önlemek için kullanılmayan zamanlayıcıyı sil
+                Timer::del($timer);
+                // Yanıtın tamamlandığını bildirmek için boş Chunk gönder
+                $connection->send(new Chunk(''));
+            }
+        });
+        // Önce Transfer-Encoding: chunked içeren HTTP başlığını gönder, ardından HTTP gövdesini zaman uyumsuz olarak gönder
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+
+}
+```
+
+Büyük dil modeli çağırıyorsanız, aşağıdaki örneğe bakın.
+
+```
+composer require webman/openai
+```
+
+```php
+<?php
+namespace app\controller;
+use support\Request;
+
+use Webman\Openai\Chat;
+use Workerman\Protocols\Http\Chunk;
+
+class ChatController
+{
+    public function completions(Request $request)
+    {
+        $connection = $request->connection;
+        // Bölgenizde https://api.openai.com erişilemiyorsa, https://api.openai-proxy.com kullanabilirsiniz
+        $chat = new Chat(['apikey' => 'sk-xx', 'api' => 'https://api.openai.com']);
+        $chat->completions(
+            [
+                'model' => 'gpt-3.5-turbo',
+                'stream' => true,
+                'messages' => [['role' => 'user', 'content' => 'hello']],
+            ], [
+            'stream' => function($data) use ($connection) {
+                // OpenAI API veri döndürdüğünde tarayıcıya ilet
+                $connection->send(new Chunk(json_encode($data, JSON_UNESCAPED_UNICODE) . "\n"));
+            },
+            'complete' => function($result, $response) use ($connection) {
+                // Yanıt tamamlandığında hata kontrolü
+                if (isset($result['error'])) {
+                    $connection->send(new Chunk(json_encode($result, JSON_UNESCAPED_UNICODE) . "\n"));
+                }
+                // Yanıt sonunu belirtmek için boş chunk gönder
+                $connection->send(new Chunk(''));
+            },
+        ]);
+        // Önce HTTP başlığını döndür, veriler zaman uyumsuz olarak döndürülecek
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
     }
 }
 ```

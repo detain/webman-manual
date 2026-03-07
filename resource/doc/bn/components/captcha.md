@@ -1,16 +1,15 @@
-# ভেরিফিকেশন কোড সংশ্লিষ্ট কম্পোনেন্টস
+# ক্যাপচা কম্পোনেন্ট
 
-## webman/captcha
-প্রোজেক্ট লিঙ্ক https://github.com/webman-php/captcha
+প্রকল্প লিঙ্ক https://github.com/webman-php/captcha
 
-### ইনস্টলেশন
-``` 
-composer require webman/captcha 
+## ইনস্টলেশন
+```
+composer require webman/captcha
 ```
 
-### ব্যবহার
+## ব্যবহার
 
-**`app/controller/LoginController.php` ফাইল তৈরি করুন**
+**ফাইল তৈরি করুন `app/controller/LoginController.php`**
 
 ```php
 <?php
@@ -30,47 +29,47 @@ class LoginController
     }
     
     /**
-     * ভেরিফিকেশন চিত্র প্রদর্শন
+     * ক্যাপচা ছবি প্রদর্শন করুন
      */
     public function captcha(Request $request)
     {
-        // ভেরিফিকেশন বিল্ডারকে আপ করুন
+        // ক্যাপচা ক্লাস ইনিশিয়ালাইজ করুন
         $builder = new CaptchaBuilder;
-        // ভেরিফিকেশন তৈরি করুন
+        // ক্যাপচা তৈরি করুন
         $builder->build();
-        // ভেরিফিকেশন মানটি সেশনে সংরক্ষণ করুন
+        // ক্যাপচা মান সেশনে সংরক্ষণ করুন
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // ভেরিফিকেশন চিত্রের বাইনারি ডেটা পেতে
+        // ক্যাপচা ছবির বাইনারি ডেটা পেতে
         $img_content = $builder->get();
-        // ভেরিফিকেশন চিত্রের বাইনারি ডেটা প্রদান করুন
+        // ক্যাপচা বাইনারি ডেটা ফেরত দিন
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
     /**
-     * ভেরিফিকেশন যাচাইকরণ
+     * ক্যাপচা যাচাই করুন
      */
     public function check(Request $request)
     {
-        // পোস্ট অনুরোধের 'ভেরিফিকেশন' ফিল্ড পেতে
+        // পোস্ট রিকোয়েস্ট থেকে captcha ফিল্ড পেতে
         $captcha = $request->post('captcha');
-        // সেশনের ভেরিফিকেশন মান সাথে তুলনা করুন
+        // সেশনের ক্যাপচা মানের সাথে তুলনা করুন
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
-            return json(['code' => 400, 'msg' => 'প্রবেশ করা ভেরিফিকেশন সঠিক নয়']);
+            return json(['code' => 400, 'msg' => 'প্রবেশ করা ক্যাপচা সঠিক নয়']);
         }
-        return json(['code' => 0, 'msg' => 'ঠিক আছে']);
+        return json(['code' => 0, 'msg' => 'ok']);
     }
 
 }
 ```
 
-**`app/view/login/index.html` ফাইল তৈরি করুন**
+**টেমপ্লেট ফাইল তৈরি করুন `app/view/login/index.html`**
 
 ```html
 <!doctype html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>ভেরিফিকেশন টেস্ট</title>  
+    <title>ক্যাপচা টেস্ট</title>  
 </head>
 <body>
     <form method="post" action="/login/check">
@@ -82,34 +81,23 @@ class LoginController
 </html>
 ```
 
-`http://127.0.0.1:8787/login` পেজে যান, সেখানে প্রদর্শিত হবে এরকম একটি ইমেজ:
+পেজ `http://127.0.0.1:8787/login` এ যান, ইন্টারফেস নিম্নরূপ হবে:
+  ![](../../assets/img/captcha.png)
 
-![](../../assets/img/captcha.png)
-
-### সাধারণ প্যারামিটার সেটিং
+## সাধারণ প্যারামিটার সেটিং
 ```php
     /**
-     * ভেরিফিকেশন চিত্র প্রদর্শন
+     * ক্যাপচা ছবি প্রদর্শন করুন
      */
     public function captcha(Request $request)
     {
-        // ভেরিফিকেশন বিল্ডারকে আপ করুন
-        $builder = new CaptchaBuilder;
-        // ভেরিফিকেশন দৈর্ঘ্য
-        $length = 4;
-        // কোন কোন অক্ষর থাকা উচিত
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // ভেরিফিকেশন তৈরি করুন
-        $builder->build();
-        // ভেরিফিকেশন মানটি সেশনে সংরক্ষণ করুন
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // ভেরিফিকেশন চিত্রের বাইনারি ডেটা পেতে
-        $img_content = $builder->get();
-        // ভেরিফিকেশন চিত্রের বাইনারি ডেটা প্রদান করুন
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```
 
-আরও প্রাক্কলিত ইন্টারফেস এবং প্যারামিটার দেখতে https://github.com/webman-php/captcha দেখুন।
+আরও ইন্টারফেস এবং প্যারামিটারের জন্য https://github.com/webman-php/captcha দেখুন।

@@ -1,6 +1,6 @@
 # Pagination
 
-# 1. Pagination using Laravel's ORM
+# Pagination using Laravel's ORM
 
 Laravel's `illuminate/database` provides convenient pagination functionality.
 
@@ -139,9 +139,9 @@ Create a new template file `app/view/user/get.html`
 The result is as follows:
 ![](../../assets/img/paginator.png)
 
-# 2. Pagination using ThinkPHP's ORM
+# Pagination using ThinkPHP's ORM
 
-No additional libraries need to be installed, as long as ThinkORM has been installed.
+No additional libraries need to be installed; think-orm alone is sufficient.
 
 ## Usage
 ```php

@@ -30,7 +30,7 @@ use Workerman\Worker;
 
 return [
     // ... 他の設定は省略 ...
-
+    
     'my-http' => [
         'handler' => app\Server::class,
         'listen' => 'http://0.0.0.0:8686',
@@ -39,10 +39,10 @@ return [
         'group' => '',
         'reusePort' => true,
         'constructor' => [
-            'request_class' => \support\Request::class, // リクエストクラスの設定
+            'requestClass' => \support\Request::class, // リクエストクラスの設定
             'logger' => \support\Log::channel('default'), // ログのインスタンス
-            'app_path' => app_path(), // アプリのディレクトリ位置
-            'public_path' => public_path() // publicのディレクトリ位置
+            'appPath' => app_path(), // アプリのディレクトリ位置
+            'publicPath' => public_path() // publicのディレクトリ位置
         ]
     ]
 ];
@@ -52,6 +52,7 @@ return [
 > webmanのデフォルトのHTTPプロセスを停止したい場合は、`config/server.php` で `listen=>''` を設定するだけです。
 
 ## カスタムWebSocketリスナーの例
+
 `app/Pusher.php` を新規作成します。
 
 ```php
@@ -83,14 +84,15 @@ class Pusher
     }
 }
 ```
-> 注意：すべてのonXXXプロパティはpublicです。
+
+> 注意：すべてのonXXXメソッドはpublicである必要があります。
 
 `config/process.php` に以下の設定を追加します。
 
 ```php
 return [
     // ... 他のプロセスの設定は省略 ...
-
+    
     // websocket_test はプロセスの名前です
     'websocket_test' => [
         // ここでプロセスクラスを指定します（上記で定義したPusherクラスです）
@@ -102,6 +104,7 @@ return [
 ```
 
 ## カスタム非リスニングプロセスの例
+
 `app/TaskTest.php` を新規作成します。
 
 ```php
@@ -116,7 +119,7 @@ class TaskTest
   
     public function onWorkerStart()
     {
-        // 10秒毎にデータベースが新しいユーザーの登録をチェックします
+        // 10秒毎にデータベースで新規ユーザー登録をチェックします
         Timer::add(10, function(){
             Db::table('users')->where('regist_timestamp', '>', time()-10)->get();
         });
@@ -124,12 +127,13 @@ class TaskTest
     
 }
 ```
+
 `config/process.php` に以下の設定を追加します。
 
 ```php
 return [
     // ... 他のプロセスの設定は省略 ...
-
+    
     'task' => [
         'handler'  => app\TaskTest::class
     ],
@@ -145,7 +149,7 @@ return [
 ```php
 return [
     // ... 
-
+    
     // websocket_test はプロセスの名前です
     'websocket_test' => [
         // ここでプロセスクラスを指定します
@@ -160,17 +164,20 @@ return [
         'group'   => '',
         // リロードをサポートするかどうか（オプション、デフォルトでtrue）
         'reloadable' => true,
-        // reusePort を有効にするかどうか（オプション、PHP>=7.0以上が必要で、デフォルトでtrue）
+        // reusePort を有効にするかどうか
         'reusePort'  => true,
         // transport（オプション、SSLを有効にする必要がある場合はsslに設定、デフォルトでtcp）
         'transport'  => 'tcp',
         // context（オプション、transportがsslの場合は証明書のパスを渡す必要があります）
         'context'    => [], 
-        // プロセスクラスのコンストラクタパラメータ、ここでは process\Pusher::class クラスのコンストラクタパラメータ（オプション）
+        // プロセスクラスのコンストラクタパラメータ（オプション）
         'constructor' => [],
+        // このプロセスが有効かどうか
+        'enable' => true
     ],
 ];
 ```
 
 ## 結論
-webmanのカスタムプロセスは実質的にはworkermanの簡単なラッピングです。それは設定とビジネスロジックを分離し、workermanの`onXXX`コールバックをクラスのメソッドで実装します。その他の使用法はworkermanと全く同じです。
+
+webmanのカスタムプロセスは実質的にはworkermanの簡単なラッピングです。設定とビジネスロジックを分離し、workermanの`onXXX`コールバックをクラスのメソッドで実装します。その他の使用法はworkermanと全く同じです。

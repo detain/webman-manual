@@ -1,7 +1,7 @@
 # Hiệu suất của webman
 
 
-### Quy trình xử lý yêu cầu của khung mạng truyền thống
+## Quy trình xử lý yêu cầu của khung mạng truyền thống
 
 1. Nginx / apache nhận yêu cầu
 2. Nginx / apache chuyển yêu cầu cho php-fpm
@@ -20,10 +20,10 @@
 15. Nginx / apache trả kết quả về cho máy khách
 
 
-### Quy trình xử lý của webman
+## Quy trình xử lý của webman
 
 1. Khung nhận yêu cầu
-2. Khung thực thi logic kinh doanh
+2. Khung thực thi logic kinh doanh (bytecode opcode)
 3. Khung trả kết quả về cho máy khách
 
 Đúng vậy, trong trường hợp không có nginx đảo ngược, khung chỉ có 3 bước này. Có thể nói rằng điều này đã là hết sức cho khung PHP, điều này làm cho hiệu suất của webman là vài lần thậm chí là mấy chục lần so với khung truyền thống.

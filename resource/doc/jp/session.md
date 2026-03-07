@@ -1,4 +1,4 @@
-# セッション管理
+# webman セッション管理
 
 ## 例
 ```php
@@ -19,26 +19,28 @@ class UserController
 }
 ```
 
-`$request->session();`を使用して、`Workerman\Protocols\Http\Session`インスタンスを取得し、インスタンスのメソッドを使用してセッションデータを追加、変更、削除します。
+`$request->session();`で`Workerman\Protocols\Http\Session`インスタンスを取得し、インスタンスのメソッドでセッションデータの追加・変更・削除を行います。
 
-> 注意：セッションオブジェクトが破棄されると、セッションデータが自動的に保存されるため、`$request->session()`が返すオブジェクトをグローバル配列やクラスメンバーに保存して、セッションが保存されないようにしてください。
+> **注意**
+> セッションオブジェクトが破棄されると、セッションデータは自動的に保存されます。
+> セッションオブジェクトをグローバル変数に保存すると、オブジェクトが破棄されず自動保存されません。その場合は、手動で`$session->save()`を呼び出して保存してください。
 
 ## すべてのセッションデータを取得する
 ```php
 $session = $request->session();
 $all = $session->all();
 ```
-返されるのは配列です。セッションデータがない場合は、空の配列が返されます。
+配列が返されます。セッションデータがない場合は空の配列が返されます。
 
 
-## セッション中の値を取得する
+## セッション内の値を取得する
 ```php
 $session = $request->session();
 $name = $session->get('name');
 ```
-データが存在しない場合は、nullが返されます。
+データが存在しない場合はnullを返します。
 
-また、getメソッドに2番目の引数としてデフォルト値を渡すことができます。セッション配列に対応する値が見つからない場合は、デフォルト値が返されます。例：
+getメソッドの第2引数にデフォルト値を渡すこともできます。セッション配列に対応する値が見つからない場合は、そのデフォルト値が返されます。例：
 ```php
 $session = $request->session();
 $name = $session->get('name', 'tom');
@@ -46,81 +48,81 @@ $name = $session->get('name', 'tom');
 
 
 ## セッションを保存する
-特定のデータを保存する場合は、setメソッドを使用します。
+個別のデータを保存する場合はsetメソッドを使います。
 ```php
 $session = $request->session();
 $session->set('name', 'tom');
 ```
-setメソッドには返り値がありません。セッションオブジェクトが破棄されると、セッションが自動的に保存されます。
+setには戻り値がありません。セッションオブジェクトが破棄されると、セッションは自動的に保存されます。
 
-複数の値を保存する場合は、putメソッドを使用します。
+複数の値を保存する場合はputメソッドを使います。
 ```php
 $session = $request->session();
 $session->put(['name' => 'tom', 'age' => 12]);
 ```
-同様に、putにも返り値はありません。
+同様に、putにも戻り値はありません。
 
 ## セッションデータを削除する
-特定のあるいは複数のセッションデータを削除する場合は、`forget`メソッドを使用します。
+1件または複数件のセッションデータを削除する場合は`forget`メソッドを使います。
 ```php
 $session = $request->session();
-// 1つ削除
+// 1件削除
 $session->forget('name');
-// 複数削除
+// 複数件削除
 $session->forget(['name', 'age']);
 ```
 
-また、deleteメソッドも提供されており、`forget`メソッドとの違いは、deleteは1つだけを削除することができることです。
+また、deleteメソッドも提供されています。forgetとの違いは、deleteは1件しか削除できない点です。
 ```php
 $session = $request->session();
 // $session->forget('name'); と同等
 $session->delete('name');
 ```
 
-## セッションデータを取得して削除する
+## セッションの値を取得して削除する
 ```php
 $session = $request->session();
 $name = $session->pull('name');
 ```
-以下のコードと同じ効果があります。
+次のコードと同じ動作です：
 ```php
 $session = $request->session();
-$value = $session->get($name);
-$session->delete($name);
+$value = $session->get('name');
+$session->delete('name');
 ```
-該当するセッションが存在しない場合は、nullが返されます。
+該当するセッションが存在しない場合はnullを返します。
+
 
 ## すべてのセッションデータを削除する
 ```php
 $request->session()->flush();
 ```
-返り値はありません。セッションオブジェクトが破棄されると、セッションが自動的に保存されます。
+戻り値はありません。セッションオブジェクトが破棄されると、セッションは自動的にストレージから削除されます。
 
 
-## 対応するセッションデータが存在するかどうかを判断する
+## セッションデータの存在を確認する
 ```php
 $session = $request->session();
 $has = $session->has('name');
 ```
-上記の場合、対応するセッションが存在しない場合や対応するセッション値がnullの場合、falseが返され、それ以外の場合はtrueが返されます。
+該当するセッションが存在しない、または値がnullの場合はfalse、それ以外はtrueを返します。
 
 ```php
 $session = $request->session();
 $has = $session->exists('name');
 ```
-上記のコードもセッションデータが存在するかどうかを判断するためのもので、違いは、対応するセッションの値がnullの場合にもtrueが返されることです。
+上記もセッションデータの存在確認に使えます。違いは、セッションの値がnullの場合でもtrueを返す点です。
 
-## ヘルパー関数session()
-> 2020-12-09 追加
+## ヘルパー関数 session()
 
-webmanでは同じ機能を備えたヘルパー関数`session()`が提供されています。
+webmanは同じ機能を実現するヘルパー関数`session()`を提供しています。
 ```php
 // セッションインスタンスを取得
 $session = session();
-// 以下は同等
+// 以下と同等
 $session = $request->session();
 
-// 特定の値を取得
+// 値を取得
 $value = session('key', 'default');
 // 以下と同等
 $value = session()->get('key', 'default');
@@ -133,11 +135,12 @@ session(['key1'=>'value1', 'key2' => 'value2']);
 session()->put(['key1'=>'value1', 'key2' => 'value2']);
 // 以下と同等
 $request->session()->put(['key1'=>'value1', 'key2' => 'value2']);
+
 ```
 
 
 ## 設定ファイル
-セッションの設定ファイルは`config/session.php`にあり、内容は次のようになります。
+セッションの設定ファイルは`config/session.php`にあり、内容は以下のようになっています。
 ```php
 use Webman\Session\FileSessionHandler;
 use Webman\Session\RedisSessionHandler;
@@ -148,11 +151,11 @@ return [
     'handler' => FileSessionHandler::class,
     
     // handlerがFileSessionHandler::classの場合はfile、
-    // handlerがRedisSessionHandler::classの場合はredis
-    // handlerがRedisClusterSessionHandler::classの場合はredis_cluster、すなわちredisクラスター
+    // handlerがRedisSessionHandler::classの場合はredis、
+    // handlerがRedisClusterSessionHandler::classの場合はredis_cluster（Redisクラスタ）
     'type'    => 'file',
 
-    // 異なるhandlerに異なる設定を使用する
+    // ハンドラごとに異なる設定を使用
     'config' => [
         // typeがfileの場合の設定
         'file' => [
@@ -176,49 +179,19 @@ return [
         
     ],
 
-    'session_name' => 'PHPSID', // セッションIDを保存するクッキーの名前
-    
-    // === 以下の設定は webman-framework>=1.3.14 workerman>=4.0.37 で利用可能 ===
-    'auto_update_timestamp' => false,  // セッションを自動的に更新するかどうか、デフォルトは無効
-    'lifetime' => 7*24*60*60,          // セッションの有効期限
-    'cookie_lifetime' => 365*24*60*60, // セッションIDを保存するクッキーの有効期限
-    'cookie_path' => '/',              // セッションIDを保存するクッキーのパス
-    'domain' => '',                    // セッションIDを保存するクッキーのドメイン
-    'http_only' => true,               // httpOnlyを有効にするかどうか、デフォルトは有効
-    'secure' => false,                 // セッションをhttpsでのみ有効にするかどうか、デフォルトは無効
-    'same_site' => '',                 // CSRF攻撃やユーザー追跡を防ぐために使用され、strict/lax/noneを選択できます
-    'gc_probability' => [1, 1000],     // セッションをクリーンアップする確率
+    'session_name' => 'PHPSID', // session_idを保存するクッキー名
+    'auto_update_timestamp' => false,  // セッションの自動更新、デフォルトは無効
+    'lifetime' => 7*24*60*60,          // セッション有効期限
+    'cookie_lifetime' => 365*24*60*60, // session_idを保存するクッキーの有効期限
+    'cookie_path' => '/',              // session_idを保存するクッキーのパス
+    'domain' => '',                    // session_idを保存するクッキーのドメイン
+    'http_only' => true,               // httpOnlyの有効化、デフォルトは有効
+    'secure' => false,                 // HTTPSのみでセッションを有効にする、デフォルトは無効
+    'same_site' => '',                 // CSRF攻撃とユーザー追跡の防止、指定値: strict/lax/none
+    'gc_probability' => [1, 1000],     // セッションのガベージコレクション確率
 ];
 ```
 
-> **注意** 
-> webman 1.4.0以降では、SessionHandlerの名前空間が変更され、以前の
-> use Webman\FileSessionHandler;  
-> use Webman\RedisSessionHandler;  
-> use Webman\RedisClusterSessionHandler;  
-> から
-> use Webman\Session\FileSessionHandler;  
-> use Webman\Session\RedisSessionHandler;  
-> use Webman\Session\RedisClusterSessionHandler;  
-> に変更されました。
+## セキュリティ
+セッションでは、クラスのインスタンスを直接保存するのは推奨されません。特に信頼できないソースのクラスインスタンスは、デシリアライズ時にセキュリティリスクを招く可能性があります。
 
-## 有効期限の設定
-webman-framework < 1.3.14 の場合、sessionの有効期限設定は`php.ini`で行う必要があります。
-
-```bash
-session.gc_maxlifetime = x
-session.cookie_lifetime = x
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-例えば、有効期限を1440秒に設定する場合は、以下のように設定します。
-```bash
-session.gc_maxlifetime = 1440
-session.cookie_lifetime = 1440
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-> **ヒント**
-> `php.ini`の位置を見つけるには、`php --ini`コマンドを使用できます。

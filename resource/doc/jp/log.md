@@ -13,8 +13,8 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('ログのテスト');
-        return response('こんにちは、index');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
@@ -101,7 +101,7 @@ return [
     ],
     // log2 チャンネル
     'log2' => [
-        // デフォルトチャンネルを処理するハンドラー、複数設定可能
+        // log2 チャンネルを処理するハンドラー、複数設定可能
         'handlers' => [
             [   
                 // ハンドラークラス名
@@ -136,8 +136,8 @@ class FooController
     public function index(Request $request)
     {
         $log = Log::channel('log2');
-        $log->info('log2 テスト');
-        return response('こんにちは、index');
+        $log->info('log2 test');
+        return response('hello index');
     }
 }
 ```

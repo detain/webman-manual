@@ -62,11 +62,11 @@ class FooController
 {
     public function index(Request $request)
     {
-        $this->chackInpout($request->post());
+        $this->checkInput($request->post());
         return response('hello index');
     }
     
-    protected function chackInpout($input)
+    protected function checkInput($input)
     {
         if (!isset($input['token'])) {
             throw new BusinessException('Parámetro incorrecto', 3000);

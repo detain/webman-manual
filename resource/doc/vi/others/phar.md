@@ -1,23 +1,19 @@
-# Gói phar
+# Đóng gói phar
 
-Phar là một tập tin đóng gói tương tự như JAR trong PHP, bạn có thể sử dụng phar để đóng gói dự án webman của mình thành một tập tin phar duy nhất để dễ dàng triển khai.
+Phar là một loại tệp đóng gói tương tự JAR trong PHP. Bạn có thể sử dụng phar để đóng gói dự án webman của mình thành một tệp phar duy nhất để dễ dàng triển khai.
 
-**Rất cảm ơn [fuzqing](https://github.com/fuzqing) đã đóng góp.**
+**Rất cảm ơn [fuzqing](https://github.com/fuzqing) đã đóng góp PR.**
 
 > **Lưu ý**
-> Cần tắt tùy chọn cấu hình phar trong `php.ini`, cụ thể là đặt `phar.readonly = 0`
+> Cần tắt tùy chọn cấu hình phar trong `php.ini`, cụ thể là đặt `phar.readonly = 0`.
 
 ## Cài đặt công cụ dòng lệnh
 `composer require webman/console`
 
-## Thiết lập cấu hình
-Mở tập tin `config/plugin/webman/console/app.php`, thiết lập `'exclude_pattern'   => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$#'`, để loại bỏ một số thư mục và tập tin không cần thiết khi đóng gói, tránh kích thước gói quá lớn.
-
 ## Đóng gói
-Trong thư mục gốc dự án webman, thực hiện lệnh `php webman phar:pack`
-Một tập tin `webman.phar` sẽ được tạo ra trong thư mục build.
+Trong thư mục gốc dự án webman, thực hiện lệnh `php webman build:phar`. Một tệp `webman.phar` sẽ được tạo ra trong thư mục `build`.
 
-> Cấu hình đóng gói có trong tập tin `config/plugin/webman/console/app.php`
+> Cấu hình đóng gói có trong tệp `config/plugin/webman/console/app.php`.
 
 ## Các lệnh bắt đầu và kết thúc
 **Bắt đầu**
@@ -36,12 +32,20 @@ Một tập tin `webman.phar` sẽ được tạo ra trong thư mục build.
 `php webman.phar restart` hoặc `php webman.phar restart -d`
 
 ## Giải thích
-* Sau khi chạy webman.phar, một thư mục runtime sẽ được tạo ra ở cùng nơi với webman.phar, để lưu trữ các tập tin nhật ký và tạm thời khác.
+* Dự án đã đóng gói không hỗ trợ reload; cần khởi động lại để cập nhật mã nguồn.
 
-* Nếu dự án của bạn sử dụng tập tin .env, bạn cần đặt tập tin .env trong cùng thư mục với webman.phar.
+* Để tránh kích thước gói quá lớn và tốn bộ nhớ, có thể thiết lập các tùy chọn `exclude_pattern` và `exclude_files` trong `config/plugin/webman/console/app.php` để loại trừ các tệp không cần thiết.
 
-* Nếu doanh nghiệp của bạn cần tải tập tin lên thư mục public, bạn cũng cần tách riêng thư mục public và đặt trong cùng thư mục với webman.phar, lúc này bạn cần thiết lập trong `config/app.php`.
-```'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',```
-Doanh nghiệp có thể sử dụng hàm trợ giúp `public_path()` để tìm vị trí thực tế của thư mục public.
+* Sau khi chạy webman.phar, một thư mục `runtime` sẽ được tạo ra ở cùng nơi với webman.phar, để lưu trữ các tệp nhật ký và tạm thời khác.
 
-* webman.phar không hỗ trợ việc chạy các quy trình tùy chỉnh trên Windows.
+* Nếu dự án của bạn sử dụng tệp .env, bạn cần đặt tệp .env trong cùng thư mục với webman.phar.
+
+* Tuyệt đối không lưu trữ tệp do người dùng tải lên trong gói phar, vì thao tác với tệp người dùng qua giao thức `phar://` rất nguy hiểm (lỗ hổng deserialization Phar). Tệp do người dùng tải lên phải được lưu trữ riêng trên đĩa ngoài gói phar. Xem bên dưới.
+
+* Nếu doanh nghiệp của bạn cần tải tệp lên thư mục public, bạn cần tách riêng thư mục public và đặt trong cùng thư mục với webman.phar. Lúc này bạn cần thiết lập trong `config/app.php`.
+```
+'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
+```
+Có thể sử dụng hàm trợ giúp `public_path($đường_dẫn_tương_đối)` để tìm vị trí thực tế của thư mục public.
+
+* webman.phar không hỗ trợ chạy các quy trình tùy chỉnh trên Windows.

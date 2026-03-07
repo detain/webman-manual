@@ -1,17 +1,17 @@
 # 결제 SDK
 
 
-### 프로젝트 주소
+## 프로젝트 주소
 
 https://github.com/yansongda/pay
 
-### 설치
+## 설치
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### 사용
+## 사용
 
 **알리페이**
 
@@ -110,7 +110,7 @@ class PayController
     protected $config = [
         'appid' => 'wxb3fxxxxxxxxxxx', // 앱 APPID
         'app_id' => 'wxb3fxxxxxxxxxxx', // 공개 번호 APPID
-        'miniapp_id' => 'wxb3fxxxxxxxxxxx', // 소프트웨어 APPID
+        'miniapp_id' => 'wxb3fxxxxxxxxxxx', // 미니프로그램 APPID
         'mch_id' => '14577xxxx',
         'key' => 'mF2suE9sU6Mk1Cxxxxxxxxxxx',
         'notify_url' => 'http://yanda.net.cn/notify.php',
@@ -165,6 +165,6 @@ class PayController
 }
 ```
 
-### 더 많은 컨텐츠
+## 더 많은 내용
 
-https://pay.yanda.net.cn/docs/2.x/overview에 방문하세요.
+자세한 내용은 https://pay.yanda.net.cn/docs/2.x/overview 에서 확인하세요

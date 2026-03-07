@@ -1,6 +1,6 @@
-## Stomp Queue
+# Stomp Queue
 
-Stomp is a Simple (Streaming) Text Orientated Messaging Protocol that provides an interoperable wire format that allows clients to communicate with any STOMP message broker. The [workerman/stomp](https://github.com/walkor/stomp) implements the Stomp client and is mainly used for message queue scenarios such as RabbitMQ, Apollo, ActiveMQ, etc.
+Stomp is a Simple (Streaming) Text Orientated Messaging Protocol that provides an interoperable wire format allowing STOMP clients to communicate with any STOMP message broker. [workerman/stomp](https://github.com/walkor/stomp) implements the Stomp client and is mainly used for message queue scenarios such as RabbitMQ, Apollo, ActiveMQ, etc.
 
 ## Installation
 `composer require webman/stomp`
@@ -22,7 +22,7 @@ class Index
     {
         // Queue name
         $queue = 'examples';
-        // Data (serialization is required when passing an array, for example, using json_encode, serialize, etc.)
+        // Data (serialization is required when passing an array, e.g. using json_encode, serialize, etc.)
         $data = json_encode(['to' => 'tom@gmail.com', 'content' => 'hello']);
         // Perform delivery
         Client::send($queue, $data);
@@ -32,10 +32,10 @@ class Index
 
 }
 ```
-> For compatibility with other projects, the Stomp component does not provide automatic serialization and deserialization. If array data is to be sent, serialization is required, and deserialization is required when consuming.
+> For compatibility with other projects, the Stomp component does not provide automatic serialization and deserialization. If sending array data, you must serialize it yourself and deserialize it when consuming.
 
 ## Consuming Messages
-Create a new file `app/queue/stomp/MyMailSend.php` (the class name can be arbitrary as long as it complies with the psr4 standard).
+Create a new file `app/queue/stomp/MyMailSend.php` (class name can be arbitrary as long as it follows the PSR-4 standard).
 ```php
 <?php
 namespace app\queue\stomp;
@@ -51,24 +51,24 @@ class MyMailSend implements Consumer
     // Connection name, corresponding to the connection in stomp.php
     public $connection = 'default';
 
-    // When the value is 'client', it is necessary to use $ack_resolver->ack() to inform the server that the consumption was successful
-    // When the value is 'auto', there is no need to call $ack_resolver->ack()
+    // When value is 'client', call $ack_resolver->ack() to notify the server of successful consumption
+    // When value is 'auto', no need to call $ack_resolver->ack()
     public $ack = 'auto';
 
-    // Consumption
+    // Consume
     public function consume($data, AckResolver $ack_resolver = null)
     {
-        // If the data is an array, deserialization is required
+        // If data is an array, deserialize it yourself
         var_export(json_decode($data, true)); // Outputs ['to' => 'tom@gmail.com', 'content' => 'hello']
-        // Inform the server that the consumption was successful
-        $ack_resolver->ack(); // This call can be omitted when ack is set to auto
+        // Notify the server of successful consumption
+        $ack_resolver->ack(); // Can be omitted when ack is 'auto'
     }
 }
 ```
 
 # Enable STOMP Protocol in RabbitMQ
-By default, RabbitMQ does not enable the STOMP protocol and requires the following command to enable it:
+RabbitMQ does not enable the STOMP protocol by default. Run the following command to enable it:
 ```
 rabbitmq-plugins enable rabbitmq_stomp
 ```
-Once enabled, the default port for STOMP is 61613.
+Once enabled, the default STOMP port is 61613.

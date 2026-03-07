@@ -1,5 +1,3 @@
-## Views
+# View
 
-The configuration file for views in the application plugin can be found in `plugin/{plugin identifier}/config/view.php`. 
-
-Using views in application plugins is the same as developing a regular webman project. Please refer to [Views](../view.md) for more information.
+The view configuration file for application plugins is located at `plugin/{plugin identifier}/config/view.php`. Using views in application plugins offers the same development experience as regular webman projects. See [View](../view.md) for details.

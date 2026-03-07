@@ -1,15 +1,16 @@
 # Logging
-The usage of the logging class is similar to the database class.
+The usage of the log class is similar to that of the database.
 
 ```php
 use support\Log;
 Log::channel('plugin.admin.default')->info('test');
 ```
-If you want to reuse the logging configuration of the main project, you can simply use:
+
+If you want to reuse the main project's log configuration, use the following directly:
 
 ```php
 use support\Log;
 Log::info('Log content');
-// Assuming the main project has a logging configuration named 'test'
+// Assuming the main project has a log configuration named test
 Log::channel('test')->info('Log content');
 ```

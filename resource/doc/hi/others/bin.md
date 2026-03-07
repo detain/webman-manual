@@ -1,104 +1,60 @@
 # बाइनरी पैकेजिंग
 
-वेबमैन अब प्रोजेक्ट को एक बाइनरी फ़ाइल में पैकेज करने का समर्थन करता है, जिससे वेबमैन को लिनक्स सिस्टम पर भागता है और PHP परिवेश की आवश्यकता नहीं होती है।
+webman प्रोजेक्ट को एक बाइनरी फ़ाइल में पैकेज करने का समर्थन करता है, जिससे webman बिना PHP वातावरण के Linux पर चल सकता है।
 
 > **ध्यान दें**
-> पैकेज के बाद की फ़ाइल अब तक सिर्फ़ x86_64 की संरचना वाले लिनक्स सिस्टम में ही चल सकती है, मैक सिस्टम का समर्थन नहीं करता है
-> `php.ini` की phar कॉन्फ़िगरेशन विकल्प को बंद करना चाहिए, अर्थात `phar.readonly = 0` सेट करें
+> पैकेज की गई फ़ाइल वर्तमान में केवल x86_64 आर्किटेक्चर वाले Linux पर चलती है। Windows और macOS समर्थित नहीं हैं।
+> `php.ini` में phar विकल्प बंद करना ज़रूरी है: `phar.readonly = 0` सेट करें।
 
-## कमांड लाइन टूल की स्थापना
-`कंम्पोज़र मांगे webman/console ^1.2.24`
-
-## कॉन्फ़िगरेशन सेटिंग
-`config/plugin/webman/console/app.php` फ़ाइल खोलें, सेट करें
-```php
-'exclude_pattern'   => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$#'
-```
-जो पैकेज करते समय कुछ बेकार डायरेक्टरी और फ़ाइलों को छोड़ देता है, बड़े पैकेज साइज़ से बचने के लिए।
+## कमांड लाइन टूल इंस्टॉल करें
+`composer require webman/console`
 
 ## पैकेजिंग
 कमांड चलाएं
-````
+```
 php webman build:bin
-````
-एक निर्दिष्ट PHP संस्करण से पैकेज करने के लिए भी संभव है, जैसे
-````
+```
+पैकेज करने के लिए PHP संस्करण निर्दिष्ट कर सकते हैं, उदाहरण के लिए
+```
 php webman build:bin 8.1
-````
+```
 
-पैकेजिंग के बाद बिल्ड डायरेक्टरी में `webman.bin` फ़ाइल उत्पन्न होगी
+पैकेजिंग के बाद build डायरेक्टरी में `webman.bin` फ़ाइल बनेगी।
 
 ## शुरू करना
-webman.bin को लिनक्स सर्वर पर अपलोड करें, `./webman.bin start` या `./webman.bin start -d` चलाकर चालू कर सकते हैं।
+webman.bin को Linux सर्वर पर अपलोड करें और `./webman.bin start` या `./webman.bin start -d` चलाएं।
 
-## तत्व
-* पहले लोकल webman प्रोजेक्ट को एक phar फ़ाइल में पैक करें
-* फिर दूरस्थ से PHP 8.x.micro.sfx फ़ाइल को डाउनलोड करें
-* PHP 8.x.micro.sfx और phar फ़ाइल को एक बाइनरी फ़ाइल में जोड़ें
+## सिद्धांत
+* पहले स्थानीय webman प्रोजेक्ट को phar फ़ाइल में पैक किया जाता है
+* फिर php8.x.micro.sfx रिमोट से डाउनलोड होती है
+* php8.x.micro.sfx और phar फ़ाइल को एक बाइनरी फ़ाइल में जोड़ दिया जाता है
 
 ## ध्यान दें
-* स्थानीय PHP संस्करण >= 7.2 पैकेजिंग कमांड को चला सकता है
-* लेकिन केवल PHP 8 के बाइनरी फ़ाइलों में पैकेज कर सकता है
-* मजबूती से आग्रह है कि स्थानीय PHP संस्करण और पैकेजिंग संस्करण मेल खायें, यानी अगर स्थानीय PHP 8.0 हो, तो पैकेजिंग भी PHP 8.0 ही उपयोग करें, संवाद समस्याएँ रोकें
-* पैकेजिंग में PHP 8 का स्रोत कोड डाउनलोड होगा, लेकिन स्थानीय रूप से स्थापित नहीं होगा, स्थानीय PHP परिवेश पर प्रभाव नहीं डालेगा
-* वर्तमान में webman.bin केवल x86_64 की संरचना वाले लिनक्स सिस्टम पर ही चल सकता है, मैक सिस्टम पर समर्थन नहीं करता है
-* डिफ़ॉल्ट रूप से env फ़ाइल को पैकेजिंग नहीं करता है (`config/plugin/webman/console/app.php` में exclude_files नियंत्रित करता है), इसलिए शुरू करने के समय env फ़ाइल भी वेबमैन बिन के सामान डायरेक्टरी में रखनी चाहिए
-* वेबमैन बिन के माध्यम से यातायात के दौरान, runtime डायरेक्टरी उत्पन्न होगी, जिसमें लॉग फ़ाइलें स्टोर होंगी
-* वर्तमान में webman.bin बाहरी php.ini फ़ाइल पढ़ने के लिए कार्रवाई नहीं करता, यदि आपको कस्टम php.ini की आवश्यकता है, तो `/config/plugin/webman/console/app.php` फ़ाइल में custom_ini में सेट करें
+* संगतता से बचने के लिए स्थानीय और पैकेजिंग में वही PHP संस्करण (जैसे दोनों में PHP 8.1) इस्तेमाल करने की सलाह दी जाती है
+* पैकेजिंग में PHP 8 का सोर्स कोड डाउनलोड होता है लेकिन स्थानीय रूप से इंस्टॉल नहीं होता, स्थानीय PHP पर असर नहीं पड़ता
+* webman.bin अभी केवल x86_64 Linux पर चलता है, macOS समर्थित नहीं है
+* पैकेज किए गए प्रोजेक्ट में reload सपोर्ट नहीं है; कोड अपडेट के लिए रीस्टार्ट ज़रूरी है
+* डिफ़ॉल्ट रूप से env फ़ाइल पैकेज नहीं होती (`config/plugin/webman/console/app.php` में exclude_files द्वारा नियंत्रित)। शुरू करते समय env फ़ाइल webman.bin के साथ ही डायरेक्टरी में होनी चाहिए
+* चलने के दौरान webman.bin वाली डायरेक्टरी में runtime डायरेक्टरी बनेगी, जिसमें लॉग फ़ाइलें रखी जाएंगी
+* अभी webman.bin बाहरी php.ini नहीं पढ़ता। php.ini कस्टमाइज़ करने के लिए `config/plugin/webman/console/app.php` में custom_ini में सेट करें
+* कुछ फ़ाइलें पैकेज करने की ज़रूरत नहीं; `config/plugin/webman/console/app.php` में बाहर रखने की सेटिंग से पैकेज साइज़ कम हो सकता है
+* बाइनरी पैकेजिंग में Swoole कोरूटीन सपोर्ट नहीं है
+* यूज़र द्वारा अपलोड की गई फ़ाइलें पैकेज के अंदर कभी न रखें। `phar://` प्रोटोकॉल से ऐसी फ़ाइलों पर काम करना जोखिम भरा है (phar deserialization कमजोरी)। अपलोड फ़ाइलें पैकेज के बाहर डिस्क पर अलग रखनी चाहिए
+* अगर ऐप को public डायरेक्टरी में अपलोड करना है, तो public डायरेक्टरी को webman.bin के पास रखें, `config/app.php` में ऐसे सेट करें और फिर से पैकेज करें:
+```
+'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
+```
 
-## विशेष रूप से डाउनलोड स्थिर PHP
-कभी-कभी आप बस PHP परिवेश लागू नहीं करना चाहते हैं, केवल एक PHP कार्यकारी फ़ाइल की आवश्यकता होती है, यहां [स्थिर PHP डाउनलोड](https://www.workerman.net/download) के लिए क्लिक करें
+## स्टैटिक PHP अलग से डाउनलोड करें
+कभी-कभी सिर्फ PHP एक्ज़ीक्यूटेबल चाहिए होता है, पूरा PHP वातावरण डिप्लॉय नहीं करना होता। [स्टैटिक PHP यहाँ डाउनलोड करें](https://www.workerman.net/download)
 
-> **सुचना**
-> स्थिर PHP को निर्दिष्ट php.ini फ़ाइल देने की आवश्यकता हो तो, नीचे दिए गए कमांड का उपयोग करें `php -c /your/path/php.ini start.php start -d`
+> **सुझाव**
+> स्टैटिक PHP के लिए php.ini निर्दिष्ट करने के लिए: `php -c /your/path/php.ini start.php start -d`
 
 ## समर्थित एक्सटेंशन
-bcmath
-calendar
-Core
-ctype
-curl
-date
-dom
-event
-exif
-FFI
-fileinfo
-filter
-gd
-hash
-iconv
-json
-libxml
-mbstring
-mongodb
-mysqlnd
-openssl
-pcntl
-pcre
-PDO
-pdo_mysql
-pdo_sqlite
-Phar
-posix
-readline
-redis
-Reflection
-session
-shmop
-SimpleXML
-soap
-sockets
-SPL
-sqlite3
-standard
-tokenizer
-xml
-xmlreader
-xmlwriter
-zip
-zlib
+apcu, bcmath, bz2, calendar, Core, ctype, curl, date, dba, dom, event, exif, fileinfo, filter, ftp, gd, gmp, hash, iconv, imagick, imap, intl, json, libxml, mbstring, mysqli, mysqlnd, openssl, pcntl, pcre, PDO, pdo_mysql, pgsql, Phar, posix, protobuf, readline, redis, Reflection, session, shmop, SimpleXML, soap, sockets, sodium, SPL, sqlite3, standard, swoole, sysvmsg, sysvsem, sysvshm, tokenizer, xml, xmlreader, xmlwriter, xsl, Zend OPcache, zip, zlib
 
-## प्रोजेक्ट की प्रारंभिक जगह
+## प्रोजेक्ट स्रोत
+
 https://github.com/crazywhalecc/static-php-cli
 https://github.com/walkor/static-php-cli

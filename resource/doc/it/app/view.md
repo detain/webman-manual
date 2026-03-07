@@ -1,4 +1,3 @@
-## Vista
+# Vista
 
-Il file di configurazione della vista del plugin dell'applicazione si trova in `plugin/{identificativo-plugin}/config/view.php`,
-Gli plugin dell'applicazione utilizzano la vista come i progetti webman comuni, fare riferimento a [Vista](../view.md)
+Il file di configurazione della vista per i plugin dell'applicazione si trova in `plugin/{identificativo_plugin}/config/view.php`. L'utilizzo delle viste nei plugin dell'applicazione offre la stessa esperienza di sviluppo dei progetti webman standard. Fare riferimento a [Vista](../view.md) per maggiori informazioni.

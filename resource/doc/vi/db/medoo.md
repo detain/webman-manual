@@ -1,20 +1,20 @@
-## Medoo
+# Cơ sở dữ liệu Medoo
 
-Medoo là một plugin thao tác cơ sở dữ liệu nhẹ, [Trang chủ của Medoo](https://medoo.in/).
+[webman/medoo](https://github.com/webman-php/medoo) mở rộng [Medoo](https://medoo.in/) với hỗ trợ connection pool và hoạt động trong cả môi trường coroutine và không coroutine. Cách sử dụng giống như Medoo.
 
 ## Cài đặt
 `composer require webman/medoo`
 
-## Cấu hình database
-Tệp cấu hình nằm tại `config/plugin/webman/medoo/database.php`
+## Cấu hình cơ sở dữ liệu Medoo
+Vị trí tệp cấu hình: `config/plugin/webman/medoo/database.php`
 
-## Sử dụng
+## Sử dụng cơ sở dữ liệu Medoo
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use Webman\Medoo\Medoo;
+use support\Medoo;
 
 class Index
 {
@@ -28,13 +28,13 @@ class Index
 
 > **Gợi ý**
 > `Medoo::get('user', '*', ['uid' => 1]);`
-> Tương đương với
+> tương đương với
 > `Medoo::instance('default')->get('user', '*', ['uid' => 1]);`
 
-## Cấu hình nhiều cơ sở dữ liệu
+## Cấu hình nhiều cơ sở dữ liệu Medoo
 
-**Cấu hình**  
-Thêm một cấu hình mới trong tệp `config/plugin/webman/medoo/database.php`, sử dụng key bất kỳ, ở đây sử dụng `other`.
+**Cấu hình**
+Thêm cấu hình mới trong `config/plugin/webman/medoo/database.php` với khóa bất kỳ; ở đây sử dụng `other`.
 
 ```php
 <?php
@@ -56,9 +56,16 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
+        ],
+        'pool' => [ // Cấu hình connection pool
+            'max_connections' => 5, // Số kết nối tối đa
+            'min_connections' => 1, // Số kết nối tối thiểu
+            'wait_timeout' => 60,   // Thời gian chờ tối đa khi lấy kết nối từ pool; ném ngoại lệ nếu vượt quá
+            'idle_timeout' => 3,    // Thời gian nhàn rỗi tối đa của kết nối trong pool; vượt quá sẽ đóng đến min_connections
+            'heartbeat_interval' => 50, // Khoảng heartbeat của pool (giây); khuyến nghị dưới 60 giây
         ]
     ],
-    // Thêm một cấu hình other mới tại đây
+    // Thêm cấu hình 'other' tại đây
     'other' => [
         'type' => 'mysql',
         'host' => 'localhost',
@@ -76,15 +83,21 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
-        ]
+        ],
+        'pool' => [
+            'max_connections' => 5,
+            'min_connections' => 1,
+            'wait_timeout' => 60,
+            'idle_timeout' => 3,
+            'heartbeat_interval' => 50,
+        ],
     ],
 ];
 ```
 
-**Sử dụng**
+## Sử dụng cơ sở dữ liệu Medoo
 ```php
 $user = Medoo::instance('other')->get('user', '*', ['uid' => 1]);
 ```
 
-## Tài liệu chi tiết
-Xem chi tiết tại [Tài liệu chính thức của Medoo](https://medoo.in/api/select)
+Xem [tài liệu chính thức Medoo](https://medoo.in/api/select)

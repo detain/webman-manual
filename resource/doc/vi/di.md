@@ -1,23 +1,29 @@
-# Tự động chèn phụ thuộc
+# Tiêm phụ thuộc tự động
 
-Trong webman, việc chèn phụ thuộc tự động là một tính năng tùy chọn và mặc định là đóng. Nếu bạn cần chèn phụ thuộc tự động, chúng tôi khuyên bạn nên sử dụng [php-di](https://php-di.org/doc/getting-started.html). Dưới đây là cách sử dụng `php-di` kết hợp với webman.
+Trong webman, tiêm phụ thuộc tự động là tính năng tùy chọn và mặc định bị tắt. Nếu cần tiêm phụ thuộc tự động, nên dùng [php-di](https://php-di.org/doc/getting-started.html). Dưới đây mô tả cách dùng `php-di` với webman.
 
 ## Cài đặt
-```composer require psr/container ^1.1.1 php-di/php-di ^6 doctrine/annotations ^1.14```
 
-Sửa đổi cấu hình trong `config/container.php`, nội dung cuối cùng sẽ như sau:
+```
+composer require php-di/php-di:^7.0
+```
+
+Chỉnh sửa cấu hình `config/container.php`. Nội dung cuối cùng phải như sau:
+
 ```php
 $builder = new \DI\ContainerBuilder();
 $builder->addDefinitions(config('dependence', []));
 $builder->useAutowiring(true);
-$builder->useAnnotations(true);
+$builder->useAttributes(true);
 return $builder->build();
 ```
 
-> Trong`config/container.php`, bạn cần trả về một thực thể của container phù hợp với chuẩn `PSR-11`. Nếu bạn không muốn sử dụng `php-di`, bạn có thể tạo và trả về một thực thể của container khác phù hợp với chuẩn `PSR-11` tại đây.
+> File `config/container.php` cuối cùng phải trả về một instance container tuân thủ đặc tả PSR-11. Nếu không muốn dùng `php-di`, bạn có thể tạo và trả về một instance container tuân thủ PSR-11 khác tại đây. Cấu hình mặc định chỉ cung cấp chức năng container cơ bản của webman.
 
-## Chèn theo constructor
-Tạo mới tệp `app/service/Mailer.php` (nếu thư mục không tồn tại, vui lòng tạo mới) với nội dung như sau:
+## Tiêm qua constructor
+
+Tạo file `app/service/Mailer.php` (tạo thư mục nếu chưa có) với nội dung sau:
+
 ```php
 <?php
 namespace app\service;
@@ -26,12 +32,12 @@ class Mailer
 {
     public function mail($email, $content)
     {
-        // Mã gửi email được bay qua
+        // Mã gửi email được bỏ qua
     }
 }
 ```
 
-Nội dung của `app/controller/UserController.php` như sau:
+Nội dung `app/controller/UserController.php`:
 
 ```php
 <?php
@@ -42,11 +48,9 @@ use app\service\Mailer;
 
 class UserController
 {
-    private $mailer;
 
-    public function __construct(Mailer $mailer)
+    public function __construct(private Mailer $mailer)
     {
-        $this->mailer = $mailer;
     }
 
     public function register(Request $request)
@@ -56,34 +60,38 @@ class UserController
     }
 }
 ```
-Thông thường, mã sau đây cần được sử dụng để khởi tạo thể hiện của `app\controller\UserController`:
+
+Thông thường, cần đoạn code sau để khởi tạo instance `app\controller\UserController`:
+
 ```php
 $mailer = new Mailer;
 $user = new UserController($mailer);
 ```
-Khi sử dụng `php-di`, phương pháp này sẽ không cần thiết nữa vì webman sẽ tự động hoàn thành việc này cho bạn. Nếu trong quá trình khởi tạo `Mailer` có phụ thuộc vào các lớp khác, webman cũng sẽ tự động khởi tạo và chèn vào. Bạn không cần phải làm bất kỳ công việc khởi tạo nào.
+
+Khi dùng `php-di`, lập trình viên không cần khởi tạo thủ công `Mailer` trong controller — webman sẽ làm tự động. Nếu quá trình khởi tạo `Mailer` có phụ thuộc lớp khác, webman cũng tự động khởi tạo và tiêm. Không cần thao tác khởi tạo nào từ lập trình viên.
 
 > **Lưu ý**
-> Chỉ từ các thể hiện được tạo ra bởi framework hoặc `php-di` mới có thể sử dụng chèn phụ thuộc tự động. Các thể hiện được tạo bằng tay bằng từ khóa `new` sẽ không có chèn phụ thuộc tự động. Để chèn phụ thuộc, bạn cần sử dụng giao diện `support\Container` thay vì câu lệnh `new`, ví dụ:
+> Chỉ instance do framework hoặc `php-di` tạo mới hỗ trợ tiêm phụ thuộc tự động. Instance tạo thủ công bằng `new` không thể dùng. Muốn tiêm, dùng interface `support\Container` thay cho `new`, ví dụ:
 
 ```php
 use app\service\UserService;
 use app\service\LogService;
 use support\Container;
 
-// Thể hiện được tạo ra bằng từ khóa `new` không thể chèn phụ thuộc tự động
+// Instance tạo bằng new không hỗ trợ tiêm phụ thuộc
 $user_service = new UserService;
-// Thể hiện được tạo ra bằng từ khóa `new` không thể chèn phụ thuộc tự động
+// Instance tạo bằng new không hỗ trợ tiêm phụ thuộc
 $log_service = new LogService($path, $name);
 
-// Thể hiện được tạo ra bằng Container có thể chèn phụ thuộc tự động
+// Instance tạo bằng Container hỗ trợ tiêm phụ thuộc
 $user_service = Container::get(UserService::class);
-// Thể hiện được tạo ra bằng Container có thể chèn phụ thuộc tự động
+// Instance tạo bằng Container hỗ trợ tiêm phụ thuộc
 $log_service = Container::make(LogService::class, [$path, $name]);
 ```
 
-## Chèn bằng chú thích
-Ngoài chứa chèn qua constructor, chúng ta cũng có thể sử dụng chú thích để chèn phụ thuộc. Tiếp tục từ ví dụ trước, `app\controller\UserController` sẽ được thay đổi như sau:
+## Tiêm qua thuộc tính (Attributes)
+
+Ngoài tiêm qua constructor, có thể dùng tiêm qua thuộc tính. Tiếp tục ví dụ trước, sửa `app\controller\UserController` như sau:
 
 ```php
 <?php
@@ -91,15 +99,12 @@ namespace app\controller;
 
 use support\Request;
 use app\service\Mailer;
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class UserController
 {
-    /**
-     * @Inject
-     * @var Mailer
-     */
-    private $mailer;
+    #[Inject]
+    private Mailer $mailer;
 
     public function register(Request $request)
     {
@@ -108,10 +113,11 @@ class UserController
     }
 }
 ```
-Trong ví dụ này, chúng ta sử dụng chú thích `@Inject` để chèn và sử dụng chú thích `@var` để khai báo kiểu đối tượng. Hiệu quả của ví dụ này tương tự như chèn qua constructor nhưng mã nguồn ngắn gọn hơn.
+
+Ví dụ này dùng thuộc tính `#[Inject]` để tiêm và tự động tiêm instance vào biến thành viên theo kiểu đối tượng. Hiệu quả tương đương tiêm qua constructor nhưng code gọn hơn.
 
 > **Lưu ý**
-> Trước phiên bản 1.4.6, webman không hỗ trợ chèn tham số điều khiển, ví dụ như trong đoạn mã sau đây sẽ không được hỗ trợ nếu phiên bản của webman <= 1.4.6
+> webman không hỗ trợ tiêm tham số controller trước phiên bản 1.4.6. Ví dụ đoạn code sau không được hỗ trợ khi webman<=1.4.6:
 
 ```php
 <?php
@@ -122,7 +128,7 @@ use app\service\Mailer;
 
 class UserController
 {
-    // Trước phiên bản 1.4.6, không hỗ trợ chèn tham số điều khiển
+    // Tiêm tham số controller không hỗ trợ trước phiên bản 1.4.6
     public function register(Request $request, Mailer $mailer)
     {
         $mailer->mail('hello@webman.com', 'Xin chào và chào mừng!');
@@ -131,9 +137,9 @@ class UserController
 }
 ```
 
-## Tự động chèn theo constructor tùy chỉnh
+## Tiêm constructor tùy chỉnh
 
-Đôi khi, tham số được truyền vào constructor có thể không phải là một thể hiện của lớp mà có thể là một chuỗi, số, mảng, hoặc dữ liệu khác. Ví dụ, constructor của Mailer cần phải truyền vào địa chỉ IP và cổng của máy chủ SMTP:
+Đôi khi tham số constructor có thể không phải instance của lớp mà là chuỗi, số, mảng hoặc dữ liệu khác. Ví dụ constructor Mailer cần IP và cổng máy chủ SMTP:
 
 ```php
 <?php
@@ -153,28 +159,33 @@ class Mailer
 
     public function mail($email, $content)
     {
-        // Mã gửi email được bay qua
+        // Mã gửi email được bỏ qua
     }
 }
 ```
 
-Trường hợp này không thể sử dụng chèn tự động qua constructor như đã giới thiệu trước vì `php-di` không thể xác định giá trị của `$smtp_host` và `$smtp_port`. Trong trường hợp này, bạn có thể thử nghiệm với chèn tùy chỉnh.
+Trường hợp này không thể dùng tiêm tự động qua constructor vì `php-di` không xác định được giá trị `$smtp_host` và `$smtp_port`. Có thể dùng tiêm tùy chỉnh.
 
-Trong `config/dependence.php` (nếu tệp không tồn tại, vui lòng tạo mới), thêm mã sau đây:
+Thêm đoạn code sau vào `config/dependence.php` (tạo file nếu chưa có):
+
 ```php
 return [
-    // ... Bỏ qua các cấu hình khác
+    // ... Cấu hình khác được bỏ qua
 
     app\service\Mailer::class =>  new app\service\Mailer('192.168.1.11', 25);
 ];
 ```
-Như vậy, khi cần thể hiện của `app\service\Mailer`, webman sẽ tự động sử dụng thể hiện của `app\service\Mailer` được tạo ra trong cấu hình này. 
 
-Chúng ta nhìn thấy rằng, trong `config/dependence.php`, chúng ta sử dụng từ khóa `new` để khởi tạo thể hiện của lớp `Mailer`. Trong ví dụ này, điều này không gây vấn đề gì, nhưng nếu lớp `Mailer` phụ thuộc vào các lớp khác hoặc sử dụng chèn qua chú thích, việc khởi tạo bằng từ khóa `new` sẽ không thực hiện chèn phụ thuộc tự động. Cách giải quyết là sử dụng chèn tùy chỉnh thông qua phương thức `Container::get(class_name)` hoặc `Container::make(class_name, [constructor_parameters])` để khởi tạo lớp.
-## Tiêm cấp giao diện tùy chỉnh
+Khi tiêm phụ thuộc cần lấy instance `app\service\Mailer`, sẽ tự động dùng instance được tạo trong cấu hình này.
 
-Trong dự án thực tế, chúng ta mong muốn lập trình theo giao diện, chứ không phải là các lớp cụ thể. Ví dụ:`app\controller\UserController` nên nhúng `app\service\MailerInterface` thay vì `app\service\Mailer`.
-Định nghĩa giao diện `MailerInterface`:
+Lưu ý rằng `config/dependence.php` dùng `new` để khởi tạo lớp `Mailer`. Trong ví dụ này không vấn đề gì, nhưng nếu lớp `Mailer` phụ thuộc lớp khác hoặc dùng tiêm qua thuộc tính bên trong, khởi tạo bằng `new` sẽ không thực hiện tiêm phụ thuộc tự động. Cách xử lý là dùng tiêm tùy chỉnh qua interface và khởi tạo lớp qua `Container::get(tên lớp)` hoặc `Container::make(tên lớp, [tham số constructor])`.
+
+## Tiêm tùy chỉnh qua interface
+
+Trong dự án thực tế, nên lập trình hướng interface hơn là lớp cụ thể. Ví dụ `app\controller\UserController` nên phụ thuộc `app\service\MailerInterface` thay vì `app\service\Mailer`.
+
+Định nghĩa interface `MailerInterface`:
+
 ```php
 <?php
 namespace app\service;
@@ -185,7 +196,8 @@ interface MailerInterface
 }
 ```
 
-Triển khai giao diện `MailerInterface`:
+Định nghĩa implementation của `MailerInterface`:
+
 ```php
 <?php
 namespace app\service;
@@ -193,6 +205,7 @@ namespace app\service;
 class Mailer implements MailerInterface
 {
     private $smtpHost;
+
     private $smtpPort;
 
     public function __construct($smtp_host, $smtp_port)
@@ -208,23 +221,21 @@ class Mailer implements MailerInterface
 }
 ```
 
-Nhúng giao diện `MailerInterface` thay vì triển khai cụ thể:
+Dùng interface `MailerInterface` thay cho implementation cụ thể:
+
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
 use app\service\MailerInterface;
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class UserController
 {
-    /**
-     * @Inject
-     * @var MailerInterface
-     */
-    private $mailer;
-    
+    #[Inject]
+    private MailerInterface $mailer;
+
     public function register(Request $request)
     {
         $this->mailer->mail('hello@webman.com', 'Xin chào và chào mừng!');
@@ -233,24 +244,28 @@ class UserController
 }
 ```
 
+Định nghĩa implementation của `MailerInterface` trong `config/dependence.php`:
 
-`config/dependence.php` định nghĩa triển khai `MailerInterface` như sau:
 ```php
 use Psr\Container\ContainerInterface;
+
 return [
     app\service\MailerInterface::class => function(ContainerInterface $container) {
         return $container->make(app\service\Mailer::class, ['smtp_host' => '192.168.1.11', 'smtp_port' => 25]);
     }
 ];
 ```
-Như vậy, khi doanh nghiệp cần sử dụng giao diện `MailerInterface`, nó sẽ tự động sử dụng triển khai `Mailer`.
-> Sự lợi ích của lập trình theo giao diện là khi chúng ta cần thay đổi một thành phần, chúng ta không cần thay đổi mã doanh nghiệp, chỉ cần thay đổi triển khai cụ thể trong `config/dependence.php`. Điều này cũng rất hữu ích khi thực hiện kiểm thử đơn vị.
 
-## Tiêm cấp tùy chỉnh khác
+Khi nghiệp vụ cần dùng interface `MailerInterface`, sẽ tự động dùng implementation `Mailer`.
 
-`config/dependence.php` không chỉ định nghĩa các phụ thuộc của lớp, mà còn có thể định nghĩa các giá trị khác như chuỗi, số, mảng, v.v.
+> Lợi ích của lập trình hướng interface là khi cần thay thế thành phần không cần sửa code nghiệp vụ, chỉ thay đổi implementation cụ thể trong `config/dependence.php`. Rất hữu ích cho kiểm thử đơn vị.
 
-Ví dụ `config/dependence.php` định nghĩa như sau:
+## Tiêm tùy chỉnh khác
+
+Ngoài phụ thuộc lớp, `config/dependence.php` còn có thể định nghĩa giá trị khác như chuỗi, số, mảng...
+
+Ví dụ nếu `config/dependence.php` định nghĩa như sau:
+
 ```php
 return [
     'smtp_host' => '192.168.1.11',
@@ -258,34 +273,119 @@ return [
 ];
 ```
 
-Lúc này, chúng ta có thể nhúng `smtp_host` `smtp_port` vào thuộc tính của lớp thông qua `@Inject`:
+Có thể dùng `#[Inject]` để tiêm `smtp_host` và `smtp_port` vào thuộc tính lớp:
+
 ```php
 <?php
 namespace app\service;
 
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class Mailer
 {
-    /**
-     * @Inject("smtp_host")
-     */
+    #[Inject("smtp_host")]
     private $smtpHost;
 
-    /**
-     * @Inject("smtp_port")
-     */
+    #[Inject("smtp_port")]
     private $smtpPort;
 
     public function mail($email, $content)
     {
         // Mã gửi email được bỏ qua
-        echo "{$this->smtpHost}:{$this->smtpPort}\n"; // Sẽ xuất hiện 192.168.1.11:25
+        echo "{$this->smtpHost}:{$this->smtpPort}\n"; // Sẽ hiển thị 192.168.1.11:25
     }
 }
 ```
 
-> Lưu ý: `"@Inject("key")"` nằm trong cặp dấu kép.
+# Tải lazy (Lazy Loading)
 
-## Nội dung khác
-Vui lòng tham khảo [hướng dẫn sử dụng php-di](https://php-di.org/doc/getting-started.html)
+> Tải lazy là mẫu thiết kế trì hoãn việc tạo hoặc khởi tạo đối tượng cho đến khi thực sự cần dùng.
+
+Tính năng này cần thêm dependency. Gói sau là fork của `ocramius/proxy-manager`; repo gốc không hỗ trợ PHP 8.
+
+```
+composer require friendsofphp/proxy-manager-lts
+```
+
+Cách dùng:
+
+```php
+<?php
+
+use DI\Attribute\Injectable;
+use DI\Attribute\Inject;
+
+#[Injectable(lazy: true)]
+class MyClass
+{
+    private string $name;
+
+    public function __construct()
+    {
+        echo "MyClass được khởi tạo\n";
+        $this->name = "Lazy Loaded Object";
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+}
+
+class Controller
+{
+    #[Inject]
+    public MyClass $myClass;
+
+    public function getClass()
+    {
+        echo "Tên lớp proxy: " . get_class($this->myClass) . "\n";
+        echo "name: " . $this->myClass->getName();
+
+    }
+}
+```
+
+Kết quả:
+
+```
+Tên lớp proxy: ProxyManagerGeneratedProxy\__PM__\app\web\MyClass\Generated98d2817da63e3c088c808a0d4f6e9ae0
+MyClass được khởi tạo
+name: Lazy Loaded Object
+```
+
+Ví dụ này cho thấy khi lớp khai báo thuộc tính `#[Injectable]` được tiêm, trước tiên tạo lớp proxy. Lớp thực chỉ được khởi tạo khi bất kỳ phương thức nào của nó được gọi.
+
+# Phụ thuộc vòng (Circular Dependencies)
+
+Phụ thuộc vòng xảy ra khi nhiều lớp phụ thuộc lẫn nhau, tạo chu trình khép kín.
+
+- Phụ thuộc vòng trực tiếp
+  - Module A phụ thuộc module B, module B phụ thuộc module A
+  - Tạo chu trình: A → B → A
+
+- Phụ thuộc vòng gián tiếp
+  - Nhiều module trong chu trình phụ thuộc
+  - Ví dụ: A → B → C → A
+
+Khi dùng tiêm qua thuộc tính, `php-di` tự phát hiện phụ thuộc vòng và ném ngoại lệ. Nếu cần, dùng cách sau:
+
+```php
+class userController
+{
+
+    // Xóa đoạn code này
+    // #[Inject]
+    // private UserService userService;
+
+    public function getUserName()
+    {
+        $userService = Container::get(UserService::class);
+        return $userService->getName();
+    }
+}
+```
+
+## Thêm thông tin
+
+Xem [tài liệu php-di](https://php-di.org/doc/getting-started.html).

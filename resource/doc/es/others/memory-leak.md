@@ -1,37 +1,47 @@
 # Sobre las fugas de memoria
-webman es un marco de residencia de memoria, por lo que necesitamos prestar un poco de atención a las fugas de memoria. Sin embargo, los desarrolladores no necesitan preocuparse demasiado, porque las fugas de memoria ocurren en condiciones muy extremas y son fáciles de evitar. El desarrollo con webman es casi igual que el desarrollo con marcos tradicionales, no es necesario realizar operaciones innecesarias para la gestión de la memoria.
+Webman es un framework residente en memoria, por lo que conviene prestar cierta atención a las fugas de memoria. No obstante, los desarrolladores no deben preocuparse en exceso, ya que estas ocurren solo en condiciones muy extremas y son fáciles de evitar. El desarrollo con webman es prácticamente igual que con frameworks tradicionales; no hace falta realizar operaciones adicionales para la gestión de memoria.
 
 > **Consejo**
-> El proceso de monitoreo integrado de webman supervisará el uso de la memoria en todos los procesos. Si el uso de la memoria de un proceso está a punto de alcanzar el valor establecido en `memory_limit` en php.ini, se reiniciará automáticamente de forma segura el proceso correspondiente para liberar la memoria, sin afectar al negocio. 
+> El proceso monitor integrado de webman supervisa el uso de memoria de todos los procesos. Si el uso de memoria de un proceso está a punto de alcanzar el valor configurado en `memory_limit` de php.ini, reiniciará automática y de forma segura el proceso correspondiente para liberar memoria, sin afectar a la aplicación.
 
 ## Definición de fuga de memoria
-A medida que aumentan las solicitudes, la memoria utilizada por webman también **aumenta infinitamente** (ten en cuenta que es **aumento infinito**), llegando a varios cientos de megabytes o más, esto se llama fuga de memoria.
-Si la memoria aumenta pero luego deja de crecer, no se considera una fuga de memoria.
+Que el uso de memoria de webman aumente con el número de peticiones es normal. En general, cuando un proceso alcanza un cierto volumen de peticiones (típicamente del orden de millones), el uso de memoria se estabiliza o crece solo ocasionalmente.
 
-Usualmente, que un proceso ocupe varias decenas de megabytes de memoria es una situación normal. Cuando un proceso maneja solicitudes muy grandes o mantiene una gran cantidad de conexiones, es común que el uso de memoria de un solo proceso pueda alcanzar cientos de megabytes. Después de usar esta parte de la memoria, php puede que no la devuelva completamente al sistema operativo, sino que la deja para reutilizarla. Por lo tanto, es posible que después de manejar una solicitud grande, el uso de memoria aumente sin liberarla, esto es un fenómeno normal. (Llamar al método gc_mem_caches() puede liberar parte de la memoria inactiva).
+En la mayoría de aplicaciones, el uso de memoria por proceso termina estabilizándose en torno a 10M–100M. No hay motivo de preocupación mientras el uso por proceso se mantenga por debajo de 100M.
 
+Además, al manejar archivos grandes, peticiones grandes o leer grandes cantidades de datos de la base de datos, PHP reserva mucha memoria. PHP puede conservar parte de esta memoria para reutilizarla en lugar de devolverla toda al sistema operativo, lo que puede provocar un uso de memoria alto. Como la memoria se reutiliza, no hay motivo de preocupación.
 
-## Cómo ocurre la fuga de memoria
-**La fuga de memoria ocurre cuando se cumplen las siguientes dos condiciones:**
-1. Hay un array de **larga duración** (ten en cuenta que es un array de **larga duración**, no un array regular)
-2. Y este array de **larga duración** se expande infinitamente (el negocio inserta datos ilimitadamente en él y nunca limpia los datos).
+> **Consejo**
+> En proyectos empaquetados en phar o binario, si el tamaño del paquete es grande, es normal que el uso de memoria supere los 100M.
 
-Si se cumplen **ambas** condiciones 1 y 2 (ten en cuenta que es **ambas**), ocurrirá una fuga de memoria. Si no se cumplen estas condiciones o si solo se cumple una de ellas, no se trata de una fuga de memoria.
+## Cómo confirmar una fuga de memoria
+Si un proceso ha atendido más de un millón de peticiones, el uso de memoria supera los 100M y la memoria sigue creciendo tras cada petición, es posible que haya una fuga de memoria.
 
+## Cómo localizar una fuga de memoria
+Un método sencillo es someter cada API a pruebas de estrés e identificar cuál sigue aumentando el uso de memoria tras millones de peticiones.
 
-## Arrays de larga duración
+Una vez localizada la API problemática, se puede aplicar una búsqueda binaria: comentar la mitad del código de negocio cada vez hasta dar con el tramo que causa el problema.
 
-En webman, los arrays de larga duración incluyen:
-1. Arrays con la palabra clave static
-2. Propiedades de arrays singleton
-3. Arrays con la palabra clave global
+## Cómo se producen las fugas de memoria
+**Una fuga de memoria solo se produce cuando se cumplen estas dos condiciones:**
+1. Existe un array de **ciclo de vida largo** (los arrays normales no son problema)
+2. Y ese array de **ciclo de vida largo** crece indefinidamente (la aplicación sigue insertando datos y nunca los elimina)
+
+Solo cuando se cumplen **ambas** condiciones hay fuga de memoria. Si falta alguna condición o solo se cumple una, no hay fuga.
+
+## Arrays de ciclo de vida largo
+
+En webman, los arrays de ciclo de vida largo incluyen:
+1. Arrays con la palabra clave `static`
+2. Propiedades de tipo array en singletons
+3. Arrays con la palabra clave `global`
 
 > **Nota**
-> En webman se permite el uso de datos de larga duración, pero se debe garantizar que los datos dentro del array sean finitos, es decir, que el número de elementos no se expanda infinitamente.
+> Webman permite datos de ciclo de vida largo, pero hay que garantizar que los datos sean acotados y que el número de elementos no crezca indefinidamente.
 
-A continuación se muestran ejemplos de cada uno
+A continuación se muestran ejemplos de cada caso.
 
-#### Array static con expansión infinita
+### Array static que crece indefinidamente
 ```php
 class Foo
 {
@@ -44,9 +54,9 @@ class Foo
 }
 ```
 
-El array `$data` definido con la palabra clave `static` es un array de larga duración, y el array `$data` en el ejemplo se expande continuamente con cada solicitud, lo que ocasiona una fuga de memoria.
+El array `$data` definido con `static` tiene un ciclo de vida largo. En el ejemplo, `$data` sigue creciendo con cada petición, lo que provoca una fuga de memoria.
 
-#### Propiedad de array singleton con expansión infinita
+### Propiedad de array en singleton que crece indefinidamente
 ```php
 class Cache
 {
@@ -80,12 +90,12 @@ class Foo
 }
 ```
 
-`Cache::instance()` devuelve una instancia única de Cache, que es una instancia de larga duración. Aunque su propiedad `$data` no usa la palabra clave `static`, debido a que la clase en sí tiene una larga duración, `$data` también es un array de larga duración. Con cada adición de un key diferente al array `$data`, el programa utiliza cada vez más memoria, lo que resulta en una fuga de memoria.
+`Cache::instance()` devuelve una instancia singleton de Cache, que tiene ciclo de vida largo. Aunque la propiedad `$data` no usa `static`, como la clase tiene ciclo de vida largo, `$data` también es un array de ciclo de vida largo. A medida que se añaden distintas claves a `$data`, el uso de memoria del programa aumenta y se produce la fuga.
 
 > **Nota**
-> Si las keys agregadas a través de Cache::instance()->set(key, value) son de cantidad finita, no habrá fuga de memoria, ya que el array `$data` no se expande infinitamente.
+> Si las claves añadidas con `Cache::instance()->set(key, value)` son finitas, no hay fuga, porque el array `$data` no crece indefinidamente.
 
-#### Array global con expansión infinita
+### Array global que crece indefinidamente
 ```php
 class Index
 {
@@ -97,7 +107,7 @@ class Index
     }
 }
 ```
-El array definido con la palabra clave global no se libera después de que una función o un método está completo, por lo tanto, tiene una larga duración. El código anterior resulta en una fuga de memoria a medida que hay más solicitudes. Del mismo modo, un array definido con la palabra clave static dentro de un método o función también es un array de larga duración, y si el array se expande infinitamente, también resultará en una fuga de memoria, por ejemplo:
+Los arrays definidos con `global` no se liberan al terminar la función o el método, por lo que tienen ciclo de vida largo. El código anterior provoca una fuga a medida que aumentan las peticiones. Del mismo modo, los arrays definidos con `static` dentro de una función o método también tienen ciclo de vida largo; si crecen indefinidamente, provocan fuga, por ejemplo:
 ```php
 class Index
 {
@@ -110,10 +120,9 @@ class Index
 }
 ```
 
-
 ## Recomendaciones
-Se recomienda a los desarrolladores no prestar demasiada atención a las fugas de memoria, ya que rara vez ocurren. En caso de que ocurra un desafortunado incidente, podemos identificar el código que está causando la fuga de memoria a través de pruebas de estrés. Aunque si los desarrolladores no pueden encontrar el punto de fuga, el servicio de monitorización integrado de webman reiniciará oportunamente de forma segura el proceso que está experimentando la fuga de memoria para liberar la memoria.
+Se recomienda no prestar atención excesiva a las fugas de memoria, ya que son poco frecuentes. Si ocurren, las pruebas de estrés permiten localizar el código que las provoca. Incluso si el desarrollador no encuentra la causa, el servicio monitor de webman reiniciará a tiempo el proceso afectado para liberar memoria.
 
-Si sin embargo, deseas evitar las fugas de memoria tanto como sea posible, podrías seguir estas recomendaciones.
-1. Trata de no utilizar arrays con las palabras clave `global` y `static`, y si las utilizas, asegúrate de que no se expandan infinitamente.
-2. Evita usar singletons para clases desconocidas, inicialízalas con la palabra clave `new`. Si es necesario el singleton, verifica si tiene propiedades de arrays con expansión infinita.
+Si se quiere minimizar el riesgo de fugas, se pueden seguir estas recomendaciones:
+1. Evitar en lo posible arrays con `global` o `static`; si se usan, asegurarse de que no crezcan indefinidamente.
+2. Para clases poco conocidas, preferir inicializar con `new` en lugar de singletons. Si se usa un singleton, comprobar si tiene propiedades de tipo array que puedan crecer indefinidamente.

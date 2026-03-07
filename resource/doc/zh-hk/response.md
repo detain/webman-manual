@@ -350,3 +350,93 @@ class ImageController
     }
 }
 ```
+
+## 分段回應
+
+有時候我們想分段發送回應，可以參考下面例子。
+
+```php
+<?php
+
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+use Workerman\Timer;
+
+class IndexController
+{
+    public function index(Request $request): Response
+    {
+        // 獲取連線
+        $connection = $request->connection;
+        // 定時發送 http 包體
+        $timer = Timer::add(1, function () use ($connection, &$timer) {
+            static $i = 0;
+            if ($i++ < 10) {
+                // 發送 http 包體
+                $connection->send(new Chunk($i));
+            } else {
+                // 刪除不用的定時器，避免定時器越來越多記憶體洩漏
+                Timer::del($timer);
+                // 輸出空的 Chunk 包體通知客戶端回應結束
+                $connection->send(new Chunk(''));
+            }
+        });
+        // 先輸出一個帶 Transfer-Encoding: chunked 的 http 頭，http 包體非同步發送
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+
+}
+```
+
+如果你呼叫的是大模型，參考下面例子。
+
+```
+composer require webman/openai
+```
+
+```php
+<?php
+namespace app\controller;
+use support\Request;
+
+use Webman\Openai\Chat;
+use Workerman\Protocols\Http\Chunk;
+
+class ChatController
+{
+    public function completions(Request $request)
+    {
+        $connection = $request->connection;
+        // https://api.openai.com 國內訪問不到的話可以用網址 https://api.openai-proxy.com 替代
+        $chat = new Chat(['apikey' => 'sk-xx', 'api' => 'https://api.openai.com']);
+        $chat->completions(
+            [
+                'model' => 'gpt-3.5-turbo',
+                'stream' => true,
+                'messages' => [['role' => 'user', 'content' => 'hello']],
+            ], [
+            'stream' => function($data) use ($connection) {
+                // 當 openai 介面回傳資料時轉發給瀏覽器
+                $connection->send(new Chunk(json_encode($data, JSON_UNESCAPED_UNICODE) . "\n"));
+            },
+            'complete' => function($result, $response) use ($connection) {
+                // 回應結束時檢查是否有錯誤
+                if (isset($result['error'])) {
+                    $connection->send(new Chunk(json_encode($result, JSON_UNESCAPED_UNICODE) . "\n"));
+                }
+                // 回傳空的 chunk 代表回應結束
+                $connection->send(new Chunk(''));
+            },
+        ]);
+        // 先回傳一個 http 頭，後面資料非同步回傳
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+}
+```

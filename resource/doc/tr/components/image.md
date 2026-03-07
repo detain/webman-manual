@@ -1,20 +1,18 @@
 # Görüntü İşleme Bileşeni
 
-## intervention/image
-
-### Proje Adresi
+## Proje Adresi
 
 https://github.com/Intervention/image
-
-### Kurulum
-
+  
+## Kurulum
+ 
 ```php
 composer require intervention/image
 ```
+  
+## Kullanım
 
-### Kullanım
-
-**Yükleme Sayfası Parçası**
+**Yükleme sayfası parçası**
 
 ```html
   <form method="post" action="/user/img" enctype="multipart/form-data">
@@ -23,13 +21,14 @@ composer require intervention/image
   </form>
 ```
 
-**`app/controller/UserController.php` içinde yeni oluşturun**
+**`app/controller/UserController.php` dosyasını oluşturun**
 
 ```php
 <?php
 namespace app\controller;
 use support\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class UserController
 {
@@ -37,14 +36,20 @@ class UserController
     {
         $file = $request->file('file');
         if ($file && $file->isValid()) {
-            $image = Image::make($file)->resize(100, 100);
-            return response($image->encode('png'), 200, ['Content-Type' => 'image/png']);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file)->scale(100, 100);
+            return response($image->encode(), 200, ['Content-Type' => 'image/png']);
         }
-        return response('dosya bulunamadı');
+        return response('file not found');
     }
+    
 }
 ```
 
-### Daha Fazla İçerik
+> **Not**
+> Yukarıdaki örnek v3 API kullanmaktadır.
 
-http://image.intervention.io/getting_started/introduction
+## Daha fazla bilgi
+
+https://image.intervention.io/v3 adresini ziyaret edin
+  

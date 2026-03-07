@@ -1,4 +1,4 @@
-# Управление сеансом
+# Управление сеансами webman
 
 ## Пример
 ```php
@@ -21,45 +21,49 @@ class UserController
 
 Получите экземпляр `Workerman\Protocols\Http\Session` через `$request->session();` и используйте методы экземпляра для добавления, изменения и удаления данных сеанса.
 
-> Заметка: При уничтожении объекта сеанса данные сеанса автоматически сохраняются. Поэтому не сохраняйте объект, возвращаемый `$request->session()`, в глобальном массиве или в члене класса, чтобы избежать потери сеанса.
+> **Примечание**
+> Данные сеанса автоматически сохраняются при уничтожении объекта сеанса.
+> Если сохранить объект сеанса в глобальную переменную, он не будет уничтожен и не сохранится автоматически. В этом случае необходимо вручную вызвать `$session->save()` для сохранения данных.
 
 ## Получение всех данных сеанса
 ```php
 $session = $request->session();
 $all = $session->all();
 ```
-Возвращается массив. Если сеансовых данных нет, то возвращается пустой массив.
+Возвращается массив. Если данных сеанса нет, возвращается пустой массив.
 
-## Получение определенного значения из сеанса
+
+## Получение значения из сеанса
 ```php
 $session = $request->session();
 $name = $session->get('name');
 ```
-Если данных не существует, возвращается null.
+Если данные не существуют, возвращается null.
 
-Также вы можете передать вторым аргументом метода `get` значение по умолчанию. Если соответствие в сеансовом массиве не найдено, возвращается значение по умолчанию. Например:
+Можно передать значение по умолчанию вторым аргументом метода `get`. Если соответствующее значение в массиве сеанса не найдено, возвращается значение по умолчанию. Например:
 ```php
 $session = $request->session();
 $name = $session->get('name', 'tom');
 ```
 
+
 ## Сохранение данных сеанса
-Для сохранения данных используйте метод `set`.
+Для сохранения одного значения используйте метод `set`.
 ```php
 $session = $request->session();
 $session->set('name', 'tom');
 ```
-Метод `set` ничего не возвращает; данные сеанса будут автоматически сохранены при уничтожении объекта сеанса.
+Метод `set` ничего не возвращает. Данные сеанса автоматически сохраняются при уничтожении объекта сеанса.
 
-При сохранении нескольких значений используйте метод `put`.
+Для сохранения нескольких значений используйте метод `put`.
 ```php
 $session = $request->session();
 $session->put(['name' => 'tom', 'age' => 12]);
 ```
-`Put` также ничего не возвращает.
+Метод `put` также ничего не возвращает.
 
 ## Удаление данных сеанса
-Для удаления одного или нескольких данных сеанса используйте метод `forget`.
+Для удаления одного или нескольких значений сеанса используйте метод `forget`.
 ```php
 $session = $request->session();
 // Удалить одно значение
@@ -67,49 +71,52 @@ $session->forget('name');
 // Удалить несколько значений
 $session->forget(['name', 'age']);
 ```
-Также доступен метод `delete`, отличие от метода `forget` в том, что `delete` может удалить только одно значение.
+
+Также доступен метод `delete`, который в отличие от `forget` может удалить только одно значение.
 ```php
 $session = $request->session();
-// То же, что и $session->forget('name');
+// Эквивалентно $session->forget('name');
 $session->delete('name');
 ```
+
 
 ## Получение и удаление значения из сеанса
 ```php
 $session = $request->session();
 $name = $session->pull('name');
 ```
-Этот код эквивалентен следующему:
+Это эквивалентно следующему коду:
 ```php
 $session = $request->session();
-$value = $session->get($name);
-$session->delete($name);
+$value = $session->get('name');
+$session->delete('name');
 ```
 Если соответствующее значение сеанса не существует, возвращается null.
+
 
 ## Удаление всех данных сеанса
 ```php
 $request->session()->flush();
 ```
-Метод ничего не возвращает; данные сеанса будут автоматически удалены из хранилища при уничтожении объекта сеанса.
+Метод ничего не возвращает. Данные сеанса автоматически удаляются из хранилища при уничтожении объекта сеанса.
 
-## Проверка существования данных в сеансе
+
+## Проверка существования значения в сеансе
 ```php
 $session = $request->session();
 $has = $session->has('name');
 ```
-Если соответствующий сеанс отсутствует или его значение равно null, возвращается false, в противном случае возвращается true.
+Возвращает false, если значение сеанса не существует или равно null; в противном случае возвращает true.
 
 ```php
 $session = $request->session();
 $has = $session->exists('name');
 ```
-Этот код также используется для проверки существования данных сеанса, однако если значение соответствующего сеанса равно null, то возвращается true.
+Этот код также проверяет существование значения в сеансе. Отличие: `exists` возвращает true даже когда значение равно null.
 
 ## Функция-помощник session()
-> Добавлено 9 декабря 2020
 
-webman предоставляет функцию-помощник `session()` для выполнения тех же функций.
+webman предоставляет функцию-помощник `session()` для тех же операций.
 ```php
 // Получение экземпляра сеанса
 $session = session();
@@ -118,21 +125,23 @@ $session = $request->session();
 
 // Получение значения
 $value = session('key', 'default');
-// То же самое, что и 
+// Эквивалентно
 $value = session()->get('key', 'default');
-// Или
+// Эквивалентно
 $value = $request->session()->get('key', 'default');
 
-// Запись в сеанс
+// Присвоение значений сеансу
 session(['key1'=>'value1', 'key2' => 'value2']);
 // Эквивалентно
 session()->put(['key1'=>'value1', 'key2' => 'value2']);
-// Или
+// Эквивалентно
 $request->session()->put(['key1'=>'value1', 'key2' => 'value2']);
+
 ```
 
+
 ## Файл конфигурации
-Файл конфигурации сеанса находится в `config/session.php` и имеет следующий вид::
+Файл конфигурации сеанса находится в `config/session.php`. Содержимое примерно такое:
 ```php
 use Webman\Session\FileSessionHandler;
 use Webman\Session\RedisSessionHandler;
@@ -142,16 +151,18 @@ return [
     // FileSessionHandler::class или RedisSessionHandler::class или RedisClusterSessionHandler::class 
     'handler' => FileSessionHandler::class,
     
-    // Для FileSessionHandler::class значение 'file'; для RedisSessionHandler::class значение 'redis'; для RedisClusterSessionHandler::class значение 'redis_cluster' (кластер Redis)
+    // Для handler FileSessionHandler::class значение 'file',
+    // для RedisSessionHandler::class — 'redis',
+    // для RedisClusterSessionHandler::class — 'redis_cluster' (кластер Redis)
     'type'    => 'file',
 
-    // Различные параметры для различных обработчиков
+    // Разные обработчики используют разные настройки
     'config' => [
-        // Параметры для type 'file'
+        // Настройки для type 'file'
         'file' => [
             'save_path' => runtime_path() . '/sessions',
         ],
-        // Параметры для type 'redis'
+        // Настройки для type 'redis'
         'redis' => [
             'host'      => '127.0.0.1',
             'port'      => 6379,
@@ -170,47 +181,18 @@ return [
     ],
 
     'session_name' => 'PHPSID', // Имя cookie для хранения session_id
-    
-    // === Настройки, требующие webman-framework>=1.3.14 workerman>=4.0.37 ===
-    'auto_update_timestamp' => false,  // Автоматическое обновление сеанса, по умолчанию отключено
+    'auto_update_timestamp' => false,  // Автоматическое обновление сеанса, по умолчанию выключено
     'lifetime' => 7*24*60*60,          // Время жизни сеанса
-    'cookie_lifetime' => 365*24*60*60, // Время жизни cookie с session_id
-    'cookie_path' => '/',              // Путь к cookie с session_id
-    'domain' => '',                    // Домен для cookie с session_id
-    'http_only' => true,               // Включен ли httpOnly, по умолчанию включен
-    'secure' => false,                 // Включение сеанса только в HTTPS, по умолчанию отключено
-    'same_site' => '',                 // Защита от атак CSRF и отслеживания пользователей, доступные значения: strict/lax/none
+    'cookie_lifetime' => 365*24*60*60, // Время жизни cookie для session_id
+    'cookie_path' => '/',              // Путь cookie для session_id
+    'domain' => '',                    // Домен cookie для session_id
+    'http_only' => true,               // Включение httpOnly, по умолчанию включено
+    'secure' => false,                 // Сеанс только по HTTPS, по умолчанию выключено
+    'same_site' => '',                 // Защита от CSRF и отслеживания, значения: strict/lax/none
     'gc_probability' => [1, 1000],     // Вероятность очистки сеанса
 ];
 ```
 
-> **Примечание** 
-> Начиная с версии webman 1.4.0 пространство имен SessionHandler было изменено с 
-> use Webman\FileSessionHandler;  
-> use Webman\RedisSessionHandler;  
-> use Webman\RedisClusterSessionHandler;  
-> на  
-> use Webman\Session\FileSessionHandler;  
-> use Webman\Session\RedisSessionHandler;  
-> use Webman\Session\RedisClusterSessionHandler;  
+## Безопасность
+Не рекомендуется сохранять в сеансе экземпляры классов напрямую, особенно из ненадёжных источников. Десериализация может создать риски безопасности.
 
-## Настройка срока действия
-Если версия webman-framework < 1.3.14, то время жизни сеанса в webman-е нужно настраивать в `php.ini`.
-
-```ini
-session.gc_maxlifetime = x
-session.cookie_lifetime = x
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-Если сеанс должен иметь срок действия 1440 секунд, то параметры будут следующие:
-```ini
-session.gc_maxlifetime = 1440
-session.cookie_lifetime = 1440
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-> **Совет**
-> Вы можете использовать команду `php --ini` для поиска расположения `php.ini`.

@@ -24,6 +24,7 @@
   - [日誌](log.md)
   - [配置文件](config.md)
   - [多應用](multiapp.md)
+  - [協程](coroutine/coroutine.md)
 
 - 數據庫
 
@@ -47,6 +48,7 @@
  
 - 常用組件
   - [驗證器](components/validation.md)
+  - [限流器](components/rate-limiter.md)
   - [分頁組件](components/paginator.md)
   - [多語言](components/translation.md)
   - [圖像處理](components/image.md)
@@ -90,17 +92,18 @@
 - 高級進階
   - [自定義進程](process.md)
   - [依賴注入](di.md)
+  - [二進制打包](others/bin.md)
   - [AOP](aop.md)
   
 - 其它
   - [安全](others/security.md)
+  - [資料庫事務](others/transaction.md)
   - [函數禁用檢查](others/disable-function-check.md)
   - [自定義腳本](others/scripts.md)
   - [自定義404 500](others/custom-error-page.md)
   - [升級方法](others/upgrade.md)
   - [nginx代理](others/nginx-proxy.md)
   - [phar打包](others/phar.md)
-  - [二進制打包](others/bin.md)
   - [啟動流程](others/process.md)
   - [生命周期](others/lifecycle.md)
   - [內存洩漏](others/memory-leak.md)
@@ -113,4 +116,9 @@
 
 - 升級
   - [1.4](upgrade/1-4.md)
+  - [1.5](upgrade/1-5.md)
+  - [1.6](upgrade/1-6.md)
+  - [2.0](upgrade/2-0.md)
+  - [2.1](upgrade/2-1.md)
+  - [2.2](upgrade/2-2.md)
   - [致謝](thanks.md)

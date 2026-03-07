@@ -1,36 +1,43 @@
 # webman Nedir
 
-webman, [workerman](https://www.workerman.net) üzerine geliştirilen yüksek performanslı bir HTTP hizmet çerçevesidir. webman, geleneksel php-fpm mimarisini değiştirerek yüksek performanslı ve ölçeklenebilir HTTP hizmetleri sunar. webman ile web sitesi geliştirebilir, HTTP arayüzleri veya mikro hizmetler oluşturabilirsiniz.
+webman, Workerman üzerine inşa edilmiş HTTP, WebSocket, TCP, UDP ve diğer modülleri entegre eden yüksek performanslı bir hizmet çerçevesidir. Kalıcı bellek, korutin ve bağlantı havuzu gibi gelişmiş teknolojilerle webman, geleneksel PHP'nin performans sınırlarını aşmanın yanı sıra uygulama alanlarını da önemli ölçüde genişletir.
 
-Ayrıca, webman özel işlemleri destekler ve workerman'ın yapabildiği her şeyi yapabilir, örneğin websocket hizmetleri, nesnelerin interneti, oyunlar, TCP hizmetleri, UDP hizmetleri, unix soket hizmetleri gibi.
+Ayrıca webman, geliştiricilerin diğer geliştiriciler tarafından oluşturulan fonksiyonel modülleri hızla entegre edip yeniden kullanmasını sağlayan güçlü bir eklenti mekanizması sunar. Web sitesi kurmak, HTTP API geliştirmek, anlık mesajlaşma, IoT sistemleri, oyunlar, TCP/UDP hizmetleri, Unix Socket hizmetleri veya benzeri işler olsun, webman hepsini üstün performans ve esneklikle kolayca üstlenir.
 
 # webman Felsefesi
-**En küçük çekirdek ile maksimum genişletilebilirlik ve en yüksek performansı sunar.**
+**En küçük çekirdek ile maksimum genişletilebilirlik ve en yüksek performans sağlamak.**
 
-webman sadece temel işlevleri (yönlendirme, ara yazılım, oturum, özel işlem arabirimi) sunar. Diğer tüm işlevleri composer ekosistemini kullanarak tekrar kullanılabilir, bu da webman'da en tanıdık işlev bileşenlerini kullanabileceğiniz anlamına gelir. Örneğin, veritabanı tarafında geliştirici, Laravel'ın `illuminate/database`'ini, ThinkPHP'nin `ThinkORM`'unu veya diğer bileşenleri like `Medoo` kullanabilir. Bu bileşenleri webman'e entegre etmek oldukça kolaydır.
+webman yalnızca temel işlevleri (yönlendirme, ara yazılım, oturum, özel işlem arabirimi) sunar. Diğer tüm işlevler Composer ekosisteminden yeniden kullanılır. Yani webman içinde alıştığınız bileşenleri kullanabilirsiniz; örneğin veritabanı için Laravel'ın [illuminate/database](./db/tutorial.md), ThinkPHP'nin [ThinkORM](./db/thinkorm.md) veya `Medoo` gibi başka bileşenleri seçebilirsiniz. Bunları webman'a entegre etmek çok kolaydır.
 
-# webman'ın Sunduğu Özellikler
+# webman'ın Özellikleri
 
-1. Yüksek İstikrar: webman, workerman üzerine kurulmuştur ve endüstride hatasız ve yüksek stabiliteli soket çerçevesidir.
-2. Süper Yüksek Performans: webman'ın performansı geleneksel php-fpm çerçevelerine göre 10-100 kat daha yüksektir ve go dilinin gin echo gibi çerçevelerinden yaklaşık olarak iki kat daha yüksektir.
-3. Yeniden Kullanılabilir: Çoğu composer bileşen ve kütüphanesini değiştirmeden tekrar kullanabilirsiniz.
-4. Yüksek Genişletilebilirlik: Özelleştirilmiş işlemleri destekler, workerman'ın yapabildiği her şeyi yapabilirsiniz.
-5. Son Derece Basit ve Kullanışlı: Öğrenme maliyeti çok düşük, kod yazma konusunda geleneksel çerçevelerle farkı yoktur.
-6. MIT açık kaynak lisansı ile kullanımı çok serbesttir.
+1. Yüksek istikrar. webman workerman üzerine kuruludur; workerman sektörde çok az hatayla yüksek istikrarlı bir soket çerçevesidir.
 
-# Proje Adresi
-GitHub: https://github.com/walkor/webman **Lütfen küçük yıldızlarınızı esirgemeyin**
+2. Çok yüksek performans. webman'ın performansı geleneksel php-fpm çerçevelerinden 10–100 kat daha yüksektir ve Go'nun gin, echo vb. çerçevelerinden yaklaşık iki kat daha fazladır.
 
-Gitee: https://gitee.com/walkor/webman **Lütfen küçük yıldızlarınızı esirgemeyin**
+3. Yüksek yeniden kullanılabilirlik. Mevcut Composer ekosistemi değiştirilmeden yeniden kullanılabilir.
 
-# Üçüncü Taraf Yetkili Performans Test Verileri
+4. Yüksek genişletilebilirlik. Özel işlemleri destekler; workerman'ın yapabildiği her şey yapılabilir.
 
-![](../assets/img/benchmark1.png)
+5. Son derece basit ve kullanımı kolay; öğrenme maliyeti düşük, kod yazımı geleneksel çerçevelerle aynıdır.
 
-Veritabanı sorgulama işlemleri ile, webman tek başına 390.000 QPS'lik bir işlem kapasitesine ulaşır, geleneksel php-fpm mimarisindeki Laravel çerçevesine göre neredeyse 80 kat daha yüksektir.
+6. [İkili paketleme](./others/bin.md) destekler; PHP ortamı olmadan doğrudan çalıştırılabilir.
 
-![](../assets/img/benchmarks-go.png)
+7. En müsamahakâr ve geliştirici dostu MIT açık kaynak lisansını kullanır.
 
-Veritabanı sorgulama işlemleri ile, webman, aynı türdeki go dilinin web çerçevelerinden yaklaşık olarak iki kat daha yüksek performans gösterir.
+# Proje Adresleri
+GitHub: https://github.com/walkor/webman **Yıldız vermeyi unutmayın!**
 
-Yukarıdaki veriler [techempower.com](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf) sitesinden alınmıştır.
+Gitee: https://gitee.com/walkor/webman **Yıldız vermeyi unutmayın!**
+
+# Üçüncü Taraf Performans Test Verileri
+
+[![](../assets/img/benchmark1.png)](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)
+
+Veritabanı sorgulama işlemlerinde webman tek makinede 390.000 QPS'e kadar ulaşır; geleneksel php-fpm mimarisindeki Laravel çerçevesinden neredeyse 80 kat daha yüksektir.
+
+[![](../assets/img/benchmarks-go.png)](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)
+
+Veritabanı sorgulama işlemlerinde webman, benzer Go web çerçevelerinden yaklaşık iki kat daha yüksek performans gösterir.
+
+Yukarıdaki veriler [techempower.com](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf) kaynaklıdır.

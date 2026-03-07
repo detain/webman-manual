@@ -1,18 +1,16 @@
-# Excel
+# Таблицы Excel
 
-## phpoffice/phpspreadsheet
-
-### Ссылка на проект
+## Адрес проекта
 
 https://github.com/PHPOffice/PhpSpreadsheet
   
-### Установка
+## Установка
  
   ```php
   composer require phpoffice/phpspreadsheet
   ```
   
-### Использование
+## Использование
 
 ```php
 <?php
@@ -34,13 +32,13 @@ class ExcelController
         // Сохранить файл в папке public
         $writer->save($file_path);
         // Скачать файл
-        return response()->download($file_path, 'Название файла.xlsx');
+        return response()->download($file_path, 'имя_файла.xlsx');
     }
 
 }
 ```
 
-
-### Больше информации
+## Дополнительная информация
 
 Посетите https://phpspreadsheet.readthedocs.io/en/latest/
+  

@@ -277,10 +277,28 @@ class UserController
 #### Controller
 Quando un controller chiama `view('nome_modello', [])`, i file del modello vengono cercati secondo le seguenti regole:
 
-1. Se non è un'applicazione multipla, vengono utilizzati i file del modello sotto `app/view/`
-2. In caso di [applicazione multipla](multiapp.md), vengono utilizzati i file del modello sotto `app/nome_app/view/`
+1. Se il percorso inizia con `/`, utilizzare tale percorso direttamente per individuare il file del modello.
+2. Se non inizia con `/` e non è un'applicazione multipla, utilizzare il file del modello corrispondente sotto `app/view/`.
+3. Se non inizia con `/` ed è un'[applicazione multipla](multiapp.md), utilizzare il file del modello corrispondente sotto `app/nome_app/view/`.
+4. Se non viene passato il parametro del modello, il file del modello viene individuato automaticamente secondo le regole 2 e 3.
 
-In sintesi, se `$request->app` è vuoto, vengono utilizzati i file del modello sotto `app/view/`, altrimenti vengono utilizzati i file del modello sotto `app/{$request->app}/view/`.
+Esempio:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Equivalente a return view('user/hello', ['name' => 'webman']);
+        // Equivalente a return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### Funzione di chiusura
 In una funzione di chiusura, `$request->app` è vuoto e non appartiene a nessuna applicazione, pertanto vengono utilizzati i file del modello sotto `app/view/`, ad esempio, quando si definiscono le route nel file `config/route.php`
@@ -293,6 +311,25 @@ verrà utilizzato il file del modello `app/view/user.html` (quando si utilizza i
 
 #### Specificare l'applicazione
 Per consentire il riutilizzo dei modelli in modalità multi-applicazione, la funzione `view($template, $data, $app = null)` fornisce un terzo parametro, `$app`, che può essere utilizzato per specificare quale cartella dell'applicazione utilizzare per i modelli. Ad esempio, `view('user', [], 'admin')` forzerà l'utilizzo dei file del modello sotto `app/admin/view/`.
+
+#### Omettere il parametro del modello
+Nei controller basati su classi è possibile omettere il parametro del modello. Ad esempio:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Equivalente a return view('user/hello', ['name' => 'webman']);
+        // Equivalente a return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## Estensione di Twig
 

@@ -1,4 +1,4 @@
-# ซอฟต์แวร์สำหรับการชำระเงิน
+# SDK การชำระเงิน
 
 ## ที่อยู่โปรเจค
 
@@ -9,7 +9,10 @@
 ```php
 composer require yansongda/pay -vvv
 ```
-## อเปีโอ
+
+## การใช้งาน
+
+**Alipay**
 
 ```php
 <?php
@@ -89,7 +92,7 @@ class PayController
     }
 }
 ```
-## WeChat
+**WeChat**
 
 ```php
 <?php
@@ -103,8 +106,8 @@ class PayController
 {
     protected $config = [
         'appid' => 'wxb3fxxxxxxxxxxx', // APP APPID
-        'app_id' => 'wxb3fxxxxxxxxxxx', // ไอดีแอพพลิเคชัน
-        'miniapp_id' => 'wxb3fxxxxxxxxxxx', // ไอดีของแอพพลิเคชันรุ่นเล็ก
+        'app_id' => 'wxb3fxxxxxxxxxxx', // ไอดีแอคเคาท์ทางการ
+        'miniapp_id' => 'wxb3fxxxxxxxxxxx', // ไอดีมินิแอป
         'mch_id' => '14577xxxx',
         'key' => 'mF2suE9sU6Mk1Cxxxxxxxxxxx',
         'notify_url' => 'http://yanda.net.cn/notify.php',
@@ -128,7 +131,7 @@ class PayController
     {
         $order = [
             'out_trade_no' => time(),
-            'total_fee' => '1', // **หน่วย: สตางค์**
+            'total_fee' => '1', // **หน่วย: เฟิน (1/100 หยวน)**
             'body' => 'test body - ทดสอบ',
             'openid' => 'onkVf1FjWS5SBIixxxxxxx',
         ];
@@ -158,6 +161,6 @@ class PayController
     }
 }
 ```
-## เนื้อหาเพิ่มเติม
+## ข้อมูลเพิ่มเติม
 
 เข้าชม https://pay.yanda.net.cn/docs/2.x/overview

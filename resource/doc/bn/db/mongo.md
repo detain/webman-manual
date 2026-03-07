@@ -1,23 +1,19 @@
-# মংগোডবি
+# MongoDB
 
-webman পূর্বনির্ধারিতভাবে [jenssegers/mongodb](https://github.com/jenssegers/laravel-mongodb) ব্যবহার করে, যা laravel প্রকল্প থেকে তুলে আনা হয়েছে, এটি laravel এর মত ব্যবহার করা হয়।
+webman পূর্বনির্ধারিতভাবে [mongodb/laravel-mongodb](https://github.com/mongodb/laravel-mongodb) ব্যবহার করে, যা Laravel প্রকল্প থেকে আলাদা করা হয়েছে, Laravel এর মত ব্যবহার করা হয়।
 
-`jenssegers/mongodb` ব্যবহার করার আগে এটি টা প্রথমে `php-cli` তে মংগোডবি এক্সটেনশন ইনস্টল করতে হবে।
+`mongodb/laravel-mongodb` ব্যবহার করার আগে প্রথমে `php-cli` তে MongoDB এক্সটেনশন ইনস্টল করতে হবে।
 
-> `php -m | grep mongodb` এই কমান্ড ব্যবহার করে দেখুন `php-cli` কি মংগোডবি এক্সটেনশন এনেবে কি না। লক্ষ্য করুন: যদি আপনি `php-fpm` এ মংগোডবি এক্সটেনশন ইনস্টল করে থাকেন, তবে এটা দর্শায় না যে আপনি `php-cli` তে এটি ব্যবহার করতে পারবেন, কারণ `php-cli` এবং `php-fpm` দুটি ভিন্ন অ্যাপ্লিকেশন, এরা কর্তৃক ব্যবহৃত `php.ini` কনফিগারেশন তারা ভিন্ন হতে পারে। `php --ini` কমান্ড ব্যবহার করে আপনার `php-cli` যে `php.ini` কনফিগারেশন ফাইল ব্যবহার করছে তা দেখুন।
+> **লক্ষ্য করুন**
+> `php-cli` এ MongoDB এক্সটেনশন ইনস্টল আছে কিনা দেখতে `php -m | grep mongodb` কমান্ড ব্যবহার করুন। লক্ষ্য করুন: যদি আপনি `php-fpm` এ MongoDB এক্সটেনশন ইনস্টল করে থাকেন, তবে এটা দর্শায় না যে আপনি `php-cli` তে এটি ব্যবহার করতে পারবেন, কারণ `php-cli` এবং `php-fpm` দুটি ভিন্ন অ্যাপ্লিকেশন, এরা ভিন্ন `php.ini` কনফিগারেশন ব্যবহার করতে পারে। আপনার `php-cli` কোন `php.ini` কনফিগারেশন ফাইল ব্যবহার করছে তা দেখতে `php --ini` কমান্ড ব্যবহার করুন।
 
 ## ইনস্টলেশন
 
-PHP>7.2 হলে
 ```php
-composer require -W illuminate/database jenssegers/mongodb ^3.8.0
-```
-PHP=7.2 হলে
-```php
-composer require -W illuminate/database jenssegers/mongodb ^3.7.0
+composer require -W webman/database mongodb/laravel-mongodb ^4.8
 ```
 
-ইনস্টলেশন পরে আবার restart করতে হবে (reload করলে কাজ হবে না)
+ইনস্টলেশন পরে restart করতে হবে (reload করলে কাজ হবে না)
 
 ## কনফিগারেশন
 `config/database.php` ফাইলে `mongodb` কানেকশন যোগ করুন, নিম্নলিখিত মত।
@@ -60,12 +56,39 @@ class UserController
 {
     public function db(Request $request)
     {
-        Db::connection('mongodb')->collection('test')->insert([1,2,3]);
-        return json(Db::connection('mongodb')->collection('test')->get());
+        Db::connection('mongodb')->table('test')->insert([1,2,3]);
+        return json(Db::connection('mongodb')->table('test')->get());
+    }
+}
+```
+
+## মডেল নমূনা
+```php
+<?php
+namespace app\model;
+
+use DateTimeInterface;
+use support\MongoModel as Model;
+
+class Test extends Model
+{
+    protected $connection = 'mongodb';
+
+    protected $table = 'test';
+
+    public $timestamps = true;
+
+    /**
+     * @param DateTimeInterface $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
     }
 }
 ```
 
 ## অধিক তথ্য জানতে ভিজিট করুন
 
-https://github.com/jenssegers/laravel-mongodb
+https://github.com/mongodb/laravel-mongodb

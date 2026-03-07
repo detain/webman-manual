@@ -250,12 +250,30 @@ class UserController
 ## 뷰 파일 경로에 대해
 
 #### 컨트롤러
-컨트롤러가 `view('템플릿명',[]);`을 호출할 때, 뷰 파일은 다음과 같은 규칙에 따라 찾습니다:
+컨트롤러가 `view('템플릿명',[]);`을 호출할 때, 뷰 파일은 다음과 같은 규칙에 따라 검색합니다:
 
-1. 다중 애플리케이션을 사용하지 않는 경우, `app/view/`에서 해당하는 뷰 파일을 사용합니다.
-2. [다중 애플리케이션](multiapp.md)을 사용하는 경우, `app/애플리케이션명/view/`에서 해당하는 뷰 파일을 사용합니다.
+1. 경로가 `/`로 시작하면 해당 경로를 직접 사용하여 뷰 파일을 검색합니다.
+2. `/`로 시작하지 않고 다중 애플리케이션이 아닌 경우, `app/view/` 아래의 해당 뷰 파일을 사용합니다.
+3. `/`로 시작하지 않고 [다중 애플리케이션](multiapp.md)인 경우, `app/애플리케이션명/view/` 아래의 해당 뷰 파일을 사용합니다.
+4. 템플릿 매개변수를 전달하지 않으면 규칙 2·3에 따라 템플릿 파일을 자동으로 검색합니다.
 
-종합하면, `$request->app`이 비어있을 경우 `app/view/`의 뷰 파일을 사용하고, 그렇지 않은 경우 `app/{$request->app}/view/`의 뷰 파일을 사용합니다.
+예시:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // return view('user/hello', ['name' => 'webman']); 와 동일
+        // return view('/app/view/user/hello', ['name' => 'webman']); 와 동일
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### 클로저 함수
 클로저 함수의 경우 `$request->app`이 비어있으므로, 클로저 함수는 `app/view/`의 뷰 파일을 사용합니다. 예를 들어 `config/route.php`에서 라우트를 정의할 경우:
@@ -268,6 +286,25 @@ Route::any('/admin/user/get', function (Request $request) {
 
 #### 애플리케이션 지정
 다중 애플리케이션 모드에서 템플릿을 재사용할 수 있도록 하기 위해 `view($template, $data, $app = null)`은 세 번째 매개변수 `$app`을 사용하여 어떤 애플리케이션 디렉토리의 템플릿을 사용할지 지정할 수 있습니다. 예를 들어 `view('user', [], 'admin');`의 경우, `app/admin/view/`의 뷰 파일을 강제로 사용합니다.
+
+#### 템플릿 매개변수 생략
+클래스 기반 컨트롤러에서는 템플릿 매개변수를 생략할 수 있습니다. 예:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // return view('user/hello', ['name' => 'webman']); 와 동일
+        // return view('/app/view/user/hello', ['name' => 'webman']); 와 동일
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## Twig 확장
 > **참고**

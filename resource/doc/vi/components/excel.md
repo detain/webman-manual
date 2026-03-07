@@ -1,18 +1,16 @@
-# Excel
+# Bảng Excel
 
-## phpoffice/phpspreadsheet
-
-### Địa chỉ dự án
+## Địa chỉ dự án
 
 https://github.com/PHPOffice/PhpSpreadsheet
   
-### Cài đặt
+## Cài đặt
  
   ```php
   composer require phpoffice/phpspreadsheet
   ```
   
-### Sử dụng
+## Sử dụng
 
 ```php
 <?php
@@ -27,19 +25,20 @@ class ExcelController
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Xin chào thế giới !');
+        $sheet->setCellValue('A1', 'Hello World !');
 
         $writer = new Xlsx($spreadsheet);
         $file_path = public_path().'/hello_world.xlsx';
         // Lưu tệp tin vào thư mục public
         $writer->save($file_path);
         // Tải tệp tin về
-        return response()->download($file_path, 'Tên_tệp.xlsx');
+        return response()->download($file_path, 'ten_file.xlsx');
     }
 
 }
 ```
-  
-### Thêm nội dung
+
+## Thêm thông tin
 
 Truy cập https://phpspreadsheet.readthedocs.io/en/latest/
+  

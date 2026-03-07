@@ -1,5 +1,5 @@
 # Redis
-Cách sử dụng Redis tương tự như cơ sở dữ liệu, ví dụ `plugin/foo/config/redis.php`
+Cách dùng Redis tương tự cơ sở dữ liệu, ví dụ `plugin/foo/config/redis.php`
 ```php
 return [
     'default' => [
@@ -16,17 +16,17 @@ return [
     ],
 ];
 ```
-Khi sử dụng
+Khi dùng
 ```php
 use support\Redis;
 Redis::connection('plugin.foo.default')->get('key');
 Redis::connection('plugin.foo.cache')->get('key');
 ```
 
-Tương tự, nếu bạn muốn sử dụng cấu hình Redis của dự án chính
+Tương tự, nếu muốn dùng lại cấu hình Redis của dự án chính
 ```php
 use support\Redis;
 Redis::get('key');
-// Giả sử dự án chính cũng cấu hình kết nối cache
+// Giả sử dự án chính đã cấu hình thêm kết nối cache
 Redis::connection('cache')->get('key');
 ```

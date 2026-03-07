@@ -1,4 +1,4 @@
-## Redis Queue
+# Redis Queue
 
 A message queue based on Redis, supports delayed message processing.
 
@@ -6,16 +6,16 @@ A message queue based on Redis, supports delayed message processing.
 `composer require webman/redis-queue`
 
 ## Configuration File
-The Redis configuration file is automatically generated in `config/plugin/webman/redis-queue/redis.php`, and its content is similar to the following:
+The Redis configuration file is automatically generated at `{main-project}/config/plugin/webman/redis-queue/redis.php`, with content similar to the following:
 ```php
 <?php
 return [
     'default' => [
         'host' => 'redis://127.0.0.1:6379',
         'options' => [
-            'auth' => '',       // Password, optional
-            'db' => 0,          // Database
-            'max_attempts'  => 5, // Retry times after consumption failure
+            'auth' => '',         // Password, optional
+            'db' => 0,            // Database
+            'max_attempts'  => 5, // Retry count after consumption failure
             'retry_seconds' => 5, // Retry interval in seconds
         ]
     ],
@@ -23,11 +23,9 @@ return [
 ```
 
 ### Consumption Failure Retry
-If a consumption failure (exception occurs), the message will be placed in the delayed queue and wait for the next retry. The retry times is controlled by the parameter `max_attempts`, while the retry interval is jointly controlled by `retry_seconds` and `max_attempts`. For example, if `max_attempts` is 5 and `retry_seconds` is 10, the interval for the first retry is `1*10` seconds, the interval for the second retry is `2*10` seconds, and so on, up to 5 retries. If the retry times exceeds the `max_attempts` setting, the message will be placed in the failed queue with the key `{redis-queue}-failed`.
+If consumption fails (an exception occurs), the message will be placed in the delayed queue and wait for the next retry. The retry count is controlled by `max_attempts`, and the retry interval is jointly controlled by `retry_seconds` and `max_attempts`. For example, if `max_attempts` is 5 and `retry_seconds` is 10, the first retry interval is `1*10` seconds, the second retry interval is `2*10` seconds, the third retry interval is `3*10` seconds, and so on up to 5 retries. If the retry count exceeds the `max_attempts` setting, the message will be placed in the failed queue with key `{redis-queue}-failed`.
 
 ## Message Delivery (Synchronous)
-> **Note**
-> Requires webman/redis >= 1.2.0, dependent on the redis extension
 
 ```php
 <?php
@@ -42,9 +40,9 @@ class Index
     {
         // Queue name
         $queue = 'send-mail';
-        // Data, can be passed as an array without serialization
+        // Data, can be passed as array directly without serialization
         $data = ['to' => 'tom@gmail.com', 'content' => 'hello'];
-        // Deliver the message
+        // Deliver message
         Redis::send($queue, $data);
         // Deliver delayed message, to be processed after 60 seconds
         Redis::send($queue, $data, 60);
@@ -54,10 +52,10 @@ class Index
 
 }
 ```
-Upon successful delivery, `Redis::send()` returns true, otherwise it returns false or throws an exception.
+On successful delivery, `Redis::send()` returns true; otherwise it returns false or throws an exception.
 
 > **Tip**
-> There may be some deviation in the delayed queue consumption time. For example, if the consumption speed is slower than the production speed, causing queue backlog and consequently consumption delay, the solution is to open more consumption processes.
+> There may be deviation in delayed queue consumption time. For example, when consumption speed is slower than production speed, it can cause queue backlog and consumption delay. The mitigation is to run more consumer processes.
 
 ## Message Delivery (Asynchronous)
 ```php
@@ -73,9 +71,9 @@ class Index
     {
         // Queue name
         $queue = 'send-mail';
-        // Data, can be passed as an array without serialization
+        // Data, can be passed as array directly without serialization
         $data = ['to' => 'tom@gmail.com', 'content' => 'hello'];
-        // Deliver the message
+        // Deliver message
         Client::send($queue, $data);
         // Deliver delayed message, to be processed after 60 seconds
         Client::send($queue, $data, 60);
@@ -85,16 +83,16 @@ class Index
 
 }
 ```
-`Client::send()` does not return a value. It is an asynchronous push and does not guarantee 100% delivery to Redis.
+`Client::send()` has no return value. It is an asynchronous push and does not guarantee 100% message delivery to Redis.
 
 > **Tip**
-> The principle of `Client::send()` is to establish an in-memory queue in the local memory and asynchronously synchronize the messages to Redis (the synchronization speed is very fast, about 10,000 messages per second). If the process restarts and the data in the local memory queue has not been synchronized, it may cause message loss. `Client::send()` is suitable for asynchronous delivery of unimportant messages.
+> The principle of `Client::send()` is to create an in-memory queue locally and asynchronously synchronize messages to Redis (synchronization is fast, about 10,000 messages per second). If the process restarts while data in the local memory queue has not been fully synchronized, message loss may occur. `Client::send()` async delivery is suitable for non-critical messages.
 
 > **Tip**
-> `Client::send()` is asynchronous and can only be used in the workerman runtime environment. For command line scripts, use the synchronous interface `Redis::send()`.
+> `Client::send()` is asynchronous and can only be used in the Workerman runtime. For command-line scripts, use the synchronous interface `Redis::send()`.
 
-## Delivering Messages in Other Projects
-Sometimes you may need to deliver messages in other projects and cannot use `webman\redis-queue`. In this case, you can refer to the following function to deliver messages to the queue.
+## Delivering Messages from Other Projects
+Sometimes you need to deliver messages from other projects and cannot use `webman\redis-queue`. In such cases, you can refer to the following function to deliver messages to the queue.
 
 ```php
 function redis_queue_send($redis, $queue, $data, $delay = 0) {
@@ -116,7 +114,8 @@ function redis_queue_send($redis, $queue, $data, $delay = 0) {
 }
 ```
 
-In the function, the parameter `$redis` is the Redis instance. For example, the usage of the redis extension is similar to the following:
+Here, the `$redis` parameter is the Redis instance. For example, usage with the Redis extension is similar to:
+
 ```php
 $redis = new Redis;
 $redis->connect('127.0.0.1', 6379);
@@ -126,12 +125,12 @@ redis_queue_send($redis, $queue, $data);
 ```
 
 ## Consumption
-The consumer process configuration file is in `config/plugin/webman/redis-queue/process.php`. The consumer directory is in `app/queue/redis/`.
+The consumer process configuration file is at `{main-project}/config/plugin/webman/redis-queue/process.php`. The consumer directory is under `{main-project}/app/queue/redis/`.
 
-Executing the command `php webman redis-queue:consumer my-send-mail` will generate the file `app/queue/redis/MyMailSend.php`.
+Executing the command `php webman redis-queue:consumer my-send-mail` will generate the file `{main-project}/app/queue/redis/MyMailSend.php`.
 
 > **Tip**
-> If the command does not exist, you can also generate it manually.
+> This command requires installing the [Console](../plugin/console.md) plugin. If you prefer not to install it, you can manually create a file similar to the following:
 
 ```php
 <?php
@@ -145,7 +144,7 @@ class MyMailSend implements Consumer
     // Queue name to consume
     public $queue = 'send-mail';
 
-    // Connection name, corresponding to the connection in `plugin/webman/redis-queue/redis.php`
+    // Connection name, corresponding to connection in plugin/webman/redis-queue/redis.php
     public $connection = 'default';
 
     // Consumption
@@ -154,28 +153,51 @@ class MyMailSend implements Consumer
         // No need for deserialization
         var_export($data); // Outputs ['to' => 'tom@gmail.com', 'content' => 'hello']
     }
+    // Consumption failure callback
+    /* 
+    $package = [
+        'id' => 1357277951, // Message ID
+        'time' => 1709170510, // Message time
+        'delay' => 0, // Delay time
+        'attempts' => 2, // Consumption count
+        'queue' => 'send-mail', // Queue name
+        'data' => ['to' => 'tom@gmail.com', 'content' => 'hello'], // Message content
+        'max_attempts' => 5, // Max retry count
+        'error' => 'Error message' // Error message
+    ]
+    */
+    public function onConsumeFailure(\Throwable $e, $package)
+    {
+        echo "consume failure\n";
+        echo $e->getMessage() . "\n";
+        // No need for deserialization
+        var_export($package); 
+    }
 }
 ```
 
 > **Note**
-> The consumption process without throwing exceptions and errors is considered successful consumption. Otherwise, it is considered consumption failure and will enter the retry queue. Redis-queue does not have an ack mechanism. You can consider it as an automatic ack (no exceptions or errors). If you want to mark the current message as not successfully consumed during consumption, you can manually throw an exception to put the current message into the retry queue. In practice, this is no different from an ack mechanism.
+> Consumption is considered successful when no exception or Error is thrown during consumption; otherwise it is a failure and the message enters the retry queue. Redis-queue has no ack mechanism; you can treat it as automatic ack (when no exception or Error occurs). If you want to mark the current message as not successfully consumed, you can manually throw an exception to send the message to the retry queue. In practice this is no different from an ack mechanism.
 
 > **Tip**
-> The consumer supports multiple servers and processes, and the same message will not be consumed repeatedly. Consumed messages will be automatically removed from the queue, no need to manually delete them.
+> Consumers support multiple servers and processes, and the same message will **not** be consumed twice. Consumed messages are automatically removed from the queue; no manual deletion is needed.
 
 > **Tip**
-> Consumption processes can consume multiple different queues at the same time. Adding a new queue does not require modification of the configuration in `process.php`. When adding a new queue consumer, only a corresponding `Consumer` class needs to be added under `app/queue/redis`, and use the class attribute `$queue` to specify the queue name to be consumed.
+> Consumer processes can consume multiple different queues at the same time. Adding a new queue does not require changing the configuration in `process.php`. When adding a new queue consumer, simply add the corresponding `Consumer` class under `app/queue/redis`, and use the class property `$queue` to specify the queue name to consume.
 
 > **Tip**
-> Windows users need to execute `php windows.php` to start webman, otherwise the consumption process will not start.
+> Windows users need to run `php windows.php` to start webman, otherwise the consumer process will not start.
 
-## Setting Different Consumption Processes for Different Queues
-By default, all consumers share the same consumption process. However, sometimes we need to separate the consumption of some queues, for example, slow business consumption in one group of processes, and fast business consumption in another group of processes. To achieve this, we can divide the consumers into two directories, for example, `app_path() . '/queue/redis/fast'` and `app_path() . '/queue/redis/slow'` (note that the namespace of the consumption class needs to be correspondingly modified). Then the configuration is as follows:
+> **Tip**
+> The onConsumeFailure callback is triggered each time consumption fails. You can handle post-failure logic here. (This feature requires `webman/redis-queue>=1.3.2` and `workerman/redis-queue>=1.2.1`)
+
+## Setting Different Consumer Processes for Different Queues
+By default, all consumers share the same consumer process. However, sometimes we need to separate consumption for some queues—for example, put slow-consuming business in one group of processes and fast-consuming business in another. To do this, we can split consumers into two directories, e.g. `app_path() . '/queue/redis/fast'` and `app_path() . '/queue/redis/slow'` (note that the consumer class namespace must be updated accordingly). The configuration is as follows:
 ```php
 return [
-    ...other configurations here...
+    ...other configurations omitted...
     
-    'redis_consumer_fast'  => [
+    'redis_consumer_fast'  => [ // Key is custom, no format restriction, named redis_consumer_fast here
         'handler'     => Webman\RedisQueue\Process\Consumer::class,
         'count'       => 8,
         'constructor' => [
@@ -183,7 +205,7 @@ return [
             'consumer_dir' => app_path() . '/queue/redis/fast'
         ]
     ],
-    'redis_consumer_slow'  => [
+    'redis_consumer_slow'  => [  // Key is custom, no format restriction, named redis_consumer_slow here
         'handler'     => Webman\RedisQueue\Process\Consumer::class,
         'count'       => 8,
         'constructor' => [
@@ -194,9 +216,10 @@ return [
 ];
 ```
 
-By categorizing directories and configuring accordingly, we can easily set different consumption processes for different consumers.
-## Multiple Redis Configurations
-### Configuration
+This way, fast-business consumers go in the `queue/redis/fast` directory and slow-business consumers in `queue/redis/slow`, achieving the goal of assigning consumer processes to queues.
+
+## Multiple Redis Configuration
+#### Configuration
 `config/plugin/webman/redis-queue/redis.php`
 ```php
 <?php
@@ -204,42 +227,43 @@ return [
     'default' => [
         'host' => 'redis://192.168.0.1:6379',
         'options' => [
-            'auth' => null,       // password, string type, optional
-            'db' => 0,            // database
-            'max_attempts'  => 5, // retry times after consumption failure
-            'retry_seconds' => 5, // retry interval in seconds
+            'auth' => null,       // Password, string type, optional
+            'db' => 0,            // Database
+            'max_attempts'  => 5, // Retry count after consumption failure
+            'retry_seconds' => 5, // Retry interval in seconds
         ]
     ],
     'other' => [
         'host' => 'redis://192.168.0.2:6379',
         'options' => [
-            'auth' => null,       // password, string type, optional
-            'db' => 0,            // database
-            'max_attempts'  => 5, // retry times after consumption failure
-            'retry_seconds' => 5, // retry interval in seconds
+            'auth' => null,       // Password, string type, optional
+            'db' => 0,            // Database
+            'max_attempts'  => 5, // Retry count after consumption failure
+            'retry_seconds' => 5, // Retry interval in seconds
         ]
     ],
 ];
 ```
 
-Note that an additional configuration for `other` key has been added to the configuration.
+Note that an additional Redis configuration with key `other` has been added.
 
-### Publishing Messages to Multiple Redis
+#### Delivering Messages to Multiple Redis
+
 ```php
-// publish message to the queue with key `default`
+// Deliver message to queue with key `default`
 Client::connection('default')->send($queue, $data);
 Redis::connection('default')->send($queue, $data);
-//  the same as
+// Same as
 Client::send($queue, $data);
 Redis::send($queue, $data);
 
-// publish message to the queue with key `other`
+// Deliver message to queue with key `other`
 Client::connection('other')->send($queue, $data);
 Redis::connection('other')->send($queue, $data);
 ```
 
-### Consuming from Multiple Redis
-Consuming messages from the queue with key `other` in the configuration
+#### Consuming from Multiple Redis
+Consuming messages from the queue with key `other` in the configuration:
 ```php
 namespace app\queue\redis;
 
@@ -247,24 +271,25 @@ use Webman\RedisQueue\Consumer;
 
 class SendMail implements Consumer
 {
-    // queue name to consume from
+    // Queue name to consume
     public $queue = 'send-mail';
 
-    // === set to 'other' here, indicating the queue key in the consumption configuration is 'other' ===
+    // === Set to 'other' here to consume from queue with key 'other' in config ===
     public $connection = 'other';
 
-    // consumption
+    // Consumption
     public function consume($data)
     {
-        // deserialization is not needed
+        // No need for deserialization
         var_export($data);
     }
 }
 ```
 
-## FAQs
-**Why do I get the error `Workerman\Redis\Exception: Workerman Redis Wait Timeout (600 seconds)`?**
+## FAQ
 
-This error only occurs in the asynchronous publishing interface `Client::send()`. Asynchronous publishing first saves the message in local memory and then sends it to Redis when the process is idle. If the speed at which Redis receives messages is slower than the message production speed, or if the process is busy with other tasks and does not have enough time to synchronize the messages from memory to Redis, it can cause message congestion. If there is message congestion for more than 600 seconds, this error will be triggered.
+**Why does the error `Workerman\Redis\Exception: Workerman Redis Wait Timeout (600 seconds)` occur?**
 
-Solution: Use the synchronous publishing interface `Redis::send()` for message publishing.
+This error only occurs with the asynchronous delivery interface `Client::send()`. Asynchronous delivery first saves messages in local memory, then sends them to Redis when the process is idle. If Redis receives messages more slowly than they are produced, or if the process is busy with other tasks and does not have enough time to synchronize messages from memory to Redis, message backlog can occur. If messages are backlogged for more than 600 seconds, this error is triggered.
+
+Solution: Use the synchronous delivery interface `Redis::send()` for message delivery.

@@ -1,5 +1,5 @@
 # Plugins de base
 
-Les plugins de base sont généralement des composants universels, généralement installés via composer et placés dans le dossier vendor. Lors de l'installation, certains paramètres personnalisés (middlewares, processus, routes, etc.) peuvent être automatiquement copiés dans le répertoire `{projet principal}config/plugin`, et webman reconnaîtra automatiquement cette configuration pour fusionner les paramètres dans la configuration principale, permettant ainsi aux plugins d'intervenir à n'importe quel moment du cycle de vie de webman.
+Les plugins de base sont généralement des composants communs, typiquement installés via Composer, le code étant placé dans le répertoire vendor. Lors de l'installation, des configurations personnalisées (middleware, processus, routes, etc.) peuvent être automatiquement copiées dans le répertoire `{projet principal}config/plugin`. Webman reconnaîtra automatiquement la configuration de ce répertoire et la fusionnera avec la configuration principale, permettant ainsi aux plugins d'intervenir à n'importe quelle phase du cycle de vie de webman.
 
-Pour en savoir plus, consultez [Créer des plugins de base](create.md)
+Pour en savoir plus, consultez [Création de plugins de base](create.md).

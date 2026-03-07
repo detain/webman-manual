@@ -22,6 +22,8 @@ Quando você acessa o endereço `http://127.0.0.1:8787/api/{controller}/{action}
 
 Quando você acessa o endereço `http://127.0.0.1:8787/admin/{controller}/{action}`, você está acessando o controlador e a ação no diretório `app/admin/controller`.
 
+No webman, cada diretório sob app pode ser considerado como um aplicativo.
+
 No webman, você até pode planejar o diretório do aplicativo da seguinte forma.
 ```
 app
@@ -54,7 +56,7 @@ class FooController
 ```
 
 ## Configuração de Middleware para Múltiplos Aplicativos
-Às vezes, você pode querer configurar middleware diferentes para aplicativos diferentes, por exemplo, o aplicativo `api` pode precisar de um middleware de controle de acesso cruzado, e `admin` pode precisar de um middleware para verificar o login do administrador. Nesse caso, a configuração do arquivo `config/midlleware.php` pode se parecer com o exemplo a seguir:
+Às vezes, você pode querer configurar middleware diferentes para aplicativos diferentes, por exemplo, o aplicativo `api` pode precisar de um middleware de controle de acesso cruzado, e `admin` pode precisar de um middleware para verificar o login do administrador. Nesse caso, a configuração do arquivo `config/middleware.php` pode se parecer com o exemplo a seguir:
 ```php
 return [
     // Middleware global

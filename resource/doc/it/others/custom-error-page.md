@@ -1,9 +1,8 @@
-## Personalizzare il 404
-In caso di errore 404, webman restituirà automaticamente il contenuto di `public/404.html`, quindi gli sviluppatori possono modificare direttamente il file `public/404.html`.
+# Personalizzare 404
 
-Se si desidera controllare dinamicamente il contenuto del 404, ad esempio restituire dati JSON come `{"code:"404", "msg":"404 not found"}` durante le richieste AJAX, o restituire il template` app/view/404.html` durante le richieste di pagina, si prega di fare riferimento all'esempio seguente.
+Se si desidera controllare dinamicamente il contenuto del 404, ad esempio restituire dati JSON `{"code:"404", "msg":"404 not found"}` per le richieste AJAX e restituire il template `app/view/404.html` per le richieste di pagina, fare riferimento all'esempio seguente.
 
-> Nell'esempio seguente viene utilizzato il modello PHP nativo, ma il funzionamento è simile per altri modelli come `twig`, `blade`, `think-tmplate`.
+> L'esempio utilizza template PHP nativi. Altri template come `twig`, `blade`, `think-template` seguono lo stesso principio.
 
 **Creare il file `app/view/404.html`**
 ```html
@@ -19,23 +18,42 @@ Se si desidera controllare dinamicamente il contenuto del 404, ad esempio restit
 </html>
 ```
 
-**Aggiungere il seguente codice a `config/route.php`:**
+**Aggiungere il seguente codice in `config/route.php`:**
 ```php
 use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // restituisci JSON durante le richieste AJAX
+    // Restituire JSON per le richieste AJAX
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
-    // restituisci il modello 404.html durante le richieste di pagina
+    // Restituire il template 404.html per le richieste di pagina
     return view('404', ['error' => 'some error'])->withStatus(404);
 });
 ```
 
-## Personalizzare il 500
-**Creare un nuovo file `app/view/500.html`**
+# Personalizzare 405
+
+Dalla versione webman-framework 1.5.23, il callback di fallback supporta il parametro `status`. 404 indica che la richiesta non esiste; 405 indica che il metodo di richiesta attuale non è supportato (es. accedere con GET a una route definita con `Route::post()`).
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# Personalizzare 500
+
+**Creare `app/view/500.html`**
+
 ```html
 <!doctype html>
 <html>
@@ -44,13 +62,13 @@ Route::fallback(function(Request $request){
     <title>500 Internal Server Error</title>
 </head>
 <body>
-Modello di errore personalizzato:
+Template di errore personalizzato:
 <?=htmlspecialchars($exception)?>
 </body>
 </html>
 ```
 
-**Creare** `app/exception/Handler.php` **(crea la cartella se non esiste)**
+**Creare `app/exception/Handler.php`** (creare la cartella se non esiste)
 ```php
 <?php
 
@@ -63,7 +81,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * Rendere e restituire
+     * Renderizzare e restituire la risposta
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -71,17 +89,17 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // restituisci dati JSON durante la richiesta AJAX
+        // Restituire dati JSON per le richieste AJAX
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
-        // restituisci il modello 500.html durante le richieste di pagina
+        // Restituire il template 500.html per le richieste di pagina
         return view('500', ['exception' => $exception], '')->withStatus(500);
     }
 }
 ```
 
-**Configura `config/exception.php`**
+**Configurare `config/exception.php`**
 ```php
 return [
     '' => \app\exception\Handler::class,

@@ -1,33 +1,47 @@
 # Über Speicherverluste
-Webman ist ein residentes Speicherframework, daher müssen wir ein wenig auf mögliche Speicherverluste achten. Entwickler müssen sich jedoch keine allzu großen Sorgen machen, da Speicherverluste unter extremen Bedingungen auftreten und leicht vermieden werden können. Die Entwicklung mit Webman ist im Wesentlichen genauso wie bei herkömmlichen Frameworks, es sind keine zusätzlichen Maßnahmen für das Speichermanagement erforderlich.
+Webman ist ein residentes Speicherframework, daher müssen wir etwas auf Speicherverluste achten. Entwickler müssen sich jedoch keine großen Sorgen machen, da Speicherverluste nur unter sehr extremen Bedingungen auftreten und leicht vermieden werden können. Die Entwicklung mit Webman entspricht im Wesentlichen herkömmlichen Frameworks; für Speichermanagement sind keine zusätzlichen Maßnahmen erforderlich.
 
 > **Hinweis**
-> Der mitgelieferte Monitorprozess von Webman überwacht den Speicherverbrauch aller Prozesse. Wenn der Speicherverbrauch eines Prozesses den im `php.ini` definierten `memory_limit` erreicht, wird der entsprechende Prozess automatisch sicher neu gestartet, um Speicher freizugeben. In dieser Zeit hat dies keinen Einfluss auf das Geschäft.
+> Der mitgelieferte Monitor-Prozess von Webman überwacht den Speicherverbrauch aller Prozesse. Wenn der Speicherverbrauch eines Prozesses den in php.ini unter `memory_limit` gesetzten Wert erreicht, wird der entsprechende Prozess automatisch sicher neu gestartet, um Speicher freizugeben – ohne Auswirkung auf die Anwendung.
 
 ## Definition von Speicherverlusten
-Mit zunehmenden Anfragen steigt der Speicherverbrauch von Webman **unbegrenzt** (beachten Sie, dass er **unbegrenzt** steigt) und erreicht einige hundert Megabyte oder mehr. Dies wird als Speicherverlust bezeichnet. Wenn der Speicherverbrauch zunimmt, aber später nicht weiter ansteigt, handelt es sich nicht um einen Speicherverlust.
+Dass der Speicherverbrauch von Webman mit steigender Anzahl von Anfragen zunimmt, ist normal. Allgemein gilt: Wenn ein Prozess eine bestimmte Zahl von Anfragen erreicht (typischerweise im Millionenbereich), stabilisiert sich der Speicherverbrauch oder wächst nur noch gelegentlich leicht.
 
-Es ist normal, dass ein Prozess mehrere zehn Megabyte Speicherplatz einnimmt. Wenn ein Prozess jedoch eine extrem große Anfrage verarbeitet oder eine große Anzahl von Verbindungen verwaltet, kann der Speicherverbrauch eines einzelnen Prozesses möglicherweise auf über hundert Megabyte steigen. Nach der Verwendung gibt PHP möglicherweise nicht den gesamten Speicherplatz an das Betriebssystem zurück, sondern behält diesen zur Wiederverwendung bei. Daher kann es zu einer Situation kommen, in der der Speicherverbrauch nach der Verarbeitung einer großen Anfrage steigt und der Speicher nicht freigegeben wird. Dies ist ein normaler Vorgang. (Das Aufrufen der Methode `gc_mem_caches()` kann einen Teil des ungenutzten Speichers freigeben.)
+Bei den meisten Anwendungen pendelt sich der Speicherverbrauch pro Prozess bei etwa 10M–100M ein. Solange der Verbrauch eines einzelnen Prozesses unter 100M bleibt, besteht kein Grund zur Sorge.
 
-## Wie entstehen Speicherverluste?
-**Speicherverluste treten nur unter folgenden beiden Bedingungen auf:**
-1. Es gibt ein **langfristiges** Array (Achten Sie auf das Wort "langfristig", normale Arrays sind unbedenklich).
-2. Und dieses **langfristige** Array dehnt sich unbegrenzt aus (Geschäft fügt unbegrenzt Daten hinzu, ohne sie zu bereinigen).
+Wenn zudem große Dateien verarbeitet, große Anfragen bearbeitet oder große Datenmengen aus der Datenbank gelesen werden, beantragt PHP viel Speicher. PHP kann diesen Speicher teilweise behalten und wiederverwenden, statt ihn vollständig an das Betriebssystem zurückzugeben. Das führt zu höherem Speicherverbrauch. Da der Speicher aber wiederverwendet wird, besteht hier ebenfalls kein Grund zur Sorge.
 
-Wenn beide Bedingungen 1 und 2 **gleichzeitig erfüllt** sind, tritt ein Speicherverlust auf. Wenn eine der Bedingungen nicht erfüllt ist oder nur eine Bedingung erfüllt ist, liegt kein Speicherverlust vor.
+> **Hinweis**
+> Bei per phar oder als Binärpaket verpackten Projekten kann der Speicherverbrauch über 100M liegen, wenn die Paketgröße groß ist – das ist normal.
 
-## Langfristige Arrays
-In Webman umfassen langfristige Arrays:
+## So erkennt man einen Speicherverlust
+Wenn ein Prozess mehr als eine Million Anfragen bearbeitet hat, der Speicherverbrauch über 100M liegt und der Speicher nach jeder Anfrage weiter wächst, könnte ein Speicherverlust vorliegen.
+
+## So findet man einen Speicherverlust
+Eine einfache Methode ist, die einzelnen APIs unter Last zu testen und festzustellen, welche nach Millionen von Anfragen den Speicherverbrauch weiter erhöht.
+
+Sobald eine problematische API gefunden ist, kann man mit der Bisektionsmethode vorgehen: jeweils die Hälfte des Geschäftscodes auskommentieren, bis die fehlerhafte Stelle eingegrenzt ist.
+
+## Wie Speicherverluste entstehen
+**Ein Speicherverlust tritt nur ein, wenn beide folgenden Bedingungen erfüllt sind:**
+1. Es existiert ein Array mit **langer Lebensdauer** (normale Arrays sind unproblematisch)
+2. Und dieses Array mit **langer Lebensdauer** wächst unbegrenzt (die Anwendung fügt ständig Daten hinzu und entfernt sie nie)
+
+Nur wenn **beide** Bedingungen erfüllt sind, entsteht ein Speicherverlust. Ist eine Bedingung nicht erfüllt oder nur eine von beiden, liegt kein Speicherverlust vor.
+
+## Arrays mit langer Lebensdauer
+
+In Webman zählen dazu:
 1. Arrays mit dem Schlüsselwort `static`
-2. Arrays mit Eigenschaften von Singletons
+2. Array-Eigenschaften von Singletons
 3. Arrays mit dem Schlüsselwort `global`
 
-> **Beachten**
-> In Webman ist es erlaubt, langfristige Daten zu verwenden, es muss jedoch sichergestellt werden, dass die Daten im Array begrenzt sind und die Anzahl der Elemente nicht unbegrenzt ansteigt.
+> **Hinweis**
+> Lange Lebensdauer von Daten ist in Webman zulässig, aber die Daten müssen begrenzt sein und die Anzahl der Elemente darf nicht unbegrenzt wachsen.
 
-Im Folgenden werden jeweils Beispiele erläutert.
+Nachfolgend konkrete Beispiele.
 
-#### Unbegrenztes Wachstum des statischen Arrays
+### Unbegrenzt wachsendes static-Array
 ```php
 class Foo
 {
@@ -39,9 +53,10 @@ class Foo
     }
 }
 ```
-Das mit dem Schlüsselwort `static` definierte `$data` Array ist ein langfristiges Array, und in diesem Beispiel wird das `$data` Array mit jeder Anfrage unbegrenzt erweitert, was zu Speicherverlusten führt.
 
-#### Unbegrenztes Wachstum von Singleton-Array-Eigenschaften
+Das mit `static` definierte Array `$data` hat eine lange Lebensdauer. Im Beispiel wächst `$data` mit jeder Anfrage, was zu einem Speicherverlust führt.
+
+### Unbegrenzt wachsendes Singleton-Array
 ```php
 class Cache
 {
@@ -62,6 +77,7 @@ class Cache
     }
 }
 ```
+
 Aufrufcode
 ```php
 class Foo
@@ -73,12 +89,13 @@ class Foo
     }
 }
 ```
-`Cache::instance()` gibt eine Cache-Singleton-Instanz zurück, die eine langfristige Klasseninstanz ist. Obwohl ihr `$data` Attribut kein Schlüsselwort `static` verwendet, ist es aufgrund der langen Lebensdauer der Klasse selbst ein langfristiges Array. Mit jeder Hinzufügung eines neuen Schlüssels zum `$data` Array verbraucht das Programm immer mehr Speicher, was zu Speicherverlusten führt.
 
-> **Beachten**
-> Wenn der Schlüssel, den `Cache::instance()->set(key, value)` hinzufügt, in begrenzter Anzahl vorhanden ist, wird keine Speicherverschwendung auftreten, da das `$data` Array nicht unbegrenzt ansteigt.
+`Cache::instance()` liefert eine Cache-Singleton-Instanz mit langer Lebensdauer. Obwohl die Eigenschaft `$data` kein `static` verwendet, hat `$data` ebenfalls lange Lebensdauer, weil die Klasse selbst lange lebt. Durch ständiges Hinzufügen neuer Keys wächst der Speicherverbrauch und es kommt zum Speicherverlust.
 
-#### Unbegrenztes Wachstum von globalen Arrays
+> **Hinweis**
+> Wenn die über `Cache::instance()->set(key, value)` hinzugefügten Keys in begrenzter Anzahl sind, entsteht kein Speicherverlust, weil das Array `$data` nicht unbegrenzt wächst.
+
+### Unbegrenzt wachsendes global-Array
 ```php
 class Index
 {
@@ -90,7 +107,7 @@ class Index
     }
 }
 ```
-Arrays, die mit dem Schlüsselwort `global` definiert sind, werden nach dem Abschluss einer Funktion oder einer Methoden nicht freigegeben, daher sind sie langfristige Arrays. Der oben genannten Code führt zu Speicherverlusten, da der Speicherverbrauch mit jedem Anstieg der Anfragen steigt. Ebenso sind in Funktionen oder Methoden mit dem Schlüsselwort `static` definierte Arrays langfristige Arrays, und wenn das Array unbegrenzt wächst, tritt ebenfalls ein Speicherverlust auf, z.B:
+Arrays mit `global` werden nach Abschluss einer Funktion oder Methode nicht freigegeben, haben also lange Lebensdauer. Der obige Code verursacht bei steigender Anfragenzahl einen Speicherverlust. Ebenso sind Arrays mit `static` innerhalb von Funktionen oder Methoden Arrays mit langer Lebensdauer; wenn sie unbegrenzt wachsen, kommt es ebenfalls zum Speicherverlust, z. B.:
 ```php
 class Index
 {
@@ -104,8 +121,8 @@ class Index
 ```
 
 ## Empfehlungen
-Entwickler sollten sich in der Regel keine große Sorgen um Speicherverluste machen, da sie selten auftreten. Wenn sie dennoch auftreten, können wir durch Stresstesting den Codeabschnitt finden, der den Speicherverlust verursacht, und das Problem lokalisieren. Selbst wenn Entwickler den Leckagepunkt nicht finden, wird der mitgelieferte Überwachungsdienst von Webman den Prozess rechtzeitig sicher neu starten, um den Speicher freizugeben.
+Entwickler sollten Speicherverluste nicht übermäßig beachten, da sie selten auftreten. Wenn doch einer auftritt, hilft Lasttesting, den verursachenden Code zu finden. Selbst wenn Entwickler die Stelle nicht finden, startet Webmans Monitor-Dienst den betroffenen Prozess rechtzeitig sicher neu und gibt Speicher frei.
 
-Wenn Sie dennoch versuchen möchten, Speicherverluste zu vermeiden, können Sie die folgenden Empfehlungen beachten:
-1. Vermeiden Sie global oder statische Arrays und stellen Sie sicher, dass sie nicht unbegrenzt wachsen.
-2. Verwenden Sie für unbekannte Klassen möglichst keine Singleton-Instanzen. Wenn ein Singleton erforderlich ist, überprüfen Sie, ob es Eigenschaften mit unbegrenztem Wachstum gibt. Verwenden Sie die `new`-Anweisung zur Initialisierung, wenn ein Singleton nicht erforderlich ist.
+Wer Speicherverluste möglichst vermeiden möchte, kann folgende Punkte beachten:
+1. Arrays mit `global` oder `static` möglichst vermeiden; falls verwendet, sicherstellen, dass sie nicht unbegrenzt wachsen.
+2. Bei unbekannten Klassen eher `new` zur Initialisierung nutzen als Singletons. Bei Singletons prüfen, ob Array-Eigenschaften unbegrenzt wachsen können.

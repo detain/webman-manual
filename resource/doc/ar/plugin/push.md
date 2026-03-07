@@ -1,140 +1,140 @@
 # webman/push
 
-`webman/push` 是一个免费的推送服务端插件，客户端基于订阅模式，兼容 [pusher](https://pusher.com)，拥有众多客户端如JS、安卓(java)、IOS(swift)、IOS(Obj-C)、uniapp、.NET、 Unity、Flutter、AngularJS等。后端推送SDK支持PHP、Node、Ruby、Asp、Java、Python、Go、Swift等。客户端自带心跳和断线自动重连，使用起来非常简单稳定。适用于消息推送、聊天等诸多即时通讯场景。
+`webman/push` هي إضافة خادم دفع مجانية، يعتمد العميل على نموذج الاشتراك، متوافقة مع [pusher](https://pusher.com)، وتضم العديد من العملاء مثل JS وAndroid (java) وIOS (swift) وIOS (Obj-C) وuniapp و.NET وUnity وFlutter وAngularJS وغيرها. يدعم SDK الدفع في الخلفية PHP وNode وRuby وAsp وJava وPython وGo وSwift وغيرها. يأتي العميل مزوداً بنبضات قلب وإعادة اتصال تلقائية عند انقطاع الاتصال، مما يجعله بسيطاً ومستقراً جداً في الاستخدام. مناسبة لسيناريوهات التواصل الفوري مثل دفع الرسائل والدردشة وغيرها.
 
-插件中自带一个网页js客户端push.js以及uniapp客户端`uniapp-push.js`，其它语言客户端在 https://pusher.com/docs/channels/channels_libraries/libraries/ 下载
+تأتي الإضافة مع عميل JavaScript لصفحة الويب push.js وعميل uniapp `uniapp-push.js`، ويمكن تنزيل عملاء اللغات الأخرى من https://pusher.com/docs/channels/channels_libraries/libraries/
 
-## 安装
+## التثبيت
 
 ```sh
 composer require webman/push
 ```
 
-## 客户端 (javascript)
+## العميل (javascript)
 
-**引入javascript客户端**
+**استيراد عميل javascript**
 ```js
 <script src="/plugin/webman/push/push.js"> </script>
 ```
 
-**客户端使用(公有频道)**
+**استخدام العميل (قناة عامة)**
 ```js
-// 建立连接
+// إنشاء الاتصال
 var connection = new Push({
-    url: 'ws://127.0.0.1:3131', // websocket地址
-    app_key: '<app_key，在config/plugin/webman/push/app.php里获取>',
-    auth: '/plugin/webman/push/auth' // 订阅鉴权(仅限于私有频道)
+    url: 'ws://127.0.0.1:3131', // عنوان websocket
+    app_key: '<app_key، يتم الحصول عليه من config/plugin/webman/push/app.php>',
+    auth: '/plugin/webman/push/auth' // مصادقة الاشتراك (لللقنوات الخاصة فقط)
 });
-// 假设用户uid为1
+// افترض أن uid المستخدم هو 1
 var uid = 1;
-// 浏览器监听user-1频道的消息，也就是用户uid为1的用户消息
+// يستمع المتصفح لرسائل قناة user-1، أي رسائل المستخدم صاحب uid 1
 var user_channel = connection.subscribe('user-' + uid);
 
-// 当user-1频道有message事件的消息时
+// عندما تحتوي قناة user-1 على رسالة حدث message
 user_channel.on('message', function(data) {
-    // data里是消息内容
+    // data يحتوي على محتوى الرسالة
     console.log(data);
 });
-// 当user-1频道有friendApply事件时消息时
+// عندما تحتوي قناة user-1 على حدث friendApply
 user_channel.on('friendApply', function (data) {
-    // data里是好友申请相关信息
+    // data يحتوي على معلومات طلب الصداقة
     console.log(data);
 });
 
-// 假设群组id为2
+// افترض أن معرف المجموعة هو 2
 var group_id = 2;
-// 浏览器监听group-2频道的消息，也就是监听群组2的群消息
+// يستمع المتصفح لرسائل قناة group-2، أي رسائل المجموعة 2
 var group_channel = connection.subscribe('group-' + group_id);
-// 当群组2有message消息事件时
+// عندما تحتوي المجموعة 2 على حدث رسالة message
 group_channel.on('message', function(data) {
-    // data里是消息内容
+    // data يحتوي على محتوى الرسالة
     console.log(data);
 });
 ```
 
-> **Tips**
-> 以上例子中subscribe实现频道订阅，`message` `friendApply` 是频道上的事件。频道和事件是任意字符串，不需要服务端预先配置。
+> **نصائح**
+> في المثال أعلاه، subscribe تنفذ اشتراك القناة، `message` و`friendApply` هما أحداث على القناة. القناة والأحداث عبارة عن سلاسل نصية عشوائية ولا تحتاج إلى تكوين مسبق على الخادم.
 
-## 服务端推送(PHP)
+## الدفع من الخادم (PHP)
 ```php
 use Webman\Push\Api;
 $api = new Api(
-    // webman下可以直接使用config获取配置，非webman环境需要手动写入相应配置
+    // في webman يمكن استخدام config مباشرة للحصول على التكوين، في بيئة غير webman يجب كتابة التكوين المقابل يدوياً
     'http://127.0.0.1:3232',
     config('plugin.webman.push.app.app_key'),
     config('plugin.webman.push.app.app_secret')
 );
-// 给订阅 user-1 的所有客户端推送 message 事件的消息
+// إرسال رسالة حدث message لجميع العملاء المشتركين في user-1
 $api->trigger('user-1', 'message', [
     'from_uid' => 2,
-    'content'  => '你好，这个是消息内容'
+    'content'  => 'مرحباً، هذا محتوى الرسالة'
 ]);
 ```
 
-## 私有频道
-以上例子里任何用户都可以通过 Push.js 订阅信息，如果信息是敏感信息，这样是不安全的。
+## القنوات الخاصة
+في الأمثلة أعلاه، يمكن لأي مستخدم الاشتراك في المعلومات عبر Push.js، وإذا كانت المعلومات حساسة فهذا غير آمن.
 
-`webman/push`支持私有频道订阅，私有频道是以 `private-` 开头的频道。例如
+يدعم `webman/push` الاشتراك في القنوات الخاصة، والقنوات الخاصة هي القنوات التي تبدأ بـ `private-`. مثلاً
 ```js
 var connection = new Push({
-    url: 'ws://127.0.0.1:3131', // websocket地址
+    url: 'ws://127.0.0.1:3131', // عنوان websocket
     app_key: '<app_key>',
-    auth: '/plugin/webman/push/auth' // 订阅鉴权(仅限于私有频道)
+    auth: '/plugin/webman/push/auth' // مصادقة الاشتراك (لللقنوات الخاصة فقط)
 });
 
-// 假设用户uid为1
+// افترض أن uid المستخدم هو 1
 var uid = 1;
-// 浏览器监听private-user-1私有频道的消息
+// يستمع المتصفح لرسائل القناة الخاصة private-user-1
 var user_channel = connection.subscribe('private-user-' + uid);
 ```
 
-当客户端订阅私有频道时(`private-`开头的频道)，浏览器会发起一个ajax鉴权请求(ajax地址为new Push时auth参数配置的地址)，开发者可以在这里判断，当前用户是否有权限监听这个频道。这样就保证了订阅的安全性。
+عندما يشترك العميل في قناة خاصة (قناة تبدأ بـ `private-`)، يرسل المتصفح طلب مصادقة ajax (عنوان ajax هو العنوان المكون في معلمة auth عند إنشاء Push جديد)، ويمكن للمطور هنا التحقق مما إذا كان للمستخدم الحالي صلاحية الاستماع لهذه القناة. وهذا يضمن أمان الاشتراك.
 
-> 关于鉴权参见 `config/plugin/webman/push/route.php` 中的代码
+> لمزيد من المعلومات حول المصادقة راجع الكود في `config/plugin/webman/push/route.php`
 
-## 客户端推送
-以上例子都是客户端订阅某个频道，服务端调用API接口推送。webman/push 也支持客户端直接推送消息。
+## الدفع من العميل
+جميع الأمثلة أعلاه تتعلق باشتراك العميل في قناة معينة ونداء الخادم لواجهة API للدفع. يدعم webman/push أيضاً دفع الرسائل مباشرة من العميل.
 
-> **注意**
-> 客户端间推送仅支持私有频道(`private-`开头的频道)，并且客户端只能触发以 `client-` 开头的事件。
+> **ملاحظة**
+> الدفع بين العملاء يدعم القنوات الخاصة فقط (القنوات التي تبدأ بـ `private-`)، ولا يمكن للعميل إلا تفعيل الأحداث التي تبدأ بـ `client-`.
 
-客户端触发事件推送的例子
+مثال على تفعيل حدث الدفع من العميل
 ```js
 var user_channel = connection.subscribe('private-user-1');
 user_channel.on('client-message', function (data) {
     // 
 });
-user_channel.trigger('client-message', {form_uid:2, content:"hello"});
+user_channel.trigger('client-message', {form_uid:2, content:"مرحباً"});
 ```
 
-> **注意**
-> 以上代码给所有(除了当前客户端)订阅了 `private-user-1` 的客户端推送 `client-message` 事件的数据(推送客户端不会收到自己推送的数据)。
+> **ملاحظة**
+> الكود أعلاه يرسل بيانات حدث `client-message` لجميع العملاء (باستثناء العميل الحالي) المشتركين في `private-user-1` (العميل المُرسل لن يستلم البيانات التي أرسلها بنفسه).
 
 ## webhooks
 
-webhook用来接收频道的一些事件。
+تُستخدم webhook لاستقبال بعض أحداث القناة.
 
-**目前主要有2个事件：**
+**حالياً يوجد حدثان رئيسيان:**
 
 - 1、channel_added
-  当某个频道从没有客户端在线到有客户端在线时触发的事件，或者说是在线事件
+  يُفعّل عند انتقال قناة من عدم وجود عملاء متصلين إلى وجود عملاء متصلين، أو بعبارة أخرى حدث الاتصال
 
 - 2、channel_removed
-  当某个频道的所有客户端都下线时触发的事件，或者说是离线事件
+  يُفعّل عند انقطاع اتصال جميع عملاء قناة معينة، أو بعبارة أخرى حدث الانقطاع
 
-> **Tips**
-> 这些事件在维护用户在线状态非常有用。
+> **نصائح**
+> هذه الأحداث مفيدة جداً في الحفاظ على حالة اتصال المستخدمين.
 
-> **注意**
-> webhook地址在`config/plugin/webman/push/app.php`中配置。
-> 接收处理webhook事件的代码参考 `config/plugin/webman/push/route.php` 里面的逻辑
-> 由于刷新页面导致用户短暂离线不应该算作离线，webman/push会做延迟判断，所以在线/离线事件会有1-3秒的延迟。
+> **ملاحظة**
+> يتم تكوين عنوان webhook في `config/plugin/webman/push/app.php`.
+> راجع منطق الكود لاستقبال ومعالجة أحداث webhook في `config/plugin/webman/push/route.php`
+> نظراً لأن انقطاع المستخدم المؤقت بسبب تحديث الصفحة لا ينبغي اعتباره انقطاعاً، سيقوم webman/push بإجراء حكم متأخر، لذا ستتأخر أحداث الاتصال/الانقطاع من 1 إلى 3 ثوانٍ.
 
-## wss代理(SSL)
-https下无法使用ws连接，需要使用wss连接。这种情况可以使用nginx代理wss，配置类似如下：
+## وكيل wss (SSL)
+لا يمكن استخدام اتصال ws تحت https، بل يجب استخدام اتصال wss. في هذه الحالة يمكن استخدام nginx كوكيل wss، بتكوين مشابه لما يلي:
 ```
 server {
-    # .... 这里省略了其它配置 ...
+    # .... تم حذف التكوينات الأخرى هنا ...
 
     location /app/<app_key>
     {
@@ -146,26 +146,26 @@ server {
     }
 }
 ```
-**注意 上面配置中的`<app_key>`在`config/plugin/webman/push/app.php`中获取**
+**ملاحظة: يتم الحصول على `<app_key>` في التكوين أعلاه من `config/plugin/webman/push/app.php`**
 
-重启nginx后，使用以下方式连接服务端
+بعد إعادة تشغيل nginx، استخدم الطريقة التالية للاتصال بالخادم
 ```
 var connection = new Push({
     url: 'wss://example.com',
-    app_key: '<app_key，在config/plugin/webman/push/app.php里获取>',
-    auth: '/plugin/webman/push/auth' // 订阅鉴权(仅限于私有频道)
+    app_key: '<app_key، يتم الحصول عليه من config/plugin/webman/push/app.php>',
+    auth: '/plugin/webman/push/auth' // مصادقة الاشتراك (لللقنوات الخاصة فقط)
 });
 ```
-> **注意**
-> 1. 请求地址为wss开头
-> 2. 不写端口
-> 3. 必须使用**ssl证书对应的域名**连接
+> **ملاحظة**
+> 1. يبدأ عنوان الطلب بـ wss
+> 2. لا تكتب المنفذ
+> 3. يجب استخدام **النطاق المقابل لشهادة SSL** للاتصال
 
-## push-vue.js 使用说明
+## تعليمات استخدام push-vue.js
 
-1、将文件 push-vue.js复制到项目目录下，如：src/utils/push-vue.js
+1、انسخ الملف push-vue.js إلى مجلد المشروع، مثلاً: src/utils/push-vue.js
 
-2、在vue页面内引入
+2、أضفه في صفحة vue
 ```js
 
 <script lang="ts" setup>
@@ -173,40 +173,40 @@ import {  onMounted } from 'vue'
 import { Push } from '../utils/push-vue'
 
 onMounted(() => {
-  console.log('组件已经挂载') 
+  console.log('تم تحميل المكون') 
 
-  //实例化webman-push
+  // إنشاء مثيل webman-push
 
-  // 建立连接
+  // إنشاء الاتصال
   var connection = new Push({
-    url: 'ws://127.0.0.1:3131', // websocket地址
-    app_key: '<app_key，在config/plugin/webman/push/app.php里获取>',
-    auth: '/plugin/webman/push/auth' // 订阅鉴权(仅限于私有频道)
+    url: 'ws://127.0.0.1:3131', // عنوان websocket
+    app_key: '<app_key، يتم الحصول عليه من config/plugin/webman/push/app.php>',
+    auth: '/plugin/webman/push/auth' // مصادقة الاشتراك (لللقنوات الخاصة فقط)
   });
 
-  // 假设用户uid为1
+  // افترض أن uid المستخدم هو 1
   var uid = 1;
-  // 浏览器监听user-1频道的消息，也就是用户uid为1的用户消息
+  // يستمع المتصفح لرسائل قناة user-1، أي رسائل المستخدم صاحب uid 1
   var user_channel = connection.subscribe('user-' + uid);
 
-  // 当user-1频道有message事件的消息时
+  // عندما تحتوي قناة user-1 على رسالة حدث message
   user_channel.on('message', function (data) {
-    // data里是消息内容
+    // data يحتوي على محتوى الرسالة
     console.log(data);
   });
-  // 当user-1频道有friendApply事件时消息时
+  // عندما تحتوي قناة user-1 على حدث friendApply
   user_channel.on('friendApply', function (data) {
-    // data里是好友申请相关信息
+    // data يحتوي على معلومات طلب الصداقة
     console.log(data);
   });
 
-  // 假设群组id为2
+  // افترض أن معرف المجموعة هو 2
   var group_id = 2;
-  // 浏览器监听group-2频道的消息，也就是监听群组2的群消息
+  // يستمع المتصفح لرسائل قناة group-2، أي رسائل المجموعة 2
   var group_channel = connection.subscribe('group-' + group_id);
-  // 当群组2有message消息事件时
+  // عندما تحتوي المجموعة 2 على حدث رسالة message
   group_channel.on('message', function (data) {
-    // data里是消息内容
+    // data يحتوي على محتوى الرسالة
     console.log(data);
   });
 
@@ -216,6 +216,6 @@ onMounted(() => {
 </script>
 ```
 
-## 其他客户端地址
-`webman/push` 兼容pusher，其他语言(Java Swift .NET Objective-C Unity Flutter Android  IOS AngularJS等)客户端地址下载地址：
+## عناوين العملاء الأخرى
+`webman/push` متوافق مع pusher، عناوين تنزيل عملاء اللغات الأخرى (Java Swift .NET Objective-C Unity Flutter Android IOS AngularJS وغيرها):
 https://pusher.com/docs/channels/channels_libraries/libraries/

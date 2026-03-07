@@ -26,13 +26,13 @@ class FooController
 
 `http://127.0.0.1:8787/foo/hello` にアクセスすると、ページは `hello webman` を返します。
 
-もちろん、ルート構成を変更するには、[ルート](route.md)を参照してください。
+もちろん、[ルート](route.md)を参照してルート設定でルールを変更できます。
 
 > **ヒント**
-> 404エラーが発生する場合は、`config/app.php` を開いて`controller_suffix` を`Controller` に設定して再起動してください。
+> 404エラーが発生する場合は、`config/app.php` を開いて `controller_suffix` を `Controller` に設定し、再起動してください。
 
 ## コントローラーのサフィックス
-Webman 1.3から、`config/app.php` でコントローラーのサフィックスを設定できます。`config/app.php` で`controller_suffix` を空文字`''` に設定すると、コントローラーは以下のようになります。
+webman 1.3 以降、`config/app.php` でコントローラーのサフィックスを設定できます。`controller_suffix` が空文字 `''` に設定されている場合、コントローラーは以下のようになります。
 
 `app\controller\Foo.php`。
 
@@ -56,23 +56,225 @@ class Foo
 }
 ```
 
-コントローラーのサフィックスを`Controller`に設定することを強くお勧めします。これにより、コントローラーがモデルクラス名と競合するのを避けることができ、セキュリティが向上します。
+コントローラーのサフィックスを `Controller` に設定することを強く推奨します。これによりコントローラーとモデルクラス名の衝突を避け、セキュリティも向上します。
 
 ## 説明
-- フレームワークは自動的に`support\Request`オブジェクトをコントローラーに渡し、それを通じてユーザー入力データ(get post header cookieなど)を取得できます。[リクエスト](request.md)を参照してください。
-- コントローラーでは、数字、文字列、または`support\Response`オブジェクトを返すことができますが、他の種類のデータを返すことはできません。
-- `support\Response`オブジェクトは、`response()` `json()` `xml()` `jsonp()` `redirect()`などのヘルパー関数を使用して作成できます。
+- フレームワークは自動的に `support\Request` オブジェクトをコントローラーに渡し、それを介してユーザー入力データ（get、post、header、cookie など）を取得できます。[リクエスト](request.md)を参照してください。
+- コントローラーでは数値、文字列、または `support\Response` オブジェクトを返すことができますが、他の型のデータは返せません。
+- `support\Response` オブジェクトは `response()`、`json()`、`xml()`、`jsonp()`、`redirect()` などのヘルパー関数で作成できます。
+
+## コントローラーのパラメータバインディング
+
+#### 例
+webman はコントローラーメソッドのパラメータへのリクエストパラメータの自動バインディングをサポートしています。例えば：
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+
+`name` と `age` の値は `GET` または `POST` で渡すことも、ルートパラメータで渡すこともできます。例えば：
+
+```php
+Route::any('/user/{name}/{age}', [app\controller\UserController::class, 'create']);
+```
+
+優先順位は `ルートパラメータ` > `GET` > `POST` パラメータです。
+
+#### デフォルト値
+
+`/user/create?name=tom` にアクセスすると、次のエラーが発生します。
+
+```html
+Missing input parameter age
+```
+
+`age` パラメータを渡していないためです。パラメータにデフォルト値を設定することで解決できます。例えば：
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+
+#### パラメータの型
+`/user/create?name=tom&age=not_int` にアクセスすると、次のエラーが発生します。
+
+> **ヒント**
+> テストの便宜上、ブラウザのアドレスバーに直接パラメータを入力しています。実際の開発では `POST` でパラメータを渡すべきです。
+
+```html
+Input age must be of type int, string given
+```
+
+受け取ったデータは型に応じて変換されます。変換できない場合は `support\exception\InputTypeException` がスローされます。`age` パラメータを `int` 型に変換できないため、上記のエラーが発生します。
+
+#### カスタムエラーメッセージ
+`Missing input parameter age` や `Input age must be of type int, string given` などのエラーメッセージは、多言語対応でカスタマイズできます。以下のコマンドを参照してください。
+
+```
+composer require symfony/translation
+mkdir resource/translations/zh_CN/ -p
+echo "<?php
+return [
+    'Input :parameter must be of type :exceptType, :actualType given' => '入力パラメータ :parameter は :exceptType 型である必要があります。渡された型は :actualType です',
+    'Missing input parameter :parameter' => '入力パラメータ :parameter が不足しています',
+];" > resource/translations/zh_CN/messages.php
+php start.php restart
+```
+
+#### その他の型
+webman がサポートするパラメータ型は `int`、`float`、`string`、`bool`、`array`、`object`、`クラスインスタンス` などです。例えば：
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age, float $balance, bool $vip, array $extension): Response
+    {
+        return json([
+            'name' => $name,
+            'age' => $age,
+            'balance' => $balance,
+            'vip' => $vip,
+            'extension' => $extension,
+        ]);
+    }
+}
+```
+
+`/user/create?name=tom&age=18&balance=100.5&vip=true&extension[foo]=bar` にアクセスすると、次の結果が得られます。
+
+```json
+{
+  "name": "tom",
+  "age": 18,
+  "balance": 100.5,
+  "vip": true,
+  "extension": {
+    "foo": "bar"
+  }
+}
+```
+
+#### クラスインスタンス
+webman はパラメータの型ヒントによるクラスインスタンスの渡し方をサポートしています。例えば：
+
+**app\service\Blog.php**
+```php
+<?php
+namespace app\service;
+class Blog
+{
+    private $title;
+    private $content;
+    public function __construct(string $title, string $content)
+    {
+        $this->title = $title;
+        $this->content = $content;
+    }
+    public function get()
+    {
+        return [
+            'title' => $this->title,
+            'content' => $this->content,
+        ];
+    }
+}
+```
+
+**app\controller\BlogController.php**
+```php
+<?php
+namespace app\controller;
+use app\service\Blog;
+use support\Response;
+
+class BlogController
+{
+    public function create(Blog $blog): Response
+    {
+        return json($blog->get());
+    }
+}
+```
+
+`/blog/create?blog[title]=hello&blog[content]=world` にアクセスすると、次の結果が得られます。
+
+```json
+{
+  "title": "hello",
+  "content": "world"
+}
+```
+
+#### モデルインスタンス
+
+**app\model\User.php**
+```php
+<?php
+namespace app\model;
+use support\Model;
+class User extends Model
+{
+    protected $connection = 'mysql';
+    protected $table = 'user';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
+    // フロントエンドから安全でないフィールドが渡されないよう、ここにフィル可能なフィールドを追加する必要があります
+    protected $fillable = ['name', 'age'];
+}
+```
+
+**app\controller\UserController.php**
+```php
+<?php
+namespace app\controller;
+use app\model\User;
+class UserController
+{
+    public function create(User $user): int
+    {
+        $user->save();
+        return $user->id;
+    }
+}
+```
+
+`/user/create?user[name]=tom&user[age]=18` にアクセスすると、次のような結果が得られます。
+
+```json
+1
+```
 
 ## コントローラーのライフサイクル
-`config/app.php`で`controller_reuse`が`false`の場合、各リクエストで対応するコントローラーインスタンスが初期化され、リクエストの終了後にコントローラーインスタンスが破棄されます。これは従来のフレームワークの実行メカニズムと同様です。
 
-`config/app.php`で`controller_reuse`が`true`の場合、すべてのリクエストでコントローラーインスタンスが再利用されます。つまり、一度コントローラーインスタンスが作成されると、すべてのリクエストでそのインスタンスが使用されます。
+`config/app.php` で `controller_reuse` が `false` の場合、各リクエストで対応するコントローラーインスタンスが1回初期化され、リクエスト終了後に破棄されます。これは従来のフレームワークの動作と同じです。
 
-> **注意**
-> コントローラー再利用を無効にするには、webman>=1.4.0が必要です。つまり、1.4.0より前ではコントローラーはデフォルトですべてのリクエストで再利用されます。
+`config/app.php` で `controller_reuse` が `true` の場合、すべてのリクエストでコントローラーインスタンスが再利用されます。つまり、一度作成されたコントローラーインスタンスはメモリに常駐し、すべてのリクエストで再利用されます。
 
 > **注意**
-> コントローラー再利用を有効にすると、リクエスト中にコントローラーのプロパティを変更しないようにする必要があります。なぜなら、これらの変更は後続のリクエストに影響を与えるからです。
+> コントローラーの再利用を有効にしている場合、リクエストでコントローラーのプロパティを変更しないでください。変更は後続のリクエストに影響します。例えば：
 
 ```php
 <?php
@@ -100,8 +302,8 @@ class FooController
     
     protected function getModel($id)
     {
-        // このメソッドは最初のリクエスト update?id=1 の後にモデルを保持します。
-        // もう一度リクエスト delete?id=2 を行うと、1 のデータが削除されます。
+        // このメソッドは最初のリクエスト update?id=1 の後にモデルを保持します
+        // 次に delete?id=2 をリクエストすると、id=1 のデータが削除されます
         if (!$this->model) {
             $this->model = Model::find($id);
         }
@@ -111,7 +313,7 @@ class FooController
 ```
 
 > **ヒント**
-> コントローラーの`__construct()`コンストラクタ内でのデータの返却は何の効果もありません。例えば
+> コントローラーの `__construct()` コンストラクタで return しても効果はありません。例えば：
 
 ```php
 <?php
@@ -123,23 +325,23 @@ class FooController
 {
     public function __construct()
     {
-        // コンストラクタでのデータの返却は効果がありません。ブラウザはこの応答を受け取りません
+        // コンストラクタで return しても効果はありません。ブラウザはこのレスポンスを受け取りません
         return response('hello'); 
     }
 }
 ```
 
 ## コントローラーの再利用と非再利用の違い
-以下に違いを示します
+違いは以下のとおりです。
 
-#### コントローラーの再利用しない場合
-すべてのリクエストで新しいコントローラーインスタンスが作成され、リクエスト終了後にそのインスタンスが解放され、メモリが解放されます。コントローラーの再利用は伝統的なフレームワークと同様であり、ほとんどの開発者の習慣に合致します。コントローラーが繰り返し作成および破棄されるため、性能は再利用するよりもやや低下します（helloworldのパフォーマンスは約10%低下し、ビジネスを含めるとほぼ無視できます）。
+#### 非再利用コントローラー
+各リクエストで新しいコントローラーインスタンスが作成され、リクエスト終了後に解放されメモリが回収されます。非再利用は従来のフレームワークと同様で、多くの開発者の慣習に合致します。コントローラーの繰り返し作成・破棄により、パフォーマンスは再利用よりやや劣ります（helloworld ベンチマークで約10%程度、実ビジネスではほぼ無視できます）。
 
-#### コントローラーの再利用する場合
-一度プロセスでコントローラーを作成し、リクエスト終了後にそのコントローラーインスタンスを解放しない場合、現在のプロセスの後続のリクエストでこのインスタンスを再利用します。コントローラーの再利用はパフォーマンスが良くなりますが、ほとんどの開発者の習慣には合わないです。
+#### 再利用コントローラー
+再利用の場合、プロセスごとに1回だけコントローラーが new され、リクエスト終了後もインスタンスは解放されません。同じプロセスの後続リクエストでこのインスタンスが再利用されます。再利用はパフォーマンスが優れますが、多くの開発者の慣習には合いません。
 
-#### コントローラーの再利用できない場合
-リクエスト中にコントローラーのプロパティが変更される場合、コントローラーを再利用することはできません。なぜなら、これらのプロパティの変更は後続のリクエストに影響するからです。
+#### 以下の場合はコントローラーの再利用を使用できません
 
-コントローラーのコンストラクタ`__construct()`で各リクエストに対して初期化を行いたい開発者がいるときには、コントローラーの再利用を有効にすることはできません。なぜなら、現在のプロセスのコンストラクタは一度だけ呼び出され、すべてのリクエストでそれが呼び出されるわけではないからです。
+リクエストがコントローラーのプロパティを変更する場合は、コントローラーの再利用を有効にできません。プロパティの変更は後続のリクエストに影響します。
 
+コントローラーの `__construct()` コンストラクタでリクエストごとに初期化を行いたい開発者の場合も、コントローラーの再利用は使えません。現在のプロセスではコンストラクタは1回だけ呼ばれ、リクエストごとには呼ばれないためです。

@@ -26,9 +26,11 @@ class Doc
             return redirect("/doc/$lang/");
         }
 
+        $info = $this->getInfo($lang);
+
         if ($uri === "/doc/$lang/") {
             $uri = "/doc/$lang/README.md";
-            $index_title = "$lang";
+            $index_title = $info['name'];
         } else {
             if (pathinfo($uri, PATHINFO_EXTENSION) !== 'html') {
                 return notfound();
@@ -46,8 +48,6 @@ class Doc
 
         $content = $this->format($file);
 
-        $info = $this->getInfo($lang);
-
         $repo = $info['repo'] . "/tree/master/resource$uri";
 
         $langs = $this->getLangs();
@@ -59,7 +59,7 @@ class Doc
         $path = substr($request->uri(), strlen("/doc/$lang/"));
 
         return view('doc/view', [
-            'html_title' => $index_title??($title ? "$title-{$info['name']}": $info['name']),
+            'html_title' => $index_title ?? ($title ? "{$title} - {$info['name']}" : $info['name']),
             'repo'        => $repo,
             'name'        => $info['name'],
             'sidebar'     => $sidebar,

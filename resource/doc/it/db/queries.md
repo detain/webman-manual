@@ -1,4 +1,5 @@
-# Costruttore delle query
+# Query al database (componente Laravel)
+
 ## Ottenere tutte le righe
 ```php
 <?php
@@ -382,6 +383,9 @@ Se hai bisogno di svuotare una tabella, puoi utilizzare il metodo truncate, che 
 ```php
 Db::table('users')->truncate();
 ```
+
+## Transazioni
+Vedere [Transazioni database](../others/transaction.md)
 
 ## Blocco pessimista
 Il costruttore della query include anche alcune funzioni che possono aiutarti a implementare il "blocco pessimista" nella sintassi della select. Se desideri implementare un "blocco condiviso" nella query, puoi utilizzare il metodo sharedLock. Il blocco condiviso impedisce che le colonne dei dati selezionati vengano modificate fino a quando la transazione non viene confermata:

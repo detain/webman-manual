@@ -1,41 +1,39 @@
 # Crontab-Zeitplanungskomponente
 
-## Workerman/Crontab
+## Beschreibung
 
-### Erklärung
+`workerman/crontab` ist ähnlich wie Linux crontab, mit dem Unterschied, dass es die Planung im Sekundentakt unterstützt.
 
-`Workerman/Crontab` ist ähnlich wie der Linux-Crontab, mit dem Unterschied, dass `Workerman/Crontab` die sekundengenaue Zeitplanung unterstützt.
+Zeitformat:
 
-Zeiterklärung:
-
-```plaintext
+```
 0   1   2   3   4   5
 |   |   |   |   |   |
-|   |   |   |   |   +------ Wochentag (0 - 6) (Sonntag=0)
-|   |   |   |   +------ Monat (1 - 12)
-|   |   |   +-------- Tag im Monat (1 - 31)
-|   |   +---------- Stunde (0 - 23)
-|   +------------ Minute (0 - 59)
-+-------------- Sekunde (0-59) [kann weggelassen werden, wenn 0 nicht vorhanden ist, ist minimaler Zeitabstand Minute]
+|   |   |   |   |   +------ day of week (0 - 6) (Sunday=0)
+|   |   |   |   +------ month (1 - 12)
+|   |   |   +-------- day of month (1 - 31)
+|   |   +---------- hour (0 - 23)
+|   +------------ min (0 - 59)
++-------------- sec (0-59)[optional; wenn 0. Stelle fehlt, ist die Mindestgranularität die Minute]
 ```
 
-### Projektadresse
+## Projekt-URL
 
 https://github.com/walkor/crontab
-
-### Installation
-
+  
+## Installation
+ 
 ```php
 composer require workerman/crontab
 ```
+  
+## Verwendung
 
-### Verwendung
-
-**Schritt 1: Neues Prozessdokument "process/Task.php" erstellen**
+**Schritt 1: Prozessdatei `app/process/Task.php` erstellen**
 
 ```php
 <?php
-namespace process;
+namespace app\process;
 
 use Workerman\Crontab\Crontab;
 
@@ -44,7 +42,7 @@ class Task
     public function onWorkerStart()
     {
 
-        // Alle Sekunde ausführen
+        // Jede Sekunde ausführen
         new Crontab('*/1 * * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -64,12 +62,12 @@ class Task
             echo date('Y-m-d H:i:s')."\n";
         });
         
-        // Jede Minute am Anfang ausführen
+        // In der ersten Sekunde jeder Minute ausführen
         new Crontab('1 * * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
       
-        // Täglich um 7:50 Uhr ausführen, achten Sie darauf, dass hier die Sekunde weggelassen wurde
+        // Täglich um 7:50 ausführen (Sekunde hier weggelassen)
         new Crontab('50 7 * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -77,34 +75,33 @@ class Task
     }
 }
 ```
-
-**Schritt 2: Konfigurieren Sie das Prozessdokument, das mit dem Webman gestartet wird**
-
-Öffnen Sie die Konfigurationsdatei `config/process.php` und fügen Sie die folgende Konfiguration hinzu:
+  
+**Schritt 2: Prozess mit webman starten konfigurieren**
+  
+Konfigurationsdatei `config/process.php` öffnen und Folgendes ergänzen:
 
 ```php
 return [
-    ....andere Konfigurationen, hier ausgelassen....
-
+    ....andere Konfiguration ausgelassen....
+  
     'task'  => [
-        'handler'  => process\Task::class
+        'handler'  => app\process\Task::class
     ],
 ];
 ```
+  
+**Schritt 3: webman neu starten**
 
+> Hinweis: Geplante Aufgaben laufen nicht sofort; sie beginnen erst ab der nächsten Minute.
 
-**Schritt 3: Webman neu starten**
-
-> Hinweis: Geplante Aufgaben werden nicht sofort ausgeführt. Alle geplanten Aufgaben beginnen erst in der nächsten Minute mit der Ausführung.
-
-### Erklärung
-Crontab ist nicht asynchron. Zum Beispiel, wenn ein Task-Prozess A und B zwei Zeitgeber setzt, die beide jede Sekunde eine Aufgabe ausführen, und A-Aufgabe 10 Sekunden dauert, muss B auf die Fertigstellung von A warten, bevor sie ausgeführt werden kann, was zu Verzögerungen bei der Ausführung von B führt.
-Wenn das Geschäft empfindlich auf Zeitintervalle reagiert, sollten die sensitiven geplanten Aufgaben in einem separaten Prozess ausgeführt werden, um sicherzustellen, dass sie nicht von anderen geplanten Aufgaben beeinflusst werden. Zum Beispiel, konfigurieren Sie in `config/process.php` wie folgt:
+## Hinweise
+Crontab ist nicht asynchron. Beispiel: Ein task-Prozess hat zwei Timer A und B, beide laufen jede Sekunde. Dauert Aufgabe A 10 Sekunden, muss B warten, bis A fertig ist – dadurch verzögert sich B.
+Ist die Logik zeitkritisch, sollten zeitkritische Aufgaben in eigenen Prozessen laufen, damit andere sie nicht beeinträchtigen. Beispiel für `config/process.php`:
 
 ```php
 return [
-    ....andere Konfigurationen, hier ausgelassen....
-
+    ....andere Konfiguration ausgelassen....
+  
     'task1'  => [
         'handler'  => process\Task1::class
     ],
@@ -113,7 +110,6 @@ return [
     ],
 ];
 ```
-Legen Sie die zeitkritischen geplanten Aufgaben in `process/Task1.php` fest und die anderen geplanten Aufgaben in `process/Task2.php`.
+Zeitkritische Aufgaben in `process/Task1.php`, übrige in `process/Task2.php`.
 
-### Mehr
-Für weitere Informationen zur Konfiguration von `config/process.php` siehe [Benutzerdefinierte Prozesse](../process.md).
+Mehr zu `config/process.php` siehe [Benutzerdefinierte Prozesse](../process.md).

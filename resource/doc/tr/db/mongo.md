@@ -1,26 +1,22 @@
 # MongoDB
 
-webman varsayılan olarak [jenssegers/mongodb](https://github.com/jenssegers/laravel-mongodb) 'u MongoDB bileşeni olarak kullanır. Bu, laravel projesinden çıkarılmıştır ve laravel ile aynı kullanıma sahiptir.
+webman varsayılan olarak [mongodb/laravel-mongodb](https://github.com/mongodb/laravel-mongodb)'ı MongoDB bileşeni olarak kullanır. Bu, Laravel projesinden çıkarılmıştır ve Laravel ile aynı şekilde çalışır.
 
-`jenssegers/mongodb`'yi kullanmadan önce, `php-cli`'da mongodb eklentisini yüklemelisiniz.
+`mongodb/laravel-mongodb` kullanmadan önce `php-cli` için MongoDB eklentisini yüklemeniz gerekir.
 
-> `php -m | grep mongodb` komutunu kullanarak `php-cli`'ın mongodb eklentisine sahip olup olmadığını kontrol edin. Not: `php-cli`'da mongodb eklentisini yüklemiş olsanız bile, bu `php-cli`'da kullanabileceğiniz anlamına gelmez, çünkü `php-cli` ve `php-fpm` farklı uygulamalardır ve farklı `php.ini` yapılandırmalarını kullanabilirler. Kullandığınız `php-cli`'ın hangi `php.ini` yapılandırma dosyasını kullandığını görmek için `php --ini` komutunu kullanın.
+> **Not**
+> `php-cli` için MongoDB eklentisinin yüklü olup olmadığını kontrol etmek için `php -m | grep mongodb` komutunu kullanın. Not: `php-fpm` için MongoDB eklentisini yüklemiş olsanız bile, bu `php-cli`'da kullanabileceğiniz anlamına gelmez, çünkü `php-cli` ve `php-fpm` farklı uygulamalardır ve farklı `php.ini` yapılandırmalarını kullanabilirler. Kullandığınız `php-cli`'ın hangi `php.ini` yapılandırma dosyasını kullandığını görmek için `php --ini` komutunu kullanın.
 
 ## Kurulum
 
-PHP>7.2 için
 ```php
-composer require -W illuminate/database jenssegers/mongodb ^3.8.0
-```
-PHP=7.2 için
-```php
-composer require -W illuminate/database jenssegers/mongodb ^3.7.0
+composer require -W webman/database mongodb/laravel-mongodb ^4.8
 ```
 
-Kurulumdan sonra restart(reload değil) yapılması gerekmektedir.
+Kurulumdan sonra restart yapılması gerekmektedir (reload yeterli değildir).
 
 ## Yapılandırma
-`config/database.php` dosyasına `mongodb` bağlantısını ekleyin, aşağıdaki gibi:
+`config/database.php` dosyasına aşağıdaki gibi `mongodb` bağlantısını ekleyin:
 ```php
 return [
 
@@ -28,7 +24,7 @@ return [
 
     'connections' => [
 
-         ...diğer yapılandırmalar burada bulunur...
+         ...diğer yapılandırmalar burada atlandı...
 
         'mongodb' => [
             'driver'   => 'mongodb',
@@ -60,12 +56,39 @@ class UserController
 {
     public function db(Request $request)
     {
-        Db::connection('mongodb')->collection('test')->insert([1,2,3]);
-        return json(Db::connection('mongodb')->collection('test')->get());
+        Db::connection('mongodb')->table('test')->insert([1,2,3]);
+        return json(Db::connection('mongodb')->table('test')->get());
     }
 }
 ```
 
-## Daha Fazlası İçin Ziyaret Edin
+## Model Örneği
+```php
+<?php
+namespace app\model;
 
-https://github.com/jenssegers/laravel-mongodb
+use DateTimeInterface;
+use support\MongoModel as Model;
+
+class Test extends Model
+{
+    protected $connection = 'mongodb';
+
+    protected $table = 'test';
+
+    public $timestamps = true;
+
+    /**
+     * @param DateTimeInterface $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+}
+```
+
+## Daha fazla bilgi için ziyaret edin
+
+https://github.com/mongodb/laravel-mongodb

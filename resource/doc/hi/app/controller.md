@@ -30,5 +30,5 @@ class FooController
 
 
 ## URL पहुंच
-ऐप प्लगइन URL पते की पथ `द्वारा/app` से शुरू होती है, उसके बाद प्लगइन पहचान, और फिर विशिष्ट नियंत्रक और विधि।
-उदाहरण के लिए `plugin\foo\app\controller\UserController` URL पता है `http://127.0.0.1:8787/app/foo/user`
+ऐप प्लगइन के URL पते का पथ सभी `/app` से शुरू होता है, उसके बाद प्लगइन पहचान, और फिर विशिष्ट नियंत्रक और विधि।
+उदाहरण के लिए `plugin\foo\app\controller\UserController` का URL पता `http://127.0.0.1:8787/app/foo/user` है।

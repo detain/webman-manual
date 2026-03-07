@@ -62,7 +62,7 @@ return [
 這樣我們就完成了一個業務初始化流程。
 
 ## 補充說明
-[自定義進程](../process.md)啟動後也會執行`config/bootstrap.php`配置的start方法，我們可以透過`$worker->name` 來判斷當前進程是什麼進程，然後決定是否在該進程執行你的業務初始化代碼，例如我們不需要監控monitor進程，則`MemReport.php`內容類似如下：
+[自定義進程](../process.md)啟動後也會執行`config/bootstrap.php`配置的start方法，我們可以透過`$worker->name` 來判斷當前進程是什麼進程，進一步可以透過`$worker->id`判斷是幾號進程，然後決定是否在該進程執行你的業務初始化代碼，例如我們只需要在webman的0號進程執行，則`MemReport.php`內容類似如下：
 ```php
 <?php
 
@@ -80,9 +80,9 @@ class MemReport implements Bootstrap
             // 如果你不想命令行環境執行這個初始化，則在這裡直接返回
             return;
         }
-        
-        // monitor進程不執行定時器
-        if ($worker->name == 'monitor') {
+
+        // 只在webman的0號進程執行
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

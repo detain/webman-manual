@@ -1,27 +1,27 @@
-# 图像处理组件
+# مكوّن معالجة الصور
 
-## 项目地址
+## عنوان المشروع
 
 https://github.com/Intervention/image
   
-## 安装
+## التثبيت
  
 ```php
 composer require intervention/image
 ```
   
-## 使用
+## الاستخدام
 
-**上传页面片段**
+**مقتطف من صفحة الرفع**
 
 ```html
   <form method="post" action="/user/img" enctype="multipart/form-data">
       <input type="file" name="file">
-      <input type="submit" value="提交">
+      <input type="submit" value="إرسال">
   </form>
 ```
 
-**新建 `app/controller/UserController.php`**
+**إنشاء `app/controller/UserController.php`**
 
 ```php
 <?php
@@ -46,11 +46,10 @@ class UserController
 }
 ```
 
-> **注意**
-> 以上是v3版本用法
+> **ملاحظة**
+> المثال أعلاه يستخدم واجهة v3.
 
-## 更多内容
+## المزيد من المعلومات
 
-访问 https://image.intervention.io/v3
+قم بزيارة https://image.intervention.io/v3
   
-

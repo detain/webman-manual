@@ -61,7 +61,7 @@ return [
 Dessa forma, concluímos o fluxo de inicialização de negócios.
 
 ## Observações Adicionais
-Após a inicialização, também será executado o método start configurado em `config/bootstrap.php` para [processos personalizados](../process.md). Podemos usar `$worker->name` para determinar qual é o processo atual e, em seguida, decidir se o seu código de inicialização de negócios deve ser executado nesse processo. Por exemplo, se não precisarmos monitorar o processo monitor, o conteúdo de `MemReport.php` será semelhante ao seguinte:
+Os [processos personalizados](../process.md) também executam o método start configurado em `config/bootstrap.php` após o seu início. Podemos usar `$worker->name` para determinar qual processo está em execução e, além disso, usar `$worker->id` para identificar o número do processo. Assim podemos decidir se o seu código de inicialização de negócios deve ser executado nesse processo. Por exemplo, se precisarmos executar apenas no processo 0 do webman, o conteúdo de `MemReport.php` será semelhante ao seguinte:
 ```php
 <?php
 
@@ -80,8 +80,8 @@ class MemReport implements Bootstrap
             return;
         }
         
-        // Não execute o temporizador para o processo monitor
-        if ($worker->name == 'monitor') {
+        // Executar apenas no processo 0 do webman
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

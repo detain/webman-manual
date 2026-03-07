@@ -36,5 +36,6 @@
 └── support                       类库适配(包括第三方类库)
     ├── Request.php               请求类
     ├── Response.php              响应类
+    ├── Setup.php                 安装想到脚本
     └── bootstrap.php             进程启动后初始化脚本
 ```

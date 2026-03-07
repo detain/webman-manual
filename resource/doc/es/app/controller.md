@@ -30,5 +30,5 @@ Cuando se accede a `http://127.0.0.1:8787/app/foo/foo/hello`, la página devuelv
 
 
 ## Acceso a URL
-La ruta de la dirección URL de la aplicación del complemento siempre comienza con `/app`, seguido del identificador del plugin y luego el controlador y el método específico.
-Por ejemplo, la dirección URL para `plugin\foo\app\controller\UserController` es `http://127.0.0.1:8787/app/foo/user`.
+Las rutas de direcciones URL de los complementos de aplicación comienzan todas con `/app`, seguidas del identificador del plugin y después el controlador y método concretos.
+Por ejemplo, la dirección URL de `plugin\foo\app\controller\UserController` es `http://127.0.0.1:8787/app/foo/user`.

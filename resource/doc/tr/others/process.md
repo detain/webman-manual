@@ -1,22 +1,22 @@
-# İşlem Akışı
+# Yürütme Akışı
 
-## Process Başlatma İşlem Akışı
+## İşlem Başlatma Akışı
 
-php start.php start komutu çalıştırıldıktan sonra işlem akışı aşağıdaki gibidir:
+`php start.php start` komutu çalıştırıldıktan sonra yürütme akışı şöyledir:
 
-1. Konfigürasyon altındaki config/ klasöründen yapılandırmalar yüklenir.
-2. Worker ile ilgili yapılandırmalar, `pid_file`, `stdout_file`, `log_file`, `max_package_size` vb. ayarlanır.
-3. webman işlemi oluşturulur ve (varsayılan olarak 8787 numaralı) bir bağlantı noktasında dinlenmeye başlar.
-4. Yapılandırmalara göre özel işlemler oluşturulur.
-5. webman işlemi ve özel işlemler başlatıldıktan sonra aşağıdaki mantık çalıştırılır (hepsi onWorkerStart içinde çalıştırılır):
-   ① `config/autoload.php` içinde belirtilen dosyalar yüklenir, örneğin `app/functions.php`.
-   ② `config/middleware.php` (içerisinde `config/plugin/*/*/middleware.php` gibi) içinde belirtilen orta yazılımlar yüklenir.
-   ③ `config/bootstrap.php` (içerisinde `config/plugin/*/*/bootstrap.php` gibi) içinde belirtilen sınıfların başlat metodu çalıştırılır; bu, modülleri başlatmak için kullanılır, örneğin Laravel veritabanı bağlantısının başlatılması.
-   ④ `config/route.php` (içerisinde `config/plugin/*/*/route.php` gibi) içinde tanımlanan yönlendirmeler yüklenir.
+1. config/ altındaki yapılandırmaları yüklemek
+2. `pid_file`, `stdout_file`, `log_file`, `max_package_size` vb. Worker ile ilgili yapılandırmaları ayarlamak
+3. webman işlemini oluşturup portu dinlemek (varsayılan: 8787)
+4. Yapılandırmaya göre özel işlemler oluşturmak
+5. webman işlemi ve özel işlemler başlatıldıktan sonra aşağıdaki mantık çalıştırılır (tümü `onWorkerStart` içinde):
+   ① `config/autoload.php` içinde tanımlanan dosyaları yüklemek, örn. `app/functions.php`
+   ② `config/middleware.php` (dahil `config/plugin/*/*/middleware.php`) içinde tanımlanan middleware'leri yüklemek
+   ③ `config/bootstrap.php` (dahil `config/plugin/*/*/bootstrap.php`) içinde tanımlanan sınıfların `start` metodunu çalıştırmak; Laravel veritabanı bağlantısı gibi modülleri başlatmak için
+   ④ `config/route.php` (dahil `config/plugin/*/*/route.php`) içinde tanımlanan rotaları yüklemek
 
 ## İstek İşleme Akışı
 
-1. İstek URL'sinin public klasöründeki statik dosyalara karşılık gelip gelmediği kontrol edilir; eğer öyleyse dosya döndürülür (isteği sonlandırılır), değilse adıma 2'ye geçilir.
-2. URL'ye göre belirli bir yönlendirmenin eşleşip eşleşmediği kontrol edilir; eğer eşleşme olmazsa adıma 3'e geçilir, eşleşme olursa adıma 4'e geçilir.
-3. Varsayılan yönlendirmenin kapatılıp kapatılmadığı kontrol edilir; eğer kapatılmışsa 404 hatası döndürülür (isteği sonlandırılır), kapatılmamışsa adıma 4'e geçilir.
-4. İstek için belirli bir denetleyiciye karşılık gelen orta yazılım bulunur, sırayla orta yazılımın ön işlemleri çalıştırılır (soğan modeli istek aşaması), denetleyici iş mantığı çalıştırılır, orta yazılımın son işlemleri çalıştırılır (soğan modeli yanıt aşaması), istek sona erdirilir. (Bkz. [Middleware Onion Model](https://www.workerman.net/doc/webman/middleware.html#%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%B4%8B%E8%91%B1%E6%A8%A1%E5%9E%8B))
+1. İstek URL'sinin public altındaki statik dosyaya karşılık gelip gelmediğini kontrol etmek. Evetse dosyayı döndürmek (isteği sonlandırmak). Hayırsa 2. adıma geçmek.
+2. URL'nin bir rotayla eşleşip eşleşmediğini belirlemek. Eşleşmezse 3. adıma; eşleşirse 4. adıma geçmek.
+3. Varsayılan rotanın devre dışı olup olmadığını kontrol etmek. Evetse 404 döndürmek (isteği sonlandırmak). Hayırsa 4. adıma geçmek.
+4. İsteğe karşılık gelen denetleyicinin middleware'lerini bulmak, sırayla middleware ön işlemlerini çalıştırmak (soğan modeli istek aşaması), denetleyici iş mantığını çalıştırmak, middleware son işlemlerini çalıştırmak (soğan modeli yanıt aşaması) ve isteği sonlandırmak. (Bkz. [Middleware Soğan Modeli](https://www.workerman.net/doc/webman/middleware.html#%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%B4%8B%E8%91%B1%E6%A8%A1%E5%9E%8B))

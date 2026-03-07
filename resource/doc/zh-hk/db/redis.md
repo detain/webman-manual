@@ -1,35 +1,50 @@
 # Redis
 
-webman的redis組件默認使用的是[illuminate/redis](https://github.com/illuminate/redis)，也就是laravel的redis庫，用法與laravel相同。
+[webman/redis](https://github.com/webman-php/redis) 基於 [illuminate/redis](https://github.com/illuminate/redis) 添加咗連接池功能，支援協程同非協程環境，用法同 Laravel 一樣。
 
-在使用`illuminate/redis`之前必須先給`php-cli`安裝redis擴展。
-
-> **注意**
-> 使用命令`php -m | grep redis`查看`php-cli`是否裝了redis擴展。注意：即使你在`php-fpm`安裝了redis擴展，不代表你在`php-cli`可以使用它，因為`php-cli`和`php-fpm`是不同的應用程序，可能使用的是不同的`php.ini`配置。使用命令`php --ini`來查看你的`php-cli`使用的是哪個`php.ini`配置文件。
+使用 `illuminate/redis` 之前必須先為 `php-cli` 安裝 redis 擴展。
 
 ## 安裝
 
 ```php
-composer require -W illuminate/redis illuminate/events
+composer require -W webman/redis illuminate/events
 ```
 
-安裝後需要restart重啟(reload無效)
-
+安裝後需要 restart 重啟（reload 無效）
 
 ## 配置
-redis配置文件在`config/redis.php`
+
+Redis 配置檔喺 `config/redis.php`
+
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
+        'pool' => [ // 連接池配置
+            'max_connections' => 10,     // 連接池最大連接數
+            'min_connections' => 1,     // 連接池最小連接數
+            'wait_timeout' => 3,        // 從連接池攞連接嘅最大等待時間
+            'idle_timeout' => 50,       // 連接空閒超時時間，超過後會關閉直到連接數為 min_connections
+            'heartbeat_interval' => 50, // 心跳檢測間隔，唔好大過 60 秒
+        ],
     ]
 ];
 ```
 
+## 關於連接池
+
+* 每個進程有自己嘅連接池，進程間唔共享。
+* 冇開協程嘅時候，業務喺進程內順序執行，連接池最多得 1 個連接。
+* 開咗協程之後，業務並發執行，連接池會動態調整連接數，最多唔超過 `max_connections`，最少唔少過 `min_connections`。
+* 當操作 Redis 嘅協程數大過 `max_connections` 嘅時候，多咗嘅協程會排隊等，最多等 `wait_timeout` 秒，超過就會拋異常。
+* 空閒情況下（包協程同非協程），連接會喺 `idle_timeout` 後釋放，直到連接數去到 `min_connections`（`min_connections` 可以係 0）。
+
 ## 示例
+
 ```php
 <?php
 namespace app\controller;
@@ -48,7 +63,8 @@ class UserController
 }
 ```
 
-## Redis接口
+## Redis 介面
+
 ```php
 Redis::append($key, $value)
 Redis::bitCount($key)
@@ -78,7 +94,9 @@ Redis::expire($key, $ttl)
 Redis::expireAt($key, $timestamp)
 Redis::select($dbIndex)
 ```
-等價於
+
+等同於
+
 ```php
 $redis = Redis::connection('default');
 $redis->append($key, $value)
@@ -91,14 +109,17 @@ $redis->getBit($key, $offset)
 ```
 
 > **注意**
-> 慎用`Redis::select($db)`接口，由於webman是常駐內存的框架，如果某一個請求使用`Redis::select($db)`切換數據庫後將會影響後續其他請求。多數據庫建議將不同的`$db`配置成不同的Redis連接配置。
+> 慎用 `Redis::select($db)` 介面。因為 webman 係常駐記憶體框架，如果某次請求用 `Redis::select($db)` 切換資料庫，會影響後續請求。多資料庫建議將唔同 `$db` 配置成唔同 Redis 連接。
 
 ## 使用多個 Redis 連接
-例如配置文件`config/redis.php`
+
+例如配置檔 `config/redis.php`：
+
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
@@ -113,20 +134,25 @@ return [
 
 ]
 ```
-默認使用的是`default`下配置的連接，你可以用`Redis::connection()`方法選擇使用哪個redis連接。
+
+默認用 `default` 下嘅連接，可以用 `Redis::connection()` 揀用邊個 redis 連接：
+
 ```php
 $redis = Redis::connection('cache');
 $redis->get('test_key');
 ```
 
 ## 集群配置
-如果你的應用使用 Redis 伺服器集群，你應該在 Redis 配置文件中使用 clusters 鍵來定義這些集群：
+
+如果你嘅應用用 Redis 伺服器集群，應該喺 Redis 配置檔用 clusters 鍵定義：
+
 ```php
 return [
     'clusters' => [
         'default' => [
             [
                 'host'     => 'localhost',
+                'username' => null,
                 'password' => null,
                 'port'     => 6379,
                 'database' => 0,
@@ -136,7 +162,8 @@ return [
 
 ];
 ```
-預設情況下，集群可以在節點上實現客戶端分片，允許你實現節點池以及創建大量可用內存。這裡要注意，客戶端共用不會處理失敗的情況；因此，這個功能主要適用於從另一個主數據庫獲取的緩存數據。如果要使用 Redis 原生集群，需要在配置文件下的 options 鍵中做出如下指定：
+
+默認情況下，集群可以喺節點上做客戶端分片，實現節點池同大量可用記憶體。要留意客戶端共享唔處理失敗情況，所以呢個功能主要適用於從另一個主資料庫攞嘅緩存資料。如果要喺 Redis 原生集群，需要喺配置檔嘅 options 鍵咁指定：
 
 ```php
 return[
@@ -151,7 +178,9 @@ return[
 ```
 
 ## 管道命令
-當你需要在一個操作中給伺服器發送很多命令時，推薦你使用管道命令。 pipeline 方法接受一個 Redis 實例的閉包 。你可以將所有的命令發送給 Redis 實例，它們都會在一個操作中執行完成：
+
+當你需要喺一次操作入面向伺服器發送好多命令嘅時候，建議用管道命令。pipeline 方法接受 Redis 實例嘅閉包，你可以將所有命令發去 Redis 實例，佢哋都會喺一次操作入面完成：
+
 ```php
 Redis::pipeline(function ($pipe) {
     for ($i = 0; $i < 1000; $i++) {

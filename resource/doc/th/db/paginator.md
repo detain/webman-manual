@@ -1,6 +1,6 @@
 # หน้า
 
-# 1. การแบ่งหน้าโดยใช้ ORM ของ Laravel
+# การแบ่งหน้าโดยใช้ Laravel ORM
 illuminate/database ของ Laravel มีฟังก์ชั่นการแบ่งหน้าที่สะดวก
 
 ## การติดตั้ง
@@ -138,8 +138,9 @@ class UserController
 ผลลัพธ์ดังต่อไปนี้:
 ![](../../assets/img/paginator.png)
 
-# 2. การแบ่งหน้าโดยใช้ ORM ของ Thinkphp
-ไม่จำเป็นต้องติดตั้งไลบรารีเพิ่มเติม เพียงแค่ติดตั้ง think-orm เท่านั้น
+# การแบ่งหน้าโดยใช้ ThinkPHP ORM
+
+ไม่จำเป็นต้องติดตั้งไลบรารีเพิ่มเติม เพียงแค่ติดตั้ง think-orm ก็ใช้ได้
 ## การใช้
 ```php
 public function index(Request $request)

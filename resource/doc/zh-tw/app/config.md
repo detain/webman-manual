@@ -14,5 +14,5 @@
 獲取某個插件的設定方法為 `config('plugin.{插件}.{具體的配置}');`，例如獲取 `plugin/foo/config/app.php` 的所有設定方法為 `config('plugin.foo.app')`
 同樣的，主專案或者其他插件都可以用 `config('plugin.foo.xxx')` 來獲取 foo 插件的設定。
 
-## 不支持的配置
-應用插件不支持 server.php，session.php 配置，不支持 `app.request_class`，`app.public_path`，`app.runtime_path` 配置。
+## 不支援的設定
+應用插件不支援 server.php、session.php 設定，也不支援 `app.request_class`、`app.public_path`、`app.runtime_path` 設定。

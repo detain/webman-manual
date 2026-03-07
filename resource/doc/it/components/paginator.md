@@ -1,18 +1,16 @@
 # Componente di paginazione
 
-## jasongrimes/php-paginator
-
-### Indirizzo del progetto
+## Indirizzo del progetto
 
 https://github.com/jasongrimes/php-paginator
-
-### Installazione
+  
+## Installazione
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
-
-### Utilizzo
+  
+## Utilizzo
 
 Creare `app/controller/UserController.php`
 ```php
@@ -55,7 +53,7 @@ Creare il modello `app/view/user/get.html`
 </html>
 ```
 
-**Modello (twig)**
+**Modello (Twig)**
 Creare il modello `app/view/user/get.html`
 ```html
 <html>
@@ -73,7 +71,7 @@ Creare il modello `app/view/user/get.html`
 </html>
 ```
 
-**Modello (blade)**
+**Modello (Blade)**
 Creare il modello `app/view/user/get.blade.php`
 ```html
 <html>
@@ -89,7 +87,7 @@ Creare il modello `app/view/user/get.blade.php`
 </html>
 ```
 
-**Modello (thinkphp)**
+**Modello (ThinkPHP)**
 Creare il modello `app/view/user/get.blade.php`
 ```html
 <html>
@@ -105,9 +103,10 @@ Creare il modello `app/view/user/get.blade.php`
 </html>
 ```
 
-Ecco l'effetto:
+L'effetto sarà il seguente:
 ![](../../assets/img/paginator.png)
+  
+## Ulteriori informazioni
 
-### Ulteriori dettagli
-
-Visita https://github.com/jasongrimes/php-paginator
+Visitate https://github.com/jasongrimes/php-paginator
+  

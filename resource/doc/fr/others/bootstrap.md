@@ -62,7 +62,7 @@ return [
 De cette manière, nous avons terminé le processus d'initialisation des affaires.
 
 ## Remarques complémentaires
-Les [processus personnalisés](./process.md) exécutent également la méthode `start` définie dans `config/bootstrap.php`. Nous pouvons utiliser `$worker->name` pour déterminer le type de processus actuel, puis décider d'exécuter ou non votre code d'initialisation des affaires dans ce processus. Par exemple, si nous n'avons pas besoin de surveiller le processus "monitor", le contenu de `MemReport.php` serait similaire à ce qui suit :
+Les [processus personnalisés](../process.md) exécutent également la méthode `start` définie dans `config/bootstrap.php` après leur démarrage. Nous pouvons utiliser `$worker->name` pour déterminer quel processus est actuellement en cours d'exécution, et en outre `$worker->id` pour identifier le numéro du processus. Ainsi, nous pouvons décider d'exécuter ou non votre code d'initialisation des affaires dans ce processus. Par exemple, si nous n'avons besoin d'exécuter que dans le processus 0 de webman, le contenu de `MemReport.php` serait similaire à ce qui suit :
 ```php
 <?php
 
@@ -80,9 +80,9 @@ class MemReport implements Bootstrap
             // Si vous ne voulez pas exécuter cette initialisation dans l'environnement de ligne de commande, retournez simplement ici
             return;
         }
-        
-        // Le processus "monitor" n'exécute pas la minuterie
-        if ($worker->name == 'monitor') {
+
+        // Exécuter uniquement dans le processus 0 de webman
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

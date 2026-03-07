@@ -1,9 +1,8 @@
-## 사용자 정의 404
-webman은 404가 발생할 때 자동으로 `public/404.html`의 내용을 반환하므로, 개발자는 직접 `public/404.html` 파일을 변경할 수 있습니다.
+# 사용자 정의 404
 
-404 내용을 동적으로 제어하려면 예를 들어 ajax 요청 시에는 JSON 데이터 `{"code:"404", "msg":"404 not found"}`을 반환하고, 페이지 요청 시에는 `app/view/404.html` 템플릿을 반환하고 싶다면 아래 예제를 참조하십시오.
+404 내용을 동적으로 제어하려면, 예를 들어 AJAX 요청 시 JSON 데이터 `{"code:"404", "msg":"404 not found"}`를 반환하고 페이지 요청 시 `app/view/404.html` 템플릿을 반환하려면 아래 예제를 참조하세요.
 
-> 아래 예시는 PHP 네이티브 템플릿을 사용한 예시이며, 다른 템플릿인 `twig`, `blade`, `think-template`의 동작 방식은 유사합니다.
+> 아래 예시는 PHP 네이티브 템플릿을 사용합니다. `twig`, `blade`, `think-template` 등의 다른 템플릿도 동일한 원리를 따릅니다.
 
 **`app/view/404.html` 파일 생성**
 ```html
@@ -25,7 +24,7 @@ use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // ajax 요청 시 JSON 반환
+    // AJAX 요청 시 JSON 반환
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
@@ -34,8 +33,27 @@ Route::fallback(function(Request $request){
 });
 ```
 
-## 사용자 정의 500
-**`app/view/500.html` 파일 생성**
+# 사용자 정의 405
+
+webman-framework 1.5.23부터 폴백 콜백은 `status` 매개변수를 지원합니다. 404는 요청이 존재하지 않음을, 405는 현재 요청 메서드가 지원되지 않음을 의미합니다 (예: `Route::post()`로 정의한 라우트를 GET으로 접근하는 경우).
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# 사용자 정의 500
+
+**`app/view/500.html` 생성**
+
 ```html
 <!doctype html>
 <html>
@@ -50,7 +68,7 @@ Route::fallback(function(Request $request){
 </html>
 ```
 
-**`app/exception/Handler.php` 생성(디렉토리가 없는 경우 직접 생성해야 함)**
+**`app/exception/Handler.php` 생성** (디렉터리가 없으면 직접 생성)
 ```php
 <?php
 
@@ -63,7 +81,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * 렌더링 반환
+     * 렌더링하여 반환
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -71,7 +89,7 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // ajax 요청 시 JSON 데이터 반환
+        // AJAX 요청 시 JSON 데이터 반환
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
@@ -81,7 +99,7 @@ class Handler extends \support\exception\Handler
 }
 ```
 
-**`config/exception.php` 구성**
+**`config/exception.php` 설정**
 ```php
 return [
     '' => \app\exception\Handler::class,

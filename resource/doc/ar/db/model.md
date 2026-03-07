@@ -1,12 +1,12 @@
-# 数据库模型 Model用法(Laravel风格)
+# نموذج قاعدة البيانات - استخدام Model (أسلوب Laravel)
 
-webman模型 基于 [Eloquent ORM](https://laravel.com/docs/7.x/eloquent) 。每个数据库表都有一个对应的「模型」用来与该表交互。你可以通过模型查询数据表中的数据，以及在数据表中插入新记录。
+يعتمد نموذج webman على [Eloquent ORM](https://laravel.com/docs/7.x/eloquent). لكل جدول في قاعدة البيانات "نموذج" مطابق للتفاعل مع ذلك الجدول. يمكنك استخدام النموذج للاستعلام عن البيانات من الجدول وإدراج سجلات جديدة في الجدول.
 
-在开始之前，请确保配置了 `config/database.php` 中配置数据库连接。
+قبل البدء، تأكد من تكوين اتصال قاعدة البيانات في `config/database.php`.
 
-> 注意：Eloquent ORM 要支持模型观察者需要额外导入`composer require "illuminate/events"` [例子](#模型观察者)
+> ملاحظة: لدعم مراقبي النماذج في Eloquent ORM، تحتاج إلى استيراد إضافي `composer require "illuminate/events"` [مثال](#مراقبو-النماذج)
 
-## 数据库模型示例
+## مثال نموذج قاعدة البيانات
 ```php
 <?php
 namespace app\model;
@@ -191,7 +191,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -538,11 +538,10 @@ if ($post->is($anotherPost)) {
 ```
 
 
-## 模型观察者
-使用参考[Laravel 中的模型事件与 Observer
-](https://learnku.com/articles/6657/model-events-and-observer-in-laravel)
+## مراقبو النماذج
+راجع [أحداث النموذج والمراقب في Laravel](https://learnku.com/articles/6657/model-events-and-observer-in-laravel)
 
-注意：Eloquent ORM 要支持模型观察者需要额外导入composer require "illuminate/events"
+注意：Eloquent ORM 要支持模型观察者需要额外导入`composer require "illuminate/events"`
 
 ```php
 <?php
@@ -561,5 +560,5 @@ class User extends Model
 }
 ```
 
-## 事务
-参见[数据库事务](../others/transaction.md)
+## المعاملات
+انظر [معاملات قاعدة البيانات](../others/transaction.md)

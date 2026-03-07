@@ -1,25 +1,23 @@
 # Composant de traitement d'image
 
-## intervention/image
-
-### Adresse du projet
+## Adresse du projet
 
 https://github.com/Intervention/image
-
-### Installation
-
+  
+## Installation
+ 
 ```php
 composer require intervention/image
 ```
+  
+## Utilisation
 
-### Utilisation
-
-**Fragment de page de téléchargement**
+**Extrait de page de téléchargement**
 
 ```html
   <form method="post" action="/user/img" enctype="multipart/form-data">
       <input type="file" name="file">
-      <input type="submit" value="Soumettre">
+      <input type="submit" value="Envoyer">
   </form>
 ```
 
@@ -29,7 +27,8 @@ composer require intervention/image
 <?php
 namespace app\controller;
 use support\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class UserController
 {
@@ -37,15 +36,20 @@ class UserController
     {
         $file = $request->file('file');
         if ($file && $file->isValid()) {
-            $image = Image::make($file)->resize(100, 100);
-            return response($image->encode('png'), 200, ['Content-Type' => 'image/png']);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file)->scale(100, 100);
+            return response($image->encode(), 200, ['Content-Type' => 'image/png']);
         }
-        return response('fichier non trouvé');
+        return response('file not found');
     }
     
 }
 ```
 
-### Plus de contenu
+> **Remarque**
+> L'exemple ci-dessus utilise l'API v3.
 
-Visitez http://image.intervention.io/getting_started/introduction
+## Plus d'informations
+
+Consultez https://image.intervention.io/v3
+  

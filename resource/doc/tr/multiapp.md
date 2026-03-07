@@ -22,6 +22,8 @@ app
 
 `http://127.0.0.1:8787/admin/{controller}/{method}` adresine erişildiğinde, `app/admin/controller` dizinindeki denetleyici ve metoda erişilir.
 
+webman'de app altındaki her dizin bir uygulama olarak kabul edilebilir.
+
 webman'de app dizinini şu şekilde bile planlayabilirsiniz.
 ```plaintext
 app
@@ -54,7 +56,7 @@ class FooController
 ```
 
 ## Çoklu Uygulama Orta Katmanı Yapılandırması
-Bazen farklı uygulamalar için farklı orta katmanları yapılandırmak isteyebilirsiniz, örneğin `api` uygulaması belki bir CORS orta katmanına ihtiyaç duyarken, `admin` bir yönetici girişi kontrolü orta katmanına ihtiyaç duyar, bu durumda `config/midlleware.php` dosyası aşağıda olduğu gibi olabilir:
+Bazen farklı uygulamalar için farklı orta katmanları yapılandırmak isteyebilirsiniz, örneğin `api` uygulaması belki bir CORS orta katmanına ihtiyaç duyarken, `admin` bir yönetici girişi kontrolü orta katmanına ihtiyaç duyar, bu durumda `config/middleware.php` dosyası aşağıda olduğu gibi olabilir:
 ```php
 return [
     // Genel orta katmanlar

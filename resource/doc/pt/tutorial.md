@@ -1,4 +1,4 @@
-# Exemplo Simples
+# Exemplo simples de início rápido com webman
 
 ## Retornando uma String
 **Criando um Controlador**
@@ -106,6 +106,6 @@ hello <?=htmlspecialchars($name)?>
 ```
 
 Acesse no navegador `http://127.0.0.1:8787/user/hello?name=tom`
-será retornado uma página HTML com o conteúdo `hello tom`.
+será retornada uma página HTML com o conteúdo `hello tom`.
 
 Nota: Por padrão, o webman utiliza a sintaxe nativa do PHP como modelo. Se desejar usar outras visualizações, consulte [View](view.md).

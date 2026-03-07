@@ -1,6 +1,6 @@
 # Phân trang
 
-# 1. Cách phân trang dựa trên Laravel ORM
+# Phân trang dựa trên Laravel ORM
 `illuminate/database` của Laravel cung cấp chức năng phân trang tiện lợi.
 
 ## Cài đặt
@@ -138,8 +138,9 @@ Tạo template mới app/view/user/get.html
 Kết quả như sau:
 ![](../../assets/img/paginator.png)
 
-# 2. Cách phân trang dựa trên ORM của Thinkphp
-Không cần cài đặt thư viện bổ sung, chỉ cần cài đặt think-orm là đủ.
+# Phân trang dựa trên ThinkPHP ORM
+
+Không cần cài đặt thư viện bổ sung; chỉ cần có think-orm là đủ.
 
 ## Sử dụng
 ```php

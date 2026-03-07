@@ -1,62 +1,59 @@
-# Processamento de Tarefas Lentas
+# Processamento de operações lentas
 
-Às vezes, precisamos lidar com tarefas lentas para evitar que afetem o processamento de outras solicitações no webman. Dependendo da situação, essas tarefas podem ser tratadas de diferentes maneiras.
+Às vezes precisamos processar operações lentas para evitar que afetem o processamento de outras solicitações no webman. Essas operações podem utilizar diferentes soluções de processamento conforme a situação.
 
-## Usando Fila de Mensagens
+## Opção 1: Uso de fila de mensagens
 Consulte [fila Redis](../queue/redis.md) [fila STOMP](../queue/stomp.md)
 
-### Vantagens
-Capacidade de lidar com picos de solicitações de processamento de alto volume.
+#### Vantagens
+Pode lidar com picos repentinos de solicitações de processamento
 
-### Desvantagens
-Incapacidade de retornar diretamente resultados para o cliente. Para enviar os resultados, é necessário utilizar outros serviços, como o [webman/push](https://www.workerman.net/plugin/2) para o envio dos resultados do processamento.
+#### Desvantagens
+Não pode retornar resultados diretamente ao cliente. Se for necessário enviar resultados, é preciso coordenar com outros serviços, como usar [webman/push](https://www.workerman.net/plugin/2) para enviar os resultados do processamento.
 
-## Adicionando uma Porta HTTP
+## Opção 2: Adicionar uma nova porta HTTP
 
-> **Observação**
-> Este recurso requer webman-framework>=1.4
+Adicionar uma nova porta HTTP para processar solicitações lentas. Essas solicitações lentas acessam esta porta e são processadas por um grupo específico de processos, retornando os resultados diretamente ao cliente após o processamento.
 
-Adicione uma porta HTTP para lidar com solicitações lentas, de forma que essas solicitações sejam encaminhadas para um grupo específico de processos que as processarão e retornarão diretamente o resultado para o cliente.
+#### Vantagens
+Pode retornar os dados diretamente ao cliente
 
-### Vantagens
-Capacidade de retornar os dados diretamente para o cliente.
+#### Desvantagens
+Não pode lidar com picos repentinos de solicitações
 
-### Desvantagens
-Incapacidade de lidar com picos de solicitações de alto volume.
-
-### Passos para Implementação
-Adicione a seguinte configuração ao arquivo `config/process.php`.
+#### Passos de implementação
+Adicione a seguinte configuração em `config/process.php`.
 ```php
 return [
-    // ... outras configurações omitidas ...
-
+    // ... Outras configurações omitidas aqui ...
+    
     'task' => [
         'handler' => \Webman\App::class,
         'listen' => 'http://0.0.0.0:8686',
-        'count' => 8, // número de processos
+        'count' => 8, // Número de processos
         'user' => '',
         'group' => '',
         'reusePort' => true,
         'constructor' => [
-            'request_class' => \support\Request::class, // configuração da classe de solicitação
-            'logger' => \support\Log::channel('default'), // instância de log
-            'app_path' => app_path(), // localização do diretório app
-            'public_path' => public_path() // localização do diretório public
+            'requestClass' => \support\Request::class, // Configuração da classe de solicitação
+            'logger' => \support\Log::channel('default'), // Instância do logger
+            'appPath' => app_path(), // Localização do diretório app
+            'publicPath' => public_path() // Localização do diretório public
         ]
     ]
 ];
 ```
 
-Dessa forma, as interfaces lentas podem ser acessadas através do conjunto de processos em `http://127.0.0.1:8686/` sem afetar o processamento de outras interfaces.
+Dessa forma, as interfaces lentas podem ser processadas pelo grupo de processos em `http://127.0.0.1:8686/` sem afetar o processamento de outras operações nos demais processos.
 
-Para garantir que o cliente não perceba a diferença entre as portas, pode-se adicionar um proxy para a porta 8686 no nginx. Supondo que o caminho das solicitações de interface lenta comece com `/tast`, a configuração completa do nginx seria semelhante ao seguinte exemplo:
-```nginx
+Para que o frontend não perceba a diferença de portas, é possível adicionar um proxy para a porta 8686 no nginx. Supondo que os caminhos das solicitações lentas comecem com `/task`, a configuração do nginx seria semelhante à seguinte:
+```
 upstream webman {
     server 127.0.0.1:8787;
     keepalive 10240;
 }
 
-# Adicionar um upstream para 8686
+# Adicionar um novo upstream 8686
 upstream task {
    server 127.0.0.1:8686;
    keepalive 10240;
@@ -68,8 +65,8 @@ server {
   access_log off;
   root /path/webman/public;
 
-  # Solicitações iniciadas com /tast são encaminhadas para a porta 8686. Altere /tast para o prefixo desejado conforme necessário.
-  location /tast {
+  # Solicitações que começam com /task vão para a porta 8686, altere /task para o prefixo desejado conforme necessário
+  location /task {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header Host $host;
       proxy_http_version 1.1;
@@ -77,7 +74,7 @@ server {
       proxy_pass http://task;
   }
 
-  # Outras solicitações são encaminhadas para a porta 8787 original
+  # Outras solicitações vão para a porta 8787 original
   location / {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header Host $host;
@@ -90,4 +87,45 @@ server {
 }
 ```
 
-Dessa forma, ao acessar `dominio.com/tast/xxx`, o acesso será direcionado para a porta 8686, sem afetar o processamento das solicitações na porta 8787.
+Dessa forma, quando o cliente acessar `dominio.com/task/xxx`, será processado pela porta 8686 separada sem afetar o processamento de solicitações na porta 8787.
+
+## Opção 3: Uso de HTTP Chunked para envio assíncrono de dados em segmentos
+
+#### Vantagens
+Pode retornar os dados diretamente ao cliente
+
+**Instalar workerman/http-client**
+
+```
+composer require workerman/http-client
+```
+
+**app/controller/IndexController.php**
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+
+class IndexController
+{
+    public function index(Request $request)
+    {
+        $connection = $request->connection;
+        $http = new \Workerman\Http\Client();
+        $http->get('https://example.com/', function ($response) use ($connection) {
+            $connection->send(new Chunk($response->getBody()));
+            $connection->send(new Chunk('')); // Enviar chunk vazio para indicar fim da resposta
+        });
+        // Enviar primeiro os cabeçalhos HTTP, os dados são enviados de forma assíncrona
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+}
+```
+
+> **Nota**
+> Este exemplo usa o cliente `workerman/http-client` para obter resultados HTTP de forma assíncrona e retornar os dados. Também é possível usar outros clientes assíncronos, como [AsyncTcpConnection](https://www.workerman.net/doc/workerman/async-tcp-connection/construct.html).

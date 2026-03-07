@@ -1,4 +1,4 @@
-# 快速開始
+# 數據庫模型 Model用法(Laravel風格)
 
 webman模型 基於 [Eloquent ORM](https://laravel.com/docs/7.x/eloquent) 。每個數據庫表都有一個對應的「模型」用來與該表交互。你可以通過模型查詢數據表中的數據，以及在數據表中插入新記錄。
 
@@ -6,7 +6,7 @@ webman模型 基於 [Eloquent ORM](https://laravel.com/docs/7.x/eloquent) 。每
 
 > 注意：Eloquent ORM 要支持模型觀察者需要額外導入`composer require "illuminate/events"` [例子](#模型觀察者)
 
-## 示例
+## 數據庫模型示例
 ```php
 <?php
 namespace app\model;
@@ -127,7 +127,7 @@ class User extends Model
 ```
 
 ## 數據庫連接
-認情況下，Eloquent 模型將使用你的應用程序配置的默認數據庫連接。如果你想為模型指定一個不同的連接，設置 $connection 屬性：
+默認情況下，Eloquent 模型將使用你的應用程序配置的默認數據庫連接。如果你想為模型指定一個不同的連接，設置 $connection 屬性：
 ```php
 class User extends Model
 {
@@ -189,7 +189,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -535,7 +535,8 @@ if ($post->is($anotherPost)) {
 ## 模型觀察者
 使用參考[Laravel 中的模型事件與 Observer](https://learnku.com/articles/6657/model-events-and-observer-in-laravel)
 
-注意：Eloquent ORM 要支持模型觀察者需要額外導入composer require "illuminate/events"
+注意：Eloquent ORM 要支持模型觀察者需要額外導入`composer require "illuminate/events"`
+
 ```php
 <?php
 namespace app\model;
@@ -552,3 +553,6 @@ class User extends Model
     }
 }
 ```
+
+## 事務
+參見[數據庫事務](../others/transaction.md)

@@ -272,10 +272,28 @@ class UserController
 #### ควบคุม
 เมื่อควบคุมเรียกใช้ `view('ชื่อมุมมอง',[]);` ไฟล์มุมมองจะถูกค้นหาตามกฎดังนี้:
 
-1. ในกรณีที่ไม่ใช่แอพหลายตัว ใช้ไฟล์มุมมองที่อยู่ใต้ `app/view/`
-2. ในกรณีที่เป็น [แอพหลายตัว](multiapp.md) ใช้ไฟล์มุมมองที่อยู่ใต้ `app/ชื่อแอพ/view/`
+1. ถ้าเส้นทางขึ้นต้นด้วย `/` ให้ใช้เส้นทางนั้นโดยตรงในการค้นหาไฟล์มุมมอง
+2. ถ้าไม่ขึ้นต้นด้วย `/` และไม่ใช่แอพหลายตัว ใช้ไฟล์มุมมองที่อยู่ใต้ `app/view/`
+3. ถ้าไม่ขึ้นต้นด้วย `/` และเป็น [แอพหลายตัว](multiapp.md) ใช้ไฟล์มุมมองที่อยู่ใต้ `app/ชื่อแอพ/view/`
+4. ถ้าไม่ส่งพารามิเตอร์เทมเพลต ไฟล์เทมเพลตจะถูกค้นหาอัตโนมัติตามกฎข้อ 2 และ 3
 
-งานจริงทั้งหมดคือ หาก `$request->app` ว่างเปล่า ใช้ไฟล์มุมมองที่อยู่ใต้ `app/view/` แต่ถ้าไม่ก็ใช้ไฟล์มุมมองที่อยู่ใต้ `app/{$request->app}/view/`
+ตัวอย่าง:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // เทียบเท่ากับ return view('user/hello', ['name' => 'webman']);
+        // เทียบเท่ากับ return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### ฟังก์ชันปิด
 ฟังก์ชันปิด `$request->app` ว่างเปล่า ไม่ได้อยู่ในแอพใด ดังนั้นฟังก์ชันปิดนั้นใช้ไฟล์มุมมองที่อยู่ใต้ `app/view/` ตัวอย่างเช่น การกำหนดเส้นทางในไฟล์ `config/route.php` ดังนี้
@@ -288,6 +306,25 @@ Route::any('/admin/user/get', function (Reqeust $reqeust) {
 
 #### การกำหนดแอพ
 เพื่อให้ไฟล์มุมมองในโหมดแอพหลายตัวสามารถสามารถใช้ซ้ำได้ `view($template, $data, $app = null)` มีพารามิเตอร์ที่สาม `$app` ที่สามารถใช้เพื่อกำหนดให้มุมมองใช้อยู่ใต้ไดเรคทอรีของแอพใด ๆ เช่น `view('user', [], 'admin');` จะบังคับให้ใช้ไฟล์มุมมองที่อยู่ใต้ `app/admin/view/`
+
+#### การละพารามิเตอร์เทมเพลต
+ในตัวควบคุมที่ใช้คลาส สามารถละพารามิเตอร์เทมเพลตได้ ตัวอย่าง:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // เทียบเท่ากับ return view('user/hello', ['name' => 'webman']);
+        // เทียบเท่ากับ return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## ขยายtwig
 > **โปรดทราบ**

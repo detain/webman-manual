@@ -1,11 +1,10 @@
-## 自定義404
-當webman遇到404時，會自動返回`public/404.html`中的內容，因此開發者可以直接修改`public/404.html`文件。
+# 自定義404
 
-如果您想要動態控制404的內容，例如在ajax請求時返回json數據 `{"code:"404", "msg":"404 not found"}`，在頁面請求時返回`app/view/404.html`模板，請參考以下示例。
+如果你想動態控制404的內容，例如在 ajax 請求時返回 json 數據 `{"code:"404", "msg":"404 not found"}`，頁面請求時返回 `app/view/404.html` 模板，請參考如下示例。
 
-> 以下以php原生模板為例，其他模板`twig` `blade` `think-tmplate` 原理類似。
+> 以下以 php 原生模板為例，其他模板 `twig` `blade` `think-template` 原理類似。
 
-**創建文件`app/view/404.html`**
+**創建文件 `app/view/404.html`**
 ```html
 <!doctype html>
 <html>
@@ -19,23 +18,42 @@
 </html>
 ```
 
-**在`config/route.php`中加入以下代碼：**
+**在 `config/route.php` 中加入如下代碼：**
 ```php
 use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // ajax請求時返回json
+    // ajax 請求時返回 json
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
-    // 頁面請求返回404.html模板
+    // 頁面請求返回 404.html 模板
     return view('404', ['error' => 'some error'])->withStatus(404);
 });
 ```
 
-## 自定義500
-**新建`app/view/500.html`**
+# 自定義405
+
+從 webman-framework 1.5.23 開始，回調函數支持傳遞 status 參數。若 status 為 404 表示請求不存在，405 表示不支持當前請求方法（例如通過 GET 方式訪問由 `Route::post()` 設置的路由）。
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# 自定義500
+
+**新建 `app/view/500.html`**
+
 ```html
 <!doctype html>
 <html>
@@ -50,7 +68,7 @@ Route::fallback(function(Request $request){
 </html>
 ```
 
-**新建**app/exception/Handler.php**(如果目錄不存在請自行創建)**
+**新建 `app/exception/Handler.php`（如目錄不存在請自行創建）**
 ```php
 <?php
 
@@ -71,17 +89,17 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // ajax請求返回json數據
+        // ajax 請求返回 json 數據
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
-        // 頁面請求返回500.html模板
+        // 頁面請求返回 500.html 模板
         return view('500', ['exception' => $exception], '')->withStatus(500);
     }
 }
 ```
 
-**配置`config/exception.php`**
+**配置 `config/exception.php`**
 ```php
 return [
     '' => \app\exception\Handler::class,

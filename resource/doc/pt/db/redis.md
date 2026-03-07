@@ -1,35 +1,50 @@
 # Redis
 
-O componente redis do webman usa por padrão o [illuminate/redis](https://github.com/illuminate/redis), que é a biblioteca redis do Laravel, e é usado da mesma maneira que no Laravel.
+[webman/redis](https://github.com/webman-php/redis) estende [illuminate/redis](https://github.com/illuminate/redis) adicionando pool de conexões e suporta ambientes com e sem coroutines. O uso é o mesmo do Laravel.
 
-Antes de usar o `illuminate/redis`, é necessário instalar a extensão redis para o `php-cli`.
-
-> **Atenção**
-> Verifique se a extensão redis está instalada para o `php-cli` usando o comando `php -m | grep redis`. Note que mesmo que você tenha instalado a extensão redis para o `php-fpm`, isso não significa que você poderá usá-la no `php-cli`, já que o `php-cli` e o `php-fpm` são aplicativos diferentes e podem usar diferentes arquivos de configuração `php.ini`. Use o comando `php --ini` para verificar qual arquivo de configuração `php.ini` está sendo usado pelo seu `php-cli`.
+Antes de usar `illuminate/redis`, é necessário instalar a extensão redis para `php-cli`.
 
 ## Instalação
 
 ```php
-composer require -W illuminate/redis illuminate/events
+composer require -W webman/redis illuminate/events
 ```
 
 Após a instalação, é necessário reiniciar (reload não funciona).
 
 ## Configuração
-O arquivo de configuração do redis está em `config/redis.php`.
+
+O arquivo de configuração do Redis está em `config/redis.php`:
 
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
+        'pool' => [ // Pool de conexões
+            'max_connections' => 10,     // Máximo de conexões no pool
+            'min_connections' => 1,      // Mínimo de conexões no pool
+            'wait_timeout' => 3,         // Tempo máximo de espera ao obter conexão (segundos)
+            'idle_timeout' => 50,        // Após esse tempo, conexões são liberadas até min_connections
+            'heartbeat_interval' => 50,  // Intervalo de heartbeat (não exceder 60 segundos)
+        ],
     ]
 ];
 ```
 
+## Pool de conexões
+
+* Cada processo tem seu próprio pool; os pools não são compartilhados entre processos.
+* Sem coroutines a execução é sequencial, então no máximo uma conexão é usada.
+* Com coroutines a execução é concorrente e o pool escala entre `min_connections` e `max_connections`.
+* Se o número de coroutines usando Redis exceder `max_connections`, elas aguardam até `wait_timeout` segundos; além disso uma exceção é lançada.
+* Em idle (com ou sem coroutines), as conexões são liberadas após `idle_timeout` até alcançar `min_connections` (0 permitido).
+
 ## Exemplo
+
 ```php
 <?php
 namespace app\controller;
@@ -49,6 +64,7 @@ class UserController
 ```
 
 ## Interface Redis
+
 ```php
 Redis::append($key, $value)
 Redis::bitCount($key)
@@ -78,7 +94,9 @@ Redis::expire($key, $ttl)
 Redis::expireAt($key, $timestamp)
 Redis::select($dbIndex)
 ```
+
 Equivalente a:
+
 ```php
 $redis = Redis::connection('default');
 $redis->append($key, $value)
@@ -91,15 +109,17 @@ $redis->getBit($key, $offset)
 ```
 
 > **Atenção**
-> Tenha cuidado com a interface `Redis::select($db)`, pois o webman é um framework residente em memória e alterar o banco de dados em uma solicitação afetará solicitações futuras. Para múltiplos bancos de dados, é recomendável configurar diferentes conexões Redis para diferentes configurações de `$db`.
+> Use a interface `Redis::select($db)` com cuidado. Como o webman é um framework residente em memória, mudar de banco em uma requisição afeta as seguintes. Para múltiplos bancos, configure conexões Redis separadas para cada `$db`.
 
-## Usando várias conexões Redis
-Por exemplo, no arquivo de configuração `config/redis.php`.
+## Usar várias conexões Redis
+
+Exemplo no arquivo `config/redis.php`:
 
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
@@ -111,17 +131,20 @@ return [
         'port'     => 6379,
         'database' => 1,
     ],
+
 ]
 ```
-Por padrão, é usada a conexão configurada em `default`, mas você pode usar o método `Redis::connection()` para selecionar a conexão redis a ser usada.
+
+Por padrão usa-se a conexão em `default`. Use `Redis::connection()` para escolher qual conexão Redis usar:
 
 ```php
 $redis = Redis::connection('cache');
 $redis->get('test_key');
 ```
 
-## Configuração de Cluster
-Se sua aplicação usar um cluster de servidores Redis, você deve definir esses clusters no arquivo de configuração do Redis:
+## Configuração de cluster
+
+Se a aplicação usa um cluster Redis, defina-o na configuração com a chave `clusters`:
 
 ```php
 return [
@@ -129,6 +152,7 @@ return [
         'default' => [
             [
                 'host'     => 'localhost',
+                'username' => null,
                 'password' => null,
                 'port'     => 6379,
                 'database' => 0,
@@ -139,7 +163,7 @@ return [
 ];
 ```
 
-Por padrão, o cluster pode fazer shard no nó do cliente, permitindo pools de nós e criando uma grande quantidade de memória disponível. No entanto, observe que compartilhamentos de clientes não tratam falhas, portanto, essa funcionalidade é principalmente indicada para dados em cache obtidos de outro banco de dados principal. Se deseja usar o cluster nativo do Redis, é necessário fazer a seguinte especificação no arquivo de configuração em `options`:
+Por padrão o cluster faz sharding no cliente nos nós, permitindo pools e grande quantidade de memória. O sharding no cliente não trata falhas; é indicado principalmente para dados em cache de outro banco principal. Para o cluster nativo do Redis, especifique em `options` na configuração:
 
 ```php
 return[
@@ -153,8 +177,9 @@ return[
 ];
 ```
 
-## Comandos Pipeline
-Quando precisa enviar muitos comandos para o servidor em uma única operação, é recomendável usar comandos pipeline. O método pipeline aceita um fechamento de instância Redis. Todos os comandos enviados para a instância Redis serão executados em uma única operação:
+## Comandos pipeline
+
+Quando precisar enviar muitos comandos em uma única operação, use o pipeline. O método `pipeline` aceita um closure; todos os comandos são executados em uma única operação:
 
 ```php
 Redis::pipeline(function ($pipe) {

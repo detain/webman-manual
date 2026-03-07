@@ -1,40 +1,41 @@
 # Otomatik Yükleme
 
-## PSR-0 Uyumluluğuna Göre Dosyaların Composer ile Yüklenmesi
-webman `PSR-4` otomatik yükleme standardını takip eder. İşletmenizin `PSR-0` uyumluluğuna ihtiyaç duyması durumunda aşağıdaki adımları izleyebilirsiniz.
+## Composer ile PSR-0 Uyumlu Dosyaları Yükleme
+webman `PSR-4` otomatik yükleme standardına uyar. Projenizin PSR-0 uyumlu kütüphaneleri yüklemesi gerekiyorsa şu adımları izleyin:
 
-- `PSR-0` uyumlu kod kütüphanesini saklamak için `extend` dizini oluşturun
-- `composer.json` dosyasını düzenleyerek, `autoload` kısmına aşağıdaki içeriği ekleyin
+- PSR-0 kütüphanelerini saklamak için `extend` dizini oluşturun
+- `composer.json` dosyasını düzenleyip `autoload` altına şunları ekleyin:
 
-```js
+```json
 "psr-0" : {
     "": "extend/"
 }
 ```
-Sonuç olarak şuna benzer bir görüntü elde edilmelidir
+Sonuç aşağıdakine benzer olacaktır:
 ![](../../assets/img/psr0.png)
 
 - `composer dumpautoload` komutunu çalıştırın
-- webman'i yeniden başlatmak için `php start.php restart` komutunu çalıştırın (Not: Etkili olabilmesi için yeniden başlatılması zorunludur)
+- webman'i yeniden başlatmak için `php start.php restart` çalıştırın (not: değişikliklerin geçerli olması için yeniden başlatma zorunludur)
 
-## Belirli Dosyaların Composer ile Yüklenmesi
+## Composer ile Belirli Dosyaları Yükleme
 
-- `composer.json` dosyasını düzenleyerek, `autoload.files` kısmına yüklenmesini istediğiniz dosyaları ekleyin
-```json
+- `composer.json` dosyasını düzenleyip `autoload.files` altına yüklenecek dosyaları ekleyin:
+```
 "files": [
     "./support/helpers.php",
     "./app/helpers.php"
 ]
 ```
+
 - `composer dumpautoload` komutunu çalıştırın
-- webman'i yeniden başlatmak için `php start.php restart` komutunu çalıştırın (Not: Etkili olabilmesi için yeniden başlatılması zorunludur)
+- webman'i yeniden başlatmak için `php start.php restart` çalıştırın (not: değişikliklerin geçerli olması için yeniden başlatma zorunludur)
 
 > **Not**
-> `composer.json` dosyasındaki `autoload.files` yapılandırması, webman başlatılmadan önce yüklenir. Diğer yandan, çerçeve tarafından yüklenen `config/autoload.php` dosyaları, webman başlatıldıktan sonra yüklenir.
-> `composer.json` dosyasındaki `autoload.files` ile yüklenen dosyaları değiştirdikten sonra, yeniden başlatmanız gerekmektedir; yeniden yükleme ile değişiklikler geçerli olmayacaktır. Diğer yandan, çerçeve üzerinde yüklenen `config/autoload.php` dosyaları, değişiklikler yapıldıktan sonra yeniden yükleme işlemi ile etkinleştirilebilir.
+> composer.json içindeki `autoload.files` ile tanımlanan dosyalar webman başlamadan önce yüklenir. Framework'ün `config/autoload.php` ile yüklenen dosyalar ise webman başladıktan sonra yüklenir.
+> composer.json'deki `autoload.files` dosyalarında yapılan değişiklikler için restart gerekir; reload yetmez. Framework'ün `config/autoload.php` ile yüklenen dosyalar hot-reload destekler; değişiklikler reload ile geçerli olur.
 
-## Çerçeve ile Belirli Dosyaların Yüklenmesi
-SPR standardına uygun olmayan bazı dosyaları otomatik olarak yükleyemeyebiliriz, bu tür dosyaların yüklenmesi için `config/autoload.php` dosyasını yapılandırabiliriz. Örneğin:
+## Framework ile Belirli Dosyaları Yükleme
+Bazı dosyalar PSR standardına uymayabilir ve otomatik yüklenemez. `config/autoload.php` dosyasını yapılandırarak bu dosyaları yükleyebilirsiniz, örneğin:
 ```php
 return [
     'files' => [
@@ -45,4 +46,4 @@ return [
 ];
 ```
  > **Not**
- > `autoload.php` dosyasında, `support/Request.php` ve `support/Response.php` dosyalarının yüklenmesi yapılandırılmıştır. Bunun nedeni, `vendor/workerman/webman-framework/src/support/` klasöründe aynı adı taşıyan iki dosya bulunmasıdır. Bu konfigürasyon ile proje dizinindeki `support/Request.php` ve `support/Response.php` dosyaları öncelikli olarak yüklenir. Bu sayede bu iki dosyanın içeriğini özelleştirebiliriz, `vendor` içerisindeki dosyaları değiştirmemiz gerekmez. Eğer bunları özelleştirmeniz gerekiyorsa, bu yapılandırmaları göz ardı edebilirsiniz.
+ > `autoload.php` içinde `support/Request.php` ve `support/Response.php` yüklemesi ayarlanmıştır, çünkü `vendor/workerman/webman-framework/src/support/` dizininde de aynı isimde dosyalar vardır. `autoload.php` ile proje kök dizinindeki sürümler öncelikli yüklenir; böylece `vendor` içindekileri değiştirmeden bu iki dosyayı özelleştirebilirsiniz. Özelleştirmeniz gerekmiyorsa bu iki ayarı atlayabilirsiniz.

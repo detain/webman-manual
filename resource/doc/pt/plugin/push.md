@@ -4,8 +4,6 @@
 
 O plugin inclui um cliente web JS `push.js` e um cliente `uniapp-push.js`, outros clientes em diferentes idiomas podem ser baixados em https://pusher.com/docs/channels/channels_libraries/libraries/
 
-> O plugin requer webman-framework>=1.2.0
-
 ## Instalação
 
 ```sh

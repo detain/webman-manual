@@ -50,7 +50,7 @@ return [
 ```php
 config('payment');
 config('payment.key');
-config('payment.key');
+config('payment.secret');
 ```
 
 ## 更改配置

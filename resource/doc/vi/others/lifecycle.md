@@ -4,10 +4,10 @@
 - Mỗi tiến trình có vòng đời rất dài
 - Mỗi tiến trình chạy độc lập mà không làm ảnh hưởng đến nhau
 - Mỗi tiến trình trong vòng đời của nó có thể xử lý nhiều yêu cầu
-- Tiến trình sẽ thoát khi nhận lệnh `dừng` `tải lại` `khởi động lại`, kết thúc vòng đời lần này
+- Tiến trình sẽ thoát khi nhận lệnh `stop` `reload` `restart`, kết thúc vòng đời hiện tại
 
-> **Lưu ý**
-> Mỗi tiến trình đều hoạt động mà không làm ảnh hưởng đến nhau, điều này có nghĩa là mỗi tiến trình duy trì các tài nguyên, biến và các thể hiện lớp của chính nó, có nghĩa là mỗi tiến trình có kết nối cơ sở dữ liệu của riêng mình, một số thể hiện đơn lẻ được khởi tạo mỗi khi một tiến trình bắt đầu, vì vậy nhiều tiến trình sẽ được khởi tạo nhiều lần.
+> **Mẹo**
+> Mỗi tiến trình đều hoạt động độc lập không ảnh hưởng lẫn nhau, nghĩa là mỗi tiến trình duy trì các tài nguyên, biến và thể hiện lớp riêng. Điều này thể hiện ở việc mỗi tiến trình có kết nối cơ sở dữ liệu riêng, một số singleton được khởi tạo một lần cho mỗi tiến trình, do đó nhiều tiến trình sẽ có nhiều lần khởi tạo.
 
 ## Vòng đời của yêu cầu
 - Mỗi yêu cầu sẽ tạo ra một đối tượng `$request`
@@ -77,12 +77,12 @@ class FooController
     public function index(Request $request)
     {
         $this->data[] = time();
-        return response('Xin chào index');
+        return response('hello index');
     }
 
     public function hello(Request $request)
     {
-        return response('Xin chào webman');
+        return response('hello webman');
     }
 }
 ```

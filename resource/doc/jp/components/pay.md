@@ -1,17 +1,17 @@
 # 支払いSDK
 
 
-### プロジェクトの場所
+## プロジェクトの場所
 
 https://github.com/yansongda/pay
 
-### インストール
+## インストール
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### 使用方法
+## 使用方法
 
 **アリペイ**
 
@@ -162,6 +162,6 @@ class PayController
 }
 ```
 
-### その他のコンテンツ
+## その他のコンテンツ
 
-https://pay.yanda.net.cn/docs/2.x/overview を訪問してください
+https://pay.yanda.net.cn/docs/2.x/overview にアクセスしてください

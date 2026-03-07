@@ -1,20 +1,18 @@
-# पेजिनेटर कॉम्पोनेंट
+# पेजिनेशन कंपोनेंट
 
-## jasongrimes/php-paginator
-
-### प्रोजेक्ट लिंक
+## प्रोजेक्ट पता
 
 https://github.com/jasongrimes/php-paginator
-
-### स्थापना
+  
+## स्थापना
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
+  
+## उपयोग
 
-### उपयोग
-
-नया बनाएँ `app/controller/UserController.php`
+नया बनाएं `app/controller/UserController.php`
 ```php
 <?php
 namespace app\controller;
@@ -39,49 +37,46 @@ class UserController
     
 }
 ```
-**टेम्पलेट (PHP मूल)**
-
-नया टेम्पलेट बनाएँ app/view/user/get.html
+**टेम्पलेट (मूल PHP)**
+नया टेम्पलेट बनाएं `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- इंटीग्रेटेड Bootstrap पेजिनेटर स्टाइल्स सपोर्ट -->
+  <!-- Bootstrap पेजिनेशन स्टाइल के लिए अंतर्निहित समर्थन -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
 
-<?= $paginator; ?>
+<?= $paginator;?>
 
 </body>
 </html>
 ```
 
-**टेम्पलेट (twig)**
-
-नया टेम्पलेट बनाएँ app/view/user/get.html
+**टेम्पलेट (Twig)**
+नया टेम्पलेट बनाएं `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- इंटीग्रेटेड Bootstrap पेजिनेटर स्टाइल्स सपोर्ट -->
+  <!-- Bootstrap पेजिनेशन स्टाइल के लिए अंतर्निहित समर्थन -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
 
 {% autoescape false %}
-{{ paginator }}
+{{paginator}}
 {% endautoescape %}
 
 </body>
 </html>
 ```
 
-**टेम्पलेट (ब्लेड)**
-
-नया टेम्पलेट बनाएँ app/view/user/get.blade.php
+**टेम्पलेट (Blade)**
+नया टेम्पलेट बनाएं `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-  <!-- इंटीग्रेटेड Bootstrap पेजिनेटर स्टाइल्स सपोर्ट -->
+  <!-- Bootstrap पेजिनेशन स्टाइल के लिए अंतर्निहित समर्थन -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -92,26 +87,26 @@ class UserController
 </html>
 ```
 
-**टेम्पलेट (thinkphp)**
-
-नया टेम्पलेट बनाएँ app/view/user/get.blade.php
+**टेम्पलेट (ThinkPHP)**
+नया टेम्पलेट बनाएं `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-    <!-- इंटीग्रेटेड Bootstrap पेजिनेटर स्टाइल्स सपोर्ट -->
+    <!-- Bootstrap पेजिनेशन स्टाइल के लिए अंतर्निहित समर्थन -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
 
-<?=$paginator ?>
+<?=$paginator?>
 
 </body>
 </html>
 ```
 
-परिणाम निम्नलिखित है:
+परिणाम निम्नानुसार है:
 ![](../../assets/img/paginator.png)
+  
+## अधिक जानकारी
 
-### अधिक जानकारी
-
-परिवर्तन करने के लिए https://github.com/jasongrimes/php-paginator  विजिट करें।
+https://github.com/jasongrimes/php-paginator पर जाएं
+  

@@ -1,15 +1,14 @@
-# Plugins da Aplicação
-
-> Os plugins da aplicação exigem webman>=1.4.0
+# Plugins de aplicação
 
 ## Conceito
-Construa rapidamente sua própria aplicação, como se estivesse montando blocos de construção.
+Construa sua própria aplicação rapidamente, como se estivesse montando blocos.
 
 ## Introdução
-Na realidade, os plugins da aplicação são aplicativos completos que podem ser instalados como plugins no projeto principal, permitindo que o projeto principal obtenha rapidamente determinadas funcionalidades de módulos. Por exemplo, se o projeto principal precisar de um sistema de perguntas e respostas, pode-se instalar um plugin de aplicativo de perguntas e respostas. Se precisar de um sistema de comércio eletrônico, pode-se instalar um plugin de aplicativo de comércio eletrônico. Todos os plugins são independentes, instantaneamente utilizáveis e podem ser facilmente removidos quando não são mais necessários.
+Um plugin de aplicação é na verdade uma aplicação completa que pode ser instalada como plugin no projeto principal, permitindo que o projeto principal adquira rapidamente funcionalidades de módulos específicos.
+Por exemplo, se o projeto principal precisa de um sistema de perguntas e respostas, você pode instalar um plugin de aplicação Q&A; se precisa de um sistema de e-commerce, pode instalar um plugin de aplicação de e-commerce. Todos os plugins são independentes entre si, plug-and-play, e podem ser removidos com um clique quando não forem mais necessários.
 
 ## Impacto
-Os plugins da aplicação aumentam significativamente a reutilização do projeto webman, permitindo que qualquer desenvolvedor transforme seu projeto em um plugin e o disponibilize para instalação em outros projetos, resultando em benefícios para esses projetos e em ganhos financeiros para si.
+Os plugins de aplicação aumentam significativamente a reutilização dos projetos webman. Qualquer desenvolvedor pode converter seu projeto em um plugin e oferecê-lo para instalação em outros projetos, beneficiando esses projetos e obtendo receita para si mesmo.
 
-## Obter Ganhos
-webman fornece um mercado oficial de [aplicativos](https://www.workerman.net/apps), onde os desenvolvedores podem enviar os aplicativos que desenvolveram e obter lucro com isso.
+## Obter receita
+webman fornece um [mercado oficial de aplicações](https://www.workerman.net/apps) onde os desenvolvedores podem enviar as aplicações que desenvolveram e obter receita com elas.

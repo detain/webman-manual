@@ -1,9 +1,8 @@
-## Custom 404
-webman automatically returns the content in `public/404.html` when a 404 error occurs, so developers can directly modify the `public/404.html` file.
+# Custom 404
 
-If you want to dynamically control the content of the 404 error, for example, return JSON data `{"code:"404", "msg":"404 not found"}` for AJAX requests, and return the `app/view/404.html` template for page requests, please refer to the following example:
+If you want to dynamically control the 404 content, for example, return JSON data `{"code:"404", "msg":"404 not found"}` for AJAX requests and return the `app/view/404.html` template for page requests, please refer to the following example.
 
-> The example below uses PHP native templates as an example. Other templates such as `twig`, `blade`, `think-template` have similar principles.
+> The example below uses PHP native templates. Other templates such as `twig`, `blade`, `think-template` follow the same principle.
 
 **Create the file `app/view/404.html`**
 ```html
@@ -34,7 +33,25 @@ Route::fallback(function(Request $request){
 });
 ```
 
-## Custom 500
+# Custom 405
+
+Since webman-framework 1.5.23, the fallback callback supports a `status` parameter. A status of 404 means the request does not exist; 405 means the current request method is not supported (e.g., accessing a route defined with `Route::post()` via GET).
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# Custom 500
+
 **Create `app/view/500.html`**
 
 ```html
@@ -51,7 +68,7 @@ Custom error template:
 </html>
 ```
 
-**Create app/exception/Handler.php** (create the directory if it does not exist)
+**Create `app/exception/Handler.php`** (create the directory if it does not exist)
 ```php
 <?php
 

@@ -1,6 +1,5 @@
-# रेडिस
-रेडिस का उपयोग डेटाबेस के तरीके से होता है, उदाहरण के लिए `plugin/foo/config/redis.php`
-
+# Redis
+Redis का उपयोग डेटाबेस के समान है, उदाहरण के लिए `plugin/foo/config/redis.php`
 ```php
 return [
     'default' => [
@@ -24,10 +23,10 @@ Redis::connection('plugin.foo.default')->get('key');
 Redis::connection('plugin.foo.cache')->get('key');
 ```
 
-इसी तरह, यदि प्रमुख परियोजना के रेडिस कॉन्फ़िगरेशन का पुनर्चक्रण करना चाहते हैं
+इसी तरह, यदि मुख्य परियोजना की Redis कॉन्फ़िगरेशन पुनः उपयोग करनी हो
 ```php
 use support\Redis;
 Redis::get('key');
-// मान लीजिए प्रमुख परियोजना ने cache कनेक्शन भी कॉन्फ़िगर किया है
+// मान लें कि मुख्य परियोजना ने cache कनेक्शन भी कॉन्फ़िगर किया है
 Redis::connection('cache')->get('key');
 ```

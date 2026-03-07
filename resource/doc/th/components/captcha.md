@@ -1,15 +1,15 @@
-# คอมโพเนนต์ที่เกี่ยวกับรหัสยืนยัน
+# คอมโพเนนต์รหัสยืนยันตัวตน
 
-## webman/captcha
-ที่อยู่ของโปรเจค https://github.com/webman-php/captcha
+ที่อยู่โปรเจกต์ https://github.com/webman-php/captcha
 
-### การติดตั้ง
-```composer require webman/captcha```
+## การติดตั้ง
+```
+composer require webman/captcha
+```
 
-### การใช้งาน
+## การใช้งาน
 
 **สร้างไฟล์ `app/controller/LoginController.php`**
-
 
 ```php
 <?php
@@ -29,7 +29,7 @@ class LoginController
     }
     
     /**
-     * แสดงรูปภาพยืนยันตัวตน
+     * แสดงรูปภาพรหัสยืนยันตัวตน
      */
     public function captcha(Request $request)
     {
@@ -39,9 +39,9 @@ class LoginController
         $builder->build();
         // จัดเก็บค่ารหัสยืนยันตัวตนในเซสชัน
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // รับข้อมูลไบนารีของรูปภาพยืนยันตัวตน
+        // รับข้อมูลไบนารีของรูปภาพรหัสยืนยันตัวตน
         $img_content = $builder->get();
-        // แสดงข้อมูลไบนารีของรูปภาพยืนยันตัวตน
+        // คืนค่าข้อมูลไบนารีของรหัสยืนยันตัวตน
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
@@ -50,19 +50,20 @@ class LoginController
      */
     public function check(Request $request)
     {
-        // รับค่าฟิลด์รหัสยืนยันตัวตนจากคำขอ post
+        // รับฟิลด์ captcha จากคำขอ POST
         $captcha = $request->post('captcha');
-        // เปรียบเทียบค่ารหัสยืนยันตัวตนในเซสชัน
+        // เปรียบเทียบกับค่ารหัสยืนยันตัวตนในเซสชัน
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
             return json(['code' => 400, 'msg' => 'รหัสยืนยันตัวตนที่ป้อนไม่ถูกต้อง']);
         }
-        return json(['code' => 0, 'msg' => 'ตกลง']);
+        return json(['code' => 0, 'msg' => 'ok']);
     }
 
 }
 ```
 
 **สร้างไฟล์เทมเพลต `app/view/login/index.html`**
+
 ```html
 <!doctype html>
 <html>
@@ -74,37 +75,27 @@ class LoginController
     <form method="post" action="/login/check">
        <img src="/login/captcha" /><br>
         <input type="text" name="captcha" />
-        <input type="submit" value="ยื่นยัน" />
+        <input type="submit" value="ส่ง" />
     </form>
 </body>
 </html>
 ```
 
-เข้าสู่หน้าเว็บ `http://127.0.0.1:8787/login` จะมีหน้าต่างในรูปแบบดังนี้:
+เข้าสู่หน้า `http://127.0.0.1:8787/login` หน้าตาจะคล้ายกับดังนี้:
   ![](../../assets/img/captcha.png)
 
-### การตั้งค่าพารามิเตอร์ที่ใช้บ่อย
+## การตั้งค่าพารามิเตอร์ที่ใช้บ่อย
 ```php
     /**
-     * แสดงรูปภาพยืนยันตัวตน
+     * แสดงรูปภาพรหัสยืนยันตัวตน
      */
     public function captcha(Request $request)
     {
-        // เริ่มต้นคลาสรหัสยืนยันตัวตน
-        $builder = new CaptchaBuilder;
-        // ความยาวของรหัสยืนยันตัวตน
-        $length = 4;
-        // รวมตัวอักษรใดใดบ้าง
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // สร้างรหัสยืนยันตัวตน
-        $builder->build();
-        // จัดเก็บค่ารหัสยืนยันตัวตนในเซสชัน
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // รับข้อมูลไบนารีของรูปภาพยืนยันตัวตน
-        $img_content = $builder->get();
-        // แสดงข้อมูลไบนารีของรูปภาพยืนยันตัวตน
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```

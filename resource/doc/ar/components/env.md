@@ -1,21 +1,21 @@
-# ENV组件 vlucas/phpdotenv
+# مكون ENV vlucas/phpdotenv
 
-## 说明
-`vlucas/phpdotenv`是一个环境变量加载组件，用来区分不同环境(如开发环境、测试环境等)的配置。
+## الوصف
+`vlucas/phpdotenv` مكون تحميل متغيرات البيئة، يُستخدم للتمييز بين إعدادات البيئات المختلفة (مثل بيئة التطوير وبيئة الاختبار وغيرها).
 
-## 项目地址
+## عنوان المشروع
 
 https://github.com/vlucas/phpdotenv
   
-## 安装
+## التثبيت
  
 ```php
 composer require vlucas/phpdotenv
  ```
   
-## 使用
+## الاستخدام
 
-### 项目根目录新建`.env`文件
+### إنشاء ملف `.env` جديد في المجلد الجذر للمشروع
 **.env**
 ```
 DB_HOST = 127.0.0.1
@@ -25,14 +25,14 @@ DB_USER = foo
 DB_PASSWORD = 123456
 ```
 
-### 修改配置文件
+### تعديل ملف الإعدادات
 **config/database.php**
 ```php
 return [
-    // 默认数据库
+    // قاعدة البيانات الافتراضية
     'default' => 'mysql',
 
-    // 各种数据库配置
+    // إعدادات قواعد البيانات المختلفة
     'connections' => [
         'mysql' => [
             'driver'      => 'mysql',
@@ -52,15 +52,13 @@ return [
 ];
 ```
 
-> **提示**
-> 建议将`.env`文件加入`.gitignore`列表，避免提交到代码库。代码库中增加一个`.env.example`配置样例文件，当项目部署时复制`.env.example`为`.env`，根据当前环境修改`.env`中的配置，这样就可以让项目在不同环境加载不同的配置了。
+> **تنبيه**
+> يُنصح بإضافة ملف `.env` إلى قائمة `.gitignore` لتجنب رفعه إلى مستودع الكود. أضف ملف إعدادات نموذجي `.env.example` في المستودع، وعند نشر المشروع انسخ `.env.example` كـ `.env` وعدّل الإعدادات وفق البيئة الحالية. بهذا يحمّل المشروع إعدادات مختلفة حسب كل بيئة.
 
-> **注意**
-> `vlucas/phpdotenv`在PHP TS版本(线程安全版本)可能会有bug，请使用NTS版本(非线程安全版本)。
-> 当前php是什么版本可以通过执行 `php -v` 查看 
+> **ملاحظة**
+> قد تحتوي `vlucas/phpdotenv` على أخطاء في إصدار PHP TS (Thread Safe). يُرجى استخدام إصدار NTS (Non-Thread-Safe). يمكن التحقق من إصدار PHP الحالي بتنفيذ الأمر `php -v`.
 
-## 更多内容
+## المزيد
 
-访问 https://github.com/vlucas/phpdotenv
+زيارة https://github.com/vlucas/phpdotenv
   
-

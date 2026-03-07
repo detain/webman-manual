@@ -226,7 +226,6 @@ return [
 ## คำอธิบาย
   
  - Middleware ถูกแบ่งเป็น middleware ทั่วไป, middleware ของแอพพลิเคชั่น (middleware ของแอพพลิเคชั่นใช้ได้เฉพาะในโหมดแอพพลิเคชั่นหลายตัว, ดูเพิ่มเติมที่[multiapp.md](multiapp.md)) และ middleware ของเส้นทาง
- - ปัจจุบันไม่รองรับ middleware ของคอนโทรลเลอร์คนละตัว (แต่สามารถใช้ `$request->controller` เพื่อทำฟังก์ชั่น middleware ในคอนโทรลเลอร์ได้)
  - ที่เก็บไฟล์การกำหนด middleware อยู่ที่ `config/middleware.php`
  - การกำหนด middleware ทั่วไปอยู่ใน key `''`
  - การกำหนด middleware ของแอพพลิเคชั่นอยู่ในชื่อของแอพพลิเคชั่นเฉพาะ เช่น
@@ -243,6 +242,31 @@ return [
         app\middleware\ApiOnly::class,
     ]
 ];
+```
+
+## Middleware ของคอนโทรลเลอร์และ middleware ของเมธอด
+
+สามารถใช้ annotation เพื่อกำหนด middleware ให้กับคอนโทรลเลอร์หรือเมธอดเฉพาะของคอนโทรลเลอร์ได้
+
+```php
+<?php
+namespace app\controller;
+use app\middleware\Controller1Middleware;
+use app\middleware\Controller2Middleware;
+use app\middleware\Method1Middleware;
+use app\middleware\Method2Middleware;
+use support\annotation\Middleware;
+use support\Request;
+
+#[Middleware(Controller1Middleware::class, Controller2Middleware::class)]
+class IndexController
+{
+    #[Middleware(Method1Middleware::class, Method2Middleware::class)]
+    public function index(Request $request): string
+    {
+        return 'hello';
+    }
+}
 ```
 
 ## Middleware ของเส้นทาง
@@ -268,21 +292,18 @@ Route::group('/blog', function () {
     app\middleware\MiddlewareB::class,
 ]);
 ```
-## การสร้างฟังก์ชันกลางของ middleware พร้อมพาไป
+## การสร้างฟังก์ชันกลางของ middleware พร้อมพารามิเตอร์
 
-> **หมายเหตุ**
-> คุณสามารถใช้คุณลักษณะนี้ได้เมื่อเวอร์ชันของ webman-framework >= 1.4.8
+ไฟล์การกำหนดค่ารองรับการสร้าง middleware โดยตรง เพื่อง่ายต่อการส่งค่าพารามิเตอร์ผ่าน constructor
 
-ตั้งแต่เวอร์ชัน 1.4.8 เป็นต้นมา ไฟล์การกำหนดค่ารองรับการสร้างฟังก์ชันกลางโดยตรงหรือฟังก์ชันไม่มีชื่อ เพื่อง่ายต่อการส่งค่าพารามิเตอร์ผ่านฟังก์ชันกลาง
 เช่น `config/middleware.php` สามารถกำหนดได้ดังนี้
+
 ```php
 return [
     // ฟังก์ชันกลางทั่วไป
     '' => [
         new app\middleware\AuthCheckTest($param1, $param2, ...),
-        function(){
-            return new app\middleware\AccessControlTest($param1, $param2, ...);
-        },
+        new app\middleware\AccessControlTest($param1, $param2, ...)
     ],
     // ฟังก์ชันกลางของแอพพลิเคชัน (ฟังก์ชันกลางของแอพพลิเคชันมีผลอย่างกว้างขวางเมื่อใช้ในโหมดหลายแอพ)
     'api' => [
@@ -291,20 +312,49 @@ return [
 ];
 ```
 
-ตลอดจนการกำหนดฟังก์ชันกลางในเส้นทางก็สามารถส่งพารามิเตอร์ผ่านฟังก์ชันกลางได้ เช่น `config/route.php`
+ตลอดจนการกำหนด middleware ในเส้นทางก็สามารถส่งพารามิเตอร์ผ่าน constructor ได้ เช่น `config/route.php`
+
 ```php
 Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->middleware([
     new app\middleware\MiddlewareA($param1, $param2, ...),
-    function(){
-        return new app\middleware\MiddlewareB($param1, $param2, ...);
-    },
+    new app\middleware\MiddlewareB($param1, $param2, ...),
 ]);
 ```
 
+ตัวอย่างการใช้พารามิเตอร์ใน middleware
+
+```php
+<?php
+namespace app\middleware;
+
+use Webman\MiddlewareInterface;
+use Webman\Http\Response;
+use Webman\Http\Request;
+
+class MiddlewareA implements MiddlewareInterface
+{
+    protected $param1;
+
+    protected $param2;
+
+    public function __construct($param1, $param2)
+    {
+        $this->param1 = $param1;
+        $this->param2 = $param2;
+    }
+
+    public function process(Request $request, callable $handler) : Response
+    {
+        var_dump($this->param1, $this->param2);
+        return $handler($request);
+    }
+}
+```
+
 ## ลำดับการทำงานของฟังก์ชันกลาง
- - ลำดับการทำงานของฟังก์ชันกลางคือ `ฟังก์ชันกลางทั่วไป`->`ฟังก์ชันกลางของแอพพลิเคชัน`->`ฟังก์ชันกลางของเส้นทาง`
- - เมื่อมีฟังก์ชันกลางทั่วไปหลายตัว จะตามการกำหนดฟังก์ชันกลางจริง ๆ (ฟังก์ชันกลางของแอพพลิเคชันและฟังก์ชันกลางของเส้นทางก็เช่นกัน)
- - คำขอที่ส่งค่าสถานะ 404 จะไม่เรียกใช้ฟังก์ชันกลางใด ๆ รวมทั้งฟังก์ชันกลางทั้วไปด้วย
+ - ลำดับการทำงานของฟังก์ชันกลางคือ `ฟังก์ชันกลางทั่วไป`->`ฟังก์ชันกลางของแอพพลิเคชัน`->`ฟังก์ชันกลางของคอนโทรลเลอร์`->`ฟังก์ชันกลางของเส้นทาง`->`ฟังก์ชันกลางของเมธอด`
+ - เมื่อมีฟังก์ชันกลางในระดับเดียวกันหลายตัว จะทำงานตามลำดับการกำหนด
+ - คำขอ 404 จะไม่เรียกใช้ฟังก์ชันกลางใด ๆ โดยค่าเริ่มต้น (แต่ยังสามารถเพิ่ม middleware ผ่าน `Route::fallback(function(){})->middleware()` ได้)
 
 ## ส่งประเภทสำหรับฟังก์ชันกลางไปยังคอนโทรลเลอร์
 
@@ -381,9 +431,6 @@ class FooController
 
 ## การรับข้อมูลเส้นทางปัจจุบันจากฟังก์ชันกลาง
 
-> **หมายเหตุ**
-> คุณสามารถใช้คุณลักษณะนี้ได้เมื่อเวอร์ชันของ webman-framework >= 1.3.2
-
 เราสามารถใช้ `$request->route` เพื่อรับอ็อบเจ็กต์เส้นทางและสามารถเรียกใช้เมทอดที่เกี่ยวข้องเพื่อรับข้อมูลที่เกี่ยวข้อง
 
 **การกำหนดเส้นทาง**
@@ -425,13 +472,7 @@ class Hello implements MiddlewareInterface
 }
 ```
 
-> **หมายเหตุ**
-> เมทอด `$route->param()` ต้องการ webman-framework >= 1.3.16
-
 ## การรับข้อมูลข้อผิดพลาดจากฟังก์ชันกลาง
-
-> **หมายเหตุ**
-> คุณสามารถใช้คุณลักษณะนี้ได้เมื่อเวอร์ชันของ webman-framework >= 1.3.15
 
 เมื่อดำเนินการธุรกรรมธุรกิจอาจเกิดข้อผิดพลาด ในฟังก์ชันกลางคุณสามารถใช้ `$response->exception()` เพื่อรับข้อผิดพลาด
 
@@ -471,10 +512,7 @@ class Hello implements MiddlewareInterface
 
 ## ฟังก์ชันกลางเซูเปอร์ที่กว้าง
 
-> **หมายเหตุ**
-> คุณสามารถใช้คุณลักษณะนี้ได้เมื่อเวอร์ชันของ webman-framework >= 1.5.16
-
-ฟังก์ชันกลางทั่วไปของโครงการหลักมีผลต่อโครงการหลักเท่านั้น โดยไม่กระทบบน [ปลั๊กอินแอปพลิเคชัน](app/app.md) อย่างไรก็ตาม เราอาจต้องการกำหนดฟังก์ชันกลางที่ส่งผลต่อทุกๆ ปลั๊กอินเอางจะสามารถใช้ฟังก์ชันกลางเซูเปอร์ได้
+ฟังก์ชันกลางทั่วไปของโครงการหลักมีผลต่อโครงการหลักเท่านั้น โดยไม่กระทบบน [ปลั๊กอินแอปพลิเคชัน](app/app.md) อย่างไรก็ตาม เราอาจต้องการกำหนดฟังก์ชันกลางที่ส่งผลต่อทุกๆ ปลั๊กอินสามารถใช้ฟังก์ชันกลางเซูเปอร์ได้
 
 ใน `config/middleware.php` คุณสามารถกำหนดได้ดังนี้:
 ```php
@@ -486,13 +524,10 @@ return [
 ];
 ```
 
-> **เพระะน**
-> ฟังก์ชันกลางเซูเปอร์ `@` สามารถกำหนดได้ไม่เพียงแค่ในโครงการหลักเท่านั้น แต่ยังสามารถกำหนดได้ในปลั๊กอินใดๆ อย่างไรก็ตาม เมื่อกำหนดการกำหนดไว้ในปลั๊กอิน เช่น `plugin/ai/config/middleware.php` การกำหนดฟังก์ชันกลางเซูเปอร์เป็นอย่างไร ก็จะส่งผลกระทบต่อโครงการหลักและปลั๊กอินทั้งหมด
+> **เคล็ดลับ**
+> ฟังก์ชันกลางเซูเปอร์ `@` สามารถกำหนดได้ไม่เพียงแค่ในโครงการหลักเท่านั้น แต่ยังสามารถกำหนดได้ในปลั๊กอินใดๆ เมื่อกำหนดในปลั๊กอิน เช่น `plugin/ai/config/middleware.php` จะส่งผลกระทบต่อโครงการหลักและปลั๊กอินทั้งหมด
 
 ## การเพิ่มฟังก์ชันกลางให้กับแอปพลิเคชันบางแอป
-
-> **หมายเหตุ**
-> คุณสามารถใช้คุณลักษณะนี้ได้เมื่อเวอร์ชันของ webman-framework >= 1.5.16
 
 บางครั้งเราต้องการเพิ่มฟังก์ชันกลางให้กับ [ปลั๊กอินแอปพลิเคชัน](app/app.md) บางตัวโดยที่ไม่ต้องแก้ไขโค้ดของปลั๊กอิน (เพราะการอัพเกรดจะเป็นการแทนที่) ในกรณีนี้ เราสามารถกำหนดได้ในโครงการหลักเพื่อเพิ่มฟังก์ชันกลางให้กับแอปพลิเคชัน
 
@@ -500,9 +535,9 @@ return [
 ```php
 return [
     'plugin.ai' => [], // เพิ่มฟังก์ชันกลางให้กับแอปพลิเคชัน ai
-    'plugin.ai.admin' => [], // เพิ่มฟังก์ชันกลางให้กับโมดูล admin ของแอปพลิเคชัน ai
+    'plugin.ai.admin' => [], // เพิ่มฟังก์ชันกลางให้กับโมดูล admin ของแอปพลิเคชัน ai (ไดเรกทอรี plugin\ai\app\admin)
 ];
 ```
 
-> **เทคนิคอ**
+> **เคล็ดลับ**
 > แน่นอนว่ายังสามารถกำหนดการเป็นแบบเดียวกับการเข้ากระทำต่อตัพเกรดที่กล่าวไปแล้ว ตัวอย่างเช่น `plugin/foo/config/middleware.php` ที่เพิ่มคำสั่งการกำหนดไว้จะส่งผลกระทบต่อการทำงานของแอปพลิเคชัน ai ได้

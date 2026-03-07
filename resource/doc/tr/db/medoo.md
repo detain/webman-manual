@@ -1,20 +1,20 @@
-## Medoo
+# Medoo Veritabanı
 
-Medoo hafif bir veritabanı işlem eklentisidir, [Medoo resmi web sitesi](https://medoo.in/).
+[webman/medoo](https://github.com/webman-php/medoo), [Medoo](https://medoo.in/)'ya bağlantı havuzu desteği ekler ve hem korutin hem korutin dışı ortamlarda çalışır. Kullanımı Medoo ile aynıdır.
 
 ## Kurulum
 `composer require webman/medoo`
 
-## Veritabanı Yapılandırması
-Yapılandırma dosyası, `config/plugin/webman/medoo/database.php` konumundadır.
+## Medoo Veritabanı Yapılandırması
+Yapılandırma dosyası konumu: `config/plugin/webman/medoo/database.php`
 
-## Kullanım
+## Medoo Veritabanı Kullanımı
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use Webman\Medoo\Medoo;
+use support\Medoo;
 
 class Index
 {
@@ -28,13 +28,13 @@ class Index
 
 > **İpucu**
 > `Medoo::get('user', '*', ['uid' => 1]);`
-> şuyla aynıdır
+> şuyla aynıdır:
 > `Medoo::instance('default')->get('user', '*', ['uid' => 1]);`
 
-## Birden Fazla Veritabanı Yapılandırması
+## Medoo Çoklu Veritabanı Yapılandırması
 
 **Yapılandırma**
-`config/plugin/webman/medoo/database.php` içine yeni bir yapılandırma ekleyin, key isteğe bağlıdır, burada `other` kullanılmıştır.
+`config/plugin/webman/medoo/database.php` dosyasına yeni bir yapılandırma ekleyin; anahtar herhangi olabilir, burada `other` kullanılmıştır.
 
 ```php
 <?php
@@ -56,9 +56,16 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
+        ],
+        'pool' => [ // Bağlantı havuzu yapılandırması
+            'max_connections' => 5, // Maksimum bağlantı sayısı
+            'min_connections' => 1, // Minimum bağlantı sayısı
+            'wait_timeout' => 60,   // Havuzdan bağlantı alırken maksimum bekleme süresi; aşılırsa istisna fırlatılır
+            'idle_timeout' => 3,    // Havuzdaki bağlantıların maksimum boşta kalma süresi; aşan bağlantılar kapatılarak min_connections'e inilir
+            'heartbeat_interval' => 50, // Havuz heartbeat aralığı (saniye); 60 saniyeden az önerilir
         ]
     ],
-    // Burada yeni bir 'other' yapılandırması eklendi
+    // Burada 'other' yapılandırması eklenir
     'other' => [
         'type' => 'mysql',
         'host' => 'localhost',
@@ -76,15 +83,21 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
-        ]
+        ],
+        'pool' => [
+            'max_connections' => 5,
+            'min_connections' => 1,
+            'wait_timeout' => 60,
+            'idle_timeout' => 3,
+            'heartbeat_interval' => 50,
+        ],
     ],
 ];
 ```
 
-**Kullanım**
+## Medoo Veritabanı Kullanımı
 ```php
 $user = Medoo::instance('other')->get('user', '*', ['uid' => 1]);
 ```
 
-## Detaylı Belgeler
-Bkz. [Medoo resmi belgeler](https://medoo.in/api/select)
+Bkz. [Medoo resmi belgeleri](https://medoo.in/api/select)

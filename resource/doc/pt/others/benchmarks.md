@@ -12,6 +12,7 @@
 O mecanismo de HTTP Keep-Alive é uma técnica usada para enviar várias solicitações e respostas HTTP em uma única conexão TCP, o que tem um grande impacto nos resultados dos testes de desempenho. Desativar o keep-alive pode diminuir o QPS consideravelmente.
 Atualmente, os navegadores têm o keep-alive ativado por padrão, o que significa que, após acessar um endereço http, o navegador mantém a conexão aberta temporariamente e a reutiliza na próxima solicitação, a fim de melhorar o desempenho.
 É recomendado manter o keep-alive ativado durante os testes de estresse.
+Além disso, se você realizar testes de estresse sem keep-alive habilitado, as portas locais do cliente serão rapidamente esgotadas por conexões em estado TIME_WAIT. Isso se manifesta como solicitações com falha assim que o número total de solicitações exceder um determinado limite (geralmente cerca de 28.000).
 
 ## Como habilitar o HTTP keep-alive durante o teste de estresse?
 Se estiver utilizando o programa 'ab' para o teste de estresse, você precisa adicionar o parâmetro -k, por exemplo, `ab -n100000 -c200 -k http://127.0.0.1:8787/`.
@@ -38,7 +39,7 @@ Os testes de desempenho do [techempower](https://www.techempower.com/benchmarks/
 Aqui estão os dados de teste:
 
 **Ambiente**
-Servidor na nuvem com 4 núcleos e 4 GB de RAM, consultando um registro aleatório de 100.000 e retornando os dados em formato JSON.
+Servidor na nuvem Alibaba 4 núcleos 4 GB, banco de dados MySQL local, consulta aleatória de um registro de 100.000 e retorno em JSON, teste de estresse local.
 
 **Quando usado o PDO nativo**
 O QPS do webman é de 17.800.
@@ -52,7 +53,8 @@ O QPS do webman cai para 7.200.
 O resultado é semelhante para o thinkORM. 
 
 > **Observação**
-> Embora o uso do ORM possa causar uma queda no desempenho, para a maioria dos negócios, ele é suficiente. Devemos encontrar um equilíbrio entre eficiência no desenvolvimento, manutenção e desempenho, em vez de buscar apenas o desempenho.
+> Embora o uso do ORM possa causar uma queda no desempenho, para 99% dos cenários de negócios o desempenho já é mais do que suficiente. Se você faz parte do 1% restante, pode resolver facilmente adicionando mais CPUs ou servidores.
+> Devemos encontrar um equilíbrio entre eficiência no desenvolvimento, manutenção e desempenho, em vez de buscar apenas o desempenho.
 
 ## Por que o QPS é baixo ao realizar testes de estresse com o apipost?
 O módulo de teste de estresse do apipost tem um bug, se o servidor não retornar o cabeçalho gzip, o keep-alive não será ativado, o que resultará em uma grande queda de desempenho. A solução é comprimir os dados ao retorná-los e adicionar o cabeçalho gzip, por exemplo:

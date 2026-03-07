@@ -1,10 +1,10 @@
 # Autoloading
 
-## Loading files based on the PSR-0 specification using Composer
-webman follows the `PSR-4` autoloading specification. If your project needs to load libraries based on the `PSR-0` specification, follow these steps:
+## Loading PSR-0 compliant files via Composer
+webman follows the `PSR-4` autoloading specification. If your project needs to load PSR-0 compliant libraries, follow these steps:
 
-- Create a `extend` directory to store the libraries that follow the `PSR-0` specification.
-- Edit the `composer.json` file and add the following code under `autoload`:
+- Create an `extend` directory to store PSR-0 compliant libraries
+- Edit `composer.json` and add the following under `autoload`:
 
 ```json
 "psr-0" : {
@@ -14,29 +14,29 @@ webman follows the `PSR-4` autoloading specification. If your project needs to l
 The final result should look like this:
 ![](../../assets/img/psr0.png)
 
-- Run `composer dumpautoload`.
-- Restart webman by running `php start.php restart` (Note: you must restart for the changes to take effect).
+- Run `composer dumpautoload`
+- Run `php start.php restart` to restart webman (Note: a full restart is required for changes to take effect)
 
-## Loading specific files using Composer
+## Loading specific files via Composer
 
-- Edit the `composer.json` file and add the files you want to load under `autoload.files`:
-```json
+- Edit `composer.json` and add the files to load under `autoload.files`:
+```
 "files": [
     "./support/helpers.php",
     "./app/helpers.php"
 ]
 ```
 
-- Run `composer dumpautoload`.
-- Restart webman by running `php start.php restart` (Note: you must restart for the changes to take effect).
+- Run `composer dumpautoload`
+- Run `php start.php restart` to restart webman (Note: a full restart is required for changes to take effect)
 
 > **Note**
-> Files specified in the `autoload.files` configuration in composer.json will be loaded before webman starts. On the other hand, files loaded using the `config/autoload.php` provided by the framework are loaded after webman starts.
-> Changes made to the files specified in `autoload.files` in composer.json will require a restart to take effect. Reloading will not work. However, files loaded using the `config/autoload.php` provided by the framework support hot reloading, and changes will take effect upon reloading.
+> Files configured in `autoload.files` in composer.json are loaded before webman starts. Files loaded via the framework's `config/autoload.php` are loaded after webman starts.
+> Changes to files in composer.json's `autoload.files` require a restart to take effect; reload will not work. Files loaded via the framework's `config/autoload.php` support hot-reload; changes take effect on reload.
 
-## Loading specific files using the framework
-Sometimes, certain files may not conform to the PSR specification and thus cannot be loaded automatically. In such cases, we can use the `config/autoload.php` file to load these files. For example:
 
+## Loading specific files via the framework
+Some files may not comply with the PSR specification and cannot be autoloaded. You can load them by configuring `config/autoload.php`, for example:
 ```php
 return [
     'files' => [
@@ -47,4 +47,4 @@ return [
 ];
 ```
  > **Note**
- > In the `autoload.php` file, we see that `support/Request.php` and `support/Response.php` are loaded. This is because there are also two files with the same names in `vendor/workerman/webman-framework/src/support/`. By loading the files specified in `autoload.php`, we give priority to the files in the project's root directory, allowing us to customize the content of these two files without modifying the files in `vendor`. If you don't need to customize them, you can ignore these two configurations.
+ > `autoload.php` is configured to load `support/Request.php` and `support/Response.php` because the same files exist in `vendor/workerman/webman-framework/src/support/`. By loading them via `autoload.php`, we prioritize the versions in the project root directory, allowing you to customize these files without modifying the ones in `vendor`. If you do not need to customize them, you can omit these two entries.

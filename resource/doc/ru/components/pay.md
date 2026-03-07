@@ -1,16 +1,16 @@
 # SDK для оплаты
 
-### Ссылка на проект
+## Ссылка на проект
 
-https://github.com/yansongda/pay
+ https://github.com/yansongda/pay
 
-### Установка
+## Установка
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### Использование
+## Использование
 
 **Alipay**
 
@@ -131,7 +131,7 @@ class PayController
     {
         $order = [
             'out_trade_no' => time(),
-            'total_fee' => '1', // **единица измерения: фенг**
+            'total_fee' => '1', // **Единица: фэнь (центы)**
             'body' => 'test body - тест',
             'openid' => 'onkVf1FjWS5SBIixxxxxxx',
         ];
@@ -162,6 +162,6 @@ class PayController
 }
 ```
 
-### Еще больше информации
+## Дополнительная информация
 
 Посетите https://pay.yanda.net.cn/docs/2.x/overview

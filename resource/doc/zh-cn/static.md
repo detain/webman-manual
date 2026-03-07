@@ -9,7 +9,7 @@ webman支持静态文件访问，静态文件都放置于`public`目录下，例
 如果不需要静态文件支持，打开`config/static.php`将`enable`选项改成false。关闭后所有静态文件的访问会返回404。
 
 ## 更改静态文件目录
-webman默认使用public目录为静态文件目录。如需修改请更改`support/helpers.php`的中的`public_path()`助手函数。
+webman默认使用public目录为静态文件目录。如需修改请更改`support/helpers.php`中的`public_path()`助手函数。
 
 ## 静态文件中间件
 webman自带一个静态文件中间件，位置`app/middleware/StaticFile.php`。

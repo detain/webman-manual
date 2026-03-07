@@ -24,10 +24,11 @@ class FooController
 }
 ```
 
-`http://127.0.0.1:8787/app/foo/foo` を訪問すると、ページは `hello index` を返します。
+`http://127.0.0.1:8787/app/foo/foo` にアクセスすると、ページは `hello index` を返します。
 
-`http://127.0.0.1:8787/app/foo/foo/hello` を訪問すると、ページは `hello webman` を返します。
+`http://127.0.0.1:8787/app/foo/foo/hello` にアクセスすると、ページは `hello webman` を返します。
+
 
 ## URLへのアクセス
-アプリケーションのプラグインのURLアドレスのパスはすべて`/app`で始まり、それに続いてプラグインの識別子、そして具体的なコントローラーとメソッドが続きます。
-例えば、`plugin\foo\app\controller\UserController`のURLアドレスは `http://127.0.0.1:8787/app/foo/user` です。
+アプリケーションプラグインのURLアドレスパスはすべて `/app` で始まり、続いてプラグイン識別子、そして具体的なコントローラーとメソッドが続きます。
+例えば `plugin\foo\app\controller\UserController` のURLアドレスは `http://127.0.0.1:8787/app/foo/user` です。

@@ -1,9 +1,8 @@
-## Personalizar el error 404
-Cuando ocurre un error 404 en webman, automáticamente se devuelve el contenido de `public/404.html`, por lo que los desarrolladores pueden cambiar directamente el archivo `public/404.html`.
+# Personalizar 404
 
-Si desea controlar dinámicamente el contenido del error 404, por ejemplo, devolver datos json `{"code:"404", "msg":"404 not found"}` en una solicitud ajax y devolver la plantilla `app/view/404.html` en una solicitud de página, consulte el siguiente ejemplo.
+Si desea controlar dinámicamente el contenido de 404, por ejemplo devolver datos JSON `{"code:"404", "msg":"404 not found"}` en solicitudes AJAX y devolver la plantilla `app/view/404.html` en solicitudes de página, consulte el siguiente ejemplo.
 
-> A continuación se muestra un ejemplo utilizando una plantilla nativa de PHP, el principio es similar para otras plantillas como `twig`, `blade`, `think-template`.
+> El ejemplo utiliza plantillas nativas de PHP. Otras plantillas como `twig`, `blade`, `think-template` siguen el mismo principio.
 
 **Crear el archivo `app/view/404.html`**
 ```html
@@ -19,13 +18,13 @@ Si desea controlar dinámicamente el contenido del error 404, por ejemplo, devol
 </html>
 ```
 
-**Agregue el siguiente código a `config/route.php`:**
+**Añadir el siguiente código en `config/route.php`:**
 ```php
 use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // Devolver json en solicitudes ajax
+    // Devolver JSON en solicitudes AJAX
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
@@ -34,8 +33,27 @@ Route::fallback(function(Request $request){
 });
 ```
 
-## Personalizar el error 500
+# Personalizar 405
+
+Desde webman-framework 1.5.23, el callback de fallback admite el parámetro `status`. 404 indica que la solicitud no existe; 405 indica que el método de solicitud actual no está permitido (p. ej. acceder con GET a una ruta definida con `Route::post()`).
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# Personalizar 500
+
 **Crear `app/view/500.html`**
+
 ```html
 <!doctype html>
 <html>
@@ -50,7 +68,7 @@ Plantilla de error personalizada:
 </html>
 ```
 
-**Crear `app/exception/Handler.php` (si el directorio no existe, créelo usted mismo)**
+**Crear `app/exception/Handler.php`** (crear el directorio si no existe)
 ```php
 <?php
 
@@ -63,7 +81,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * Renderizar y devolver
+     * Renderizar y devolver la respuesta
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -71,7 +89,7 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // Devolver datos json en solicitudes ajax
+        // Devolver datos JSON en solicitudes AJAX
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }

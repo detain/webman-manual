@@ -2,7 +2,7 @@
 
 A veces necesitamos escribir algunos scripts temporales, en los que podemos llamar a cualquier clase o interfaz como lo hacemos en webman, para completar operaciones como importación de datos, actualización de datos y estadísticas, entre otras. En webman, esto es algo muy fácil de hacer, por ejemplo:
 
-**Crear `scripts/update.php`** (create the directory if it doesn't exist)
+**Crear `scripts/update.php`** (si el directorio no existe, créelo manualmente)
 ```php
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';

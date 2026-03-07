@@ -28,6 +28,7 @@ Lorsque vous accédez à `http://127.0.0.1:8787/app/foo/foo`, la page renvoie `h
 
 Lorsque vous accédez à `http://127.0.0.1:8787/app/foo/foo/hello`, la page renvoie `hello webman`.
 
+
 ## Accès par URL
-Les chemins d'accès des URL des plugins d'application commencent toujours par `/app`, suivis de l'identifiant du plugin, puis du contrôleur et de la méthode spécifique.
+Les chemins d'adresse URL des plugins d'application commencent tous par `/app`, suivis de l'identifiant du plugin, puis du contrôleur et de la méthode concernés.
 Par exemple, l'adresse URL de `plugin\foo\app\controller\UserController` est `http://127.0.0.1:8787/app/foo/user`.

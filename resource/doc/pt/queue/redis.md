@@ -1,33 +1,31 @@
-## Fila Redis
+# Fila Redis
 
-Uma fila de mensagens baseada em Redis que suporta o processamento de mensagens com atraso.
+Fila de mensagens baseada em Redis que suporta processamento de mensagens com atraso.
 
 ## Instalação
 `composer require webman/redis-queue`
 
-## Arquivo de Configuração
-O arquivo de configuração do Redis é gerado automaticamente em `config/plugin/webman/redis-queue/redis.php`, com conteúdo semelhante ao seguinte:
+## Arquivo de configuração
+O arquivo de configuração Redis é gerado automaticamente em `{projeto-principal}/config/plugin/webman/redis-queue/redis.php`, com conteúdo similar ao seguinte:
 ```php
 <?php
 return [
     'default' => [
         'host' => 'redis://127.0.0.1:6379',
         'options' => [
-            'auth' => '',         // Senha, parâmetro opcional
+            'auth' => '',         // Senha, opcional
             'db' => 0,            // Banco de dados
-            'max_attempts' => 5,  // Número de tentativas após falha no consumo
-            'retry_seconds' => 5, // Intervalo de tentativa, em segundos
+            'max_attempts'  => 5, // Número de tentativas após falha no consumo
+            'retry_seconds' => 5, // Intervalo de tentativa em segundos
         ]
     ],
 ];
 ```
 
-### Tentativas de Consumo Após Falha
-Se houver uma falha no consumo (por exemplo, uma exceção), a mensagem será colocada em uma fila de atraso e aguardará uma nova tentativa. O número de tentativas é controlado pelo parâmetro `max_attempts`, e o intervalo de tentativas é determinado por `retry_seconds` e `max_attempts`. Por exemplo, se `max_attempts` for 5 e `retry_seconds` for 10, o intervalo para a primeira tentativa será de `1 * 10` segundos, para a segunda tentativa será de `2 * 10` segundos, e assim por diante até a quinta tentativa. Se o número de tentativas exceder o valor definido em `max_attempts`, a mensagem será colocada na fila de falhas com a chave `{redis-queue}-failed`.
+### Nova tentativa após falha no consumo
+Se o consumo falhar (ocorrer exceção), a mensagem será colocada na fila de atraso e aguardará a próxima tentativa. O número de tentativas é controlado por `max_attempts`; o intervalo, por `retry_seconds` e `max_attempts`. Ex.: se `max_attempts` for 5 e `retry_seconds` for 10, o intervalo da 1.ª tentativa é `1*10` s, da 2.ª `2*10` s, da 3.ª `3*10` s, até 5 tentativas. Se o número de tentativas exceder o definido em `max_attempts`, a mensagem vai para a fila de falhas com chave `{redis-queue}-failed`.
 
-## Envio de Mensagem (Síncrono)
-> **Observação**
-> É necessário ter a versão `webman/redis` >= 1.2.0, que depende da extensão redis.
+## Envio de mensagem (síncrono)
 
 ```php
 <?php
@@ -42,24 +40,24 @@ class Index
     {
         // Nome da fila
         $queue = 'send-mail';
-        // Dados, podem ser enviados diretamente como um array, sem a necessidade de serialização
-        $data = ['para' => 'tom@gmail.com', 'conteúdo' => 'olá'];
-        // Envio da mensagem
+        // Dados, podem ser passados como array diretamente, sem serialização
+        $data = ['to' => 'tom@gmail.com', 'content' => 'hello'];
+        // Enviar mensagem
         Redis::send($queue, $data);
-        // Envio de mensagem atrasada, que será processada em 60 segundos
+        // Enviar mensagem atrasada, processada após 60 segundos
         Redis::send($queue, $data, 60);
 
-        return response('Teste de fila Redis');
+        return response('redis queue test');
     }
 
 }
 ```
-Se o envio for bem-sucedido, `Redis::send()` irá retornar true, caso contrário, retornará false ou lançará uma exceção.
+Em sucesso, `Redis::send()` retorna true; caso contrário false ou exceção.
 
 > **Dica**
-> Pode haver uma discrepância no tempo de consumo da fila atrasada, por exemplo, se a velocidade de consumo for menor que a velocidade de produção, a fila pode ficar congestionada, resultando em atrasos no consumo. Uma maneira de aliviar isso é abrir mais processos de consumo.
+> Pode haver desvio no horário de consumo da fila atrasada. Ex.: quando a velocidade de consumo é menor que a de produção, a fila pode acumular e atrasar. Mitigação: rodar mais processos consumidores.
 
-## Envio de Mensagem (Assíncrono)
+## Envio de mensagem (assíncrono)
 ```php
 <?php
 namespace app\controller;
@@ -73,29 +71,28 @@ class Index
     {
         // Nome da fila
         $queue = 'send-mail';
-        // Dados, podem ser enviados diretamente como um array, sem a necessidade de serialização
-        $data = ['para' => 'tom@gmail.com', 'conteúdo' => 'olá'];
-        // Envio da mensagem
+        // Dados, podem ser passados como array diretamente, sem serialização
+        $data = ['to' => 'tom@gmail.com', 'content' => 'hello'];
+        // Enviar mensagem
         Client::send($queue, $data);
-        // Envio de mensagem atrasada, que será processada em 60 segundos
+        // Enviar mensagem atrasada, processada após 60 segundos
         Client::send($queue, $data, 60);
 
-        return response('Teste de fila Redis');
+        return response('redis queue test');
     }
 
 }
 ```
-
-`Client::send()` não retorna nenhum valor, pois se trata de um envio assíncrono, o qual não garante a entrega de 100% das mensagens no Redis.
-
-> **Dica**
-> O princípio do `Client::send()` é estabelecer uma fila de memória local e, de forma assíncrona, enviar as mensagens para o Redis (a sincronização é muito rápida, aproximadamente 10 mil mensagens por segundo). Se o processo for reiniciado e a fila de memória local ainda não tiver sido sincronizada, isso pode resultar em perda de mensagens. O `Client::send()` é mais adequado para o envio de mensagens não críticas.
+`Client::send()` não retorna valor. É um envio assíncrono e não garante 100% de entrega ao Redis.
 
 > **Dica**
-> O `Client::send()` é assíncrono e só pode ser usado no ambiente de execução do workerman, para scripts de linha de comando, use a interface síncrona `Redis::send()`
+> O princípio de `Client::send()` é criar uma fila em memória local e sincronizar mensagens de forma assíncrona com Redis (sincronização é rápida, ~10.000 mensagens/s). Se o processo reiniciar antes dos dados da fila em memória estarem totalmente sincronizados, mensagens podem ser perdidas. O envio assíncrono com `Client::send()` é adequado para mensagens não críticas.
 
-## Envio de Mensagem a partir de Outro Projeto
-Às vezes, é necessário enviar mensagens de outra aplicação e não é possível usar o `webman\redis-queue`. Nesse caso, é possível usar a seguinte função para enviar mensagens para a fila:
+> **Dica**
+> `Client::send()` é assíncrono e só pode ser usado no ambiente de execução Workerman. Para scripts em linha de comando use a interface síncrona `Redis::send()`.
+
+## Enviar mensagens de outros projetos
+Às vezes é preciso enviar mensagens de outros projetos e não se pode usar `webman\redis-queue`. Nesses casos, pode usar a função abaixo para enviar mensagens à fila.
 
 ```php
 function redis_queue_send($redis, $queue, $data, $delay = 0) {
@@ -117,23 +114,23 @@ function redis_queue_send($redis, $queue, $data, $delay = 0) {
 }
 ```
 
-O parâmetro `$redis` é uma instância do Redis. Por exemplo, o uso da extensão Redis seria semelhante ao exemplo a seguir:
+Aqui o parâmetro `$redis` é a instância Redis. Ex.: o uso da extensão redis é similar a:
+
 ```php
 $redis = new Redis;
 $redis->connect('127.0.0.1', 6379);
 $queue = 'user-1';
-$data = ['alguns', 'dados'];
+$data= ['some', 'data'];
 redis_queue_send($redis, $queue, $data);
-````
+```
 
 ## Consumo
-O arquivo de configuração do processo de consumo está em `config/plugin/webman/redis-queue/process.php`.
-Os consumidores estão localizados no diretório `app/queue/redis/`.
+O arquivo de configuração do processo consumidor está em `{projeto-principal}/config/plugin/webman/redis-queue/process.php`. O diretório dos consumidores está em `{projeto-principal}/app/queue/redis/`.
 
-Ao executar o comando `php webman redis-queue:consumer my-send-mail`, será gerado o arquivo `app/queue/redis/MyMailSend.php`.
+O comando `php webman redis-queue:consumer my-send-mail` gera o arquivo `{projeto-principal}/app/queue/redis/MyMailSend.php`.
 
 > **Dica**
-> Se o comando não existir, você também pode criar manualmente.
+> Este comando requer a instalação do plugin [Console](../plugin/console.md). Se não quiser instalar, pode criar manualmente um arquivo similar ao seguinte:
 
 ```php
 <?php
@@ -144,60 +141,84 @@ use Webman\RedisQueue\Consumer;
 
 class MyMailSend implements Consumer
 {
-    // Nome da fila a ser consumida
+    // Nome da fila a consumir
     public $queue = 'send-mail';
 
-    // Nome da conexão, correspondente à conexão em `plugin/webman/redis-queue/redis.php`
+    // Nome da conexão, corresponde à conexão em plugin/webman/redis-queue/redis.php
     public $connection = 'default';
 
     // Consumo
     public function consume($data)
     {
-        // Não é necessário desserializar
-        var_export($data); // Saída ['para' => 'tom@gmail.com', 'conteúdo' => 'olá']
+        // Não precisa deserializar
+        var_export($data); // Saída ['to' => 'tom@gmail.com', 'content' => 'hello']
+    }
+    // Callback de falha no consumo
+    /* 
+    $package = [
+        'id' => 1357277951, // ID da mensagem
+        'time' => 1709170510, // Tempo da mensagem
+        'delay' => 0, // Tempo de atraso
+        'attempts' => 2, // Número de consumos
+        'queue' => 'send-mail', // Nome da fila
+        'data' => ['to' => 'tom@gmail.com', 'content' => 'hello'], // Conteúdo da mensagem
+        'max_attempts' => 5, // Número máximo de tentativas
+        'error' => 'Mensagem de erro' // Mensagem de erro
+    ]
+    */
+    public function onConsumeFailure(\Throwable $e, $package)
+    {
+        echo "consume failure\n";
+        echo $e->getMessage() . "\n";
+        // Não precisa deserializar
+        var_export($package); 
     }
 }
 ```
 
-> **Observação**
-> Durante o processo de consumo, se nenhuma exceção ou erro for lançado, considera-se que o consumo foi bem-sucedido. Caso contrário, será considerado como falha no consumo e a mensagem será encaminhada para a fila de tentativas.
+> **Nota**
+> O consumo é considerado bem-sucedido quando nenhuma exceção ou Error é lançada durante o consumo; caso contrário é falha e a mensagem entra na fila de nova tentativa. O redis-queue não tem mecanismo ack; pode ser visto como ack automático (quando não há exceção ou Error). Para marcar a mensagem atual como não consumida com sucesso, lance uma exceção manualmente para enviar à fila de nova tentativa. Na prática equivale a um mecanismo ack.
 
 > **Dica**
-> A fila de mensagens suporta múltiplos servidores e processos, e a mesma mensagem **não** será consumida mais de uma vez. As mensagens consumidas são automaticamente removidas da fila, não sendo necessário fazer isso manualmente.
+> Os consumidores suportam múltiplos servidores e processos, e a mesma mensagem **não** será consumida duas vezes. As mensagens consumidas são removidas automaticamente da fila; não é necessário remover manualmente.
 
 > **Dica**
-> Os processos de consumo podem consumir várias filas diferentes e a adição de uma nova fila não requer a modificação da configuração no arquivo `process.php`. Basta adicionar uma classe de `Consumer` correspondente no diretório `app/queue/redis` e definir a propriedade da classe `$queue` para a fila desejada.
+> Os processos consumidores podem consumir várias filas diferentes ao mesmo tempo. Adicionar uma nova fila não exige alterar a configuração em `process.php`. Para adicionar consumidor de fila nova, basta adicionar a classe `Consumer` correspondente em `app/queue/redis` e usar a propriedade `$queue` para especificar o nome da fila a consumir.
 
 > **Dica**
-> Os usuários do Windows precisam executar `php windows.php` para iniciar o webman; caso contrário, os processos de consumo não serão iniciados.
-## Definir processos de consumo diferentes para filas diferentes
-Por padrão, todos os consumidores compartilham o mesmo processo de consumo. No entanto, às vezes precisamos separar o consumo de algumas filas, por exemplo, colocar negócios com consumo lento em um grupo de processos e consumir negócios rápidos em outro grupo. Para isso, podemos dividir os consumidores em dois diretórios, por exemplo `app_path() . '/queue/redis/fast'` e `app_path() . '/queue/redis/slow'` (observe que o namespace da classe do consumidor precisa ser alterado adequadamente). Então a configuração seria a seguinte:
+> Usuários Windows precisam executar `php windows.php` para iniciar o webman; caso contrário o processo consumidor não será iniciado.
+
+> **Dica**
+> O callback onConsumeFailure é acionado a cada falha no consumo. Aqui você pode tratar a lógica pós-falha. (Esta função requer `webman/redis-queue>=1.3.2` e `workerman/redis-queue>=1.2.1`)
+
+## Definir processos consumidores diferentes para filas diferentes
+Por padrão todos os consumidores compartilham o mesmo processo. Às vezes quer-se separar o consumo de algumas filas—ex.: negócios de consumo lento em um grupo de processos, consumo rápido em outro. Para isso, os consumidores podem ser divididos em dois diretórios, ex.: `app_path() . '/queue/redis/fast'` e `app_path() . '/queue/redis/slow'` (o namespace da classe consumidora deve ser atualizado). A configuração fica:
 ```php
 return [
-    ... Outras configurações aqui ...
+    ...outras configurações omitidas...
     
-    'redis_consumer_fast'  => [
+    'redis_consumer_fast'  => [ // A chave é personalizada, sem restrição de formato, aqui redis_consumer_fast
         'handler'     => Webman\RedisQueue\Process\Consumer::class,
         'count'       => 8,
         'constructor' => [
-            // Diretório da classe consumidora
+            // Diretório das classes consumidoras
             'consumer_dir' => app_path() . '/queue/redis/fast'
         ]
     ],
-    'redis_consumer_slow'  => [
+    'redis_consumer_slow'  => [  // A chave é personalizada, sem restrição de formato, aqui redis_consumer_slow
         'handler'     => Webman\RedisQueue\Process\Consumer::class,
         'count'       => 8,
         'constructor' => [
-            // Diretório da classe consumidora
+            // Diretório das classes consumidoras
             'consumer_dir' => app_path() . '/queue/redis/slow'
         ]
     ]
 ];
 ```
 
-Com a classificação de diretórios e a configuração correspondente, podemos facilmente configurar processos de consumo diferentes para diferentes consumidores.
+Assim, consumidores de negócios rápidos ficam em `queue/redis/fast` e os lentos em `queue/redis/slow`, atingindo o objetivo de atribuir processos consumidores às filas.
 
-## Multiple Redis Configuration
+## Configuração múltipla de Redis
 #### Configuração
 `config/plugin/webman/redis-queue/redis.php`
 ```php
@@ -206,42 +227,43 @@ return [
     'default' => [
         'host' => 'redis://192.168.0.1:6379',
         'options' => [
-            'auth' => null,       // Senha, tipo de string, parâmetro opcional
+            'auth' => null,       // Senha, tipo string, opcional
             'db' => 0,            // Banco de dados
-            'max_attempts'  => 5, // Número de tentativas após falha de consumo
-            'retry_seconds' => 5, // Intervalo de tentativa, em segundos
+            'max_attempts'  => 5, // Tentativas após falha no consumo
+            'retry_seconds' => 5, // Intervalo de tentativa em segundos
         ]
     ],
     'other' => [
         'host' => 'redis://192.168.0.2:6379',
         'options' => [
-            'auth' => null,       // Senha, tipo de string, parâmetro opcional
-            'db' => 0,             // Banco de dados
-            'max_attempts'  => 5, // Número de tentativas após falha de consumo
-            'retry_seconds' => 5, // Intervalo de tentativa, em segundos
+            'auth' => null,       // Senha, tipo string, opcional
+            'db' => 0,            // Banco de dados
+            'max_attempts'  => 5, // Tentativas após falha no consumo
+            'retry_seconds' => 5, // Intervalo de tentativa em segundos
         ]
     ],
 ];
 ```
 
-Observe que foi adicionada uma configuração 'other' como chave para a configuração do Redis.
+A configuração inclui uma configuração Redis adicional com chave `other`.
 
-#### Envio de Mensagens para Múltiplos Redis
+#### Enviar mensagens para Redis múltiplos
+
 ```php
-// Enviar mensagem para a fila com a chave 'default'
+// Enviar mensagem para a fila com chave `default`
 Client::connection('default')->send($queue, $data);
 Redis::connection('default')->send($queue, $data);
-// Equivalente a
+// O mesmo que
 Client::send($queue, $data);
 Redis::send($queue, $data);
 
-// Enviar mensagem para a fila com a chave 'other'
+// Enviar mensagem para a fila com chave `other`
 Client::connection('other')->send($queue, $data);
 Redis::connection('other')->send($queue, $data);
 ```
 
-#### Consumo de Múltiplos Redis
-Configurar o consumo na fila com a chave 'other'
+#### Consumir de Redis múltiplos
+Consumir mensagens da fila com chave `other` na configuração:
 ```php
 namespace app\queue\redis;
 
@@ -249,25 +271,25 @@ use Webman\RedisQueue\Consumer;
 
 class SendMail implements Consumer
 {
-    // Nome da fila a ser consumida
+    // Nome da fila a consumir
     public $queue = 'send-mail';
 
-    // === Definir como 'other', para consumir a fila onde a chave é 'other' ===
+    // === Definir 'other' aqui para consumir da fila com chave 'other' na configuração ===
     public $connection = 'other';
 
-    // Consumir
+    // Consumo
     public function consume($data)
     {
-        // Sem necessidade de desserialização
+        // Não precisa deserializar
         var_export($data);
     }
 }
 ```
 
-## Perguntas Frequentes
+## FAQ
 
-**Por que ocorre o erro `Workerman\Redis\Exception: Workerman Redis Wait Timeout (600 seconds)`**
+**Por que ocorre o erro `Workerman\Redis\Exception: Workerman Redis Wait Timeout (600 seconds)`?**
 
-Esse erro ocorre apenas na interface de envio assíncrono `Client::send()`. O envio assíncrono inicialmente armazena a mensagem na memória local e, quando o processo está ocioso, envia a mensagem para o Redis. Se a velocidade de recebimento do Redis for mais lenta do que a velocidade de produção das mensagens, ou se o processo estiver ocupado com outras atividades e não tiver tempo suficiente para sincronizar as mensagens na memória com o Redis, isso pode causar congestionamento de mensagens. Se o congestionamento de mensagens persistir por mais de 600 segundos, esse erro será acionado.
+Este erro ocorre apenas com a interface de envio assíncrono `Client::send()`. O envio assíncrono salva primeiro as mensagens na memória local e depois as envia ao Redis quando o processo está ocioso. Se o Redis recebe mensagens mais devagar do que são produzidas, ou o processo está ocupado com outras tarefas e não tem tempo para sincronizar as mensagens da memória ao Redis, pode haver acúmulo. Se as mensagens ficarem acumuladas por mais de 600 segundos, este erro é acionado.
 
-Solução: Use a interface de envio síncrono `Redis::send()` para enviar mensagens.
+Solução: use a interface de envio síncrono `Redis::send()` para envio de mensagens.

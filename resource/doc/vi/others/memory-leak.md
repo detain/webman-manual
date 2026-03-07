@@ -1,33 +1,47 @@
 # Về rò rỉ bộ nhớ
-webman là một framework mãi mãi trong bộ nhớ, vì vậy chúng ta cần chú ý đến tình trạng rò rỉ bộ nhớ. Tuy nhiên, các nhà phát triển không cần quá lo lắng, vì rò rỉ bộ nhớ xảy ra trong điều kiện cực kỳ cận thận và dễ dàng tránh được. Việc phát triển webman tương tự như phát triển framework truyền thống, không cần thêm các hoạt động quản lý bộ nhớ không cần thiết.
+Webman là framework thường trú trong bộ nhớ, vì vậy chúng ta cần chú ý một chút đến tình trạng rò rỉ bộ nhớ. Tuy nhiên, nhà phát triển không cần quá lo lắng vì rò rỉ bộ nhớ chỉ xảy ra trong điều kiện cực kỳ hiếm và dễ tránh. Trải nghiệm phát triển với webman về cơ bản giống framework truyền thống; không cần thao tác quản lý bộ nhớ thừa.
 
 > **Gợi ý**
-> Quá trình theo dõi mặc định của webman sẽ giám sát sử dụng bộ nhớ của tất cả các quá trình. Nếu sử dụng bộ nhớ của quá trình sắp đạt đến giá trị `memory_limit` được thiết lập trong php.ini, quá trình tương ứng sẽ tự động khởi động lại một cách an toàn để giải phóng bộ nhớ, trong quá trình này không ảnh hưởng đến doanh nghiệp.
+> Tiến trình monitor tích hợp sẵn của webman giám sát mức sử dụng bộ nhớ của tất cả tiến trình. Khi mức sử dụng bộ nhớ của một tiến trình sắp đạt giá trị cài đặt `memory_limit` trong php.ini, tiến trình tương ứng sẽ được tự động khởi động lại an toàn để giải phóng bộ nhớ, không ảnh hưởng đến ứng dụng.
 
 ## Định nghĩa rò rỉ bộ nhớ
-Với việc tăng các yêu cầu, bộ nhớ được sử dụng bởi webman cũng **tăng không giới hạn** (chú ý là **tăng không giới hạn**), đạt hàng trăm megabyte hoặc hơn, đây được coi là rò rỉ bộ nhớ. Nếu bộ nhớ tăng lên và không tăng lên sau đó không phải là rò rỉ bộ nhớ.
+Mức sử dụng bộ nhớ của webman tăng theo số yêu cầu là hiện tượng bình thường. Thông thường, khi một tiến trình đạt đến một khối lượng yêu cầu nhất định (thường ở mức hàng triệu), bộ nhớ sẽ ngừng tăng hoặc thi thoảng tăng nhẹ.
 
-Bình thường, việc quá trình sử dụng vài chục megabyte bộ nhớ là tình trạng bình thường, khi quá trình xử lý yêu cầu cực lớn hoặc duy trì kết nối hàng loạt, sự sử dụng bộ nhớ của một quá trình có thể lên đến hàng trăm megabyte là chuyện thường. Một phần bộ nhớ sau khi sử dụng không nhất thiết phải trả lại toàn bộ cho hệ điều hành. Thay vào đó, một phần nhỏ có thể được giữ lại để tái sử dụng, vì vậy có thể xảy ra trường hợp sau khi xử lý một yêu cầu lớn, sử dụng bộ nhớ tăng lên nhưng không giải phóng bộ nhớ, đây là hiện tượng bình thường. (Gọi gc_mem_caches() sẽ giải phóng một số bộ nhớ trống)
+Đối với hầu hết ứng dụng, mức sử dụng bộ nhớ của mỗi tiến trình cuối cùng sẽ ổn định quanh mức 10M–100M. Không cần lo lắng nếu bộ nhớ mỗi tiến trình không vượt quá 100M.
 
-## Làm thế nào để rò rỉ bộ nhớ xảy ra
-**Rò rỉ bộ nhớ xảy ra khi phải đáp ứng đồng thời hai điều kiện sau đây:**
-1. Tồn tại một mảng **với chu kỳ sống lâu** (chú ý là mảng với chu kỳ sống lâu, mảng thông thường không sao)
-2. Và mảng **với chu kỳ sống lâu** này sẽ tăng không giới hạn (doanh nghiệp không ngừng chèn dữ liệu vào, không bao giờ dọn dẹp dữ liệu)
+Ngoài ra, khi xử lý tệp lớn, yêu cầu lớn hoặc đọc lượng lớn dữ liệu từ cơ sở dữ liệu, PHP sẽ cấp phát nhiều bộ nhớ. PHP có thể giữ lại một phần bộ nhớ này để tái sử dụng thay vì trả lại toàn bộ cho hệ điều hành, khiến mức sử dụng bộ nhớ cao. Vì bộ nhớ được tái sử dụng nên không cần lo lắng.
 
-Nếu đáp ứng đồng thời các điều kiện 1 2 trên (chú ý là đồng thời), thì sẽ xảy ra rò rỉ bộ nhớ. Ngược lại, không đáp ứng một trong các điều kiện trên hoặc chỉ đáp ứng một điều kiện thì không phải rò rỉ bộ nhớ.
+> **Gợi ý**
+> Đối với dự án đóng gói phar hoặc nhị phân, nếu kích thước gói lớn thì việc mức sử dụng bộ nhớ vượt 100M là bình thường.
 
-## Mảng với chu kỳ sống lâu
-Các mảng với chu kỳ sống lâu trong webman bao gồm:
-1. Mảng với từ khóa static
-2. Thuộc tính mảng đơn lẻ của đối tượng duy nhất
-3. Mảng với từ khóa global
+## Cách xác nhận rò rỉ bộ nhớ
+Nếu một tiến trình đã xử lý hơn một triệu yêu cầu, mức sử dụng bộ nhớ vượt 100M và bộ nhớ vẫn tăng sau mỗi yêu cầu thì có thể đang xảy ra rò rỉ bộ nhớ.
 
-> **Chú ý**
-> Trong webman, việc sử dụng dữ liệu với chu kỳ sống lâu được phép, nhưng phải đảm bảo rằng dữ liệu trong mảng có hạn chế, số lượng phần tử không tăng không giới hạn.
+## Cách xác định vị trí rò rỉ bộ nhớ
+Cách đơn giản là thực hiện kiểm tra tải trên từng API và xác định API nào tiếp tục tăng mức sử dụng bộ nhớ sau hàng triệu yêu cầu.
 
-Dưới đây là các ví dụ cụ thể
+Sau khi tìm được API có vấn đề, dùng phương pháp tìm kiếm nhị phân: mỗi lần chú thích bỏ nửa mã nghiệp vụ cho đến khi xác định được đoạn mã gây ra sự cố.
 
-#### Mảng static tăng không giới hạn
+## Rò rỉ bộ nhớ xảy ra như thế nào
+**Rò rỉ bộ nhớ chỉ xảy ra khi đáp ứng đầy đủ cả hai điều kiện sau:**
+1. Tồn tại mảng có **chu kỳ sống dài** (mảng thông thường không phải vấn đề)
+2. Và mảng có **chu kỳ sống dài** này phình to vô hạn (ứng dụng liên tục chèn dữ liệu vào và không bao giờ dọn dẹp)
+
+Chỉ khi **cả hai** điều kiện đều thỏa mãn thì mới xảy ra rò rỉ. Nếu thiếu một điều kiện hoặc chỉ thỏa mãn một điều kiện thì không phải rò rỉ.
+
+## Mảng có chu kỳ sống dài
+
+Trong webman, mảng có chu kỳ sống dài gồm:
+1. Mảng dùng từ khóa `static`
+2. Thuộc tính mảng của singleton
+3. Mảng dùng từ khóa `global`
+
+> **Lưu ý**
+> Webman cho phép dùng dữ liệu có chu kỳ sống dài, nhưng cần đảm bảo dữ liệu có giới hạn và số phần tử không phình to vô hạn.
+
+Sau đây là ví dụ cho từng trường hợp.
+
+### Mảng static phình to vô hạn
 ```php
 class Foo
 {
@@ -35,14 +49,14 @@ class Foo
     public function index(Request $request)
     {
         self::$data[] = time();
-        return response('xin chào');
+        return response('hello');
     }
 }
 ```
 
-Dùng từ khóa `static` để định nghĩa mảng `$data` là một mảng với chu kỳ sống lâu, và mảng `$data` trong ví dụ này ngày càng tăng theo yêu cầu mà không ngừng, dẫn đến rò rỉ bộ nhớ.
+Mảng `$data` định nghĩa bằng từ khóa `static` có chu kỳ sống dài. Trong ví dụ, `$data` tiếp tục phình to theo mỗi yêu cầu, gây rò rỉ bộ nhớ.
 
-#### Mảng thuộc tính đơn lẻ tăng không giới hạn
+### Thuộc tính mảng singleton phình to vô hạn
 ```php
 class Cache
 {
@@ -64,24 +78,24 @@ class Cache
 }
 ```
 
-Đoạn mã gọi
+Mã gọi
 ```php
 class Foo
 {
     public function index(Request $request)
     {
         Cache::instance()->set(time(), time());
-        return response('xin chào');
+        return response('hello');
     }
 }
 ```
 
-`Cache::instance()` trả về một đối tượng Cache duy nhất, nó là một thể hiện với chu kỳ sống lâu, mặc dù thuộc tính `$data` của nó không dùng từ khóa `static`, nhưng do lớp chính nó có chu kỳ sống lâu, nên `$data` cũng là một mảng với chu kỳ sống lâu. Khi có thêm dữ liệu khác nhau vào mảng `$data`, bộ nhớ của chương trình cũng tăng lên từng ngày, gây ra rò rỉ bộ nhớ.
+`Cache::instance()` trả về singleton Cache có chu kỳ sống dài. Dù thuộc tính `$data` không dùng từ khóa `static`, do bản thân lớp có chu kỳ sống dài nên `$data` cũng là mảng có chu kỳ sống dài. Khi liên tục thêm dữ liệu với các khóa khác nhau vào `$data`, mức sử dụng bộ nhớ của chương trình tăng lên và xảy ra rò rỉ.
 
-> **Chú ý**
-> Nếu các key được thêm vào bằng `Cache::instance()->set(key, value)` chỉ là số lượng hạn chế, thì không có rò rỉ bộ nhớ, vì mảng `$data` không phát triển không giới hạn.
+> **Lưu ý**
+> Nếu số khóa thêm qua `Cache::instance()->set(key, value)` có hạn thì không xảy ra rò rỉ vì mảng `$data` không phình to vô hạn.
 
-#### Mảng global tăng không giới hạn
+### Mảng global phình to vô hạn
 ```php
 class Index
 {
@@ -93,7 +107,7 @@ class Index
     }
 }
 ```
-Mảng được định nghĩa bằng từ khóa global sẽ không được thu hồi sau khi hàm hoặc phương thức lớp thực thi xong, do đó nó là một mảng với chu kỳ sống lâu, đoạn mã trên với sự tăng không ngừng của yêu cầu sẽ dẫn đến rò rỉ bộ nhớ. Tương tự, mảng được định nghĩa bằng từ khóa static bên trong hàm hoặc phương thức lớp cũng là một mảng với chu kỳ sống lâu, nếu mảng tăng giới hạn không ngừng cũng sẽ gây rò rỉ bộ nhớ, ví dụ:
+Mảng định nghĩa bằng từ khóa `global` không được thu hồi sau khi hàm hoặc phương thức kết thúc, nên có chu kỳ sống dài. Đoạn mã trên sẽ gây rò rỉ khi số yêu cầu tăng dần. Tương tự, mảng định nghĩa bằng từ khóa `static` bên trong hàm hoặc phương thức cũng có chu kỳ sống dài; nếu mảng phình to vô hạn thì cũng gây rò rỉ, ví dụ:
 ```php
 class Index
 {
@@ -106,9 +120,9 @@ class Index
 }
 ```
 
-## Lời khuyên
-Chúng tôi đề xuất cho các nhà phát triển không cần phải quá quan tâm đến rò rỉ bộ nhớ, vì nó xảy ra rất ít, nếu rủi ro xảy ra, chúng ta có thể tìm ra điểm code nào gây rò rỉ thông qua các bài kiểm tra tải, từ đó xác định được vấn đề. Ngay cả khi nhà phát triển không tìm ra điểm rò rỉ, dịch vụ theo dõi tích hợp sẵn của webman sẽ khởi động lại quá trình gây rò rỉ bộ nhớ an toàn thích hợp, giải phóng bộ nhớ.
+## Khuyến nghị
+Nên không tập trung quá mức vào rò rỉ bộ nhớ vì chúng rất hiếm. Khi xảy ra, có thể dùng kiểm tra tải để tìm đoạn mã gây rò rỉ. Dù nhà phát triển không tìm được vị trí rò rỉ, dịch vụ monitor tích hợp của webman vẫn sẽ khởi động lại tiến trình bị ảnh hưởng đúng lúc để giải phóng bộ nhớ.
 
-Nếu bạn muốn cố gắng hạn chế rò rỉ bộ nhớ càng nhiều càng tốt, bạn có thể tham khảo các lời khuyên sau đây.
-1. Tránh sử dụng từ khóa `global`, `static` để định nghĩa mảng, nếu phải sử dụng, đảm bảo rằng chúng sẽ không phát triển không giới hạn
-2. Đối với các lớp không quen, hãy tránh sử dụng đối tượng duy nhất, sử dụng từ khóa new để khởi tạo. Nếu phải sử dụng đối tượng duy nhất, hãy xem xét xem chúng có tính chất phát triển không giới hạn của mảng không
+Nếu muốn hạn chế tối đa rò rỉ bộ nhớ, có thể tham khảo các khuyến nghị sau:
+1. Cố gắng không dùng mảng với từ khóa `global` hoặc `static`; nếu dùng thì đảm bảo chúng không phình to vô hạn.
+2. Với lớp không quen thuộc, ưu tiên khởi tạo bằng từ khóa `new` thay vì singleton. Khi dùng singleton thì kiểm tra xem nó có thuộc tính mảng có thể phình to vô hạn không.

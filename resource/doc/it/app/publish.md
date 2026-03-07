@@ -1,15 +1,15 @@
 # Pubblicazione
 
-Gli sviluppatori possono caricare i propri plugin con diritti d'autore sul mercato delle applicazioni, aiutando gli altri e ottenendo benefici.  
-Indirizzo di pubblicazione: https://www.workerman.net/app/create  
+Gli sviluppatori possono caricare i propri plugin con diritti d'autore sul mercato delle applicazioni, aiutando gli altri e beneficiandone al contempo.
+Indirizzo di pubblicazione: https://www.workerman.net/app/create
 
-Nota: Il **numero di versione** inserito durante la pubblicazione deve corrispondere al numero di versione in `plugin/{plugin}/config/app.php`.
+Nota: Il **numero di versione** indicato in fase di pubblicazione deve corrispondere a quello in `plugin/{plugin}/config/app.php`.
 
-## Restrizioni sulla messa in vendita
-**Non sono supportati i seguenti tipi di applicazioni per la messa in vendita**  
+## Restrizioni di pubblicazione
+**Le seguenti tipologie di applicazioni non sono supportate per la pubblicazione:**
 
-**Tipo finanziario** incluse ma non limitate a pagamenti aggregati, cashback, prestiti, aste, criptovalute, blockchain  
-**Tipo gioco di carte** incluse ma non limitate a lotterie, aste, poker cinese, carte prepagate  
-**Tipo raccolta** incluse ma non limitate a romanzi, fumetti, film, condivisione di risorse  
-**Applicazioni estere** incluse ma non limitate a server cloud, VPN   
-**Tipo chat, tipo assistenza clienti** attualmente non supportato per la messa in vendita
+**Finanziaria** Inclusi, tra gli altri: pagamenti aggregati, rimborsi, prestiti, aste, criptovalute, blockchain  
+**Giochi di società e carte** Inclusi, tra gli altri: lotterie, caccia al tesoro, NiuNiu, carte prepagate, ecc.  
+**Raccolta di dati** Inclusi, tra gli altri: romanzi, fumetti, film, serie TV, condivisione di risorse, ecc.  
+**Applicazioni estere** Inclusi, tra gli altri: hosting cloud, VPN, ecc.  
+**Chat e assistenza clienti** Attualmente non supportate per la pubblicazione.

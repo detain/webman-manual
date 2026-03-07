@@ -1,39 +1,76 @@
-## ThinkCache
+# think-cache
 
-### Instalação do ThinkCache  
+think-cache é um componente extraído do framework thinkphp, com suporte a pool de conexões adicionado. Suporta automaticamente ambientes de corotina e não-corotina.
+
+## Instalação
 `composer require -W webman/think-cache`
 
-Após a instalação, é necessário reiniciar (reload não é válido)
+É necessário reiniciar (restart) após a instalação (reload não tem efeito)
 
-> [webman/think-cache](https://www.workerman.net/plugin/15) é na verdade um plugin de instalação automática do `toptink/think-cache`.
+### Ficheiro de configuração
 
-> **Nota**
-> toptink/think-cache não suporta o PHP 8.1
+O ficheiro de configuração é `config/think-cache.php`
 
-### Arquivo de Configuração
+## Utilização
 
-O arquivo de configuração está localizado em `config/thinkcache.php`
-
-### Uso
-
+  ```php
+  <?php
+  namespace app\controller;
+    
+  use support\Request;
+  use support\think\Cache;
+  
+  class UserController
+  {
+      public function db(Request $request)
+      {
+          $key = 'test_key';
+          Cache::set($key, rand());
+          return response(Cache::get($key));
+      }
+  }
+  ```
+## API fornecida
 ```php
-<?php
-namespace app\controller;
-  
-use support\Request;
-use think\facade\Cache;
+// Definir cache
+Cache::set('val','value',600);
+// Verificar se o cache existe
+Cache::has('val');
+// Obter cache
+Cache::get('val');
+// Eliminar cache
+Cache::delete('val');
+// Limpar cache
+Cache::clear();
+// Ler e eliminar cache
+Cache::pull('val');
+// Escrever se não existir
+Cache::remember('val',10);
 
-class UserController
-{
-    public function db(Request $request)
-    {
-        $key = 'test_key';
-        Cache::set($key, rand());
-        return response(Cache::get($key));
-    }
-}
+// Para dados de cache numéricos
+// Incrementar cache em 1
+Cache::inc('val');
+// Incrementar cache em 5
+Cache::inc('val',5);
+// Decrementar cache em 1
+Cache::dec('val');
+// Decrementar cache em 5
+Cache::dec('val',5);
+
+// Usar etiquetas de cache
+Cache::tag('tag_name')->set('val','value',600);
+// Eliminar cache sob uma etiqueta
+Cache::tag('tag_name')->clear();
+// Suporta múltiplas etiquetas
+Cache::tag(['tag1','tag2'])->set('val2','value',600);
+// Eliminar cache sob múltiplas etiquetas
+Cache::tag(['tag1','tag2'])->clear();
+
+// Usar diferentes armazenamentos de cache
+$redis = Cache::store('redis');
+
+$redis->set('var','value',600);
+$redis->get('var');
 ```
-  
-### Documentação de Uso do Think-Cache
 
-[Endereço da documentação do ThinkCache](https://github.com/top-think/think-cache)
+

@@ -1,4 +1,4 @@
-# सत्र प्रबंधन
+# webman सत्र प्रबंधन
 
 ## उदाहरण
 ```php
@@ -19,121 +19,129 @@ class UserController
 }
 ```
 
-`$request->session();` के माध्यम से `Workerman\Protocols\Http\Session` उदाहरण प्राप्त करें, उदाहरण की विधि के माध्यम से सत्र डेटा को जोड़ें, संशोधित करें, हटाएँ।
+`$request->session();` के माध्यम से `Workerman\Protocols\Http\Session` इंस्टैंस प्राप्त करें और इसकी विधियों का उपयोग करके सत्र डेटा जोड़ें, संशोधित करें या हटाएं।
 
-> ध्यान दें: सत्र ऑब्जेक्ट नष्ट होने पर सत्र डेटा स्वचालित रूप से सहेजा जाएगा, इसलिए कृपया न करें कि `$$request->session()` द्वारा वापस मिलने वाला ऑब्जेक्ट को ग्लोबल एरे या किसी भी क्लास सदस्य में सहेज कर सत्र सहेज नहीं सकता है।
+> **ध्यान दें**
+> सत्र ऑब्जेक्ट के नष्ट होने पर सत्र डेटा स्वचालित रूप से सहेजा जाता है।
+> सत्र ऑब्जेक्ट को वैश्विक चर में संग्रहीत करने से ऑब्जेक्ट नष्ट नहीं होता और स्वचालित रूप से सहेजा नहीं जाता। ऐसी स्थिति में डेटा सहेजने के लिए मैन्युअल रूप से `$session->save()` को कॉल करना होगा।
 
 ## सभी सत्र डेटा प्राप्त करें
 ```php
 $session = $request->session();
 $all = $session->all();
 ```
-यह एक एरे वापस करता है। यदि कोई सत्र डेटा नहीं है, तो एक खाली एरे लौटाया जाता है।
+यह एक ऐरे लौटाता है। यदि कोई सत्र डेटा नहीं है, तो खाली ऐरे लौटाया जाता है।
 
-## कुछ मान प्राप्त करें
+
+## सत्र से किसी मान को प्राप्त करें
 ```php
 $session = $request->session();
 $name = $session->get('name');
 ```
-अगर डेटा उपलब्ध नहीं है तो नल लौटाता है।
+डेटा मौजूद नहीं होने पर null लौटाता है।
 
-आप कुछ डीफ़ॉल्ट मान भेज सकते हैं get में दूसरे पैरामीटर के रूप में, अगर सत्र एरे में कोई मान नहीं मिलता है तो डीफ़ॉल्ट मान लौटाता है। उदाहरण के लिए:
+आप get विधि के दूसरे पैरामीटर के रूप में डिफ़ॉल्ट मान भी भेज सकते हैं। सत्र ऐरे में संगत मान न मिलने पर डिफ़ॉल्ट मान लौटाया जाता है। उदाहरण:
 ```php
 $session = $request->session();
 $name = $session->get('name', 'tom');
 ```
 
-## सत्र सहेजें
-किसी विशिष्ट आइटम डेटा को सहेजने के लिए set विधि का उपयोग करें।
+
+## सत्र डेटा संग्रहीत करें
+एक डेटा संग्रहीत करने के लिए set विधि का उपयोग करें।
 ```php
 $session = $request->session();
 $session->set('name', 'tom');
 ```
-set का कोई लौटाव नहीं है, सत्र ऑब्जेक्ट नष्ट होने पर सत्र स्वचालित रूप से सहेजा जाएगा।
+set कोई मान नहीं लौटाता। सत्र ऑब्जेक्ट नष्ट होने पर सत्र स्वचालित रूप से सहेजा जाता है।
 
-जब बहुत से मान सहेजने होते हैं तो put विधि का उपयोग करें।
+अनेक मान संग्रहीत करने के लिए put विधि का उपयोग करें।
 ```php
 $session = $request->session();
 $session->put(['name' => 'tom', 'age' => 12]);
 ```
-उसी प्रकार, put का कोई लौटाव नहीं है।
+इसी प्रकार put भी कोई मान नहीं लौटाता।
 
-## सत्र डेटा हटाएँ
-किसी अथवा कुछ सत्र डेटा को हटाने के लिए `forget` विधि का उपयोग करें।
+## सत्र डेटा हटाएं
+एक या अधिक सत्र डेटा हटाने के लिए `forget` विधि का उपयोग करें।
 ```php
 $session = $request->session();
-// एक आइटम हटाएँ
+// एक आइटम हटाएं
 $session->forget('name');
-// कई आइटम हटाएँ
+// अनेक आइटम हटाएं
 $session->forget(['name', 'age']);
 ```
 
-अतिरिक्त रूप से सिस्टम `delete` विधि प्रदान करता है, भेद है, forget केवल एक आइटम हटा सकता है।
+सिस्टम delete विधि भी प्रदान करता है। forget से भिन्न, delete केवल एक आइटम हटा सकता है।
 ```php
 $session = $request->session();
 // $session->forget('name'); के समान
 $session->delete('name');
 ```
 
-## सत्र का कोई विशिष्ट मान प्राप्त और हटाएँ
+
+## सत्र से मान प्राप्त करें और हटाएं
 ```php
 $session = $request->session();
 $name = $session->pull('name');
 ```
-यह प्रभाव निम्नलिखित कोड के समान है
+निम्नलिखित कोड के समान प्रभाव:
 ```php
 $session = $request->session();
-$value = $session->get($name);
-$session->delete($name);
+$value = $session->get('name');
+$session->delete('name');
 ```
-यदि संबंधित सत्र उपलब्ध नहीं है, तो नल लौटाया जाता है।
+संगत सत्र मौजूद न होने पर null लौटाता है।
 
-## सभी सत्र डेटा हटाएँ
+
+## सभी सत्र डेटा हटाएं
 ```php
 $request->session()->flush();
 ```
-कोई लौटाव नहीं है, सत्र ऑब्जेक्ट नष्ट होने पर सत्र स्वचालित रूप से संग्रहण से हटाया जाएगा।
+कोई मान नहीं लौटाता। सत्र ऑब्जेक्ट नष्ट होने पर सत्र स्वचालित रूप से स्टोरेज से हटा दिया जाता है।
 
-## संबंधित सत्र डेटा की उपस्थिति को निर्धारित करें
+
+## सत्र मान की उपस्थिति जांचें
 ```php
 $session = $request->session();
 $has = $session->has('name');
 ```
-उपर्युक्त सत्र अनुपलब्ध है या यदि संबंधित सत्र मान नल है, तो लौटाता है false, अन्यथा true।
+सत्र मान मौजूद न होने या null होने पर false लौटाता है; अन्यथा true लौटाता है।
 
 ```php
 $session = $request->session();
 $has = $session->exists('name');
 ```
-उपर्युक्त कोड भी सत्र डेटा की उपस्थिति को निर्धारित करने के लिए है, अंतर है कि संबंधित सत्र आइटम मान नल होने पर अंतर है, तो true लौटाता है।
+उपरोक्त कोड भी सत्र मान की उपस्थिति जांचता है। अंतर: मान null होने पर भी `exists` true लौटाता है।
 
-## हेल्पर फ़ंक्शन सेशन()
-> 2020-12-09 नया जोड़ा गया
+## सहायक फ़ंक्शन session()
 
-webman ने समान कार्य करने के लिए हेल्पर फ़ंक्शन `session()` प्रदान किया है।
+webman समान कार्यक्षमता के लिए सहायक फ़ंक्शन `session()` प्रदान करता है।
 ```php
-// सत्र उदाहरण प्राप्त करें
+// सत्र इंस्टैंस प्राप्त करें
 $session = session();
-// बराबरी द
+// समतुल्य
 $session = $request->session();
 
-// कुछ मान प्राप्त करें
+// मान प्राप्त करें
 $value = session('key', 'default');
-// बराबरी द
+// समतुल्य
 $value = session()->get('key', 'default');
-// बराबरी द
+// समतुल्य
 $value = $request->session()->get('key', 'default');
 
-// सत्र को मान से भरें
+// सत्र को मान सौंपें
 session(['key1'=>'value1', 'key2' => 'value2']);
-// बराबरी द
+// समतुल्य
 session()->put(['key1'=>'value1', 'key2' => 'value2']);
-// बराबरी द
+// समतुल्य
 $request->session()->put(['key1'=>'value1', 'key2' => 'value2']);
+
 ```
 
+
 ## कॉन्फ़िग फ़ाइल
-सत्र कॉन्फ़िग फ़ाइल `config/session.php` में होती है, यहां कुछ इस प्रकार होता है:
+सत्र कॉन्फ़िग फ़ाइल `config/session.php` में है। सामग्री निम्नलिखित के समान है:
 ```php
 use Webman\Session\FileSessionHandler;
 use Webman\Session\RedisSessionHandler;
@@ -143,18 +151,18 @@ return [
     // FileSessionHandler::class या RedisSessionHandler::class या RedisClusterSessionHandler::class 
     'handler' => FileSessionHandler::class,
     
-    // handler के रूप में FileSessionHandler::class होने पर मान 'file', 
-    // handler के रूप में RedisSessionHandler::class होने पर मान 'redis'
-    // handler के रूप में RedisClusterSessionHandler::class होने पर मान 'redis_cluster', अर्थात् रेडिस क्लस्टर
+    // handler FileSessionHandler::class होने पर मान 'file',
+    // handler RedisSessionHandler::class होने पर मान 'redis'
+    // handler RedisClusterSessionHandler::class होने पर मान 'redis_cluster' (Redis क्लस्टर)
     'type'    => 'file',
 
-    // विभिन्न handler के लिए विभिन्न कॉन्फ़िगरेशन का उपयोग करें
+    // विभिन्न हैंडलर विभिन्न कॉन्फ़िगरेशन उपयोग करते हैं
     'config' => [
-        // टाइप file होने पर कॉन्फ़िगरेशन
+        // type 'file' के लिए कॉन्फ़िगरेशन
         'file' => [
             'save_path' => runtime_path() . '/sessions',
         ],
-        // टाइप redis होने पर कॉन्फ़िगरेशन
+        // type 'redis' के लिए कॉन्फ़िगरेशन
         'redis' => [
             'host'      => '127.0.0.1',
             'port'      => 6379,
@@ -172,48 +180,19 @@ return [
         
     ],
 
-    'session_name' => 'PHPSID', // सत्र आईडी कुकी का नाम
-    
-    // === नीचे दिए गए कॉन्फ़िगरेशन को आवश्यकता है webman-framework>=1.3.14 workerman>=4.0.37 ===
-    'auto_update_timestamp' => false,  // क्या सत्र स्वचालित रूप से तारीख को अपडेट करेगा, डिफ़ॉल्ट बंद है
+    'session_name' => 'PHPSID', // session_id संग्रहीत करने वाली कुकी का नाम
+    'auto_update_timestamp' => false,  // सत्र स्वचालित ताज़ा करें, डिफ़ॉल्ट: बंद
     'lifetime' => 7*24*60*60,          // सत्र समाप्ति समय
-    'cookie_lifetime' => 365*24*60*60, // सत्र आईडी कुकी समाप्ति समय
-    'cookie_path' => '/',              // सत्र आईडी कुकी पथ
-    'domain' => '',                    // सत्र आईडी कुकी डोमेन
-    'http_only' => true,               // क्या httpOnly, डिफ़ॉल्ट बंद
-    'secure' => false,                 // सत्र केवल https के नीचे खोलें, डिफ़ॉल्ट बंद
-    'same_site' => '',                 // CSRF हमला और उपयोगकर्ता ट्रैकिंग से बचाव के लिए, विकल्पित मान strict/lax/none
-    'gc_probability' => [1, 1000],     // सत्र यद्यपि
+    'cookie_lifetime' => 365*24*60*60, // session_id कुकी समाप्ति समय
+    'cookie_path' => '/',              // session_id कुकी पथ
+    'domain' => '',                    // session_id कुकी डोमेन
+    'http_only' => true,               // httpOnly सक्षम करें, डिफ़ॉल्ट: सक्षम
+    'secure' => false,                 // केवल HTTPS पर सत्र सक्षम, डिफ़ॉल्ट: बंद
+    'same_site' => '',                 // CSRF हमले और उपयोगकर्ता ट्रैकिंग रोकने के लिए, मान: strict/lax/none
+    'gc_probability' => [1, 1000],     // सत्र गार्बेज संग्रहण संभावना
 ];
 ```
 
-> **ध्यान दें** 
-> webman 1.4.0 से SessionHandler का नामस्थान बदल गया है, पहले
-> use Webman\FileSessionHandler;  
-> use Webman\RedisSessionHandler;  
-> use Webman\RedisClusterSessionHandler;  
-> _से बदलकर_  
-> use Webman\Session\FileSessionHandler;  
-> use Webman\Session\RedisSessionHandler;  
-> use Webman\Session\RedisClusterSessionHandler;  
+## सुरक्षा
+सत्र में कक्षा इंस्टैंस को सीधे संग्रहीत करने की सिफारिश नहीं की जाती, खासकर अविश्वसनीय स्रोतों से। डिसीरियलाइजेशन सुरक्षा जोखिम पैदा कर सकता है।
 
-## समय सीमा विन्यास
-जब webman-framework < 1.3.14 होता है, तो सत्र अवधि को `php.ini` में कॉन्फ़िगर करनी होती है।
-
-```ini
-session.gc_maxlifetime = x
-session.cookie_lifetime = x
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-मान देखते हैं कि 1440 सेकंड के लिए समय सीमा है, इसकी विन्यासिकता निम्नलिखित होगी
-```ini
-session.gc_maxlifetime = 1440
-session.cookie_lifetime = 1440
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-> **सुझाव**
-> `php --ini` कमांड का उपयोग करके `php.ini` की स्थिति खोज सकते हैं।

@@ -1,16 +1,17 @@
 # SDK de paiement
 
-### Emplacement du projet
 
-https://github.com/yansongda/pay
+## Emplacement du projet
 
-### Installation
+ https://github.com/yansongda/pay
+
+## Installation
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### Utilisation
+## Utilisation
 
 **Alipay**
 
@@ -163,6 +164,6 @@ class PayController
 }
 ```
 
-### Pour plus d'informations
+## Plus d'informations
 
 Visitez https://pay.yanda.net.cn/docs/2.x/overview

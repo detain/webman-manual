@@ -206,6 +206,10 @@ class AccessControlTest implements MiddlewareInterface
 }
 ```
 
+> **ヒント**
+> クロスオリジンリクエストではOPTIONSプリフライトリクエストが発生することがあります。OPTIONSリクエストをコントローラーに到達させたくないため、空のレスポンス（`response('')`）を直接返してリクエストをインターセプトします。
+> APIにルーティングが必要な場合は、`Route::any(..)` または `Route::add(['POST', 'OPTIONS'], ..)` でルートを設定してください。
+
 `config/middleware.php`に以下のようにグローバルミドルウェアを追加します：
 
 ```php
@@ -219,12 +223,11 @@ return [
 ```
 
 > **注意**
-> Ajaxリクエストでヘッダーをカスタムした場合、中間層で`Access-Control-Allow-Headers`フィールドにそのカスタムヘッダーを追加する必要があります。そうしないと`Request header field XXXX is not allowed by Access-Control-Allow-Headers in preflight response.` というエラーが発生する可能性があります。
+> Ajaxリクエストでヘッダーをカスタムした場合、ミドルウェアの`Access-Control-Allow-Headers`フィールドにそのカスタムヘッダーを追加する必要があります。そうしないと`Request header field XXXX is not allowed by Access-Control-Allow-Headers in preflight response.` というエラーが発生する可能性があります。
 
 ## 説明
 
-- ミドルウェアにはグローバルミドルウェア、アプリケーションミドルウェア（複数のアプリケーションモードでのみ有効）、ルートミドルウェアの3つの種類があります。
-- 現在、単一のコントローラーのミドルウェアはサポートされていません（ただし、中間層で`$request->controller`を判断することで、コントローラーのミドルウェアのような機能を実現することができます）。
+- ミドルウェアにはグローバルミドルウェア、アプリケーションミドルウェア（複数アプリケーションモードでのみ有効、[マルチアプリケーション](multiapp.md)参照）、ルートミドルウェアがあります。
 - ミドルウェアの設定ファイルの場所は `config/middleware.php` です。
 - グローバルミドルウェアの設定は、`''` のキー下にあります。
 - アプリケーションミドルウェアの設定は、特定のアプリケーション名の下にあります。例えば：
@@ -241,6 +244,31 @@ return [
         app\middleware\ApiOnly::class,
     ]
 ];
+```
+
+## コントローラーミドルウェアとメソッドミドルウェア
+
+アノテーションを利用することで、特定のコントローラーまたはコントローラーの特定のメソッドにミドルウェアを設定できます。
+
+```php
+<?php
+namespace app\controller;
+use app\middleware\Controller1Middleware;
+use app\middleware\Controller2Middleware;
+use app\middleware\Method1Middleware;
+use app\middleware\Method2Middleware;
+use support\annotation\Middleware;
+use support\Request;
+
+#[Middleware(Controller1Middleware::class, Controller2Middleware::class)]
+class IndexController
+{
+    #[Middleware(Method1Middleware::class, Method2Middleware::class)]
+    public function index(Request $request): string
+    {
+        return 'hello';
+    }
+}
 ```
 
 ## ルートミドルウェア
@@ -267,21 +295,17 @@ Route::group('/blog', function () {
     app\middleware\MiddlewareB::class,
 ]);
 ```
-中間層構築関数のパラメーター
 
-> 注意
-> この機能はwebman-framework >= 1.4.8が必要です
+## ミドルウェアのコンストラクタパラメータ
 
-1.4.8バージョン以降、設定ファイルは直接ミドルウェアをインスタンス化するか、無名関数を使用して、構築関数を介してミドルウェアにパラメーターを渡すことができます。
+設定ファイルではミドルウェアを直接インスタンス化でき、コンストラクタ経由でパラメータを渡すことができます。
 例えば、`config/middleware.php`では以下のように構成できます。
-```php
+```
 return [
     // グローバルミドルウェア
     '' => [
         new app\middleware\AuthCheckTest($param1, $param2, ...),
-        function(){
-            return new app\middleware\AccessControlTest($param1, $param2, ...);
-        },
+        new app\middleware\AccessControlTest($param1, $param2, ...)
     ],
     // APIアプリケーションミドルウェア（複数のアプリケーションモードのみ有効）
     'api' => [
@@ -290,20 +314,47 @@ return [
 ];
 ```
 
-同様に、ルートミドルウェアも構築関数を介してパラメーターを渡すことができます。例えば`config/route.php`では以下のようになります。
-```php
+同様に、ルートミドルウェアもコンストラクタを介してパラメータを渡すことができます。例えば`config/route.php`では以下のようになります。
+```
 Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->middleware([
     new app\middleware\MiddlewareA($param1, $param2, ...),
-    function(){
-        return new app\middleware\MiddlewareB($param1, $param2, ...);
-    },
+    new app\middleware\MiddlewareB($param1, $param2, ...),
 ]);
 ```
 
+ミドルウェアでパラメータを使用する例
+```
+<?php
+namespace app\middleware;
+
+use Webman\MiddlewareInterface;
+use Webman\Http\Response;
+use Webman\Http\Request;
+
+class MiddlewareA implements MiddlewareInterface
+{
+    protected $param1;
+
+    protected $param2;
+
+    public function __construct($param1, $param2)
+    {
+        $this->param1 = $param1;
+        $this->param2 = $param2;
+    }
+
+    public function process(Request $request, callable $handler) : Response
+    {
+        var_dump($this->param1, $this->param2);
+        return $handler($request);
+    }
+}
+```
+
 ## ミドルウェアの実行順序
-- ミドルウェアの実行順序は `グローバルミドルウェア`->`アプリケーションミドルウェア`->`ルートミドルウェア`です。
-- 複数のグローバルミドルウェアがある場合、ミドルウェアの実際の構成順に従って実行されます（アプリケーションミドルウェア、ルートミドルウェアも同様です）。
-- 404リクエストはグローバルミドルウェアを含む、いかなるミドルウェアもトリガーしません。
+- ミドルウェアの実行順序は `グローバルミドルウェア`->`アプリケーションミドルウェア`->`コントローラーミドルウェア`->`ルートミドルウェア`->`メソッドミドルウェア`です。
+- 同一階層に複数のミドルウェアがある場合、その階層のミドルウェアの実際の構成順に従って実行されます。
+- 404リクエストはデフォルトでいかなるミドルウェアもトリガーしません（`Route::fallback(function(){})->middleware()`でミドルウェアを追加することは可能です）。
 
 ## ルートがミドルウェアにパラメータを渡す（route->setParams）
 
@@ -380,10 +431,7 @@ class FooController
 
 ## ミドルウェアが現在のリクエストルート情報を取得する
 
-> 注
-> webman-framework >= 1.3.2が必要です
-
-`$request->route`を使用してルートオブジェクトを取得し、対応するメソッドを呼び出すことで、現在の情報を取得できます。
+`$request->route`を使用してルートオブジェクトを取得し、対応するメソッドを呼び出すことで、関連情報を取得できます。
 
 **ルートの構成**
 ```php
@@ -424,13 +472,7 @@ class Hello implements MiddlewareInterface
 }
 ```
 
-> 注意
-> `$route->param()`メソッドには webman-framework >= 1.3.16が必要です。
-
 ## ミドルウェアが例外を取得する
-
-> 注意
-> webman-framework >= 1.3.15が必要です
 
 ビジネスプロセス中に例外が発生する場合、ミドルウェア内で`$response->exception()`を使用して例外を取得できます。
 
@@ -470,9 +512,6 @@ class Hello implements MiddlewareInterface
 
 ## 超大域ミドルウェア
 
-> 注意
-> この機能にはwebman-framework >= 1.5.16が必要です
-
 メインプロジェクトのグローバルミドルウェアはメインプロジェクトにのみ影響を与え、[アプリケーションプラグイン](app/app.md)に影響を与えません。場合によっては、全てのプラグインに影響を与えるミドルウェアを追加したいと思う場合、超大域ミドルウェアを使用できます。
 
 `config/middleware.php`に以下のように設定します。
@@ -490,16 +529,13 @@ return [
 
 ## 特定のプラグインにミドルウェアを追加する
 
-> 注意
-> この機能にはwebman-framework >= 1.5.16が必要です
-
 時には特定の[アプリケーションプラグイン](app/app.md)にミドルウェアを追加したい場合がありますが、プラグインのコードを変更したくない（アップグレードされると上書きされるため）場合、メインプロジェクトでそれにミドルウェアを構成することができます。
 
 `config/middleware.php`に以下のように設定します。
 ```php
 return [
     'plugin.ai' => [], // aiプラグインにミドルウェアを追加
-    'plugin.ai.admin' => [], // aiプラグインのadminモジュールにミドルウェアを追加
+    'plugin.ai.admin' => [], // aiプラグインのadminモジュール(plugin\ai\app\adminディレクトリ)にミドルウェアを追加
 ];
 ```
 

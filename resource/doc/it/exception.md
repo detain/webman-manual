@@ -63,11 +63,11 @@ class FooController
 {
     public function index(Request $request)
     {
-        $this->chackInpout($request->post());
+        $this->checkInput($request->post());
         return response('hello index');
     }
     
-    protected function chackInpout($input)
+    protected function checkInput($input)
     {
         if (!isset($input['token'])) {
             throw new BusinessException('Parametro errato', 3000);
@@ -118,7 +118,7 @@ una richiesta in formato json riceverà una risposta in json simile a quella seg
 ```json
 {"code": 3000, "message": "Parametro errato"}
 ```
-> **Nota**
+> **Suggerimento**
 > Poiché l'eccezione BusinessException è relativa ad errori di logica di business (ad esempio errori nei parametri di input dell'utente), è prevedibile; di conseguenza, il framework non la considera un errore fatale e non vi registrerà nessun log.
 
 ## Conclusione

@@ -1,8 +1,8 @@
 # AOP
 
-> Thanks to the author of Hyperf for the submission.
+> Thanks to the author of Hyperf for the contribution.
 
-### Installation
+## Installation
 
 - Install aop-integration
 
@@ -10,9 +10,9 @@
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### Add AOP Configuration
+## Add AOP-related Configuration
 
-We need to add the `config.php` configuration file under the `config` directory.
+We need to add the `config.php` configuration file in the `config` directory.
 
 ```php
 <?php
@@ -36,16 +36,16 @@ return [
         ],
     ],
     'aspects' => [
-        // Add corresponding Aspects here
+        // Add the corresponding Aspect here
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### Configure the Entry File `start.php`
+## Configure the Entry File start.php
 
-> We will place the initialization method below `timezone`, and omit other code below.
+> Place the initialization code below the timezone setting. Other code is omitted below.
 
 ```
 use Hyperf\AopIntegration\ClassLoader;
@@ -58,9 +58,9 @@ if ($timezone = config('app.default_timezone')) {
 ClassLoader::init();
 ```
 
-### Testing
+## Testing
 
-First, let's write the class to be intercepted.
+First, let's create the class to be intercepted:
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-Next, add the corresponding `DebugAspect`.
+Then add the corresponding `DebugAspect`:
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-Then, edit the controller `app/controller/IndexController.php`.
+Next, edit the controller `app/controller/IndexController.php`:
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-Finally, configure the route.
+Then configure the route:
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-Finally, start the server and test.
+Finally, start the service and run the test:
 
 ```shell
 php start.php start

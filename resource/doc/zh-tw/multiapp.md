@@ -22,6 +22,8 @@ app
 
 当访问地址 `http://127.0.0.1:8787/admin/{控制器}/{方法}` 时访问`app/admin/controller`下的控制器与方法。
 
+在webman中，app下的每个目录可以看作是一个应用。
+
 在webman中，甚至可以这样规划app目录。
 ```
 app
@@ -56,7 +58,7 @@ class FooController
 ```
 
 ## 多应用中间件配置
-有时候你想为不同应用配置不同的中间件，例如`api`应用可能需要一个跨域中间件，`admin`需要一个检查管理员登录的中间件，则配置`config/midlleware.php`可能类似下面这样：
+有时候你想为不同应用配置不同的中间件，例如`api`应用可能需要一个跨域中间件，`admin`需要一个检查管理员登录的中间件，则配置`config/middleware.php`可能类似下面这样：
 ```php
 return [
     // 全局中间件

@@ -6,8 +6,8 @@
 - Jeder Prozess kann während seiner Lebensdauer mehrere Anfragen verarbeiten.
 - Wenn ein Prozess die Befehle `stop`, `reload` oder `restart` empfängt, führt er einen Ausstieg aus und beendet seine aktuelle Lebensdauer.
 
-> **Hinweis**
-> Jeder Prozess arbeitet unabhängig voneinander, was bedeutet, dass jeder Prozess seine eigenen Ressourcen, Variablen und Klasseninstanzen wie z.B. eigene Datenbankverbindungen verwaltet. Einige Singleton-Instanzen werden in jedem Prozess einmal initialisiert, was bedeutet, dass sie mehrmals initialisiert werden, wenn mehrere Prozesse vorhanden sind.
+> **Tipp**
+> Jeder Prozess arbeitet unabhängig voneinander, was bedeutet, dass jeder Prozess seine eigenen Ressourcen, Variablen und Klasseninstanzen verwaltet. Dies zeigt sich darin, dass jeder Prozess seine eigene Datenbankverbindung hat und einige Singletons pro Prozess einmal initialisiert werden, sodass mehrere Prozesse zu mehrfachen Initialisierungen führen.
 
 ## Anforderungslebenszyklus
 - Jede Anfrage generiert ein `$request`-Objekt.
@@ -60,10 +60,10 @@ class IndexController
 ```
 Die `Container::get()`-Methode dient zum Erstellen und Speichern von Klasseninstanzen. Bei erneutem Aufruf mit denselben Parametern wird die zuvor erstellte Instanz zurückgegeben.
 
-> **Hinweis**
+> **Beachten Sie**
 > `Container::get()` kann nur Instanzen ohne Konstruktorargumente initialisieren. `Container::make()` kann Instanzen mit Konstruktorargumenten erstellen, und im Gegensatz zu `Container::get()` wird `Container::make()` die Instanz nicht wiederverwenden, was bedeutet, dass sie immer eine neue Instanz zurückgibt, auch bei wiederholtem Aufruf mit denselben Parametern.
 
-# Über Speicherlecks
+## Über Speicherlecks
 In den allermeisten Fällen tritt in unserem Geschäftscode kein Speicherleck auf (nur sehr wenige Benutzer haben davon berichtet). Es genügt, darauf zu achten, dass die langzeitigen Array-Daten nicht endlos wachsen. Betrachten Sie bitte den folgenden Code:
 
 ```php

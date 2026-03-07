@@ -1,10 +1,10 @@
-# 自定义404
+# تخصيص 404
 
-如果你想动态控制404的内容时，例如在ajax请求时返回json数据 `{"code:"404", "msg":"404 not found"}`，页面请求时返回`app/view/404.html`模版，请参考如下示例
+إذا أردت التحكم ديناميكياً في محتوى 404، مثلاً إرجاع بيانات JSON `{"code:"404", "msg":"404 not found"}` لطلبات AJAX وإرجاع قالب `app/view/404.html` لطلبات الصفحة، يرجى مراجعة المثال التالي.
 
-> 以下以php原生模版为例，其它模版`twig` `blade` `think-tmplate` 原理类似
+> يستخدم المثال التالي قوالب PHP الأصلية، وقوالب أخرى مثل `twig` و`blade` و`think-template` تعمل بنفس المبدأ.
 
-**创建文件`app/view/404.html`**
+**إنشاء الملف `app/view/404.html`**
 ```html
 <!doctype html>
 <html>
@@ -18,23 +18,25 @@
 </html>
 ```
 
-**在`config/route.php`中加入如下代码：**
+**إضافة الكود التالي في `config/route.php`:**
 ```php
 use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // ajax请求时返回json
+    // إرجاع JSON لطلبات AJAX
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
-    // 页面请求返回404.html模版
+    // إرجاع قالب 404.html لطلبات الصفحة
     return view('404', ['error' => 'some error'])->withStatus(404);
 });
 ```
 
-# 自定义405
-从webman-framework 1.5.23开始，回调函数支持传递status参数，如果status是404则代表请求不存在，405代表不支持当前请求方法(例如Route::post()设置的路由通过GET方式访问)
+# تخصيص 405
+
+من إصدار webman-framework 1.5.23، يدعم رد الدالة المعيّن للفشل معامل `status`. القيمة 404 تعني أن الطلب غير موجود، و405 تعني عدم دعم طريقة الطلب الحالية (مثل الوصول بطريقة GET لمسار معرّف بـ `Route::post()`).
+
 ```php
 use support\Request;
 use Webman\Route;
@@ -48,8 +50,9 @@ Route::fallback(function(Request $request, $status) {
 });
 ```
 
-# 自定义500
-**新建`app/view/500.html`**
+# تخصيص 500
+
+**إنشاء `app/view/500.html`**
 
 ```html
 <!doctype html>
@@ -59,13 +62,13 @@ Route::fallback(function(Request $request, $status) {
     <title>500 Internal Server Error</title>
 </head>
 <body>
-自定义错误模版：
+قالب الخطأ المخصص:
 <?=htmlspecialchars($exception)?>
 </body>
 </html>
 ```
 
-**新建`app/exception/Handler.php`(如目录不存在请自行创建)**
+**إنشاء `app/exception/Handler.php`** (أنشئ المجلد إن لم يكن موجوداً)
 ```php
 <?php
 
@@ -78,7 +81,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * 渲染返回
+     * عرض الاستجابة وإرجاعها
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -86,17 +89,17 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // ajax请求返回json数据
+        // إرجاع بيانات JSON لطلبات AJAX
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
-        // 页面请求返回500.html模版
+        // إرجاع قالب 500.html لطلبات الصفحة
         return view('500', ['exception' => $exception], '')->withStatus(500);
     }
 }
 ```
 
-**配置`config/exception.php`**
+**تكوين `config/exception.php`**
 ```php
 return [
     '' => \app\exception\Handler::class,

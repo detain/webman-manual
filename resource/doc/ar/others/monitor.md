@@ -1,22 +1,22 @@
-# 监控进程
-webman自带一个monitor监控进程，它支持两个功能
-1. 监控文件更新并自动reload载入新的业务代码(一般在开发时使用)
-2. 监控所有进程占用内存，如果某个进程占用内存即将超过`php.ini`中`memory_limit`限制则自动安全重启该进程(不影响业务)
+# مراقبة العملية
+يأتي webman مزوداً بعملية مراقبة مدمجة تدعم وظيفتين:
+1. مراقبة تحديثات الملفات وإعادة تحميل كود الأعمال الجديد تلقائياً (تُستخدم عادةً أثناء التطوير).
+2. مراقبة استهلاك الذاكرة لجميع العمليات؛ إذا كانت عملية ما على وشك تجاوز حد `memory_limit` في `php.ini`، يتم إعادة تشغيلها تلقائياً بشكل آمن (دون التأثير على الأعمال).
 
-## 监控配置
-配置文件 `config/process.php` 中`monitor`配置
+## تكوين المراقبة
+تكوين `monitor` في `config/process.php`:
 ```php
 
 global $argv;
 
 return [
-    // File update detection and automatic reload
+    // كشف تحديث الملف وإعادة التحميل التلقائي
     'monitor' => [
         'handler' => process\Monitor::class,
         'reloadable' => false,
         'constructor' => [
-            // Monitor these directories
-            'monitorDir' => array_merge([    // 哪些目录下的文件需要被监控
+            // مراقبة هذه المجلدات
+            'monitorDir' => array_merge([    // المجلدات التي يجب مراقبة ملفاتها
                 app_path(),
                 config_path(),
                 base_path() . '/process',
@@ -24,26 +24,22 @@ return [
                 base_path() . '/resource',
                 base_path() . '/.env',
             ], glob(base_path() . '/plugin/*/app'), glob(base_path() . '/plugin/*/config'), glob(base_path() . '/plugin/*/api')),
-            // Files with these suffixes will be monitored
+            // الملفات ذات هذه الامتدادات ستُراقَب
             'monitorExtensions' => [
                 'php', 'html', 'htm', 'env'
             ],
             'options' => [
-                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // 是否开启文件监控
-                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // 是否开启内存监控
+                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // تفعيل مراقبة الملفات
+                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // تفعيل مراقبة الذاكرة
             ]
         ]
     ]
 ];
 ```
-`monitorDir`用来配置监控哪些目录的更新(监控目录的文件不宜过多)。
-`monitorExtensions`用来配置`monitorDir`目录里哪些文件后缀应该被监控。
-`options.enable_file_monitor`值为`true`时，则开启文件更新监控(linux系统下以debug方式运行默认开启文件监控)。
-`options.enable_memory_monitor`值为`true`时，则开启内存占用监控(内存占用监控不支持windows系统)。
+`monitorDir` يحدد المجلدات التي تُراقَب للتحديثات (يفضل ألا يكون عدد الملفات كبيراً).
+`monitorExtensions` يحدد امتدادات الملفات التي تُراقَب في مجلدات `monitorDir`.
+عندما تكون `options.enable_file_monitor` بقيمة `true`، تُفعّل مراقبة تحديثات الملفات (تكون مفعّلة افتراضياً في وضع التصحيح على Linux).
+عندما تكون `options.enable_memory_monitor` بقيمة `true`، تُفعّل مراقبة الذاكرة (غير مدعومة على Windows).
 
-> **提示**
-> windows系统下当需要运行`windows.bat` 或者 `php windows.php` 时才能开启文件更新监控。
-
-
-
-
+> **تلميح**
+> على Windows، تُفعّل مراقبة تحديثات الملفات فقط عند تشغيل `windows.bat` أو `php windows.php`.

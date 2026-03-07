@@ -5,8 +5,6 @@
 
 Eklenti, bir web sayfası JS istemcisi olan push.js ve uniapp istemcisi olan `uniapp-push.js` ile birlikte gelir. Diğer dil istemcilerini https://pusher.com/docs/channels/channels_libraries/libraries/ adresinden indirebilirsiniz.
 
-> Eklenti için webman-framework>=1.2.0 gereklidir.
-
 ## Kurulum
 
 ```sh

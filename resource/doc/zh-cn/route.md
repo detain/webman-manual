@@ -73,6 +73,153 @@ Route::any('/testclass', [app\controller\IndexController::class, 'test']);
 当访问地址为 `http://127.0.0.1:8787/testclass` 时，将返回`app\controller\IndexController`类的`test`方法的返回值。
 
 
+## 注解路由
+
+在控制器方法上使用注解定义路由，无需在 `config/route.php` 中配置。
+
+> **注意**
+> 此功能需要 webman-framework >= v2.2.0
+
+### 基本用法
+
+```php
+namespace app\controller;
+use support\annotation\route\DisableDefaultRoute;
+use support\annotation\route\Get;
+use support\annotation\route\Post;
+use support\annotation\route\Route;
+
+#[DisableDefaultRoute]
+class UserController
+{
+    #[Get('/user/{id}')]
+    public function show($id)
+    {
+        return "user $id";
+    }
+
+    #[Post('/user')]
+    public function store()
+    {
+        return 'created';
+    }
+
+    #[Route('/user/form', ['GET', 'POST'], 'user.form')]
+    public function form()
+    {
+        return 'form';
+    }
+}
+```
+
+可用注解：`#[Get]` `#[Post]` `#[Put]` `#[Delete]` `#[Patch]` `#[Head]` `#[Options]` `#[Any]`（任意方法）。路径必须以 `/` 开头。第二参数可指定路由名，用于 `route()` 生成 URL。
+
+`#[DisableDefaultRoute]` 表示该控制器禁用默认路由(可选)，仅通过注解定义的路由可访问。
+
+**`#[Route]` 完整用法**：`#[Route(path, methods, name)]`
+- `path`：路由路径，以 `/` 开头；为 `null` 时仅限制默认路由的请求方法，不注册新路由
+- `methods`：HTTP 方法，字符串或字符串数组，如 `'GET'` 或 `['GET','POST']`
+- `name`：路由名，用于 `route('name')` 生成 URL，可省略
+
+### 无参数注解：限制默认路由的请求方法
+
+不带路径时，仅限制该动作可通过的 HTTP 方法，仍使用默认路由路径：
+
+```php
+#[Post]
+public function create() { ... }  // 仅允许 POST，路径仍为 /user/create
+
+#[Get]
+public function index() { ... }   // 仅允许 GET
+```
+
+可组合多个注解，允许多种请求方法：
+
+```php
+#[Get]
+#[Post]
+public function form() { ... }  // 允许 GET 和 POST
+```
+
+未在注解中声明的请求方法将返回 405。
+
+多个带路径的注解会注册为多条独立路由：`#[Get('/a')] #[Post('/b')]` 会生成 GET /a 与 POST /b 两条路由。
+
+### 路由组前缀
+
+在类上使用 `#[RouteGroup]` 为所有方法路由添加前缀：
+
+```php
+use support\annotation\route\RouteGroup;
+use support\annotation\route\Get;
+
+#[RouteGroup('/api/v1')]
+class UserController
+{
+    #[Get('/user/{id}')]  // 实际路径 /api/v1/user/{id}
+    public function show($id) { ... }
+}
+```
+
+### 自定义请求方法与路由名
+
+`#[Route]` 支持自定义多种 HTTP 方法和路由名：
+
+```php
+use support\annotation\route\Route;
+
+#[Route('/user', ['GET', 'POST'], 'user.form')]
+public function form() { ... }
+
+// 仅指定路径和方法，不含路由名
+#[Route('/user/update', 'PUT')]
+public function update() { ... }
+```
+
+### 路径参数与正则
+
+注解路由路径支持与 `config/route.php` 相同的参数语法，包括正则与可选参数：
+
+```php
+#[Get('/user/{id:\d+}')]           // 仅匹配数字 id
+public function show($id) { ... }
+
+#[Get('/user[/{name}]')]           // name 为可选，/user 或 /user/xxx
+public function list($name = null) { ... }
+
+#[Any('/user/[{path:.+}]')]        // 匹配 /user 及 /user/ 任意后缀
+public function catchAll($path = null) { ... }
+```
+
+详见本文档「路由参数」章节。
+
+### 中间件
+
+控制器或方法上的 `#[Middleware]` 会作用于注解路由，用法同 `support\annotation\Middleware`：
+
+```php
+use support\annotation\Middleware;
+
+#[Middleware(\app\middleware\AuthMiddleware::class)]
+class UserController { ... }
+
+#[Get('/user/{id}')]
+#[Middleware(\app\middleware\RateLimitMiddleware::class)]
+public function show($id) { ... }
+```
+
+### 与 route() URL 生成的配合
+
+在注解中指定路由名后，可通过 `route('name', $params)` 生成 URL：
+
+```php
+#[Get('/user/{id}', 'user.show')]
+public function show($id) { ... }
+
+// 使用：route('user.show', ['id' => 123])  =>  /user/123
+```
+
+
 ## 路由参数
 如果路由中存在参数，通过`{key}`来匹配，匹配结果将传递到对应的控制器方法参数中(从第二个参数开始依次传递)，例如：
 ```php
@@ -123,7 +270,7 @@ Route::options('[{path:.+}]', function () {
 进阶用法总结
 
 > `[]` 语法在 Webman 路由中主要用于处理可选路径部分或匹配动态路由，它让你能够为路由定义更复杂的路径结构和匹配规则
-> 
+>
 > `:用于指定正则表达式`
 
 
@@ -138,7 +285,7 @@ Route::group('/blog', function () {
    Route::any('/view/{id}', function (Request $request, $id) {return response("view $id");});
 });
 ```
-等价与
+等价于
 ```php
 Route::any('/blog/create', function (Request $request) {return response('create');});
 Route::any('/blog/edit', function (Request $request) {return response('edit');});
@@ -159,7 +306,7 @@ Route::group('/blog', function () {
 
 ## 路由中间件
 
-我们可以给某个一个或某一组路由设置中间件。
+我们可以给某个或某一组路由设置中间件。
 例如：
 ```php
 Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->middleware([
@@ -170,7 +317,7 @@ Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->mi
 Route::group('/blog', function () {
    Route::any('/create', function () {return response('create');});
    Route::any('/edit', function () {return response('edit');});
-   Route::any('/view/{id}', function ($request, $id) {response("view $id");});
+   Route::any('/view/{id}', function ($request, $id) {return response("view $id");});
 })->middleware([
     app\middleware\MiddlewareA::class,
     app\middleware\MiddlewareB::class,
@@ -231,8 +378,8 @@ Route::resource('/test', app\controller\IndexController::class, ['index','create
 
 
 ## url生成
-> **注意** 
-> 暂时不支持group嵌套的路由生成url  
+> **注意**
+> 暂时不支持group嵌套的路由生成url
 
 例如路由：
 ```php
@@ -251,7 +398,7 @@ route('blog.view', ['id' => 100]); // 结果为 /blog/100
 通过`$request->route`对象我们可以获取当前请求路由信息，例如
 
 ```php
-$route = $request->route; // 等价与 $route = request()->route;
+$route = $request->route; // 等价于 $route = request()->route;
 if ($route) {
     var_export($route->getPath());
     var_export($route->getMethods());
@@ -292,7 +439,7 @@ Route::fallback(function(){
     app\middleware\MiddlewareA::class,
     app\middleware\MiddlewareB::class,
 ]);
-````
+```
 
 相关链接 [自定义404 500页面](others/custom-error-page.md)
 
@@ -329,7 +476,7 @@ class IndexController
 }
 ```
 
-同样的，我们也可以通过注解禁用某个控制器的默认路由，例如：
+同样的，我们也可以通过注解禁用某个控制器方法的默认路由，例如：
 
 ```php
 namespace app\controller;

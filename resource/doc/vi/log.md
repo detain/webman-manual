@@ -38,8 +38,7 @@ $log->log($level, $message, array $context = [])
 $log->debug($message, array $context = [])
 $log->info($message, array $context = [])
 $log->notice($message, array $context = [])
-$log->warning($message, array $conte
-xt = [])
+$log->warning($message, array $context = [])
 $log->error($message, array $context = [])
 $log->critical($message, array $context = [])
 $log->alert($message, array $context = [])
@@ -102,7 +101,7 @@ return [
     ],
     // Kênh log2
     'log2' => [
-        // Bộ xử lý kênh mặc định, có thể thiết lập nhiều
+        // Bộ xử lý kênh log2, có thể thiết lập nhiều
         'handlers' => [
             [   
                 // Tên lớp xử lý

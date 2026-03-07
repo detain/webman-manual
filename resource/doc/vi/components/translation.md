@@ -1,27 +1,25 @@
 # Đa ngôn ngữ
 
-Đa ngôn ngữ sử dụng thành phần [symfony/translation](https://github.com/symfony/translation).
+Hỗ trợ đa ngôn ngữ sử dụng component [symfony/translation](https://github.com/symfony/translation).
 
 ## Cài đặt
-```sh
+```
 composer require symfony/translation
 ```
 
 ## Tạo gói ngôn ngữ
-Mặc định, webman đặt các gói ngon ngữ trong thư mục `resource/translations` (nếu không có thì hãy tự tạo), nếu cần thay đổi thư mục, vui lòng cấu hình trong `config/translation.php`.
-Mỗi ngôn ngữ tương ứng với một thư mục con trong đó, và định nghĩa ngôn ngữ mặc định được đặt trong `messages.php`. Ví dụ:
-
-```plaintext
+webman mặc định lưu gói ngôn ngữ trong thư mục `resource/translations` (tạo mới nếu chưa có). Để đổi thư mục, cấu hình trong `config/translation.php`.
+Mỗi ngôn ngữ tương ứng với một thư mục con, định nghĩa ngôn ngữ mặc định đặt trong `messages.php`. Ví dụ:
+```
 resource/
 └── translations
     ├── en
-    │   └── messages.php
+    │   └── messages.php
     └── zh_CN
         └── messages.php
 ```
 
-Tất cả các tệp ngôn ngữ đều trả về một mảng như sau:
-
+Tất cả file ngôn ngữ trả về một mảng, ví dụ:
 ```php
 // resource/translations/en/messages.php
 
@@ -38,26 +36,25 @@ return [
 return [
     // Ngôn ngữ mặc định
     'locale' => 'zh_CN',
-    // Ngôn ngữ dự phòng, nếu không thấy dịch vụ trong ngôn ngữ hiện tại, thì sẽ thử sử dụng dịch vụ trong ngôn ngữ dự phòng
+    // Ngôn ngữ dự phòng: khi không tìm thấy bản dịch trong ngôn ngữ hiện tại sẽ thử dùng bản dịch của ngôn ngữ dự phòng
     'fallback_locale' => ['zh_CN', 'en'],
-    // Thư mục chứa tập tin ngôn ngữ
+    // Thư mục lưu file ngôn ngữ
     'path' => base_path() . '/resource/translations',
 ];
 ```
 
-## Dich
-Dịch bằng cách sử dụng phương thức `trans()`.
+## Dịch
 
-Tạo tập tin ngôn ngữ `resource/translations/zh_CN/messages.php` như sau:
+Dùng phương thức `trans()` để dịch.
 
+Tạo file ngôn ngữ `resource/translations/zh_CN/messages.php`:
 ```php
 return [
-    'hello' => 'Xin chào thế giới!',
+    'hello' => '你好 世界!',
 ];
 ```
 
-Tạo tệp `app/controller/UserController.php` như sau:
-
+Tạo file `app/controller/UserController.php`:
 ```php
 <?php
 namespace app\controller;
@@ -68,23 +65,22 @@ class UserController
 {
     public function get(Request $request)
     {
-        $hello = trans('hello'); // Xin chào thế giới!
+        $hello = trans('hello'); // 你好 世界!
         return response($hello);
     }
 }
 ```
 
-Truy cập `http://127.0.0.1:8787/user/get` sẽ trả về "Xin chào thế giới!"
+Truy cập `http://127.0.0.1:8787/user/get` sẽ trả về "你好 世界!"
 
-## Thay đổi ngôn ngữ mặc định
+## Đổi ngôn ngữ mặc định
 
-Sử dụng phương thức `locale()` để chuyển đổi ngôn ngữ.
+Dùng phương thức `locale()` để chuyển ngôn ngữ.
 
-Thêm tệp ngôn ngữ `resource/translations/en/messages.php` như sau:
-
+Thêm file ngôn ngữ `resource/translations/en/messages.php`:
 ```php
 return [
-    'hello' => 'Hello world!',
+    'hello' => 'hello world!',
 ];
 ```
 
@@ -98,17 +94,16 @@ class UserController
 {
     public function get(Request $request)
     {
-        // Chuyển đổi ngôn ngữ
+        // Chuyển ngôn ngữ
         locale('en');
-        $hello = trans('hello'); // Hello world!
+        $hello = trans('hello'); // hello world!
         return response($hello);
     }
 }
 ```
-Truy cập `http://127.0.0.1:8787/user/get` sẽ trả về "Hello world!"
+Truy cập `http://127.0.0.1:8787/user/get` sẽ trả về "hello world!"
 
-Bạn cũng có thể sử dụng tham số thứ tư của hàm `trans()` để chuyển đổi ngôn ngữ tạm thời, ví dụ như ở trên và ví dụ dưới đây tương đương:
-
+Bạn cũng có thể dùng tham số thứ 4 của hàm `trans()` để tạm thời chuyển ngôn ngữ. Ví dụ trên tương đương với:
 ```php
 <?php
 namespace app\controller;
@@ -119,18 +114,17 @@ class UserController
 {
     public function get(Request $request)
     {
-        // Tham số thứ 4 chuyển đổi ngôn ngữ
-        $hello = trans('hello', [], null, 'en'); // Hello world!
+        // Tham số thứ 4 chuyển ngôn ngữ
+        $hello = trans('hello', [], null, 'en'); // hello world!
         return response($hello);
     }
 }
 ```
 
-## Đặt ngôn ngữ cụ thể cho mỗi yêu cầu
-translation là một đối tượng đơn lẻ, điều này có nghĩa là tất cả các yêu cầu chia sẻ đối tượng này, nếu một yêu cầu nào đó sử dụng `locale()` để thiết lập ngôn ngữ mặc định, thì nó sẽ ảnh hưởng đến tất cả các yêu cầu tiếp theo của quá trình này. Vì vậy, chúng ta nên đặt ngôn ngữ cụ thể cho mỗi yêu cầu. Ví dụ như sử dụng middleware sau:
+## Thiết lập ngôn ngữ rõ ràng cho từng request
+translation là singleton, nghĩa là mọi request dùng chung một instance. Nếu request nào dùng `locale()` để đặt ngôn ngữ mặc định sẽ ảnh hưởng đến mọi request sau đó trong process. Vì vậy cần thiết lập ngôn ngữ rõ ràng cho từng request. Ví dụ dùng middleware sau:
 
-Tạo tệp `app/middleware/Lang.php` (nếu thư mục không tồn tại thì hãy tự tạo) như sau:
-
+Tạo file `app/middleware/Lang.php` (tạo thư mục nếu chưa có):
 ```php
 <?php
 namespace app\middleware;
@@ -149,46 +143,42 @@ class Lang implements MiddlewareInterface
 }
 ```
 
-Thêm middleware toàn cầu vào `config/middleware.php` như sau:
-
+Thêm middleware toàn cục trong `config/middleware.php`:
 ```php
 return [
-    // Middleware toàn cầu
+    // Middleware toàn cục
     '' => [
-        // ... Giữa này, được lược bỏ
+        // ... các middleware khác bỏ qua
         app\middleware\Lang::class,
     ]
 ];
 ```
 
-## Sử dụng thay thế
-Đôi khi, một thông báo chứa biến cần được dịch, ví dụ:
 
+## Dùng placeholder
+Đôi khi một thông báo chứa biến cần dịch, ví dụ
 ```php
 trans('hello ' . $name);
 ```
+Trường hợp này dùng placeholder để xử lý.
 
-Khi gặp trường hợp này, chúng ta sử dụng thay thế để xử lý.
-
-Thay đổi `resource/translations/zh_CN/messages.php` như sau:
-
+Cập nhật `resource/translations/zh_CN/messages.php`:
 ```php
 return [
-    'hello' => 'Xin chào %name%!',
+    'hello' => '你好 %name%!',
 ];
 ```
-Khi dịch, dữ liệu được chuyển vào các giá trị tương ứng với thay thế thông qua tham số thứ hai
+Khi dịch, truyền giá trị tương ứng với placeholder qua tham số thứ 2:
 ```php
-trans('hello', ['%name%' => 'webman']); // Xin chào webman!
+trans('hello', ['%name%' => 'webman']); // 你好 webman!
 ```
 
 ## Xử lý số nhiều
-Một số ngôn ngữ do sự khác biệt về số lượng có các cấu trúc câu khác nhau, ví dụ: `There is %count% apple`, khi `%count%` bằng 1 cấu trúc câu đúng, khi lớn hơn 1 thì cấu trúc câu sai.
+Một số ngôn ngữ cấu trúc câu khác nhau theo số lượng. Ví dụ `There is %count% apple` đúng khi `%count%` là 1, sai khi lớn hơn 1.
 
-Khi gặp trường hợp này, chúng ta sử dụng **dấu đường ống** (`|`) để liệt kê các hình thức số nhiều.
+Trường hợp này dùng **dấu pipe** (`|`) để liệt kê dạng số nhiều.
 
-Tệp ngôn ngữ `resource/translations/en/messages.php` thêm `apple_count` như sau:
-
+Thêm `apple_count` vào file `resource/translations/en/messages.php`:
 ```php
 return [
     // ...
@@ -200,8 +190,7 @@ return [
 trans('apple_count', ['%count%' => 10]); // There are 10 apples
 ```
 
-Chúng ta thậm chí có thể chỉ định phạm vi số, tạo ra các quy tắc số nhiều phức tạp hơn:
-
+Có thể chỉ định khoảng số để tạo quy tắc số nhiều phức tạp hơn:
 ```php
 return [
     // ...
@@ -213,21 +202,21 @@ return [
 trans('apple_count', ['%count%' => 20]); // There are many apples
 ```
 
-## Chỉ định tệp ngôn ngữ
-Tệp ngôn ngữ mặc định có tên là `messages.php`, thực tế bạn có thể tạo tệp ngôn ngữ khác. 
+## Chỉ định file ngôn ngữ
 
-Tạo tệp ngôn ngữ `resource/translations/zh_CN/admin.php` như sau:
+Tên file ngôn ngữ mặc định là `messages.php`, thực tế có thể tạo file ngôn ngữ tên khác.
 
+Tạo file ngôn ngữ `resource/translations/zh_CN/admin.php`:
 ```php
 return [
-    'hello_admin' => 'Xin chào người quản trị!',
+    'hello_admin' => '你好 管理员!',
 ];
 ```
 
-Để chỉ định tệp ngôn ngữ, sử dụng tham số thứ ba của `trans()` (bỏ qua phần mở rộng `.php`).
+Chỉ định file ngôn ngữ qua tham số thứ 3 của `trans()` (bỏ phần mở rộng `.php`).
 ```php
-trans('hello', [], 'admin', 'zh_CN'); // Xin chào người quản trị!
+trans('hello', [], 'admin', 'zh_CN'); // 你好 管理员!
 ```
 
 ## Thêm thông tin
-Xin tham khảo [tài liệu symfony/translation](https://symfony.com/doc/current/translation.html) để biết thêm thông tin.
+Xem [tài liệu symfony/translation](https://symfony.com/doc/current/translation.html)

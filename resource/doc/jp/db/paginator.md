@@ -1,6 +1,6 @@
 # ページネーション
 
-# 1. LaravelのORMに基づいたページネーション
+# LaravelのORMに基づいたページネーション
 Laravelの`illuminate/database`は便利なページネーション機能を提供しています。
 
 ## インストール
@@ -138,8 +138,8 @@ class UserController
 効果は以下の通りです：
 ![](../../assets/img/paginator.png)
 
-# 2. ThinkphpのORMに基づいたページネーション方法
-追加のライブラリをインストールする必要はありません。think-ormがインストールされていれば使用できます。
+# ThinkPHPのORMに基づいたページネーション
+追加のライブラリのインストールは不要で、think-ormをインストールしていれば使用できます。
 
 ## 使用方法
 ```php

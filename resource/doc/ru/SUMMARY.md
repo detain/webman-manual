@@ -24,6 +24,7 @@
   - [Логирование](log.md)
   - [Файл конфигурации](config.md)
   - [Множество приложений](multiapp.md)
+  - [Корутина](coroutine/coroutine.md)
 
 - База данных
 
@@ -47,6 +48,7 @@
  
 - Популярные компоненты
   - [Проверка данных](components/validation.md)
+  - [Ограничитель частоты запросов](components/rate-limiter.md)
   - [Компонент пагинации](components/paginator.md)
   - [Мультиязычность](components/translation.md)
   - [Обработка изображений](components/image.md)
@@ -91,17 +93,18 @@
 
   - [Пользовательские процессы](process.md)
   - [Внедрение зависимостей](di.md)
+  - [Бинарная упаковка](others/bin.md)
   - [AOP](aop.md)
   
 - Другое
   - [Безопасность](others/security.md)
+  - [Транзакции базы данных](others/transaction.md)
   - [Проверка отключенных функций](others/disable-function-check.md)
   - [Пользовательские скрипты](others/scripts.md)
   - [Пользовательская страница 404 500](others/custom-error-page.md)
   - [Методы обновления](others/upgrade.md)
   - [Прокси-сервер nginx](others/nginx-proxy.md)
   - [Упаковка в phar](others/phar.md)
-  - [Бинарная упаковка](others/bin.md)
   - [Процесс запуска](others/process.md)
   - [Жизненный цикл](others/lifecycle.md)
   - [Утечка памяти](others/memory-leak.md)
@@ -114,4 +117,9 @@
 
 - Обновление
   - [1.4](upgrade/1-4.md)
+  - [1.5](upgrade/1-5.md)
+  - [1.6](upgrade/1-6.md)
+  - [2.0](upgrade/2-0.md)
+  - [2.1](upgrade/2-1.md)
+  - [2.2](upgrade/2-2.md)
   - [Благодарности](thanks.md)

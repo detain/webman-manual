@@ -1,18 +1,18 @@
 # AOP
 
-> 感谢 Hyperf 作者的提交
+> شكراً لمؤلف Hyperf على المساهمة.
 
-## 安装
+## التثبيت
 
-- 安装 aop-integration
+- تثبيت aop-integration
 
 ```shell
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-## 增加 AOP 相关配置
+## إضافة إعدادات AOP
 
-我们需要在 `config` 目录下，增加 `config.php` 配置
+يجب إضافة ملف الإعدادات `config.php` في مجلد `config`.
 
 ```php
 <?php
@@ -36,16 +36,16 @@ return [
         ],
     ],
     'aspects' => [
-        // 这里写入对应的 Aspect
+        // أضف الـ Aspect المقابل هنا
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-## 配置入口文件 start.php
+## تكوين ملف الدخول start.php
 
-> 我们将初始化方法，放到 timezone 下方，以下省略其他代码
+> ضع كود التهيئة أسفل إعداد timezone. باقي الكود مُحذوف أدناه.
 
 ```
 use Hyperf\AopIntegration\ClassLoader;
@@ -54,13 +54,13 @@ if ($timezone = config('app.default_timezone')) {
     date_default_timezone_set($timezone);
 }
 
-// 初始化
+// التهيئة
 ClassLoader::init();
 ```
 
-## 测试
+## الاختبار
 
-首先让我们编写待切入类
+أولاً، لننشئ الفئة التي سيتم اعتراضها:
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-其次新增对应的 `DebugAspect`
+ثم أضف الـ `DebugAspect` المقابل:
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-接下来编辑控制器 `app/controller/IndexController.php`
+بعد ذلك، عدّل المتحكم `app/controller/IndexController.php`:
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-然后配置路由
+ثم حدّث المسار:
 
 ```php
 <?php
@@ -126,11 +126,9 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-最后启动服务，并测试。
+أخيراً، شغّل الخدمة ونفّذ الاختبار:
 
 ```shell
 php start.php start
 curl  http://127.0.0.1:8787/json
 ```
-
-

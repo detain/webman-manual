@@ -1,12 +1,12 @@
 # Manejo de eventos
-
-`webman/event` proporciona un mecanismo de eventos ingenioso que puede ejecutar la lógica empresarial sin invadir el código, logrando el desacoplamiento entre los módulos de negocios. Un escenario típico es cuando un nuevo usuario se registra con éxito, simplemente publicando un evento personalizado como `user.register`, todos los módulos pueden recibir ese evento y ejecutar la lógica empresarial correspondiente.
+`webman/event` proporciona un mecanismo de eventos elegante que permite ejecutar lógica de negocio sin modificar el código, logrando el desacoplamiento entre módulos. Un escenario típico: cuando un nuevo usuario se registra correctamente, basta con publicar un evento personalizado como `user.register`, y cada módulo podrá recibir ese evento y ejecutar la lógica correspondiente.
 
 ## Instalación
 `composer require webman/event`
 
 ## Suscribirse a eventos
-La suscripción a eventos se configura de forma unificada a través del archivo `config/event.php`.
+La suscripción a eventos se configura de forma unificada mediante el archivo `config/event.php`.
+
 ```php
 <?php
 return [
@@ -20,13 +20,16 @@ return [
     ]
 ];
 ```
+
 **Nota:**
-- `user.register`, `user.logout`, etc., son nombres de eventos, de tipo cadena, se recomienda en minúsculas y separados por punto (`.`).
-- Un evento puede tener múltiples funciones de manejo de eventos, que se ejecutan en el orden configurado.
+- `user.register`, `user.logout`, etc., son nombres de eventos (tipo cadena). Se recomienda usar palabras en minúsculas separadas por punto (`.`).
+- Un evento puede tener varias funciones de manejo; se invocan en el orden configurado.
 
 ## Funciones de manejo de eventos
-Las funciones de manejo de eventos pueden ser cualquier método de clase, función, función anónima, etc.
-Por ejemplo, crea la clase de manejo de eventos `app/event/User.php` (crea el directorio si no existe).
+Las funciones de manejo pueden ser métodos de clase, funciones o closures.
+
+Por ejemplo, cree la clase de manejo `app/event/User.php` (cree el directorio si no existe):
+
 ```php
 <?php
 namespace app\event;
@@ -45,7 +48,8 @@ class User
 ```
 
 ## Publicar eventos
-Usa `Event::emit($event_name, $data);` para publicar eventos, por ejemplo:
+Use `Event::dispatch($event_name, $data);` o `Event::emit($event_name, $data);` para publicar un evento. Por ejemplo:
+
 ```php
 <?php
 namespace app\controller;
@@ -59,16 +63,19 @@ class User
             'name' => 'webman',
             'age' => 2
         ];
-        Event::emit('user.register', $user);
+        Event::dispatch('user.register', $user);
     }
 }
 ```
 
-> **Nota**
-> El parámetro `$data` de `Event::emit($event_name, $data);` puede ser cualquier tipo de datos, como un array, una instancia de clase, una cadena, etc.
+Hay dos funciones para publicar: `Event::dispatch($event_name, $data);` y `Event::emit($event_name, $data);`, ambas con los mismos parámetros. La diferencia: `emit` captura excepciones internamente; si una función lanza una excepción, las demás siguen ejecutándose. `dispatch` no captura excepciones; si alguna función lanza una excepción, se detiene la ejecución y la excepción se propaga hacia arriba.
 
-## Escuchar eventos con comodines
-Los registros de escucha de comodines le permiten manejar múltiples eventos en el mismo escuchador, por ejemplo, configurado en `config/event.php`
+> **Sugerencia**
+> El parámetro `$data` puede ser cualquier tipo de datos (array, instancia de clase, cadena, etc.).
+
+## Escucha de eventos con comodines
+La escucha con comodines permite manejar varios eventos con el mismo listener. Por ejemplo, en `config/event.php`:
+
 ```php
 <?php
 return [
@@ -77,7 +84,9 @@ return [
     ],
 ];
 ```
-Podemos obtener el nombre de evento específico a través del segundo parámetro `$event_data` de la función de manejo de eventos
+
+Puede obtener el nombre concreto del evento mediante el segundo parámetro `$event_data` de la función de manejo:
+
 ```php
 <?php
 namespace app\event;
@@ -85,17 +94,17 @@ class User
 {
     function deal($user, $event_name)
     {
-        echo $event_name; // nombre de evento específico, como user.register, user.logout, etc.
+        echo $event_name; // nombre concreto del evento, ej. user.register, user.logout, etc.
         var_export($user);
     }
 }
 ```
 
-## Detener la difusión de eventos
-Cuando regresamos `false` en la función de manejo de eventos, se detendrá la difusión del evento.
+## Detener la difusión del evento
+Si una función de manejo devuelve `false`, se detiene la difusión de ese evento.
 
-## Función de manejo de eventos como función anónima
-La función de manejo de eventos puede ser un método de clase o una función anónima, por ejemplo
+## Manejo de eventos con closures
+La función de manejo puede ser un método de clase o una closure. Por ejemplo:
 
 ```php
 <?php
@@ -108,8 +117,13 @@ return [
 ];
 ```
 
-## Ver eventos y escuchadores
-Usa el comando `php webman event:list` para ver todos los eventos y escuchadores configurados en el proyecto.
+## Ver eventos y listeners
+Use el comando `php webman event:list` para ver todos los eventos y listeners configurados en el proyecto.
+
+## Ámbito de soporte
+Además del proyecto principal, los [plugins base](../plugin/base.md) y los [plugins de aplicación](../app/app.md) también admiten la configuración en `event.php`.
+**Configuración de plugin base:** `config/plugin/vendor/nombre-plugin/event.php`
+**Configuración de plugin de aplicación:** `plugin/nombre-plugin/config/event.php`
 
 ## Consideraciones
-El manejo de eventos no es asíncrono. No es adecuado para manejar procesos lentos. Los procesos lentos deberían ser manejados mediante colas de mensajes, como [webman/redis-queue](https://www.workerman.net/plugin/12).
+El manejo de eventos no es asíncrono. No es adecuado para lógica de negocio lenta; esta debería gestionarse mediante colas de mensajes, como [webman/redis-queue](https://www.workerman.net/plugin/12).

@@ -1,6 +1,6 @@
 # 分頁
 
-# 1. 基於Laravel的ORM的分頁方式
+# 基於Laravel的ORM的分頁方式
 Laravel的`illuminate/database`提供了方便的分頁功能。
 
 ## 安裝
@@ -70,7 +70,7 @@ class UserController
 ```
 
 **模板(php原生)**
-新建模版 app/view/user/get.html
+新建模板 app/view/user/get.html
 ```html
 <html>
 <head>
@@ -86,7 +86,7 @@ class UserController
 ```
 
 **模板(twig)** 
-新建模版 app/view/user/get.html
+新建模板 app/view/user/get.html
 ```html
 <html>
 <head>
@@ -104,7 +104,7 @@ class UserController
 ```
 
 **模板(blade)** 
-新建模版 app/view/user/get.blade.php
+新建模板 app/view/user/get.blade.php
 ```html
 <html>
 <head>
@@ -120,7 +120,7 @@ class UserController
 ```
 
 **模板(thinkphp)**
-新建模版 app/view/user/get.html
+新建模板 app/view/user/get.html
 ```html
 <html>
 <head>
@@ -138,8 +138,8 @@ class UserController
 效果如下：
 ![](../../assets/img/paginator.png)
 
-# 2. 基於Thinkphp的ORM的分頁方式
-無須額外安裝類庫,只要安裝過think-orm即可
+# 基於Thinkphp的ORM的分頁方式
+無須額外安裝類庫，只要安裝過 think-orm 即可。
 ## 使用
 ```php
 public function index(Request $request)

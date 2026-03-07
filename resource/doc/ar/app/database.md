@@ -1,8 +1,8 @@
-# 数据库
+# قاعدة البيانات
 
-由于大部分插件都会安装[webman-admin](https://www.workerman.net/plugin/82)，所以建议直接复用`webman-admin`的数据库配置。
+نظرًا لأن معظم الملحقات تقوم بتثبيت [webman-admin](https://www.workerman.net/plugin/82)، يُوصى بإعادة استخدام تكوين قاعدة بيانات `webman-admin` مباشرةً.
 
-模型基类使用`plugin\admin\app\model\Base`则会自动使用`webman-admin`的数据库配置。
+النماذج التي أساسها `plugin\admin\app\model\Base` ستستخدم تلقائيًا تكوين قاعدة بيانات webman-admin.
 ```php
 <?php
 
@@ -29,60 +29,65 @@ class Orders extends Base
 }
 ```
 
-也可以通过`plugin.admin.mysql`操作`webman-admin`的数据库，例如
+يمكنك أيضًا الوصول إلى قاعدة بيانات webman-admin عبر `plugin.admin.mysql`، على سبيل المثال:
 
 ```php
 Db::connection('plugin.admin.mysql')->table('user')->first();
 ```
 
 
-## 使用自己的数据库
-插件也可以选择使用自己的数据库，例如`plugin/foo/config/database.php`内容如下
+## استخدام قاعدة البيانات الخاصة بك
+
+يمكن للملحقات أيضًا اختيار استخدام قاعدة بيانات خاصة بها. على سبيل المثال، محتوى `plugin/foo/config/database.php`:
+
 ```php
 return  [
     'default' => 'mysql',
     'connections' => [
-        'mysql' => [ // mysql为连接名
+        'mysql' => [ // mysql هو اسم الاتصال
             'driver'      => 'mysql',
             'host'        => '127.0.0.1',
             'port'        => 3306,
-            'database'    => '数据库',
-            'username'    => '用户名',
-            'password'    => '密码',
+            'database'    => 'قاعدة_البيانات',
+            'username'    => 'اسم_المستخدم',
+            'password'    => 'كلمة_المرور',
             'charset'     => 'utf8mb4',
             'collation'   => 'utf8mb4_general_ci',
         ],
-        'admin' => [ // admin为连接名
+        'admin' => [ // admin هو اسم الاتصال
             'driver'      => 'mysql',
             'host'        => '127.0.0.1',
             'port'        => 3306,
-            'database'    => '数据库',
-            'username'    => '用户名',
-            'password'    => '密码',
+            'database'    => 'قاعدة_البيانات',
+            'username'    => 'اسم_المستخدم',
+            'password'    => 'كلمة_المرور',
             'charset'     => 'utf8mb4',
             'collation'   => 'utf8mb4_general_ci',
         ],
     ],
 ];
 ```
-引用方式为`Db::connection('plugin.{插件}.{连接名}');`，例如
+
+صيغة المرجع هي `Db::connection('plugin.{الملحق}.{اسم_الاتصال}');`، على سبيل المثال:
+
 ```php
 use support\Db;
 Db::connection('plugin.foo.mysql')->table('user')->first();
 Db::connection('plugin.foo.admin')->table('admin')->first();
 ```
 
-如果想使用主项目的数据库，则直接使用即可，例如
+لاستخدام قاعدة بيانات المشروع الرئيسي، استدعها مباشرةً:
+
 ```php
 use support\Db;
 Db::table('user')->first();
-// 假设主项目还配置了一个admin连接
+// بافتراض أن المشروع الرئيسي لديه أيضًا اتصال admin مُعد
 Db::connection('admin')->table('admin')->first();
 ```
 
-#### 给Model配置数据库
+#### تكوين قاعدة البيانات للنموذج (Model)
 
-我们可以为Model创建一个Base类，Base类用`$connection`指定插件自己的数据库连接，例如
+يمكنك إنشاء فئة Base للنموذج وتحديد الخاصية `$connection` لاستخدام اتصال قاعدة بيانات الملحق نفسه:
 
 ```php
 <?php
@@ -102,84 +107,92 @@ class Base extends Model
 }
 ```
 
-这样插件里所有的Model继承自Base，就自动使用了插件自己的数据库。
+بهذا الشكل، ستستخدم جميع النماذج في الملحق التي ترث من Base تلقائيًا قاعدة بيانات الملحق نفسه.
 
-## 自动导入数据库
-运行 ` php webman app-plugin:create foo` 会自动创建foo插件，其中包含 `plugin/foo/api/Install.php` 和 `plugin/foo/install.sql`。
+## استيراد قاعدة البيانات تلقائيًا
 
-> **提示**
-> 如果没有生成install.sql文件请尝试升级`webman/console`，命令为`composer require webman/console ^1.3.6`
+تنفيذ `php webman app-plugin:create foo` ينشئ ملحق foo، بما في ذلك `plugin/foo/api/Install.php` و `plugin/foo/install.sql`.
 
-#### 插件安装时导入数据库
-安装插件时会执行Install.php里的`install`方法，该方法会自动导入`install.sql`里的sql语句，从而实现自动导入数据库表的目的。
+> **نصيحة**
+> إذا لم يتم إنشاء ملف install.sql، جرّب تحديث `webman/console`: `composer require webman/console ^1.3.6`
 
-`install.sql`文件内容是创建数据库表以及对表历史修改sql语句，注意每个语句必须用`;`结束，例如
+#### استيراد قاعدة البيانات عند تثبيت الملحق
+
+عند تثبيت ملحق، يتم تنفيذ الدالة `install` في Install.php والتي تشغّل تلقائيًا عبارات SQL في `install.sql`، مستوردةً بذلك جداول قاعدة البيانات.
+
+يجب أن يتضمن محتوى `install.sql` إنشاء الجداول والتغييرات التاريخية للمخطط. كل عبارة يجب أن تنتهي بـ `;`، على سبيل المثال:
+
 ```sql
 CREATE TABLE `foo_orders` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `order_id` varchar(50) NOT NULL COMMENT '订单id',
-  `user_id` int NOT NULL COMMENT '用户id',
-  `total_amount` decimal(10,2) NOT NULL COMMENT '须支付金额',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'المفتاح الأساسي',
+  `order_id` varchar(50) NOT NULL COMMENT 'معرف الطلب',
+  `user_id` int NOT NULL COMMENT 'معرف المستخدم',
+  `total_amount` decimal(10,2) NOT NULL COMMENT 'المبلغ المطلوب دفعه',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB COMMENT='订单';
+) ENGINE=InnoDB COMMENT='الطلبات';
 
 CREATE TABLE `foo_goods` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `name` varchar(50) NOT NULL COMMENT '名称',
-  `price` int NOT NULL COMMENT '价格',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'المفتاح الأساسي',
+  `name` varchar(50) NOT NULL COMMENT 'الاسم',
+  `price` int NOT NULL COMMENT 'السعر',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB COMMENT='商品';
+) ENGINE=InnoDB COMMENT='المنتجات';
 ```
 
-**更改数据库连接**
+**تغيير اتصال قاعدة البيانات**
 
-`install.sql`导入的目标数据库默认为`webman-admin`的数据库，如果想导入到其它数据库，可以修改`Install.php`里的`$connection`属性，例如
+بشكل افتراضي، يتم استيراد `install.sql` إلى قاعدة بيانات webman-admin. للاستيراد إلى قاعدة بيانات أخرى، عدّل الخاصية `$connection` في `Install.php`:
+
 ```php
 <?php
 
 class Install
 {
-    // 指定插件自己的数据库
+    // تحديد قاعدة بيانات الملحق نفسها
     protected static $connection = 'plugin.admin.mysql';
     
     // ...
 }
 ```
 
-**测试**
+**الاختبار**
 
-执行`php webman app-plugin:install foo`安装插件，然后查看数据库，会发现`foo_orders`和`foo_goods`表已经创建了。
+نفّذ `php webman app-plugin:install foo` لتثبيت الملحق. ثم تحقق من قاعدة البيانات: يجب أن تكون جداول `foo_orders` و `foo_goods` قد أُنشئت.
 
-#### 插件升级时更改表结构
-有时候插件升级需要新建表或更改表结构，可以直接在`install.sql`后面追加对应的语句即可，注意每个语句后面用`;`结束，例如追加一个`foo_user`表以及给`foo_orders`表增加一个`status`字段
+#### تغيير هيكل الجداول عند ترقية الملحق
+
+عندما تتطلب ترقية الملحق جداول جديدة أو تغييرات في المخطط، أضف العبارات SQL المناسبة في نهاية `install.sql`. كل عبارة يجب أن تنتهي بـ `;`. على سبيل المثال، إضافة جدول `foo_user` وعمود `status` إلى `foo_orders`:
+
 ```sql
 CREATE TABLE `foo_orders` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `order_id` varchar(50) NOT NULL COMMENT '订单id',
-  `user_id` int NOT NULL COMMENT '用户id',
-  `total_amount` decimal(10,2) NOT NULL COMMENT '须支付金额',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'المفتاح الأساسي',
+  `order_id` varchar(50) NOT NULL COMMENT 'معرف الطلب',
+  `user_id` int NOT NULL COMMENT 'معرف المستخدم',
+  `total_amount` decimal(10,2) NOT NULL COMMENT 'المبلغ المطلوب دفعه',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB COMMENT='订单';
+) ENGINE=InnoDB COMMENT='الطلبات';
 
 CREATE TABLE `foo_goods` (
- `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
- `name` varchar(50) NOT NULL COMMENT '名称',
- `price` int NOT NULL COMMENT '价格',
+ `id` int NOT NULL AUTO_INCREMENT COMMENT 'المفتاح الأساسي',
+ `name` varchar(50) NOT NULL COMMENT 'الاسم',
+ `price` int NOT NULL COMMENT 'السعر',
  PRIMARY KEY (`id`)
-) ENGINE=InnoDB COMMENT='商品';
+) ENGINE=InnoDB COMMENT='المنتجات';
 
 
 CREATE TABLE `foo_user` (
- `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
- `name` varchar(50) NOT NULL COMMENT '名字'
+ `id` int NOT NULL AUTO_INCREMENT COMMENT 'المفتاح الأساسي',
+ `name` varchar(50) NOT NULL COMMENT 'الاسم'
  PRIMARY KEY (`id`)
-) ENGINE=InnoDB COMMENT='用户';
+) ENGINE=InnoDB COMMENT='المستخدم';
 
-ALTER TABLE `foo_orders` ADD `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态';
+ALTER TABLE `foo_orders` ADD `status` tinyint NOT NULL DEFAULT 0 COMMENT 'الحالة';
 ```
 
-升级时会执行Install.php里的`update`方法，该方法同样会执行`install.sql`里的语句，如果有新的语句会执行新的语句，如果是旧的语句会跳过，从而实现升级对数据库的修改。
+عند الترقية، الدالة `update` في Install.php تنفذ العبارات من `install.sql`. الجديدة تُنفّذ؛ القديمة المُطبّقة تُتخطى، مُطبقةً بذلك تغييرات قاعدة البيانات بشكل صحيح عند الترقيات.
 
-#### 卸载插件时删除数据库
-卸载插件时`Install.php`的`uninstall`方法会被调用，它会自动分析`install.sql`里有哪些建表语句，并自动删除这些表，达到卸载插件时删除数据库表的目的。
-如果想卸载时只想执行自己的`uninstall.sql`，不执行自动的删表操作，则只需要创建`plugin/插件名/uninstall.sql`即可，这样`uninstall`方法只会执行`uninstall.sql`文件里的语句。
+#### حذف قاعدة البيانات عند إلغاء تثبيت الملحق
+
+عند إلغاء تثبيت ملحق، يتم استدعاء الدالة `uninstall` في Install.php. تقوم بتحليل تلقائي لعبارات CREATE TABLE في `install.sql` وحذف تلك الجداول.
+
+إذا كنت تريد تنفيذ `uninstall.sql` الخاص بك فقط بدلاً من حذف الجداول التلقائي، أنشئ `plugin/{اسم_الملحق}/uninstall.sql`. في هذه الحالة، الدالة `uninstall` تنفذ فقط العبارات من هذا الملف.

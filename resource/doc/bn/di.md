@@ -1,22 +1,29 @@
-# ডিপেন্ডেন্স অটো ইনজেকশন
-webman-এ ডিপেন্ডেন্স অটো ইনজেকশন একটি ঐচ্ছিক ফিচার, এই ফিচারটি ডিফল্টভাবে বন্ধ থাকে। আপনি যদি ডিপেন্ডেন্স অটো ইনজেকশন ব্যবহার করতে চান, তবে [php-di](https://php-di.org/doc/getting-started.html) ব্যবহার করা সুপরিক্ষিত। নিম্নলিখিত হল কিভাবে `php-di` এর সাথে webman এসোসিয়েশন করতে হবে।
+# ডিপেন্ডেন্সি অটো ইনজেকশন
+
+webman-এ ডিপেন্ডেন্সি অটো ইনজেকশন একটি ঐচ্ছিক ফিচার এবং ডিফল্টভাবে বন্ধ থাকে। আপনার যদি ডিপেন্ডেন্সি অটো ইনজেকশন দরকার হয় তাহলে [php-di](https://php-di.org/doc/getting-started.html) ব্যবহারের সুপারিশ করা হয়। নিচে webman-এর সাথে `php-di` ব্যবহারের বিবরণ দেওয়া হল।
 
 ## ইনস্টলেশন
-```sh
-composer require psr/container ^1.1.1 php-di/php-di ^6 doctrine/annotations ^1.14
+
 ```
-`config/container.php` কনফিগারেশন ফাইল সম্পাদনা করুন, এবার তার মাঝখানের বিষয়গুলি হবে:
+composer require php-di/php-di:^7.0
+```
+
+`config/container.php` কনফিগারেশন সম্পাদনা করুন। চূড়ান্ত কন্টেন্ট এরকম হওয়া উচিত:
+
 ```php
 $builder = new \DI\ContainerBuilder();
 $builder->addDefinitions(config('dependence', []));
 $builder->useAutowiring(true);
-$builder->useAnnotations(true);
+$builder->useAttributes(true);
 return $builder->build();
 ```
-> `config/container.php` ফাইলটি শেষ পর্যন্ত `PSR-11` স্পেসিফিকেশন অনুসারে পারদর্শী ইল্লিট রিটার্ন করবে। আপনি যদি `php-di` ব্যবহার না করতে চান, তবে এখানে অন্য যে কোন পারদর্শী `PSR-11` স্পেসিফিকেশন অনুসারে কনটেনের ইন্সট্যান্স রিটার্ন করতে পারেন।
+
+> `config/container.php` ফাইল শেষ পর্যন্ত PSR-11 স্পেসিফিকেশনের সাথে সামঞ্জস্যপূর্ণ একটি কনটেইনার ইনস্ট্যান্স রিটার্ন করবে। আপনি যদি `php-di` ব্যবহার না করতে চান তাহলে এখানে অন্য কোনো PSR-11 সামঞ্জস্যপূর্ণ কনটেইনার ইনস্ট্যান্স তৈরি ও রিটার্ন করতে পারেন। ডিফল্ট কনফিগারেশন শুধু webman-এর মৌলিক কনটেইনার ফাংশনালিটি দেয়।
 
 ## কনস্ট্রাক্টর ইনজেকশন
-নতুন একটি `app/service/Mailer.php` ফাইল তৈরি করুন (যদি ফোল্ডার না থাকে তাহলে নিজে তৈরি করুন) এবং তার কন্টেন্ট দেখুন:
+
+`app/service/Mailer.php` ফাইল তৈরি করুন (ফোল্ডার না থাকলে তৈরি করুন) এবং নিচের কন্টেন্ট দিন:
+
 ```php
 <?php
 namespace app\service;
@@ -25,11 +32,12 @@ class Mailer
 {
     public function mail($email, $content)
     {
-        // ইমেইল পাঠানোর কোড অনুমোদিত নয়
+        // ইমেইল পাঠানোর কোড বাদ দেওয়া হয়েছে
     }
 }
 ```
-`app/controller/UserController.php` ফাইলে নিম্নলিখিত কনটেন্ট দেখুন:
+
+`app/controller/UserController.php` এর কন্টেন্ট:
 
 ```php
 <?php
@@ -40,11 +48,9 @@ use app\service\Mailer;
 
 class UserController
 {
-    private $mailer;
 
-    public function __construct(Mailer $mailer)
+    public function __construct(private Mailer $mailer)
     {
-        $this->mailer = $mailer;
     }
 
     public function register(Request $request)
@@ -54,49 +60,51 @@ class UserController
     }
 }
 ```
-সাধারণভাবে, `app\controller\UserController` ইন্সট্যান্স করার জন্য নিম্নলিখিত কোডগুলি ব্যবহার করা প্রয়োজন:
+
+সাধারণত `app\controller\UserController` ইনস্ট্যান্স করতে নিচের কোড লাগে:
+
 ```php
 $mailer = new Mailer;
 $user = new UserController($mailer);
 ```
-তবে `php-di` ব্যবহার করার পরে, ডেভেলপারের কোনো ম্যানুয়াল ইনস্ট্যান্স তৈরি করার প্রয়োজন নেই, ওয়েবম্যান স্বয়ংক্রিয়ভাবে সাহায্য করবে। ইনস্ট্যান্স মানও আছে যদি ইনস্ট্যান্সে অন্যান্য ডিপেন্ডেন্স থাকে, তাহলে ওয়েবম্যান স্বয়ংক্রিয়ভাবে ইনস্ট্যান্স তৈরি করে আপনাকে বিস্তারিত হাতোয়ারী করবে। ডেভেলপারের কোন প্রাথমিক প্রস্তুতি কাজ করা প্রয়োজন নেই।
 
-> **দৃষ্টিভঙ্গি**
-> ডিপেন্ডেন্স অটো ইনজেকশন সম্পন্ন করার জন্য কেবল ফ্রেমওয়ার্ক অথবা `php-di` তৈরি ইনস্ট্যান্স দরকার, ম্যানুয়াল `new` স্টেটমেন্ট দ্বারা তৈরি করা ইনস্ট্যান্স ডিপেন্ডেন্স অটো ইনজেকশন সম্পন্ন করতে পারবে না, যদি ইনজেকশন করতে চান তাহলে `support/Container` ইন্টারফেস ব্যবহার করে `new` স্টেটমেন্ট প্রতিস্থাপন করতে হবে, উদাহরণস্বরূপ:
+`php-di` ব্যবহার করলে ডেভেলপারের কন্ট্রোলারে `Mailer` ম্যানুয়ালি ইনস্ট্যান্স করার দরকার নেই — webman নিজেই করবে। `Mailer` ইনস্ট্যান্স করার সময় যদি অন্য ক্লাস ডিপেন্ডেন্সি থাকে তাহলে webman সেগুলোও ইনস্ট্যান্স ও ইনজেক্ট করবে। ডেভেলপারের কোনো ইনিশিয়ালাইজেশন লাগে না।
+
+> **মনে রাখুন**
+> ডিপেন্ডেন্সি অটো ইনজেকশন শুধু ফ্রেমওয়ার্ক বা `php-di` দ্বারা তৈরি ইনস্ট্যান্সেই কাজ করে। `new` দিয়ে ম্যানুয়ালি তৈরি ইনস্ট্যান্সে কাজ করে না। ইনজেকশন চাইলে `new` এর বদলে `support\Container` ইন্টারফেস ব্যবহার করুন, যেমন:
 
 ```php
 use app\service\UserService;
 use app\service\LogService;
 use support\Container;
 
-// নিউ কীওয়ার্ড ব্যবহার করে তৈরি ইনস্ট্যান্স ডিপেন্ডেন্স পাঠানো যাবে না
+// new দিয়ে তৈরি ইনস্ট্যান্সে ডিপেন্ডেন্সি ইনজেকশন কাজ করে না
 $user_service = new UserService;
-// নিউ কীওয়ার্ড ব্যবহার করে তৈরি ইন্স্ট্যান্স ডিপেন্ডেন্স পাঠানো যাবে না
+// new দিয়ে তৈরি ইনস্ট্যান্সে ডিপেন্ডেন্সি ইনজেকশন কাজ করে না
 $log_service = new LogService($path, $name);
 
-// কনটেনের ইন্স্ট্যান্স ব্যবহার করে ইন্জেক্শন করা যাবে
+// Container দিয়ে তৈরি ইনস্ট্যান্সে ডিপেন্ডেন্সি ইনজেকশন কাজ করে
 $user_service = Container::get(UserService::class);
-// কনটেনের ইন্স্ট্যান্স ব্যবহার করে ইন্জেক্শন করা যাবে
+// Container দিয়ে তৈরি ইনস্ট্যান্সে ডিপেন্ডেন্সি ইনজেকশন কাজ করে
 $log_service = Container::make(LogService::class, [$path, $name]);
 ```
 
-## অ্যানোটেশন ইনজেকশন
-কনস্ট্রাক্টর ডিপেন্ডেন্স অটো ইনজেকশনের পাশাপাশি, আমরা এনোটেশন ইনজেকশন ব্যবহার করতে পারি। উপরের উদাহরণে, `app\controller\UserController` -কে নিম্নলিখিত মতে পরিবর্তন করুন:
+## অ্যাট্রিবিউট ইনজেকশন
+
+কনস্ট্রাক্টর ডিপেন্ডেন্সি ইনজেকশনের পাশাপাশি অ্যাট্রিবিউট ইনজেকশন ব্যবহার করা যায়। আগের উদাহরণের ধারাবাহিকতায় `app\controller\UserController` এভাবে পরিবর্তন করুন:
+
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
 use app\service\Mailer;
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class UserController
 {
-    /**
-     * @Inject
-     * @var Mailer
-     */
-    private $mailer;
+    #[Inject]
+    private Mailer $mailer;
 
     public function register(Request $request)
     {
@@ -105,10 +113,11 @@ class UserController
     }
 }
 ```
-এই উদাহরণটি `@Inject` এনোটেশন ইনজেকশনের মাধ্যমে ইনজেকশন করে এবং `@var` এনোটেশন দিয়ে অবজেক্টের ধরন ঘোষণা করে। এই উদাহরণ কনস্ট্রাক্টর ইনজেকশনের ফলাফল যথার্থ তবে কোডটি আরও সংক্ষিপ্ত।
 
-> **দৃষ্টিভঙ্গি**
-> webman-এ 1.4.6 ভার্শনের আগে কন্ট্রোলার প্যারামিটার ইনজেকশন সমর্থন করে না, উদাহরণস্বরূপ নিম্নলিখিত কোডটি 1.4.6 <= webman এ সমর্থিত নয়:
+এ উদাহরণ ইনজেকশনের জন্য `#[Inject]` অ্যাট্রিবিউট ব্যবহার করে এবং অবজেক্ট টাইপ অনুযায়ী ইনস্ট্যান্স মেম্বার ভেরিয়েবলে অটো ইনজেক্ট করে। কনস্ট্রাক্টর ইনজেকশনের মতই ফলাফল, কিন্তু কোড আরও সংক্ষিপ্ত।
+
+> **মনে রাখুন**
+> webman ভার্সন 1.4.6 এর আগে কন্ট্রোলার প্যারামিটার ইনজেকশন সাপোর্ট করে না। যেমন নিচের কোড webman<=1.4.6 এ সাপোর্টেড নয়:
 
 ```php
 <?php
@@ -119,7 +128,7 @@ use app\service\Mailer;
 
 class UserController
 {
-    // 1.4.6 ভার্শনের পূর্বে কন্ট্রোলার প্যারামিটার ইনজেকশন সমর্থন করে না
+    // 1.4.6 এর আগে কন্ট্রোলার প্যারামিটার ইনজেকশন সাপোর্ট করে না
     public function register(Request $request, Mailer $mailer)
     {
         $mailer->mail('hello@webman.com', 'Hello and welcome!');
@@ -127,9 +136,11 @@ class UserController
     }
 }
 ```
-## কাস্টম কন্সট্রাক্টর ইনজেকশন
 
-কখনও কখনও কনস্ট্রাকটরে প্যারামিটার ক্লাসের ইনস্ট্যান্স নয়, পিএইইচপি-ডিআই চেয়ে প্রয়োজনীয় ডাটা যোগাযোগ সার্ভার আইপি এবং পোর্টের মতো। উদাহরণস্বরূপ, মেইলার কন্সট্রাক্টরে এসএমটিপি সার্ভার আইপি এবং পোর্ট প্যারামিটার গ্রহণ করতে হবে -
+## কাস্টম কনস্ট্রাক্টর ইনজেকশন
+
+কখনও কখনও কনস্ট্রাক্টরে পাঠানো প্যারামিটার ক্লাস ইনস্ট্যান্স না হয়ে স্ট্রিং, সংখ্যা, অ্যারে ইত্যাদি হতে পারে। যেমন Mailer কনস্ট্রাক্টরে SMTP সার্ভার IP ও পোর্ট লাগতে পারে:
+
 ```php
 <?php
 namespace app\service;
@@ -148,30 +159,33 @@ class Mailer
 
     public function mail($email, $content)
     {
-        // ইমেইল পাঠানোর কোড অনুপ্তম করা হলেও
+        // ইমেইল পাঠানোর কোড বাদ দেওয়া হয়েছে
     }
 }
-``` 
+```
 
-এই ধরনের সমস্যার জন্য আমরা পিইএইইচ-ডিআই দ্বারা প্রস্তাবিত কনস্ট্রাক্টরের আইডেন্টিটি নিশ্চিত না হওয়ার কারণে পূর্ব পর্বে আলোচনা করা তুলনা করার কারণে এই ধরনের কোড কে স্বয়ংক্রিয়ভাবে আপনার ইচ্ছিত ফলাফল দেয়। 
+এ অবস্থায় আগের কনস্ট্রাক্টর অটো ইনজেকশন সরাসরি ব্যবহার করা যায় না কারণ `php-di` জানে না `$smtp_host` ও `$smtp_port` এর মান কী। এ ক্ষেত্রে কাস্টম ইনজেকশন ব্যবহার করা যায়।
 
-### কাস্টম কন্সট্রাক্টর ইনজেকশন
-`config/dependence.php` এ নিম্নলিখিত কোডটি যোগ করুন -
+`config/dependence.php` এ (ফাইল না থাকলে তৈরি করুন) নিচের কোড যোগ করুন:
+
 ```php
 return [
-    // ... অন্যান্য কনফিগারেশন এর অনস্কিপেড থাকলেও 
-    
+    // ... অন্যান্য কনফিগারেশন বাদ দেওয়া হয়েছে
+
     app\service\Mailer::class =>  new app\service\Mailer('192.168.1.11', 25);
 ];
 ```
-এইভাবে যেখানে ডিপেন্ডেন্সি ইনজেকশনের প্রয়োজন হয়, সেই সময় ডিপেন্ডেন্সি ইনজেকশনের জন্য এই `app\service\Mailer` ইনস্ট্যান্স ব্যবহৃত হবে। 
 
-আমরা `config/dependence.php` তে দেখতে পাচ্ছি, `new` ব্যবহার করে `Mailer` ক্লাস ইনস্ট্যান্স বানানো আছে, ক্ষমতা রেখেছে এই উদাহরণে কিন্তু `Mailer` ক্লাস অন্য কোনও প্যাকেজের নির্ভরণা থাকতে পারে, অথবা `Mailer` ক্লাস আইচ্ছার মাঝে অ্যানোটেশন ইনজেকশন ব্যবহার করা হত পারে। সমস্যা সমাধান হল - `Container::get(ক্লাস নাম)` অথবা `Container::make(ক্লাস নাম, [কনস্ট্রাক্টর প্যারামিটার])` ফাংশনের মাধ্যমে ক্লাস ইনিশিয়ালাইজ করা।
+ডিপেন্ডেন্সি ইনজেকশন যখন `app\service\Mailer` ইনস্ট্যান্স চাইবে তখন এই কনফিগে তৈরি ইনস্ট্যান্স অটোমেটিক ব্যবহার করবে।
 
-### কাস্টম ইন্টারফেস ইনজেকশন
-রিয়েল প্রজেক্টে, আমরা ইন্টারফেস এর দিকে ভাবতে চা খ, অবশ্যই ক্লাস এর সাথে। যেমনঃ `app\controller\UserController` এ `app\service\MailerInterface` এর সাথে যুক্ত হওয়া উচিত, `app\service\Mailer` না। 
+লক্ষ্য করুন `config/dependence.php` এ `Mailer` ক্লাস ইনস্ট্যান্স করতে `new` ব্যবহার হচ্ছে। এ উদাহরণে কোন সমস্যা নেই কিন্তু `Mailer` ক্লাস যদি অন্য ক্লাসে ডিপেন্ড করে বা ভিতরে অ্যাট্রিবিউট ইনজেকশন ব্যবহার করে তাহলে `new` দিয়ে ইনিশিয়ালাইজ করলে ডিপেন্ডেন্সি অটো ইনজেকশন হবে না। সমাধান হল কাস্টম ইন্টারফেস ইনজেকশন এবং `Container::get(ক্লাস নাম)` বা `Container::make(ক্লাস নাম, [কনস্ট্রাক্টর প্যারামিটার])` দিয়ে ক্লাস ইনিশিয়ালাইজ করা।
 
-`MailerInterface` ইন্টারফেস সংজ্ঞা -
+## কাস্টম ইন্টারফেস ইনজেকশন
+
+প্রকৃত প্রজেক্টে কংক্রিট ক্লাসের বদলে ইন্টারফেসে প্রোগ্রাম করা ভালো। যেমন `app\controller\UserController` কে `app\service\Mailer` এর বদলে `app\service\MailerInterface` এ ডিপেন্ড করা উচিত।
+
+`MailerInterface` ইন্টারফেস ডিফাইন করুন:
+
 ```php
 <?php
 namespace app\service;
@@ -182,7 +196,8 @@ interface MailerInterface
 }
 ```
 
-`MailerInterface` ইন্টারফেসের বাস্তবায়ন -
+`MailerInterface` এর ইমপ্লিমেন্টেশন ডিফাইন করুন:
+
 ```php
 <?php
 namespace app\service;
@@ -201,19 +216,56 @@ class Mailer implements MailerInterface
 
     public function mail($email, $content)
     {
-        // ইমেইল পাঠানোর কোড অনুপ্তম করা হলেও
+        // ইমেইল পাঠানোর কোড বাদ দেওয়া হয়েছে
     }
 }
 ```
 
-`MailerInterface` ইন্টারফেস সেরা, না বাস্তব পরিবর্তন নিতে, কেবল মাত্র, `config/dependence.php` এর সাহায্যে, এই ইন্টারফেস ব্যবহার করা যাবে। ইউজ করা হতে পারে যেকোনো ব্যবস্থা পাইলে পূর্বলিখিত ইন্টারফেস প্রয়োজন হয়, `MailerInterface` ইন্টারফেস প্রথমে ইমপ্লিমেন্ট করা যাবে।
+কংক্রিট ইমপ্লিমেন্টেশন এর বদলে `MailerInterface` ব্যবহার করুন:
 
-> ইন্টারফেস ব্যবহারের সুবিধা হল, যখন আমরা কোনও পৃথক কোড প্রয়োজন হয় যেমন, কোনও যন্ত্রাংশ পরিবর্তন করুন, তখন ব্যবহারকারীগণ পরিবর্তনিযোগ্য নয়, হলেও `config/dependence.php` এ কোন নির্দিষ্ট ব্যবহার পরিবর্তন করা যাবে। এটা একটি ইউনিট-টেস্টিং করার জন্য বেশ ব্যবহারী হলো।
+```php
+<?php
+namespace app\controller;
 
-### অন্যান্য কাস্টম ইনজেকশন
-`config/dependence.php` এ ক্লাস এর ডিপেন্ডেন্সি, বা পূর্ণাঙ্গ স্ট্রিং, নম্বর, অ্যারে ইত্যাদি মূল্য পরিবর্তনের সাথে যোগ করা যা যায়। 
+use support\Request;
+use app\service\MailerInterface;
+use DI\Attribute\Inject;
 
-যেমন, `config/dependence.php` এ নিম্নলিখিত সম্পর্কে সংজ্ঞা করা যাবে -
+class UserController
+{
+    #[Inject]
+    private MailerInterface $mailer;
+
+    public function register(Request $request)
+    {
+        $this->mailer->mail('hello@webman.com', 'Hello and welcome!');
+        return response('ok');
+    }
+}
+```
+
+`config/dependence.php` এ `MailerInterface` এর ইমপ্লিমেন্টেশন ডিফাইন করুন:
+
+```php
+use Psr\Container\ContainerInterface;
+
+return [
+    app\service\MailerInterface::class => function(ContainerInterface $container) {
+        return $container->make(app\service\Mailer::class, ['smtp_host' => '192.168.1.11', 'smtp_port' => 25]);
+    }
+];
+```
+
+বিজনেস যখন `MailerInterface` ইন্টারফেস ব্যবহার করবে তখন অটোমেটিক `Mailer` ইমপ্লিমেন্টেশন ব্যবহার হবে।
+
+> ইন্টারফেসে প্রোগ্রাম করার সুবিধা হল কম্পোনেন্ট বদলাতে হলে বিজনেস কোড বদলাতে হয় না — শুধু `config/dependence.php` এ কংক্রিট ইমপ্লিমেন্টেশন বদলাতে হয়। ইউনিট টেস্টের জন্যও খুব কাজের।
+
+## অন্যান্য কাস্টম ইনজেকশন
+
+ক্লাস ডিপেন্ডেন্সি ছাড়াও `config/dependence.php` এ স্ট্রিং, সংখ্যা, অ্যারে ইত্যাদি অন্যান্য ভ্যালু ডিফাইন করা যায়।
+
+যেমন `config/dependence.php` যদি এভাবে ডিফাইন হয়:
+
 ```php
 return [
     'smtp_host' => '192.168.1.11',
@@ -221,34 +273,119 @@ return [
 ];
 ```
 
-এই সময়ে, আমরা `@Inject` ব্যবহার থেকে `smtp_host` `smtp_port` অনুপ্তরে সাধারণ মানে আবিশ্কার করব -
+তখন `#[Inject]` দিয়ে `smtp_host` ও `smtp_port` ক্লাস প্রোপার্টিতে ইনজেক্ট করা যায়:
+
 ```php
 <?php
 namespace app\service;
 
-use DI\Annotation\Inject;
+use DI\Attribute\Inject;
 
 class Mailer
 {
-    /**
-     * @Inject("smtp_host")
-     */
+    #[Inject("smtp_host")]
     private $smtpHost;
 
-    /**
-     * @Inject("smtp_port")
-     */
+    #[Inject("smtp_port")]
     private $smtpPort;
 
     public function mail($email, $content)
     {
-        // ইমেইল পাঠানোর কোড অনুপ্তম করা হলেও
-        echo "{$this->smtpHost}:{$this->smtpPort}\n"; //  আউটপুট 192.168.1.11:25
+        // ইমেইল পাঠানোর কোড বাদ দেওয়া হয়েছে
+        echo "{$this->smtpHost}:{$this->smtpPort}\n"; // 192.168.1.11:25 আউটপুট হবে
     }
 }
 ```
 
-> লক্ষ্য করুন: `@Inject("key")` এখানে ডাবল কোটেশন টি আছে।
+# লেজি লোডিং
 
-### অধিক পড়ুন
-[পিএইইচ-ডিআই ম্যানুয়ালে](https://php-di.org/doc/getting-started.html) এ বেশি জানুন।
+> লেজি লোডিং একটি ডিজাইন প্যাটার্ন যা অবজেক্ট তৈরি বা ইনিশিয়ালাইজ করা পর্যন্ত পিছিয়ে দেয় যতক্ষণ না সত্যিই প্রয়োজন হয়।
+
+এ ফিচারের জন্য অতিরিক্ত ডিপেন্ডেন্সি লাগে। নিচের প্যাকেজটি `ocramius/proxy-manager` এর একটি ফোর্ক; মূল রিপোজিটরি PHP 8 সাপোর্ট করে না।
+
+```
+composer require friendsofphp/proxy-manager-lts
+```
+
+ব্যবহার:
+
+```php
+<?php
+
+use DI\Attribute\Injectable;
+use DI\Attribute\Inject;
+
+#[Injectable(lazy: true)]
+class MyClass
+{
+    private string $name;
+
+    public function __construct()
+    {
+        echo "MyClass ইনস্ট্যান্স হয়েছে\n";
+        $this->name = "Lazy Loaded Object";
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+}
+
+class Controller
+{
+    #[Inject]
+    public MyClass $myClass;
+
+    public function getClass()
+    {
+        echo "প্রক্সি ক্লাস নাম: " . get_class($this->myClass) . "\n";
+        echo "name: " . $this->myClass->getName();
+
+    }
+}
+```
+
+আউটপুট:
+
+```
+প্রক্সি ক্লাস নাম: ProxyManagerGeneratedProxy\__PM__\app\web\MyClass\Generated98d2817da63e3c088c808a0d4f6e9ae0
+MyClass ইনস্ট্যান্স হয়েছে
+name: Lazy Loaded Object
+```
+
+এ উদাহরণ দেখায় যে `#[Injectable]` অ্যাট্রিবিউট সহ ডিক্লেয়ারড ক্লাস ইনজেক্ট হলে আগে তার প্রক্সি ক্লাস তৈরি হয়। আসল ক্লাস শুধু তার যেকোনো মেথড কল হলেই ইনস্ট্যান্স হয়।
+
+# সিরকুলার ডিপেন্ডেন্সি
+
+সিরকুলার ডিপেন্ডেন্সি হয় যখন একাধিক ক্লাস একে অপরের উপর নির্ভর করে একটি বন্ধ ডিপেন্ডেন্সি লুপ তৈরি করে।
+
+- ডাইরেক্ট সিরকুলার ডিপেন্ডেন্সি
+  - মডিউল A মডিউল B তে ডিপেন্ড করে, মডিউল B মডিউল A তে ডিপেন্ড করে
+  - A → B → A লুপ তৈরি হয়
+
+- ইন্ডাইরেক্ট সিরকুলার ডিপেন্ডেন্সি
+  - ডিপেন্ডেন্সি সাইকেলে একাধিক মডিউল জড়িত
+  - যেমন A → B → C → A
+
+অ্যাট্রিবিউট ইনজেকশন ব্যবহার করলে `php-di` সিরকুলার ডিপেন্ডেন্সি অটো ডিটেক্ট করে এক্সেপশন দেয়। দরকার হলে নিচের পদ্ধতি ব্যবহার করুন:
+
+```php
+class userController
+{
+
+    // এ কোড মুছে দিন
+    // #[Inject]
+    // private UserService userService;
+
+    public function getUserName()
+    {
+        $userService = Container::get(UserService::class);
+        return $userService->getName();
+    }
+}
+```
+
+## আরও তথ্য
+
+দয়া করে [php-di ডকুমেন্টেশন](https://php-di.org/doc/getting-started.html) দেখুন।

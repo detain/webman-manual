@@ -65,6 +65,21 @@ Wie bei der `get`-Methode können Sie auch der `post`-Methode einen Standardwert
 $request->post('name', 'tom');
 ```
 
+## Hilfsfunktion input()
+Ähnlich wie `$request->input()` kann die Hilfsfunktion `input()` alle Parameter abrufen. Sie hat zwei Parameter:
+1. name: Der Name des abzurufenden Parameters (wenn leer, werden alle Parameter als Array zurückgegeben)
+2. default: Standardwert (wird verwendet, wenn der Parameter aus dem ersten Argument nicht gefunden wird)
+
+**Beispiel**
+```php
+// Parameter name abrufen
+$name = input('name');
+// Parameter name abrufen, bei Nichtvorhandensein den Standardwert verwenden
+$name = input('name', 'Max');
+// Alle Parameter abrufen
+$all_params = input();
+```
+
 ## Abrufen des Original-POST-Körpers der Anfrage
 ```php
 $post = $request->rawBody();
@@ -128,15 +143,53 @@ $only = $request->only(['username', 'password']);
 $except = $request->except(['avatar', 'age']);
 ```
 
+## Eingabe über Controller-Parameter abrufen
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Die obige Logik entspricht:
+```php
+<?php
+namespace app\controller;
+use support\Request;
+use support\Response;
+
+class UserController
+{
+    public function create(Request $request): Response
+    {
+        $name = $request->input('name');
+        $age = (int)$request->input('age', 18);
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Weitere Informationen finden Sie unter [Controller-Parameter-Bindung](controller.md#controller-parameter-binding).
+
 ## Abrufen von hochgeladenen Dateien
+
+> **Hinweis**
+> Für Datei-Uploads ist ein Formular mit `multipart/form-data` erforderlich.
+
 **Abrufen des gesamten hochgeladenen Datei-Arrays**
 ```php
 $request->file();
 ```
 
-Formular ähnlich:
+Formularbeispiel:
 ```html
-<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
+<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data">
 <input name="file1" multiple="multiple" type="file">
 <input name="file2" multiple="multiple" type="file">
 <input type="submit">
@@ -300,7 +353,7 @@ $request->getRealIp($safe_mode=true);
 
 Wenn ein Projekt einen Proxy verwendet (z. B. nginx), gibt `$request->getRemoteIp()` normalerweise die IP-Adresse des Proxy-Servers zurück (ähnlich wie `127.0.0.1` `192.168.x.x`) und nicht die wirkliche IP-Adresse des Client-Anfragers. In diesem Fall können Sie versuchen, die wirkliche IP-Adresse des Client-Anfragers mit `$request->getRealIp()` zu erhalten.
 
-`$request->getRealIp()` versucht, die wirkliche IP-Adresse aus den HTTP-Headern `x-real-ip`, `x-forwarded-for`, `client-ip`, `x-client-ip`, `via` zu erhalten.
+`$request->getRealIp()` versucht, die wirkliche IP-Adresse aus den HTTP-Headern `x-forwarded-for`, `x-real-ip`, `client-ip`, `x-client-ip`, `via` zu erhalten.
 
 > Da HTTP-Header leicht gefälscht werden können, ist die mit dieser Methode erhaltene IP-Adresse des Client-Anfragers nicht zu 100% vertrauenswürdig, insbesondere wenn `$safe_mode` auf false gesetzt ist. Eine verlässlichere Methode, die die wirkliche IP-Adresse des Client-Anfragers über einen Proxy erhält, besteht darin, die als sicher bekannte Proxy-Server-IP zu kennen und zu wissen, welcher HTTP-Header die wirkliche IP-Adresse übermittelt. Falls die IP-Adresse, die von `$request->getRemoteIp()` zurückgegeben wird, als die des bekannten sicheren Proxy-Servers bestätigt wird, kann die wirkliche IP-Adresse dann über `$request->header('Name des Headers mit der wirklichen IP-Adresse')` erhalten werden.
 
@@ -339,7 +392,6 @@ Bei einer Anfrage, die kein Plugin ist, wird ein Leerstring `''` zurückgegeben.
 ```php
 $request->plugin;
 ```
-> Diese Funktion erfordert webman>=1.4.0
 
 ## Erhalte den Anwendungsnamen der Anfrage
 Bei einer einzelnen Anwendung wird immer ein Leerstring `''` zurückgegeben. Bei [mehreren Anwendungen](multiapp.md) wird der Anwendungsnamen zurückgegeben.
@@ -368,3 +420,33 @@ Gibt etwas ähnliches wie `index` zurück.
 
 > Da Closure-Funktionen keiner Controller-Methode zugeordnet sind, gibt eine Anfrage von einer Closure-Route immer einen Leerstring `''` zurück.
 > Siehe auch [Routing](route.md) für Closure-Routen.
+
+## Parameter überschreiben
+
+Manchmal müssen wir Anforderungsparameter überschreiben, z. B. um die Anfrage zu filtern und die Werte dem Anforderungsobjekt neu zuzuweisen. In solchen Fällen können wir die Methoden `setGet()`, `setPost()` und `setHeader()` verwenden.
+
+#### GET-Parameter überschreiben
+```php
+$request->get(); // Angenommen, das Ergebnis ist ['name' => 'tom', 'age' => 18]
+$request->setGet(['name' => 'tom']);
+$request->get(); // Endergebnis ist ['name' => 'tom']
+```
+
+> **Hinweis**
+> Wie im Beispiel gezeigt, überschreibt `setGet()` alle GET-Parameter. `setPost()` und `setHeader()` verhalten sich ebenso.
+
+#### POST-Parameter überschreiben
+```php
+$post = $request->post();
+foreach ($post as $key => $value) {
+    $post[$key] = htmlspecialchars($value);
+}
+$request->setPost($post);
+$request->post(); // Gefilterte POST-Parameter abrufen
+```
+
+#### HEADER-Parameter überschreiben
+```php
+$request->setHeader(['host' => 'example.com']);
+$request->header('host'); // Ausgabe: example.com
+```

@@ -22,6 +22,8 @@ When accessing the URL `http://127.0.0.1:8787/api/{controller}/{method}`, it wil
 
 When accessing the URL `http://127.0.0.1:8787/admin/{controller}/{method}`, it will access the controller and method under `app/admin/controller`.
 
+In webman, each directory under app can be regarded as an application.
+
 In webman, you can even organize the app directory like this:
 ```
 app

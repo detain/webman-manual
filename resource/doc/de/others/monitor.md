@@ -1,22 +1,22 @@
 # Prozessüberwachung
-Webman enthält einen eigenen Monitor-Prozess, der zwei Funktionen unterstützt:
+webman verfügt über einen eingebauten Monitor-Prozess, der zwei Funktionen unterstützt:
+1. Überwacht Dateiänderungen und lädt den neuen Geschäftscode automatisch neu (üblicherweise während der Entwicklung).
+2. Überwacht den Speicherverbrauch aller Prozesse; wenn ein Prozess kurz davor steht, das `memory_limit` aus der `php.ini` zu überschreiten, wird er automatisch sicher neu gestartet (ohne Auswirkungen auf den Betrieb).
 
-1. Überwacht die Aktualisierung von Dateien und lädt automatisch neuen Geschäftscode nach (in der Regel während der Entwicklung).
-2. Überwacht den Speicherbedarf aller Prozesse. Wenn der Speicherbedarf eines Prozesses kurz davor ist, die `memory_limit`-Einschränkung in der `php.ini` zu überschreiten, wird der Prozess sicher neu gestartet (ohne den Geschäftsbetrieb zu beeinträchtigen).
-
-### Überwachungskonfiguration
-Die Konfigurationsdatei `config/process.php` enthält die Einstellungen für die `monitor`-Konfiguration:
+## Überwachungskonfiguration
+Konfiguration für `monitor` in `config/process.php`:
 ```php
+
 global $argv;
 
 return [
-    // Dateiaktualisierungserkennung und automatisches Neuladen
+    // Erkennung von Dateiänderungen und automatisches Neuladen
     'monitor' => [
         'handler' => process\Monitor::class,
         'reloadable' => false,
         'constructor' => [
             // Diese Verzeichnisse überwachen
-            'monitorDir' => array_merge([    // Welche Verzeichnisse sollen überwacht werden
+            'monitorDir' => array_merge([    // Welche Verzeichnisse überwacht werden sollen
                 app_path(),
                 config_path(),
                 base_path() . '/process',
@@ -29,18 +29,17 @@ return [
                 'php', 'html', 'htm', 'env'
             ],
             'options' => [
-                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // Soll Dateiüberwachung aktiviert werden
-                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // Soll Speicherüberwachung aktiviert werden
+                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/', // Dateiüberwachung aktivieren
+                'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',                      // Speicherüberwachung aktivieren
             ]
         ]
     ]
 ];
 ```
-
-`monitorDir` wird konfiguriert, um zu überwachen, welche Verzeichnisse aktualisiert werden sollen (es sollten nicht zu viele Dateien in den überwachten Verzeichnissen vorhanden sein).
-`monitorExtensions` wird konfiguriert, um festzulegen, welche Dateiendungen in den überwachten `monitorDir`-Verzeichnissen überwacht werden sollen.
-Der Wert von `options.enable_file_monitor` ist `true`, um die Dateiaktualisierungsüberwachung zu aktivieren (standardmäßig ist die Dateiüberwachung auf Linux-Systemen im Debug-Modus standardmäßig aktiviert).
-Der Wert von `options.enable_memory_monitor` ist `true`, um die Speichernutzungsüberwachung zu aktivieren (Speichernutzungsüberwachung wird auf Windows-Systemen nicht unterstützt).
+`monitorDir` legt fest, welche Verzeichnisse auf Änderungen überwacht werden (die Anzahl der überwachten Dateien sollte nicht zu groß sein).
+`monitorExtensions` legt fest, welche Dateiendungen in den `monitorDir`-Verzeichnissen überwacht werden.
+Bei `options.enable_file_monitor` = `true` wird die Dateiüberwachung aktiviert (unter Linux standardmäßig im Debug-Modus aktiv).
+Bei `options.enable_memory_monitor` = `true` wird die Speicherüberwachung aktiviert (unter Windows nicht unterstützt).
 
 > **Hinweis**
-> Auf Windows-Systemen muss die Dateiüberwachung gestartet werden, wenn Sie `windows.bat` oder `php windows.php` ausführen müssen.
+> Unter Windows wird die Dateiüberwachung nur bei Ausführung von `windows.bat` oder `php windows.php` aktiviert.

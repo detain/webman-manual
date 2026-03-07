@@ -1,4 +1,4 @@
-# Schnellstart
+# Datenbankmodell - Modellverwendung (Laravel-Stil)
 
 Das Webman-Modell basiert auf [Eloquent ORM](https://laravel.com/docs/7.x/eloquent). Jede Datenbanktabelle hat ein entsprechendes "Modell", das mit dieser Tabelle interagiert. Sie können das Modell verwenden, um Daten aus der Tabelle abzufragen und neue Datensätze in die Tabelle einzufügen.
 
@@ -6,7 +6,7 @@ Bevor Sie beginnen, stellen Sie sicher, dass die Datenbankverbindung in `config/
 
 > Hinweis: Um Modellbeobachter mit Eloquent ORM zu verwenden, müssen Sie zusätzlich `composer require "illuminate/events"` importieren. [Beispiel](#模型观察者)
 
-## Beispiel
+## Datenbankmodell-Beispiel
 ```php
 <?php
 namespace app\model;
@@ -192,7 +192,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -536,7 +536,7 @@ if ($post->is($anotherPost)) {
 Verwenden Sie die folgende Referenz[Laravel 中的模型事件与 Observer
 ](https://learnku.com/articles/6657/model-events-and-observer-in-laravel)
 
-Hinweis: Um den Modell-Observer in Eloquent ORM zu verwenden, muss zusätzlich composer require "illuminate/events" importiert werden.
+Hinweis: Um den Modell-Observer in Eloquent ORM zu verwenden, muss zusätzlich `composer require "illuminate/events"` importiert werden.
 
 ```php
 <?php
@@ -555,3 +555,5 @@ class User extends Model
 }
 ```
 
+## Transaktionen
+Siehe [Datenbanktransaktionen](../others/transaction.md)

@@ -1,18 +1,18 @@
 # AOP
 
-> Agradecimientos a los colaboradores de Hyperf
+> Gracias al autor de Hyperf por su contribución.
 
-### Instalación
+## Instalación
 
-- Instalar la integración aop
+- Instalar aop-integration
 
 ```shell
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### Agregar configuración relacionada con AOP
+## Añadir configuración relacionada con AOP
 
-Necesitamos agregar la configuración `config.php` en el directorio `config`
+Es necesario añadir el archivo de configuración `config.php` en el directorio `config`.
 
 ```php
 <?php
@@ -36,31 +36,31 @@ return [
         ],
     ],
     'aspects' => [
-        // Escribir aquí el Aspect correspondiente
+        // Aquí se añaden los Aspect correspondientes
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### Configurar el archivo de inicio start.php
+## Configurar el archivo de entrada start.php
 
-> Vamos a colocar el método de inicialización debajo de la zona de la zona horaria, a continuación omitiremos el resto del código
+> Coloque el código de inicialización debajo de la configuración de zona horaria. El resto del código se omite a continuación.
 
-```php
+```
 use Hyperf\AopIntegration\ClassLoader;
 
 if ($timezone = config('app.default_timezone')) {
     date_default_timezone_set($timezone);
 }
 
-// Inicializar
+// Inicialización
 ClassLoader::init();
 ```
 
-### Prueba
+## Pruebas
 
-Primero vamos a escribir la clase a la que se le aplicará el corte
+Primero, creemos la clase a interceptar:
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-Luego añadimos el `DebugAspect` correspondiente
+A continuación, añada el `DebugAspect` correspondiente:
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-A continuación, editamos el controlador `app/controller/IndexController.php`
+Luego, edite el controlador `app/controller/IndexController.php`:
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-Luego configuramos las rutas
+Después configure la ruta:
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-Finalmente, iniciamos el servicio y realizamos la prueba.
+Por último, inicie el servicio y ejecute la prueba:
 
 ```shell
 php start.php start

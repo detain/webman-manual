@@ -16,17 +16,17 @@ return [
     ],
 ];
 ```
-เมื่อใช้
+เมื่อใช้งาน
 ```php
 use support\Redis;
 Redis::connection('plugin.foo.default')->get('key');
 Redis::connection('plugin.foo.cache')->get('key');
 ```
 
-เช่นเดียวกัน หากต้องการนำการกำหนดค่าตั้งต้นของ Redis ของโปรเจกต์หลักมาใช้
+ในทำนองเดียวกัน หากต้องการใช้การตั้งค่า Redis ของโปรเจกต์หลักซ้ำ
 ```php
 use support\Redis;
 Redis::get('key');
-// ถ้าสมมติว่าโปรเจกต์หลักกำหนดการเชื่อมต่อ cache ไว้
+// สมมติว่าโปรเจกต์หลักมีการตั้งค่าการเชื่อมต่อ cache ไว้แล้ว
 Redis::connection('cache')->get('key');
 ```

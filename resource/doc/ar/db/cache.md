@@ -1,18 +1,14 @@
-# Cache缓存
+# التخزين المؤقت (Cache)
 
-[webman/cache](https://github.com/webman-php/cache)是基于[symfony/cache](https://github.com/symfony/cache)开发的缓存组件，兼容协程和非协程环境，支持连接池。
+[webman/cache](https://github.com/webman-php/cache) هو مكون تخزين مؤقت مبني على [symfony/cache](https://github.com/symfony/cache)، متوافق مع البيئات ذات التزامن والغير متزامنة، ويدعم تجمع الاتصالات.
 
-
-> **注意**
-> 当前手册为 webman v2 版本，如果您使用的是webman v1版本，请查看 [v1版本手册](/doc/webman-v1/db/cache.html)
-
-## 安装
+## التثبيت
 
 ```php
 composer require -W webman/cache
 ```
 
-## 示例
+## مثال
 ```php
 <?php
 namespace app\controller;
@@ -31,10 +27,10 @@ class UserController
 }
 ```
 
-## 配置文件位置
-配置文件在 `config/cache.php`，如果没有请手动创建。
+## موقع ملف التكوين
+يوجد ملف التكوين في `config/cache.php`. أنشئه يدوياً إن لم يكن موجوداً.
 
-## 配置文件内容
+## محتوى ملف التكوين
 ```php
 <?php
 return [
@@ -57,27 +53,27 @@ return [
     ]
 ];
 ```
-`stores.driver`支持4种驱动，**file**、**redis**、**array**、**apcu**。
+يدعم `stores.driver` أربعة محركات: **file** و **redis** و **array** و **apcu**.
 
-#### file 文件驱动
-此为默认驱动，不依赖其它组件，支持跨进程共享缓存数据，不支持多服务器共享缓存数据。
+#### محرك file
+المحرك الافتراضي. لا يعتمد على مكونات خارجية. يدعم مشاركة التخزين المؤقت عبر العمليات. لا يدعم المشاركة عبر عدة خوادم.
 
-#### array 内存驱动
-内存存储，性能最好，但是会占用内存，不支持跨进程跨服务器共享数据，进程重启后失效，一般用于缓存数据量小的项目。
+#### محرك array
+تخزين في الذاكرة بأفضل أداء، لكنه يستهلك الذاكرة. لا يدعم المشاركة بين العمليات أو الخوادم. تضيع البيانات عند إعادة تشغيل العملية. مناسب للمشاريع ذات حجم تخزين مؤقت صغير.
 
-#### apcu 内存驱动
-内存存储，性能仅次于 array，支持跨进程共享缓存数据，不支持多服务器共享缓存数据，进程重启后失效，一般用于缓存数据量小的项目。
+#### محرك apcu
+تخزين في الذاكرة. أداؤه ثاني أفضل بعد array. يدعم مشاركة التخزين المؤقت عبر العمليات. لا يدعم المشاركة عبر عدة خوادم. تضيع البيانات عند إعادة تشغيل العملية. مناسب للمشاريع ذات حجم تخزين مؤقت صغير.
 
-> 需要安装并启用 [APCu 扩展](https://pecl.php.net/package/APCu)；不建议用于频繁进行缓存写入/删除的场景，会导致明显的性能下降。
+> يتطلب تثبيت وتفعيل [إضافة APCu](https://pecl.php.net/package/APCu). لا يُنصح به لسيناريوهات الكتابة/الحذف المتكررة للتخزين المؤقت، فقد يؤدي إلى انخفاض ملحوظ في الأداء.
 
-#### redis 驱动
-依赖[webman/redis](./redis.md)组件，支持跨进程跨服务器共享缓存数据。
+#### محرك redis
+يعتمد على مكون [webman/redis](./redis.md). يدعم مشاركة التخزين المؤقت عبر العمليات والخوادم.
 
 **stores.redis.connection**
 
-`stores.redis.connection` 对应的是`config/redis.php` 里对应的key。当使用redis时，会复用`webman/redis`的配置包括连接池配置。
+`stores.redis.connection` يقابل المفتاح المُعرّف في `config/redis.php`. عند استخدام Redis، يعيد استخدام تكوين `webman/redis` بما فيه إعدادات تجمع الاتصالات.
 
-**建议在`config/redis.php`增加一个独立的配置，例如cache类似如下**
+**يُوصى بإضافة تكوين Redis مخصص للتخزين المؤقت في `config/redis.php`، مثال:**
 
 ```php
 <?php
@@ -88,7 +84,7 @@ return [
         'port' => 6379,
         'database' => 0,
     ],
-    'cache' => [ // <==== 新增
+    'cache' => [ // <==== إضافة جديد
         'password' => 'abc123',
         'host' => '127.0.0.1',
         'port' => 6379,
@@ -98,11 +94,12 @@ return [
 ];
 ```
 
-然后将`stores.redis.connection`设置为`cache`，`config/cache.php`最终配置类似如下
+ثم ضع `stores.redis.connection` على `cache`. يكون ملف `config/cache.php` النهائي كالتالي:
+
 ```php
 <?php
 return [
-    'default' => 'redis', // <==== 
+    'default' => 'redis', // <====
     'stores' => [
         'file' => [
             'driver' => 'file',
@@ -119,16 +116,17 @@ return [
 ];
 ```
 
-## 切换存储
-可以通过如下代码手动切store，从而使用不同的存储驱动，例如
+## تبديل التخزين
+يمكن التبديل يدوياً بين التخزينات لاستخدام محركات مختلفة، مثال:
+
 ```php
 Cache::store('redis')->set('key', 'value');
 Cache::store('array')->set('key', 'value');
 ```
 
-> **提示**
-> Key 名受 [PSR6](https://www.php-fig.org/psr/psr-6/#definitions) 限制不允许包含`{}()/\@:`中任一字符，但这一判断截至目前（`symfony/cache` 7.2.4）可暂时通过 PHP ini 配置 `zend.assertions=-1` 跳过。
+> **تلميح**
+> أسماء مفاتيح التخزين المؤقت مقيدة بـ [PSR-6](https://www.php-fig.org/psr/psr-6/#definitions) ولا يجوز أن تحتوي على أي من الأحرف `{}()/\@:`. اعتباراً من `symfony/cache` 7.2.4، يمكن تجاوز هذا التحقق عبر خيار PHP ini `zend.assertions=-1`.
 
-## 使用其它Cache组件
+## استخدام مكونات تخزين مؤقت أخرى
 
-[ThinkCache](https://github.com/webman-php/think-cache)组件使用参考 [其它数据库](others.md#ThinkCache)
+راجع [قواعد البيانات الأخرى](others.md#ThinkCache) لمكون [ThinkCache](https://github.com/webman-php/think-cache).

@@ -1,8 +1,8 @@
 # AOP
 
-> 感謝 Hyerpf 作者的貢獻
+> 感謝 Hyperf 作者的貢獻。
 
-### 安裝
+## 安裝
 
 - 安裝 aop-integration
 
@@ -10,9 +10,9 @@
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### 增加 AOP 相關配置
+## 增加 AOP 相關配置
 
-我們需要在 `config` 目錄下，增加 `config.php` 配置
+我們需要在 `config` 目錄下新增 `config.php` 配置檔案。
 
 ```php
 <?php
@@ -36,18 +36,18 @@ return [
         ],
     ],
     'aspects' => [
-        // 這裡寫入對應的 Aspect
+        // 在此寫入對應的 Aspect
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### 配置入口文件 start.php
+## 配置入口檔案 start.php
 
-> 我們將初始化方法，放到 timezone 下方，以下省略其他代碼
+> 將初始化方法放在 timezone 設定下方，以下省略其他程式碼。
 
-```php
+```
 use Hyperf\AopIntegration\ClassLoader;
 
 if ($timezone = config('app.default_timezone')) {
@@ -58,9 +58,9 @@ if ($timezone = config('app.default_timezone')) {
 ClassLoader::init();
 ```
 
-### 測試
+## 測試
 
-首先讓我們編寫待切入類
+首先建立待切入的類別：
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-其次新增對應的 `DebugAspect`
+接著新增對應的 `DebugAspect`：
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-接下來編輯控制器 `app/controller/IndexController.php`
+然後編輯控制器 `app/controller/IndexController.php`：
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-然後配置路由
+接著設定路由：
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-最後啟動服務，並測試。
+最後啟動服務並進行測試。
 
 ```shell
 php start.php start

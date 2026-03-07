@@ -1,13 +1,12 @@
-# Kết nối webman-admin
+# Tích hợp webman-admin
 
-[webman-admin](https://www.workerman.net/plugin/82) là một bảng điều khiển quản lý được phát triển bởi webman chính thức.
-Hỗ trợ cài đặt quyền hạn, tạo menu (curd một cách dễ dàng), đi kèm với một bảng người dùng, thuận tiện cho việc chia sẻ dữ liệu người dùng giữa các ứng dụng và plugin khác nhau.
+[webman-admin](https://www.workerman.net/plugin/82) là bảng quản trị chính thức do webman phát triển. Hỗ trợ thiết lập quyền hạn, tạo menu (CRUD một chạm), kèm theo bảng người dùng để thuận tiện chia sẻ dữ liệu giữa các plugin ứng dụng.
 
-## Lợi ích của việc kết nối webman-admin
+## Lợi ích khi tích hợp webman-admin
 
-* Cung cấp một cổng vào sau đều cho các ứng dụng và plugin, nâng cao trải nghiệm người dùng
-* Giảm thời gian phát triển bảng điều khiển sau đều cho các ứng dụng và plugin, giảm chi phí bảo trì
-* Bảng điều khiển quản lý đi kèm với tính năng quản lý plugin, thuận tiện cho việc tìm kiếm và cài đặt plugin một cách tập trung
+* Cung cấp điểm vào backend thống nhất cho các plugin ứng dụng, nâng cao trải nghiệm người dùng
+* Giảm thời gian phát triển backend cho plugin ứng dụng, hạ chi phí bảo trì
+* Bảng quản trị có sẵn chức năng quản lý plugin, thuận tiện tìm kiếm và cài đặt plugin tập trung
 
-## Tài liệu kết nối
+## Tài liệu tích hợp
 https://www.workerman.net/doc/webman-admin/development/link.html

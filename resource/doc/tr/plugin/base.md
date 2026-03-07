@@ -1,5 +1,5 @@
-# Temel Eklentiler
+# Temel eklentiler
 
-Temel eklentiler genellikle genel bileşenlerdir ve genellikle composer kullanılarak kurulur. Kodlar vendor klasörüne yerleştirilir. Kurulum sırasında, özel yapılandırmaların (ara katmanlar, süreçler, yönlendirme vb. yapılandırmaların) `{ana proje}config/plugin` dizinine otomatik olarak kopyalanmasını sağlayabilir ve webman otomatik olarak bu dizini yapılandırma olarak tanır ve yapılandırmayı ana yapılandırmaya birleştirir, böylece eklentiler webman'ın herhangi bir yaşam döngüsüne müdahale edebilir.
+Temel eklentiler genellikle ortak bileşenlerdir, tipik olarak Composer ile kurulur ve kod vendor dizininin altında bulunur. Kurulum sırasında özel yapılandırmalar (middleware, işlemler, rotalar vb.) `{ana proje}config/plugin` dizinine otomatik olarak kopyalanabilir. webman bu dizindeki yapılandırmayı otomatik olarak tanır ve ana yapılandırmayla birleştirir, böylece eklentiler webman'ın yaşam döngüsünün herhangi bir aşamasına müdahale edebilir.
 
-Daha fazlası için [Temel Eklenti Oluşturma](create.md) sayfasına bakın.
+Daha fazla bilgi için [Temel eklenti oluşturma](create.md) bölümüne bakın.

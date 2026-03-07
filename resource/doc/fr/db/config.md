@@ -1,18 +1,18 @@
-# Configuration
-Les bases de données et les versions pris en charge par illuminate/database sont les suivantes : 
+# Configuration de la base de données (style Laravel)
+webman/database prend en charge les bases de données et versions suivantes :
 
 - MySQL 5.6+
 - PostgreSQL 9.4+
 - SQLite 3.8.8+
 - SQL Server 2017+
 
-Le fichier de configuration de la base de données se trouve dans `config/database.php`.
+Le fichier de configuration se trouve dans `config/database.php`.
 
 ```php
 return [
     // Base de données par défaut
     'default' => 'mysql',
-    // Configurations de différentes bases de données
+    // Diverses configurations de bases de données
     'connections' => [
 
         'mysql' => [
@@ -28,100 +28,126 @@ return [
             'prefix'      => '',
             'strict'      => true,
             'engine'      => null,
-        ],
+            'pool' => [ // Configuration du pool de connexions, uniquement avec les pilotes swoole/swow
+                'max_connections' => 5, // Nombre maximal de connexions
+                'min_connections' => 1, // Nombre minimal de connexions
+                'wait_timeout' => 3,    // Délai maximal d'attente pour obtenir une connexion, lance une exception en cas de dépassement
+                'idle_timeout' => 60,   // Durée maximale d'inactivité des connexions dans le pool, récupération au dépassement jusqu'à min_connections
+                'heartbeat_interval' => 50, // Intervalle de pulsation en secondes, recommandé inférieur à 60
+            ],
+         ],
+         
+         'sqlite' => [
+             'driver'   => 'sqlite',
+             'database' => '',
+             'prefix'   => '',
+             'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
+            ],
+         ],
 
-        'sqlite' => [
-            'driver'   => 'sqlite',
-            'database' => '',
-            'prefix'   => '',
-        ],
-
-        'pgsql' => [
-            'driver'   => 'pgsql',
-            'host'     => '127.0.0.1',
-            'port'     => 5432,
-            'database' => 'webman',
-            'username' => 'webman',
-            'password' => '',
-            'charset'  => 'utf8',
-            'prefix'   => '',
-            'schema'   => 'public',
-            'sslmode'  => 'prefer',
-        ],
-
-        'sqlsrv' => [
-            'driver'   => 'sqlsrv',
-            'host'     => 'localhost',
-            'port'     => 1433,
-            'database' => 'webman',
-            'username' => 'webman',
-            'password' => '',
-            'charset'  => 'utf8',
-            'prefix'   => '',
-        ],
-    ],
-];
-```
-
-## Utiliser plusieurs bases de données
-Utilisez `Db::connection('nom_de_la_configuration')` pour choisir quelle base de données utiliser, où `nom_de_la_configuration` correspond à la clé correspondante dans le fichier de configuration `config/database.php`.
-
-Par exemple, avec la configuration de base de données suivante :
-
-```php
-return [
-    // Base de données par défaut
-    'default' => 'mysql',
-    // Configurations de différentes bases de données
-    'connections' => [
-
-        'mysql' => [
-            'driver'      => 'mysql',
-            'host'        =>   '127.0.0.1',
-            'port'        => 3306,
-            'database'    => 'webman',
-            'username'    => 'webman',
-            'password'    => '',
-            'unix_socket' =>  '',
-            'charset'     => 'utf8',
-            'collation'   => 'utf8_unicode_ci',
-            'prefix'      => '',
-            'strict'      => true,
-            'engine'      => null,
-        ],
-
-        'mysql2' => [
-             'driver'      => 'mysql',
-             'host'        => '127.0.0.1',
-             'port'        => 3306,
-             'database'    => 'webman2',
-             'username'    => 'webman2',
-             'password'    => '',
-             'unix_socket' => '',
-             'charset'     => 'utf8',
-             'collation'   => 'utf8_unicode_ci',
-             'prefix'      => '',
-             'strict'      => true,
-             'engine'      => null,
-        ],
-        'pgsql' => [
+         'pgsql' => [
              'driver'   => 'pgsql',
              'host'     => '127.0.0.1',
-             'port'     =>  5432,
+             'port'     => 5432,
              'database' => 'webman',
-             'username' =>  'webman',
+             'username' => 'webman',
              'password' => '',
              'charset'  => 'utf8',
              'prefix'   => '',
              'schema'   => 'public',
              'sslmode'  => 'prefer',
+             'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
+            ],
          ],
+
+         'sqlsrv' => [
+             'driver'   => 'sqlsrv',
+             'host'     => 'localhost',
+             'port'     => 1433,
+             'database' => 'webman',
+             'username' => 'webman',
+             'password' => '',
+             'charset'  => 'utf8',
+             'prefix'   => '',
+             'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
+            ],
+         ],
+     ],
  ];
 ```
 
-Vous pouvez changer de base de données de la manière suivante :
+## Utiliser plusieurs bases de données
+Utilisez `Db::connection('nom_config')` pour sélectionner la base de données, où `nom_config` correspond à la `key` dans le fichier `config/database.php`.
+
+Exemple avec la configuration suivante :
+
 ```php
-// Utiliser la base de données par défaut, équivalent à Db::connection('mysql')->table('users')->where('name', 'John')->first();
+ return [
+     'default' => 'mysql',
+     'connections' => [
+
+         'mysql' => [
+             'driver'      => 'mysql',
+             'host'        =>   '127.0.0.1',
+             'port'        => 3306,
+             'database'    => 'webman',
+             'username'    => 'webman',
+             'password'    => '',
+             'unix_socket' =>  '',
+             'charset'     => 'utf8',
+             'collation'   => 'utf8_unicode_ci',
+             'prefix'      => '',
+             'strict'      => true,
+             'engine'      => null,
+         ],
+         
+         'mysql2' => [
+              'driver'      => 'mysql',
+              'host'        => '127.0.0.1',
+              'port'        => 3306,
+              'database'    => 'webman2',
+              'username'    => 'webman2',
+              'password'    => '',
+              'unix_socket' => '',
+              'charset'     => 'utf8',
+              'collation'   => 'utf8_unicode_ci',
+              'prefix'      => '',
+              'strict'      => true,
+              'engine'      => null,
+         ],
+         'pgsql' => [
+              'driver'   => 'pgsql',
+              'host'     => '127.0.0.1',
+              'port'     =>  5432,
+              'database' => 'webman',
+              'username' =>  'webman',
+              'password' => '',
+              'charset'  => 'utf8',
+              'prefix'   => '',
+              'schema'   => 'public',
+              'sslmode'  => 'prefer',
+          ],
+ ];
+```
+
+Pour changer de base de données :
+```php
+// Utiliser la base par défaut, équivalent à Db::connection('mysql')->table('users')->where('name', 'John')->first();
 $users = Db::table('users')->where('name', 'John')->first(); 
 // Utiliser mysql2
 $users = Db::connection('mysql2')->table('users')->where('name', 'John')->first();

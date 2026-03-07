@@ -1,8 +1,8 @@
-# কাসবিন
+# Casbin
 
 ## বর্ণনা
 
-কাসবিন হল একটি শক্তিশালী, দক্ষ ওপেন সোর্স অ্যাক্সেস কন্ট্রোল ফ্রেমওয়ার্ক যা বহু ধরণের অ্যাক্সেস কন্ট্রোল মডেল সমর্থন করে।
+Casbin একটি শক্তিশালী এবং দক্ষ ওপেন সোর্স অ্যাক্সেস কন্ট্রোল ফ্রেমওয়ার্ক। এর অনুমতি ব্যবস্থাপনা প্রক্রিয়া বিভিন্ন অ্যাক্সেস কন্ট্রোল মডেল সমর্থন করে।
 
 ## প্রজেক্ট ঠিকানা
 
@@ -14,23 +14,23 @@ https://github.com/teamones-open/casbin
 composer require teamones/casbin
 ```
 
-## কাসবিন অফিসিয়াল ওয়েবসাইট
+## Casbin অফিসিয়াল ওয়েবসাইট
 
-বিস্তারিত ব্যবহারের জন্য আপনি অফিসিয়াল চাইনিজ ডকুমেন্টে যেতে পারেন, এখানে আমি কেবল ওয়েবম্যানে কীভাবে কনফিগার করব তা বলবো।
+বিস্তারিত ব্যবহারের জন্য অফিসিয়াল চীনা ডকুমেন্টেশনে যান। এখানে শুধুমাত্র webman এ Casbin কনফিগার এবং ব্যবহার করার পদ্ধতি বর্ণিত হয়েছে।
 
 https://casbin.org/docs/zh-CN/overview
 
 ## ডিরেক্টরি স্ট্রাকচার
 
-``` 
+```
 .
 ├── config                        কনফিগারেশন ডিরেক্টরি
-│   ├── casbin-restful-model.conf ব্যবহার করা অনুমতি মডেল কনফিগারেশন ফাইল
-│   ├── casbin.php                casbin কনফিগারেশন
+│   ├── casbin-restful-model.conf অনুমতি মডেল কনফিগারেশন ফাইল
+│   ├── casbin.php                Casbin কনফিগারেশন
 ......
 ├── database                      ডেটাবেস ফাইল
-│   ├── migrations                মাইগ্রেশন ফাইল
-│   │   └── 20210218074218_create_rule_table.php
+│   ├── migrations                মাইগ্রেশন ফাইল
+│   │   └── 20210218074218_create_rule_table.php
 ......
 ```
 
@@ -43,44 +43,79 @@ use Phinx\Migration\AbstractMigration;
 
 class CreateRuleTable extends AbstractMigration
 {
-    // পরিবর্তন পদ্ধতি
+    /**
+     * Change Method.
+     *
+     * Write your reversible migrations using this method.
+     *
+     * More information on writing migrations is available here:
+     * http://docs.phinx.org/en/latest/migrations.html#the-abstractmigration-class
+     *
+     * The following commands can be used in this method and Phinx will
+     * automatically reverse them when rolling back:
+     *
+     *    createTable
+     *    renameTable
+     *    addColumn
+     *    addCustomColumn
+     *    renameColumn
+     *    addIndex
+     *    addForeignKey
+     *
+     * Any other destructive changes will result in an error when trying to
+     * rollback the migration.
+     *
+     * Remember to call "create()" or "update()" and NOT "save()" when working
+     * with the Table class.
+     */
     public function change()
     {
-      // টেবিল তৈরি করুন
+        $table = $this->table('rule', ['id' => false, 'primary_key' => ['id'], 'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => 'নিয়ম টেবিল']);
+
+        // ডেটা ফিল্ড যোগ করুন
+        $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => 'প্রাইমারি কী ID'])
+            ->addColumn('ptype', 'char', ['default' => '', 'limit' => 8, 'comment' => 'নিয়ম ধরন'])
+            ->addColumn('v0', 'string', ['default' => '', 'limit' => 128])
+            ->addColumn('v1', 'string', ['default' => '', 'limit' => 128])
+            ->addColumn('v2', 'string', ['default' => '', 'limit' => 128])
+            ->addColumn('v3', 'string', ['default' => '', 'limit' => 128])
+            ->addColumn('v4', 'string', ['default' => '', 'limit' => 128])
+            ->addColumn('v5', 'string', ['default' => '', 'limit' => 128]);
+
+        // তৈরি সম্পাদন করুন
+        $table->create();
     }
 }
-
 ```
 
-## কাসবিন কনফিগারেশন
+## Casbin কনফিগারেশন
 
-অনুমতি নিয়ামক কনফিগারেশন দয়া করে দেখুন: https://casbin.org/docs/zh-CN/syntax-for-models
+অনুমতি নিয়ম মডেল কনফিগারেশন সিনট্যাক্সের জন্য দেখুন: https://casbin.org/docs/zh-CN/syntax-for-models
 
 ```php
-
 <?php
 
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // অনুমতি নিয়ামক মডেল কনফিগারেশন ফাইল
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // অনুমতি নিয়ম মডেল কনফিগারেশন ফাইল
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'model', // মডেল অথবা অ্যাডাপ্টার
+            'type' => 'model', // model or adapter
             'class' => \app\model\Rule::class,
         ],
     ],
-    // একাধিক অনুমতি মডেল কনফিগারেশন করা যায়
+    // একাধিক অনুমতি মডেল কনফিগার করা যেতে পারে
     'rbac' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // অনুমতি নিয়ামক মডেল কনফিগারেশন ফাইল
+            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // অনুমতি নিয়ম মডেল কনফিগারেশন ফাইল
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'model', // মডেল অথবা অ্যাডাপ্টার
+            'type' => 'model', // model or adapter
             'class' => \app\model\RBACRule::class,
         ],
     ],
@@ -89,66 +124,66 @@ return [
 
 ### অ্যাডাপ্টার
 
-বর্তমান কম্পোজার পৃষ্ঠাবলীতে think-orm এর মডেল পদ্ধতিকে অনুগত করা হয়েছে, অন্য এওয়ারএম দয়া করে vendor/teamones/src/adapters/DatabaseAdapter.php দেখুন
+বর্তমান Composer প্যাকেজ think-orm এর model মেথডের সাথে উপযুক্ত। অন্যান্য ORM এর জন্য vendor/teamones/src/adapters/DatabaseAdapter.php দেখুন
 
-তারপর কনফিগারেশন পরিবর্তন করুন
+তারপর কনফিগারেশন পরিবর্তন করুন:
 
 ```php
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // অনুমতি নিয়ামক মডেল কনফিগারেশন ফাইল
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // অনুমতি নিয়ম মডেল কনফিগারেশন ফাইল
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'adapter', // এখানে টাইপটি অ্যাডাপ্টার মোডেল হিসেবে কনফিগার করুন
+            'type' => 'adapter', // এখানে টাইপ অ্যাডাপ্টার মোড হিসাবে কনফিগার করুন
             'class' => \app\adapter\DatabaseAdapter::class,
         ],
     ],
 ];
 ```
 
-## ব্যবহারের নির্দেশ
+## ব্যবহার নির্দেশিকা
 
-### আমন্ত্রণ
+### ইমপোর্ট
 
 ```php
-# আমন্ত্রণ
+# ইমপোর্ট
 use teamones\casbin\Enforcer;
 ```
 
-### দুটি ব্যবহারের পদ্ধতি
+### দুটি ব্যবহার পদ্ধতি
 
 ```php
 # 1. ডিফল্ট কনফিগারেশন ব্যবহার করুন
 Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# 2. ব্যক্তিগত rbac কনফিগারেশন ব্যবহার করুন
+# 2. কাস্টম rbac কনফিগারেশন ব্যবহার করুন
 Enforcer::instance('rbac')->addPermissionForUser('user1', '/user', 'read');
 ```
 
-### সাধারণ API পরিচিতি
+### সাধারণ API পরিচয়
 
-অধিক API ব্যবহারের তথ্যের জন্য দয়া করে অফিসিয়াল ডকুমেন্টে যান
+আরও API ব্যবহারের জন্য অফিসিয়াল ডকুমেন্টেশন দেখুন:
 
-- ম্যানেজমেন্ট API: https://casbin.org/docs/zh-CN/management-api
-- আরবিএসি এপিআই: https://casbin.org/docs/zh-CN/rbac-api
+- Management API: https://casbin.org/docs/zh-CN/management-api
+- RBAC API: https://casbin.org/docs/zh-CN/rbac-api
 
 ```php
-# ব্যবহারকারীকে অনুমতি যোগ করুন
+# ব্যবহারকারীর জন্য অনুমতি যোগ করুন
 
 Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# একটি ব্যবহারকে আনুমতি মুছুন
+# ব্যবহারকারীর অনুমতি মুছুন
 
 Enforcer::deletePermissionForUser('user1', '/user', 'read');
 
-# ব্যবহারকে সমস্ত অনুমতি প্রাপ্তি করুন
+# ব্যবহারকারীর সব অনুমতি পান
 
 Enforcer::getPermissionsForUser('user1');
 
-# ব্যবহারকে ভূমিকা যোগ করুন
+# ব্যবহারকারীর জন্য ভূমিকা যোগ করুন
 
 Enforcer::addRoleForUser('user1', 'role1');
 
@@ -156,29 +191,29 @@ Enforcer::addRoleForUser('user1', 'role1');
 
 Enforcer::addPermissionForUser('role1', '/user', 'edit');
 
-# সমস্ত ভূমিকা প্রাপ্ত করুন
+# সব ভূমিকা পান
 
 Enforcer::getAllRoles();
 
-# ব্যবহারকে সমস্ত ভূমিকা প্রাপ্ত করুন
+# ব্যবহারকারীর সব ভূমিকা পান
 
 Enforcer::getRolesForUser('user1');
 
-# ভূমিকা অনুযায়ী ব্যবহার প্রাপ্ত করুন
+# ভূমিকা অনুযায়ী ব্যবহারকারী পান
 
 Enforcer::getUsersForRole('role1');
 
-# ব্যবহারকে ভূমিকা অনুযায়ী মধ্যে যে কোনও ভূমিকা হয় কি না তা বিচার করুন
+# ব্যবহারকারী ভূমিকার অন্তর্ভুক্ত কিনা পরীক্ষা করুন
 
-Enforcer::hasRoleForUser('use1', 'role1');
+Enforcer::hasRoleForUser('user1', 'role1');
 
-# ব্যবহারকে ভূমিকা থেকে মুছুন
+# ব্যবহারকারীর ভূমিকা মুছুন
 
-Enforcer::deleteRoleForUser('use1', 'role1');
+Enforcer::deleteRoleForUser('user1', 'role1');
 
-# ব্যবহারের সমস্ত ভূমিকা মুছুন
+# ব্যবহারকারীর সব ভূমিকা মুছুন
 
-Enforcer::deleteRolesForUser('use1');
+Enforcer::deleteRolesForUser('user1');
 
 # ভূমিকা মুছুন
 
@@ -188,13 +223,12 @@ Enforcer::deleteRole('role1');
 
 Enforcer::deletePermission('/user', 'read');
 
-# ব্যবহারকে অথবা ভূমিকার সমস্ত অনুমতি মুছুন
+# ব্যবহারকারী বা ভূমিকার সব অনুমতি মুছুন
 
 Enforcer::deletePermissionsForUser('user1');
 Enforcer::deletePermissionsForUser('role1');
 
-# অনুমতি পরীক্ষা করুন, true বা false ফিরে।
+# অনুমতি পরীক্ষা করুন, true বা false ফেরত দেয়
 
 Enforcer::enforce("user1", "/user", "edit");
-
 ```

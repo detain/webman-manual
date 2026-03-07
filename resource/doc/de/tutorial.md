@@ -1,4 +1,4 @@
-# Einfaches Beispiel
+# webman Schnellstart einfaches Beispiel
 
 ## Rückgabe eines Strings
 **Controller erstellen**
@@ -19,7 +19,7 @@ class UserController
         // Holen Sie sich den Namen-Parameter aus der GET-Anfrage. Wenn kein Name-Parameter übergeben wurde, wird $default_name zurückgegeben
         $name = $request->get('name', $default_name);
         // Gib den String an den Browser zurück
-        return response('hallo ' . $name);
+        return response('hello ' . $name);
     }
 }
 ```
@@ -28,7 +28,7 @@ class UserController
 
 Rufen Sie im Browser `http://127.0.0.1:8787/user/hello?name=tom` auf
 
-Der Browser wird `hallo tom` zurückgeben
+Der Browser wird `hello tom` zurückgeben
 
 ## Rückgabe von JSON
 Ändern Sie die Datei `app/controller/UserController.php` wie folgt
@@ -100,12 +100,12 @@ Erstellen Sie die Datei `app/view/user/hello.html` wie folgt
     <title>webman</title>
 </head>
 <body>
-hallo <?=htmlspecialchars($name)?>
+hello <?=htmlspecialchars($name)?>
 </body>
 </html>
 ```
 
 Rufen Sie im Browser `http://127.0.0.1:8787/user/hello?name=tom` auf
-Es wird eine HTML-Seite mit dem Inhalt `hallo tom` zurückgegeben.
+Es wird eine HTML-Seite mit dem Inhalt `hello tom` zurückgegeben.
 
-Hinweis: Standardmäßig verwendet webman die nativen PHP-Syntax als Vorlage. Wenn Sie andere Ansichten verwenden möchten, siehe [View](view.md).
+Hinweis: Standardmäßig verwendet webman die native PHP-Syntax als Vorlage. Für andere Ansichten siehe [Ansichten](view.md).

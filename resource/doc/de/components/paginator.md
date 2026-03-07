@@ -1,20 +1,18 @@
 # Paginierungskomponente
 
-## jasongrimes/php-paginator
-
-### Projektadresse
+## Projektadresse
 
 https://github.com/jasongrimes/php-paginator
   
-### Installation
+## Installation
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### Verwendung
+## Verwendung
 
-Erstellen Sie `app/controller/UserController.php` neu
+Neue Datei `app/controller/UserController.php` anlegen
 ```php
 <?php
 namespace app\controller;
@@ -39,8 +37,8 @@ class UserController
     
 }
 ```
-**Template (reines PHP)**
-Neues Template erstellen `app/view/user/get.html`
+**Vorlage (Native PHP)**
+Neue Vorlage anlegen `app/view/user/get.html`
 ```html
 <html>
 <head>
@@ -55,8 +53,8 @@ Neues Template erstellen `app/view/user/get.html`
 </html>
 ```
 
-**Template (Twig)**
-Neues Template erstellen `app/view/user/get.html`
+**Vorlage (Twig)**
+Neue Vorlage anlegen `app/view/user/get.html`
 ```html
 <html>
 <head>
@@ -73,8 +71,8 @@ Neues Template erstellen `app/view/user/get.html`
 </html>
 ```
 
-**Template (Blade)**
-Neues Template erstellen `app/view/user/get.blade.php`
+**Vorlage (Blade)**
+Neue Vorlage anlegen `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
@@ -89,8 +87,8 @@ Neues Template erstellen `app/view/user/get.blade.php`
 </html>
 ```
 
-**Template (ThinkPHP)**
-Neues Template erstellen `app/view/user/get.blade.php`
+**Vorlage (ThinkPHP)**
+Neue Vorlage anlegen `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
@@ -108,6 +106,7 @@ Neues Template erstellen `app/view/user/get.blade.php`
 Das Ergebnis sieht wie folgt aus:
 ![](../../assets/img/paginator.png)
   
-### Mehr erfahren
+## Weitere Informationen
 
 Besuchen Sie https://github.com/jasongrimes/php-paginator
+  

@@ -1,33 +1,47 @@
 # Redis
 
-คอมโพเนนต์ redis ของ webman ใช้ [illuminate/redis](https://github.com/illuminate/redis) เป็นค่าเริ่มต้น ซึ่งเป็นไลบรารี redis ของ Laravel โดยการใช้งานมีความคล้ายคลึงกับ Laravel
+[webman/redis](https://github.com/webman-php/redis) ขยาย [illuminate/redis](https://github.com/illuminate/redis) ด้วยการเพิ่ม connection pool รองรับทั้งสภาพแวดล้อมแบบ coroutine และไม่ใช้ coroutine การใช้งานเหมือนกับ Laravel
 
-ก่อนที่จะใช้ `illuminate/redis` คุณต้องติดตั้งเพิ่มเติม redis extension ให้กับ `php-cli`
-
-> **โปรดทราบ** ใช้คำสั่ง `php -m | grep redis` เพื่อตรวจสอบว่า `php-cli` มีตัวขยายของ redis หรือไม่ โดยให้ทราบว่า แม้จะติดตั้งตัวขยายของ redis สำหรับ `php-fpm` แต่จะไม่สามารถใช้งานกับ `php-cli` เนื่องจาก `php-cli` และ `php-fpm` เป็นโปรแกรมที่แตกต่างกัน ซึ่งอาจใช้ค่าตัวกำหนดของ `php.ini` ที่แตกต่างกัน โปรดใช้คำสั่ง `php --ini` เพื่อตรวจสอบว่า `php-cli` ใช้ค่าตัวกำหนด `php.ini` ของตัวไหน
+ก่อนใช้ `illuminate/redis` ต้องติดตั้ง redis extension สำหรับ `php-cli` ก่อน
 
 ## การติดตั้ง
 
 ```php
-composer require -W illuminate/redis illuminate/events
+composer require -W webman/redis illuminate/events
 ```
 
-หลังจากติดตั้งจะต้องรีสตาร์ท (restart) (reload จะไม่ทำงาน)
+หลังจากติดตั้งแล้วต้อง restart (reload ไม่ทำงาน)
 
 ## การกำหนดค่า
 
-ไฟล์กำหนดค่า redis อยู่ที่ `config/redis.php`
+ไฟล์กำหนดค่า Redis อยู่ที่ `config/redis.php`
 
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
+        'pool' => [ // การตั้งค่า connection pool
+            'max_connections' => 10,     // จำนวนการเชื่อมต่อสูงสุดใน pool
+            'min_connections' => 1,      // จำนวนการเชื่อมต่อขั้นต่ำใน pool
+            'wait_timeout' => 3,         // เวลารอสูงสุดเมื่อขอการเชื่อมต่อ (วินาที)
+            'idle_timeout' => 50,        // หลังเวลานี้ การเชื่อมต่อจะถูกปล่อยจนถึง min_connections
+            'heartbeat_interval' => 50,  // ช่วง heartbeat (ไม่เกิน 60 วินาที)
+        ],
     ]
 ];
 ```
+
+## เกี่ยวกับ Connection Pool
+
+* แต่ละ process มี pool ของตัวเอง ไม่มีการแชร์ pool ระหว่าง process
+* เมื่อไม่ใช้ coroutine การทำงานจะเป็นแบบลำดับ จึงใช้การเชื่อมต่อสูงสุด 1 การเชื่อมต่อ
+* เมื่อใช้ coroutine การทำงานจะเป็นแบบขนาน และ pool จะปรับแบบไดนามิกระหว่าง `min_connections` ถึง `max_connections`
+* เมื่อจำนวน coroutine ที่ใช้ Redis เกิน `max_connections` จะรอสูงสุด `wait_timeout` วินาที ถ้าเกินจะ throw exception
+* เมื่อ idle (มีหรือไม่มี coroutine) การเชื่อมต่อจะถูกปล่อยหลัง `idle_timeout` จนถึง `min_connections` (0 ได้)
 
 ## ตัวอย่าง
 
@@ -49,7 +63,7 @@ class UserController
 }
 ```
 
-## อินเตอร์เฟสของ Redis
+## Redis API
 
 ```php
 Redis::append($key, $value)
@@ -94,15 +108,18 @@ $redis->getBit($key, $offset)
 ...
 ```
 
-> **โปรดทราบ** อย่าใช้ `Redis::select($db)` อินเทอร์เฟส เนื่องจาก webman เป็นเฟรมเวิร์กที่ถูกจำพวกข้อมูลไว้อยู่ในหน่วยความจำ ถ้าคำขอหนึ่งคำใช้ `Redis::select($db)` เพื่อสลับฐานข้อมูลหลังจากนั้นจะมีผลกระทบต่อคำขออื่น ๆ แนะนำให้กำหนด `$db` ที่แตกต่างไว้เป็นการตั้งค่าเชื่อมต่อ Redis ที่แตกต่างกัน
+> **โปรดทราบ**
+> ใช้ `Redis::select($db)` อย่างระมัดระวัง เนื่องจาก webman เป็น framework แบบ resident-in-memory การเปลี่ยนฐานข้อมูลในคำขอหนึ่งจะส่งผลต่อคำขอถัดไป สำหรับหลายฐานข้อมูลแนะนำให้กำหนดการเชื่อมต่อ Redis แยกกันสำหรับแต่ละ `$db`
 
-## การใช้งานการเชื่อมต่อ Redis หลายตัว
+## การใช้การเชื่อมต่อ Redis หลายรายการ
 
-เช่น ไฟล์กำหนดค่า `config/redis.php`
+ตัวอย่างในไฟล์กำหนดค่า `config/redis.php`
+
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
@@ -117,36 +134,39 @@ return [
 
 ]
 ```
-ค่าเริ่มต้นที่ใช้งานคือการเชื่อมต่อที่กำหนดไว้ใน `default` คุณสามารถใช้เมธอด `Redis::connection()` เพื่อเลือกใช้การเชื่อมต่อ Redis ที่คุณต้องการ
+
+ค่าเริ่มต้นจะใช้การเชื่อมต่อที่กำหนดใน `default` สามารถใช้เมธอด `Redis::connection()` เพื่อเลือกการเชื่อมต่อ Redis ที่ต้องการใช้
+
 ```php
 $redis = Redis::connection('cache');
 $redis->get('test_key');
 ```
 
-## การกำหนดค่าคลัสเตอร์ (Cluster Configuration)
+## การกำหนดค่า Cluster
 
-หากโปรแกรมของคุณใช้เซิร์ฟเวอร์ Redis แบบคลัสเตอร์ คุณควรใช้คีย์ `clusters` ในไฟล์กำหนดค่าของ Redis เพื่อกำหนดค่าคลัสเตอร์นั้น
+หากแอปพลิเคชันของคุณใช้ Redis server cluster ควรกำหนดค่า cluster ในไฟล์กำหนดค่า Redis ด้วยคีย์ `clusters`
+
 ```php
 return [
     'clusters' => [
         'default' => [
             [
                 'host'     => 'localhost',
+                'username' => null,
                 'password' => null,
                 'port'     => 6379,
                 'database' => 0,
             ],
         ],
     ],
+
 ];
 ```
 
-โดยค่าเริ่มต้น คลัสเตอร์สามารถรวมโปรแกรมในโหนด ที่อนุญาตให้คุณสร้างกลุ่มของอิชคิวนั่นไว้ และสร้างแม่เหมี่ยวที่ใช้ภาระข้อมูลที่มีอยู่ สำหรับการใช้งานที่ส่วนใหญ่ คุณควรพิจารณาให้เขียนค่าข้มูลเพื่อให้ได้ข้อมูลคัชข้อมูลที่อยู่ในอิชคิว็นแบบตัวเลือกใบไม่ได้ผลไวมากระแตะคิสดย الن من – أي – معلن تل – حكومة
-
-หากต้องการใช้คลัสเตอร์รีดิสแบบไททีท้ คุณจำเป็นต้องจัดการค่าที่ `options` ในไฟล์กำหนดค่าแกมหนี่งตัวหนำ 
+โดยค่าเริ่มต้น cluster สามารถทำ client-side sharding บน nodes ได้ ทำให้สามารถสร้าง node pool และใช้งานหน่วยความจำจำนวนมาก โปรดทราบว่า client-side sharding ไม่ได้จัดการกรณีเกิดความล้มเหลว ดังนั้นฟีเจอร์นี้เหมาะสำหรับข้อมูลแคชที่ได้จากฐานข้อมูลหลักอื่น หากต้องการใช้ Redis native cluster ต้องกำหนดค่าใน options ของไฟล์กำหนดค่าดังนี้
 
 ```php
-return [
+return[
     'options' => [
         'cluster' => 'redis',
     ],
@@ -157,9 +177,10 @@ return [
 ];
 ```
 
-## คำสั่งท่่เซิงคชม์จ (Pipeline Command)
+## คำสั่ง Pipeline
 
-เมื่อคุณต้องการส่งคำสั่งหลาย ๆ ตัวให้กับเซิร์ฟเวอร์ในการดำเนินการคุณควรใช้คำสั่งเซิงคชม์จ (Pipeline Command) คำสั่ง pipeline รับการเส้นตรงของเซิร์ฟเวอร์ที่ใชฺ้นุณของรีดิสตัวอย่างจาก การนสุ่มเอาค่าที่มีเคีพจาการสุ่มหัวงับไว้ที่ค่าที่คุณอยาที่ท่างท่างเกบบับแมา้ใ้บคดหานน้าำไวำชั ด 
+เมื่อต้องการส่งคำสั่งหลายรายการไปยังเซิร์ฟเวอร์ในการดำเนินการครั้งเดียว แนะนำให้ใช้คำสั่ง pipeline เมธอด `pipeline` รับ closure ของ Redis instance คุณสามารถส่งคำสั่งทั้งหมดไปยัง Redis instance ได้ และจะดำเนินการในครั้งเดียว
+
 ```php
 Redis::pipeline(function ($pipe) {
     for ($i = 0; $i < 1000; $i++) {

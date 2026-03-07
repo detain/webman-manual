@@ -1,18 +1,16 @@
-# Excel
+# Tableaux Excel
 
-## phpoffice/phpspreadsheet
-
-### Adresse du projet
+## Adresse du projet
 
 https://github.com/PHPOffice/PhpSpreadsheet
   
-### Installation
+## Installation
  
   ```php
   composer require phpoffice/phpspreadsheet
   ```
   
-### Utilisation
+## Utilisation
 
 ```php
 <?php
@@ -27,20 +25,20 @@ class ExcelController
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Bonjour le monde !');
+        $sheet->setCellValue('A1', 'Hello World !');
 
         $writer = new Xlsx($spreadsheet);
         $file_path = public_path().'/hello_world.xlsx';
         // Enregistrer le fichier dans le répertoire public
         $writer->save($file_path);
         // Télécharger le fichier
-        return response()->download($file_path, 'nom_du_fichier.xlsx');
+        return response()->download($file_path, 'nom_fichier.xlsx');
     }
 
 }
 ```
 
-
-### Plus d'informations
+## Plus d'informations
 
 Visitez https://phpspreadsheet.readthedocs.io/en/latest/
+  

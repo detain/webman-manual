@@ -1,41 +1,65 @@
-# Yêu cầu môi trường
+# Cách cài đặt webman
 
-* PHP >= 7.2
+* PHP >= 8.1
 * [Composer](https://getcomposer.org/) >= 2.0
 
 
-### 1. Tạo dự án
+## Linux: Cài đặt môi trường PHP + Composer (bỏ qua nếu đã có sẵn)
+```
+curl -sO https://www.workerman.net/install-php-and-composer && sudo bash install-php-and-composer
+```
+> **Lưu ý**
+> Lệnh trên áp dụng cho Linux và macOS. Người dùng Windows cần cài đặt PHP riêng.
+
+Bạn cũng có thể tải xuống thủ công [bản PHP tĩnh](https://www.workerman.net/download) do webman cung cấp và giải nén để sử dụng.
+
+## 1. Tạo dự án
 
 ```php
-composer create-project workerman/webman
+composer create-project workerman/webman:~2.0
 ```
 
-### 2. Chạy
+> **Mẹo**
+> Nếu gặp lỗi, có thể bạn đang dùng gương Composer có vấn đề. Chạy `composer config -g --unset repos.packagist` để gỡ proxy.
 
-Đi vào thư mục webman   
+## 2. Chạy
 
-#### Đối với người dùng windows
-Nhấn đôi vào `windows.bat` hoặc chạy `php windows.php` để khởi động
+Đi vào thư mục webman
 
-> **Lưu ý**
-> Nếu có lỗi xuất hiện, có thể là một số hàm đã bị vô hiệu hóa, tham khảo [Kiểm tra hàm bị vô hiệu hóa](others/disable-function-check.md) để gỡ cấm
+#### Người dùng Windows
+Nhấp đúp vào `windows.bat` hoặc chạy `php windows.php` để khởi động
 
-#### Đối với người dùng linux
-Chạy trong chế độ `debug` (dùng cho debugging phát triển)
+> **Mẹo**
+> Nếu gặp lỗi, có thể một số hàm đã bị vô hiệu hóa. Xem [Kiểm tra hàm bị vô hiệu hóa](others/disable-function-check.md) để gỡ cấm.
+
+#### Người dùng Linux
+**Chế độ debug** (cho phát triển: dữ liệu hiển thị ở terminal, dịch vụ webman dừng khi đóng terminal)
 
 ```php
 php start.php start
 ```
 
-Chạy trong chế độ `daemon` (dùng cho môi trường chạy thực tế)
+**Chế độ daemon** (cho môi trường thực tế: dữ liệu không hiển thị ở terminal, dịch vụ webman chạy tiếp sau khi đóng terminal)
 
 ```php
 php start.php start -d
 ```
 
-> **Lưu ý**
-> Nếu có lỗi xuất hiện, có thể là một số hàm đã bị vô hiệu hóa, tham khảo [Kiểm tra hàm bị vô hiệu hóa](others/disable-function-check.md) để gỡ cấm
+#### Người dùng Docker
 
-### 3. Truy cập
+Khởi động tất cả dịch vụ và đính kèm vào console
+```php
+docker-compose up
+```
 
-Truy cập trình duyệt vào `http://địa chỉ_ip:8787`
+Chạy dịch vụ ở chế độ nền
+```php
+docker-compose up -d
+```
+
+> **Mẹo**
+> Nếu gặp lỗi, có thể một số hàm đã bị vô hiệu hóa. Xem [Kiểm tra hàm bị vô hiệu hóa](others/disable-function-check.md) để gỡ cấm.
+
+## 3. Truy cập
+
+Mở trình duyệt truy cập `http://địa-chỉ-ip:8787`.

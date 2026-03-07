@@ -22,6 +22,8 @@ Cuando se accede a la dirección `http://127.0.0.1:8787/api/{controller}/{method
 
 Cuando se accede a la dirección `http://127.0.0.1:8787/admin/{controller}/{method}` se accede al controlador y al método en el directorio `app/admin/controller`.
 
+En webman, cada directorio bajo app puede considerarse como una aplicación.
+
 En webman, incluso puedes planificar el directorio de la aplicación de la siguiente manera.
 ``` 
 app 
@@ -53,7 +55,7 @@ class FooController
 ```
 
 ## Configuración de middleware para aplicaciones múltiples
-A veces puede que desees configurar middleware diferentes para diferentes aplicaciones, por ejemplo, la aplicación `api` puede necesitar un middleware de control de acceso, mientras que `admin` puede necesitar un middleware para verificar el inicio de sesión del administrador. La configuración de `config/midlleware.php` puede ser similar a lo siguiente:
+A veces puede que desees configurar middleware diferentes para diferentes aplicaciones, por ejemplo, la aplicación `api` puede necesitar un middleware de control de acceso, mientras que `admin` puede necesitar un middleware para verificar el inicio de sesión del administrador. La configuración de `config/middleware.php` puede ser similar a lo siguiente:
 ``` php
 return [
     // Middleware global

@@ -1,20 +1,18 @@
-# পৃষ্ঠাবিভাজক বিষয়ক
+# পেজিনেশন কম্পোনেন্ট
 
-## jasongrimes/php-paginator
-
-### প্রকল্প ঠিকানা
+## প্রকল্পের ঠিকানা
 
 https://github.com/jasongrimes/php-paginator
-
-### ইনস্টলেশন
+  
+## ইনস্টলেশন
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
+  
+## ব্যবহার
 
-### ব্যবহার
-
-"app/controller/UserController.php" নতুন তৈরি করুন
+নতুন তৈরি করুন `app/controller/UserController.php`
 ```php
 <?php
 namespace app\controller;
@@ -39,12 +37,12 @@ class UserController
     
 }
 ```
-
-**টেম্পলেট (পিএইচপি নেটিভ)** "app/view/user/get.html" নতুন তৈরি করুন
+**টেম্পলেট (নেটিভ PHP)**
+নতুন টেম্পলেট তৈরি করুন `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- অভ্যন্তরীণ Bootstrap পৃষ্ঠানুযায়ী স্টাইল সমর্থন -->
+  <!-- Bootstrap পেজিনেশন স্টাইলের অন্তর্নির্মিত সমর্থন -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -55,11 +53,12 @@ class UserController
 </html>
 ```
 
-**টেম্পলেট (টুইগ)** "app/view/user/get.html" নতুন তৈরি করুন
+**টেম্পলেট (Twig)**
+নতুন টেম্পলেট তৈরি করুন `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- অভ্যন্তরীণ Bootstrap পৃষ্ঠানুযায়ী স্টাইল সমর্থন -->
+  <!-- Bootstrap পেজিনেশন স্টাইলের অন্তর্নির্মিত সমর্থন -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -72,11 +71,12 @@ class UserController
 </html>
 ```
 
-**টেম্পলেট (ব্লেড)** "app/view/user/get.blade.php" নতুন তৈরি করুন
+**টেম্পলেট (Blade)**
+নতুন টেম্পলেট তৈরি করুন `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-  <!-- অভ্যন্তরীণ Bootstrap পৃষ্ঠানুযায়ী স্টাইল সমর্থন -->
+  <!-- Bootstrap পেজিনেশন স্টাইলের অন্তর্নির্মিত সমর্থন -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -87,11 +87,12 @@ class UserController
 </html>
 ```
 
-**টেম্পলেট (থিংকপিএইচপি)** "app/view/user/get.blade.php" নতুন তৈরি করুন
+**টেম্পলেট (ThinkPHP)**
+নতুন টেম্পলেট তৈরি করুন `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-    <!-- অভ্যন্তরীণ Bootstrap পৃষ্ঠানুযায়ী স্টাইল সমর্থন -->
+    <!-- Bootstrap পেজিনেশন স্টাইলের অন্তর্নির্মিত সমর্থন -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -102,9 +103,10 @@ class UserController
 </html>
 ```
 
-প্রভাব দেখুন:
+ফলাফল নিম্নরূপ:
 ![](../../assets/img/paginator.png)
+  
+## আরও তথ্য
 
-### আরো বিস্তারিত
-
-https://github.com/jasongrimes/php-paginator
+পরিদর্শন করুন https://github.com/jasongrimes/php-paginator
+  

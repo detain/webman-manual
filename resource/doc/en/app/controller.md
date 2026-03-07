@@ -27,6 +27,8 @@ class FooController
 When accessing `http://127.0.0.1:8787/app/foo/foo`, the page returns `hello index`.
 
 When accessing `http://127.0.0.1:8787/app/foo/foo/hello`, the page returns `hello webman`.
+
+
 ## URL Access
 The URL path for application plugin starts with `/app`, followed by the plugin identifier, and then the specific controller and method.
 

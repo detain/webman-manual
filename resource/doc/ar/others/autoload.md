@@ -1,25 +1,25 @@
-# 自动加载
+# التحميل التلقائي
 
-## 利用composer加载PSR-0规范的文件
-webman遵循`PSR-4`自动加载规范。如果你的业务需要加载`PSR-0`规范的代码库，参考以下操作。
+## تحميل ملفات متوافقة مع PSR-0 عبر Composer
+يتبع webman مواصفات التحميل التلقائي `PSR-4`. إذا كان مشروعك يحتاج إلى تحميل مكتبات متوافقة مع PSR-0، اتبع الخطوات التالية:
 
-- 新建 `extend` 目录用户存放`PSR-0`规范的代码库
-- 编辑`composer.json`，在`autoload`下增加以下内容
+- أنشئ مجلداً `extend` لتخزين مكتبات PSR-0
+- عدّل ملف `composer.json` وأضف التالي ضمن `autoload`:
 
-```js
+```json
 "psr-0" : {
     "": "extend/"
 }
 ```
-最终结果类似
+ستكون النتيجة النهائية مشابهة لما يلي:
 ![](../../assets/img/psr0.png)
 
-- 执行 `composer dumpautoload`
-- 执行 `php start.php restart` 重启webman (注意，必须重启才能生效) 
+- نفّذ الأمر `composer dumpautoload`
+- نفّذ الأمر `php start.php restart` لإعادة تشغيل webman (ملاحظة: إعادة التشغيل الكاملة مطلوبة لتفعيل التغييرات)
 
-## 利用composer加载某些文件
+## تحميل ملفات محددة عبر Composer
 
-- 编辑`composer.json`，在`autoload.files`下添加要加载的文件
+- عدّل ملف `composer.json` وأضف الملفات المطلوب تحميلها ضمن `autoload.files`:
 ```
 "files": [
     "./support/helpers.php",
@@ -27,16 +27,15 @@ webman遵循`PSR-4`自动加载规范。如果你的业务需要加载`PSR-0`规
 ]
 ```
 
-- 执行 `composer dumpautoload`
-- 执行 `php start.php restart` 重启webman (注意，必须重启才能生效) 
+- نفّذ الأمر `composer dumpautoload`
+- نفّذ الأمر `php start.php restart` لإعادة تشغيل webman (ملاحظة: إعادة التشغيل الكاملة مطلوبة لتفعيل التغييرات)
 
-> **提示**
-> composer.json里`autoload.files`配置的文件在webman启动前就会加载。而利用框架`config/autoload.php`加载的文件是在webman启动后才加载的。
-> composer.json里`autoload.files`加载的文件更改后必须restart才能生效，reload不生效。而利用框架`config/autoload.php`加载的文件支持热加载，更改后reload即可生效。
+> **ملاحظة**
+> الملفات المعرّفة في `autoload.files` داخل composer.json تُحمّل قبل بدء webman. أمّا الملفات المحمّلة عبر `config/autoload.php` في الإطار، فتُحمّل بعد بدء webman.
+> التغييرات في ملفات `autoload.files` داخل composer.json تتطلب إعادة التشغيل (restart) لتفعيلها؛ التحديث (reload) لا يكفي. أمّا الملفات المحمّلة عبر `config/autoload.php` فتدعم التحديث السريع (hot-reload)، والتغييرات تُفعّل بعد التحديث (reload).
 
-
-## 利用框架加载某些文件
-有些文件可能不符合SPR规范，无法自动加载，我们可以通过配置`config/autoload.php`加载这些文件，例如：
+## تحميل ملفات محددة عبر الإطار
+قد لا تتوافق بعض الملفات مع مواصفة PSR ولا تُحمّل تلقائياً. يمكنك تحميلها عبر إعداد `config/autoload.php`، مثلاً:
 ```php
 return [
     'files' => [
@@ -46,5 +45,5 @@ return [
     ]
 ];
 ```
- > **提示**
- > 我们看到`autoload.php`里设置了加载 `support/Request.php` `support/Response.php`两个文件，这是因为在`vendor/workerman/webman-framework/src/support/`下也有两个相同的文件，我们通过`autoload.php`优先加载项目根目录下的`support/Request.php` `support/Response.php`，这样允许我们可以定制这两个文件的内容而不需要修改`vendor`中的文件。如果你不需要定制它们，则可以忽略这两个配置。
+ > **ملاحظة**
+ > تُعدّ في `autoload.php` تحميل الملفين `support/Request.php` و`support/Response.php` لأن الملفات نفسها موجودة في `vendor/workerman/webman-framework/src/support/`. عبر `autoload.php` يتمّ إعطاء أولوية لنسخ المجلد الجذر للمشروع، مما يسمح بتخصيص هذين الملفين دون تعديل ملفات مجلد `vendor`. إن لم تحتج لتخصيصهما، يمكنك حذف هاتين الإعدادتين.

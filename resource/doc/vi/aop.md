@@ -1,8 +1,8 @@
 # AOP
 
-> Cảm ơn tác giả của Hyperf đã đóng góp
+> Cảm ơn tác giả của Hyperf đã đóng góp.
 
-### Cài đặt
+## Cài đặt
 
 - Cài đặt aop-integration
 
@@ -10,9 +10,9 @@
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### Thêm cấu hình liên quan đến AOP
+## Thêm cấu hình liên quan đến AOP
 
-Chúng ta cần thêm cấu hình `config.php` trong thư mục `config`
+Cần thêm file cấu hình `config.php` vào thư mục `config`.
 
 ```php
 <?php
@@ -36,18 +36,18 @@ return [
         ],
     ],
     'aspects' => [
-        // Ở đây viết Aspect tương ứng
+        // Thêm Aspect tương ứng tại đây
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### Cấu hình tập tin nhập
+## Cấu hình file khởi đầu start.php
 
-> Chúng ta sẽ đặt phương thức khởi tạo dưới timezone, bỏ qua mã khác sau
+> Đặt mã khởi tạo bên dưới cấu hình timezone. Các mã khác được bỏ qua bên dưới.
 
-```php
+```
 use Hyperf\AopIntegration\ClassLoader;
 
 if ($timezone = config('app.default_timezone')) {
@@ -58,9 +58,9 @@ if ($timezone = config('app.default_timezone')) {
 ClassLoader::init();
 ```
 
-### Kiểm tra
+## Kiểm thử
 
-Trước tiên, hãy viết lớp cắt ('Aspect') đợi
+Đầu tiên, tạo class cần được chặn (intercept):
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-Tiếp theo, thêm `DebugAspect` tương ứng
+Sau đó thêm `DebugAspect` tương ứng:
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-Tiếp theo, chỉnh sửa bộ điều khiển `app/controller/IndexController.php`
+Tiếp theo, chỉnh sửa controller `app/controller/IndexController.php`:
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-Sau đó cấu hình tuyến đường
+Sau đó cấu hình route:
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-Cuối cùng, khởi động dịch vụ và kiểm tra.
+Cuối cùng, khởi động dịch vụ và chạy kiểm thử:
 
 ```shell
 php start.php start

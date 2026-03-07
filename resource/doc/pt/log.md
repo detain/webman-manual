@@ -14,36 +14,36 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('teste de registo');
-        return response('olá índice');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
 
 ## Métodos disponibilizados
 ```php
-Log::log($nível, $mensagem, array $contexto = [])
-Log::debug($mensagem, array $contexto = [])
-Log::info($mensagem, array $contexto = [])
-Log::notice($mensagem, array $contexto = [])
-Log::warning($mensagem, array $contexto = [])
-Log::error($mensagem, array $contexto = [])
-Log::critical($mensagem, array $contexto = [])
-Log::alert($mensagem, array $contexto = [])
-Log::emergency($mensagem, array $contexto = [])
+Log::log($level, $message, array $context = [])
+Log::debug($message, array $context = [])
+Log::info($message, array $context = [])
+Log::notice($message, array $context = [])
+Log::warning($message, array $context = [])
+Log::error($message, array $context = [])
+Log::critical($message, array $context = [])
+Log::alert($message, array $context = [])
+Log::emergency($message, array $context = [])
 ```
 Equivalente a
 ```php
 $log = Log::channel('default');
-$log->log($nível, $mensagem, array $contexto = [])
-$log->debug($mensagem, array $contexto = [])
-$log->info($mensagem, array $contexto = [])
-$log->notice($mensagem, array $contexto = [])
-$log->warning($mensagem, array $contexto = [])
-$log->error($mensagem, array $contexto = [])
-$log->critical($mensagem, array $contexto = [])
-$log->alert($mensagem, array $contexto = [])
-$log->emergency($mensagem, array $contexto = [])
+$log->log($level, $message, array $context = [])
+$log->debug($message, array $context = [])
+$log->info($message, array $context = [])
+$log->notice($message, array $context = [])
+$log->warning($message, array $context = [])
+$log->error($message, array $context = [])
+$log->critical($message, array $context = [])
+$log->alert($message, array $context = [])
+$log->emergency($message, array $context = [])
 ```
 
 ## Configuração
@@ -138,8 +138,8 @@ class FooController
     public function index(Request $request)
     {
         $log = Log::channel('log2');
-        $log->info('teste log2');
-        return response('olá índice');
+        $log->info('log2 test');
+        return response('hello index');
     }
 }
 ```

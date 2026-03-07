@@ -1,14 +1,14 @@
-## Stomp কিউ
+# Stomp কিউ
 
-Stomp হল একটি সিম্পল (স্ট্রিমিং) টেক্সট বেস ম্যাসেজ প্রোটোকল, যা একটি ইন্টারঅপারেবল কানেক্ট ফরম্যাট সরবরাহ করে এবং একটি STOMP ক্লায়েন্টকে যে কোনও STOMP ম্যাসেজ ব্রোকার (Broker) এর সাথে ইন্টারঅপারেবল করার অনুমতি দেয়। [workerman/stomp](https://github.com/walkor/stomp) stomp ক্লায়েন্টের অনুরূপ, প্রধানত RabbitMQ, Apollo, ActiveMQ ইত্যাদি ম্যাসেজ কিউ সিনারিও এপ্লিকেশনের জন্য ব্যবহৃত।
+Stomp একটি সরল (স্ট্রিমিং) পাঠ্য-ভিত্তিক বার্তা প্রোটোকল যা একটি আন্তঃপরিচালনযোগ্য সংযোগ বিন্যাস প্রদান করে, যাতে STOMP ক্লায়েন্ট যেকোনো STOMP বার্তা ব্রোকার (Broker) এর সাথে যোগাযোগ করতে পারে। [workerman/stomp](https://github.com/walkor/stomp) Stomp ক্লায়েন্ট বাস্তবায়ন করে এবং প্রধানত RabbitMQ, Apollo, ActiveMQ ইত্যাদি বার্তা কিউ দৃশ্যপটে ব্যবহৃত হয়।
 
-## Install
+## ইনস্টলেশন
 `composer require webman/stomp`
 
-## Configure
-কনফিগারেশন ফাইল এর অধীনে `config/plugin/webman/stomp`
+## কনফিগারেশন
+কনফিগারেশন ফাইল `config/plugin/webman/stomp` এর অধীনে রয়েছে।
 
-## ম্যাসেজ ডেলিভারি
+## বার্তা প্রেরণ
 ```php
 <?php
 namespace app\controller;
@@ -22,9 +22,9 @@ class Index
     {
         // কিউ
         $queue = 'examples';
-        // ডেটা (অ্যারে পাস করাতে হলে ডেটা সিরিয়ালাইজেশনের প্রয়োজন হবে, উদাহরণস্বরূপ json_encode, serialize ইত্যাদি ব্যবহার করুন)
+        // ডেটা (অ্যারে পাঠাতে হলে নিজে সিরিয়ালাইজ করতে হবে, যেমন json_encode, serialize ইত্যাদি ব্যবহার করে)
         $data = json_encode(['to' => 'tom@gmail.com', 'content' => 'hello']);
-        // ডেলিভারি কার্যকর করুন
+        // প্রেরণ সম্পাদন করুন
         Client::send($queue, $data);
 
         return response('redis queue test');
@@ -32,10 +32,10 @@ class Index
 
 }
 ```
-> অন্যান্য প্রজেক্টের সাথে সামঞ্জস্যপূর্ণতা সংযোগ নিয়ে বিবেচনা করে, stomp প্লাগিন স্বয়ংক্রিয় সিরিয়ালাইজেশন এবং ডিসিরিয়ালাইজেশন সুযোগ সরবরাহ করে না। যদি আপনি একটি অ্যারে ডাটা পাঠান, তবে আপনার নিজেরা সিরিয়ালাইজেশন করতে হবে এবং আপনার নিজেরা ডিসিরিয়ালাইজেশন করতে হবে।
+> অন্যান্য প্রকল্পের সাথে সামঞ্জস্যের জন্য Stomp উপাদান স্বয়ংক্রিয় সিরিয়ালাইজেশন এবং ডিসিরিয়ালাইজেশন প্রদান করে না। অ্যারে ডেটা পাঠালে নিজে সিরিয়ালাইজ করতে হবে এবং গ্রহণ করার সময় নিজে ডিসিরিয়ালাইজ করতে হবে।
 
-## ম্যাসেজ কনসিউম
-`app/queue/stomp/MyMailSend.php` তৈরি করুন (ক্লাস নাম সাধারণভাবে psr4 মান অনুসারে দিতে হবে)।
+## বার্তা গ্রহণ
+`app/queue/stomp/MyMailSend.php` নতুন তৈরি করুন (ক্লাসের নাম যেকোনো হতে পারে, PSR-4 মান অনুসরণ করলে)।
 ```php
 <?php
 namespace app\queue\stomp;
@@ -45,32 +45,30 @@ use Webman\Stomp\Consumer;
 
 class MyMailSend implements Consumer
 {
-    // কিউ নাম
+    // কিউর নাম
     public $queue = 'examples';
 
-    // কানেকশন নাম, stomp.php ফাইলে নির্ধারিত কানেকশন সাথে মিলবে`
+    // সংযোগের নাম, stomp.php এ সংযোগের সাথে মিলে যায়
     public $connection = 'default';
 
-    // যখন মান client তখন সার্ভারকে সফলভাবে কনসিউম হলে, $ack_resolver->ack() কল করতে হবে
-    // যখন মান auto হল তখন $ack_resolver->ack() কল করা প্রয়োজন নেই
+    // মান client হলে সফলভাবে গ্রহণ হয়েছে জানাতে $ack_resolver->ack() কল করতে হবে
+    // মান auto হলে $ack_resolver->ack() কল করার প্রয়োজন নেই
     public $ack = 'auto';
 
-    // কনসিউম করুন
+    // গ্রহণ
     public function consume($data, AckResolver $ack_resolver = null)
     {
-        // যদি ডাটা অ্যারে হয়, তবে সিরিয়ালাইজেশনের প্রয়োজন
+        // ডেটা অ্যারে হলে নিজে ডিসিরিয়ালাইজ করতে হবে
         var_export(json_decode($data, true)); // আউটপুট ['to' => 'tom@gmail.com', 'content' => 'hello']
-        // কানেকশন সার্ভারে বলুন যে, ম্যাসেজটি সফলভাবে কনসিউম করা হয়েছে
-        $ack_resolver->ack(); // যদি ack মান auto হয়, তবে এই কল অনুপ্রেরণ করা যেতে পারে
+        // সফলভাবে গ্রহণ হয়েছে সার্ভারকে জানান
+        $ack_resolver->ack(); // ack auto হলে এই কল বাদ দেওয়া যেতে পারে
     }
 }
 ```
 
-# র‌্‌‌্‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌।यब्‌‌‌‌‌‌‌‌‌‌न‌‌ratmqটीন(तेर्stompद्वनेरीदेस्सीखेजनायलत‌नेगर)
-
-र‌्‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌।यब्‌‌‌‌‌‌‌‌‌‌न‌‌ratmqतूूटूयल्राउदफेरदेरलाटयबरगरतयलसयकरलाडेकल
-```shell
+# RabbitMQ এ Stomp প্রোটোকল সক্ষম করা
+RabbitMQ ডিফল্টভাবে Stomp প্রোটোকল সক্ষম করে না। সক্ষম করতে নিম্নলিখিত কমান্ড চালান:
+```
 rabbitmq-plugins enable rabbitmq_stomp
-```दारुन् useClassकरी
-
-ratmqजरबएदचेstompतुल्यषमुलर1010थेवाशहाइलदरारदीगरतल।दानकेंरSelf-contained activities environment created to interact with customers 
+```
+সক্ষম করার পরে Stomp এর ডিফল্ট পোর্ট 61613।

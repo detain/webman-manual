@@ -1,40 +1,38 @@
-# 配置文件
+# ملفات التكوين
 
-## 位置
-webman的配置文件在`config/`目录下，项目中可以通过`config()`函数来获取对应的配置。
+## الموقع
+توجد ملفات تكوين webman في مجلد `config/`. يمكنك استخدام الدالة `config()` للوصول إلى التكوينات المقابلة في مشروعك.
 
-## 获取配置
+## الوصول إلى التكوينات
 
-获取所有配置
+الحصول على جميع التكوينات:
 ```php
 config();
 ```
 
-获取`config/app.php`里的所有配置
+الحصول على جميع التكوينات في `config/app.php`:
 ```php
 config('app');
 ```
 
-获取`config/app.php`里的`debug`配置
+الحصول على تكوين `debug` في `config/app.php`:
 ```php
 config('app.debug');
 ```
 
-如果配置是数组，可以通过`.`来获取数组内部元素的值，例如
+إذا كان التكوين مصفوفة، يمكنك استخدام `.` للوصول إلى القيم المتداخلة. مثال:
 ```php
 config('file.key1.key2');
 ```
 
-## 默认值
+## القيمة الافتراضية
 ```php
 config($key, $default);
 ```
-config通过第二个参数传递默认值，如果配置不存在则返回默认值。
-配置不存在且没有设置默认值则返回null。
+مرر القيمة الافتراضية كمعامل ثانٍ. إذا لم يكن التكوين موجوداً، سيتم إرجاع القيمة الافتراضية. إذا لم يكن التكوين موجوداً ولم يتم تعيين قيمة افتراضية، يتم إرجاع `null`.
 
-
-## 自定义配置
-开发者可以在`config/`目录下添加自己的配置文件，例如
+## التكوين المخصص
+يمكن للمطورين إضافة ملفات تكوين خاصة بهم في مجلد `config/`. مثال:
 
 **config/payment.php**
 
@@ -46,71 +44,71 @@ return [
 ];
 ```
 
-**获取配置时使用**
+**الاستخدام عند الوصول إلى التكوينات**
 ```php
 config('payment');
 config('payment.key');
-config('payment.key');
+config('payment.secret');
 ```
 
-## 更改配置
-webman不支持动态修改配置，所有配置必须手动修改对应的配置文件，并reload或restart重启
+## تعديل التكوينات
+لا يدعم Webman تغييرات التكوين الديناميكية. يجب تعديل جميع التكوينات يدوياً في ملفات التكوين المقابلة، ثم إعادة تحميل أو إعادة تشغيل التطبيق.
 
-> **注意**
-> 服务器配置`config/server.php`以及进程配置`config/process.php`不支持reload，需要restart重启才能生效
+> **ملاحظة**
+> تكوين الخادم `config/server.php` وتكوين العملية `config/process.php` لا يدعمان إعادة التحميل. يجب إعادة التشغيل لتفعيل التغييرات.
 
-## 特别提醒
-如果你是要在config下的子目录创建配置文件并读取，比如：`config/order/status.php`，那么`config/order`目录下需要有一个`app.php`文件，内容如下
+## تذكير مهم
+إذا قمت بإنشاء ملفات تكوين في مجلد فرعي تحت `config/`، على سبيل المثال `config/order/status.php`، فستحتاج إلى ملف `app.php` في مجلد `config/order/` بالمحتوى التالي:
 ```php
 <?php
 return [
     'enable' => true,
 ];
 ```
-`enable`为`true`代表让框架读取这个目录的配置。
-最终配置文件目录树类似下面这样
+تعيين `enable` على `true` يخبر الإطار بتحميل التكوينات من هذا المجلد.
+يجب أن تبدو بنية مجلد التكوين كما يلي:
 ```
 ├── config
-│   ├── order
-│   │   ├── app.php
-│   │   └── status.php
+│   ├── order
+│   │   ├── app.php
+│   │   └── status.php
 ```
-这样你就可以通过`config.order.status`读取`status.php`中返回的数组或者特定的key数据了。
+يمكنك بعد ذلك الوصول إلى المصفوفة أو المفاتيح المحددة من `status.php` عبر `config.order.status`.
 
 
-## 配置文件讲解
+## مرجع ملفات التكوين
 
 #### server.php
 ```php
 return [
-    'listen' => 'http://0.0.0.0:8787', // 监听端口(从1.6.0版本开始移除, 改在config/process.php中配置)
-    'transport' => 'tcp', // 传输层协议(从1.6.0版本开始移除, 改在config/process.php中配置)
-    'context' => [], // ssl等配置(从1.6.0版本开始移除, 改在config/process.php中配置)
-    'name' => 'webman', // 进程名(从1.6.0版本开始移除, 改在config/process.php中配置)
-    'count' => cpu_count() * 4, // 进程数量(从1.6.0版本开始移除, 改在config/process.php中配置)
-    'user' => '', // 用户(从1.6.0版本开始移除, 改在config/process.php中配置)
-    'group' => '', // 用户组(从1.6.0版本开始移除, 改在config/process.php中配置)
-    'reusePort' => false, // 是否开启端口复用(从1.6.0版本开始移除, 改在config/process.php中配置)
-    'event_loop' => '',  // 事件循环类，默认自动选择
-    'stop_timeout' => 2, // 收到stop/restart/reload信号时，等待处理完成的最大时间，超过这个时间进程未退出则强制退出
-    'pid_file' => runtime_path() . '/webman.pid', // pid文件存储位置
-    'status_file' => runtime_path() . '/webman.status', // status文件存储位置
-    'stdout_file' => runtime_path() . '/logs/stdout.log', // 标准输出文件位置，webman启动后所有输出都会写入这个文件
-    'log_file' => runtime_path() . '/logs/workerman.log', // workerman日志文件位置
-    'max_package_size' => 10 * 1024 * 1024 // 最大数据包大小，10M。上传文件大小受到此限制
+    'listen' => 'http://0.0.0.0:8787', // منفذ الاستماع (تمت إزالته منذ 1.6.0، يُكوّن في config/process.php)
+    'transport' => 'tcp', // بروتوكول النقل (تمت إزالته منذ 1.6.0، يُكوّن في config/process.php)
+    'context' => [], // SSL إلخ (تمت إزالته منذ 1.6.0، يُكوّن في config/process.php)
+    'name' => 'webman', // اسم العملية (تمت إزالته منذ 1.6.0، يُكوّن في config/process.php)
+    'count' => cpu_count() * 4, // عدد العمليات (تمت إزالته منذ 1.6.0، يُكوّن في config/process.php)
+    'user' => '', // المستخدم (تمت إزالته منذ 1.6.0، يُكوّن في config/process.php)
+    'group' => '', // المجموعة (تمت إزالته منذ 1.6.0، يُكوّن في config/process.php)
+    'reusePort' => false, // تفعيل إعادة استخدام المنفذ (تمت إزالته منذ 1.6.0، يُكوّن في config/process.php)
+    'event_loop' => '',  // فئة حلقة الأحداث، تُختار تلقائياً افتراضياً
+    'stop_timeout' => 2, // أقصى وقت انتظار عند استلام إشارة الإيقاف/إعادة التشغيل/إعادة التحميل، إنهاء قسري إذا لم تخرج العملية في الوقت
+    'pid_file' => runtime_path() . '/webman.pid', // موقع ملف PID
+    'status_file' => runtime_path() . '/webman.status', // موقع ملف الحالة
+    'stdout_file' => runtime_path() . '/logs/stdout.log', // موقع ملف stdout، يُكتب كل المخرجات بعد بدء webman هنا
+    'log_file' => runtime_path() . '/logs/workerman.log', // موقع ملف سجل Workerman
+    'max_package_size' => 10 * 1024 * 1024 // الحد الأقصى لحجم الحزمة، 10 ميجا. حجم ملف الرف محدود بهذا
 ];
 ```
 
 #### app.php
 ```php
 return [
-    'debug' => true,  // 是否开启debug模式，开启后页面报错会输出调用栈等调试信息，为了安全生产环境应该关闭debug
-    'error_reporting' => E_ALL, // 错误报告级别
-    'default_timezone' => 'Asia/Shanghai', // 默认时区
-    'public_path' => base_path() . DIRECTORY_SEPARATOR . 'public', // public目录位置
-    'runtime_path' => base_path(false) . DIRECTORY_SEPARATOR . 'runtime', // runtime目录位置
-    'controller_suffix' => 'Controller', // 控制器后缀
-    'controller_reuse' => false, // 控制器是否复用
+    'debug' => true,  // وضع التصحيح، يُفعّل تتبع المكدس إلخ عند الأخطاء. يُفترض تعطيله في بيئة الإنتاج
+    'error_reporting' => E_ALL, // مستوى الإبلاغ عن الأخطاء
+    'default_timezone' => 'Asia/Shanghai', // المنطقة الزمنية الافتراضية
+    'public_path' => base_path() . DIRECTORY_SEPARATOR . 'public', // مسار المجلد العام
+    'runtime_path' => base_path(false) . DIRECTORY_SEPARATOR . 'runtime', // مسار مجلد التشغيل
+    'controller_suffix' => 'Controller', // لاحقة المتحكم
+    'controller_reuse' => false, // إعادة استخدام المتحكمات أم لا
 ];
 ```
 
@@ -122,29 +120,29 @@ use app\process\Http;
 global $argv;
 
 return [
-     // webman进程配置
+     // تكوين عملية webman
     'webman' => [ 
-        'handler' => Http::class, // 进程处理类
-        'listen' => 'http://0.0.0.0:8787', // 监听地址
-        'count' => cpu_count() * 4, // 进程数量，默认cpu的4倍
-        'user' => '', // 进程运行的用户，应该使用低级别用户
-        'group' => '', // 进程运行的用户组，应该使用低级别用户组
-        'reusePort' => false, // 是否开启reusePort，开启后连接会均匀分布到不同的worker进程
-        'eventLoop' => '', // 事件循环类，为空时自动使用server.event_loop配置 
-        'context' => [], // 监听上下文配置，例如ssl
-        'constructor' => [ // 进程处理类构造函数参数，本例中是Http类的构造函数参数
-            'requestClass' => Request::class, // 可以自定义请求类
-            'logger' => Log::channel('default'), // 日志实例
-            'appPath' => app_path(), // app目录位置
-            'publicPath' => public_path() // public目录位置
+        'handler' => Http::class, // فئة معالج العملية
+        'listen' => 'http://0.0.0.0:8787', // عنوان الاستماع
+        'count' => cpu_count() * 4, // عدد العمليات، 4x CPU افتراضياً
+        'user' => '', // مستخدم العملية، استخدم مستخدماً بصلاحيات منخفضة
+        'group' => '', // مجموعة العملية، استخدم مجموعة بصلاحيات منخفضة
+        'reusePort' => false, // تفعيل reusePort، يوزع الاتصالات على عمليات worker
+        'eventLoop' => '', // فئة حلقة الأحداث، تستخدم server.event_loop عند الفراغ
+        'context' => [], // سياق الاستماع، مثلاً SSL
+        'constructor' => [ // معاملات المُنشئ لمعالج العملية، هنا فئة Http
+            'requestClass' => Request::class, // فئة الطلب المخصصة
+            'logger' => Log::channel('default'), // مثيل المسجل
+            'appPath' => app_path(), // مسار مجلد التطبيق
+            'publicPath' => public_path() // مسار المجلد العام
         ]
     ],
-    // 监控进程，用于检测文件更新自动加载和内存泄漏
+    // عملية المراقبة لإعادة التحميل التلقائي عند تغيير الملفات واكتشاف تسرب الذاكرة
     'monitor' => [
-        'handler' => app\process\Monitor::class, // 处理类
-        'reloadable' => false, // 当前进程不执行reload
-        'constructor' => [ // 进程处理类构造函数参数
-            // 监听的目录，不要过多，会导致检测变慢
+        'handler' => app\process\Monitor::class, // فئة المعالج
+        'reloadable' => false, // هذه العملية لا تنفذ إعادة التحمل
+        'constructor' => [ // معاملات المُنشئ لمعالج العملية
+            // المجلدات للمراقبة، تجنب الإكثار لأن ذلك يبطئ الاكتشاف
             'monitorDir' => array_merge([
                 app_path(),
                 config_path(),
@@ -153,15 +151,15 @@ return [
                 base_path() . '/resource',
                 base_path() . '/.env',
             ], glob(base_path() . '/plugin/*/app'), glob(base_path() . '/plugin/*/config'), glob(base_path() . '/plugin/*/api')),
-            // 监听这些后缀文件的更新
+            // امتدادات الملفات لمراقبة التغييرات
             'monitorExtensions' => [
                 'php', 'html', 'htm', 'env'
             ],
-            // 其它选项
+            // خيارات أخرى
             'options' => [
-                // 是否开启文件监控，仅在linux下有效，默认守护进程模式不开启文件监控
+                // تفعيل مراقبة الملفات، Linux فقط، مراقبة الملفات معطلة افتراضياً في وضع daemon
                 'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/',
-                // 是否开启内存监控，仅支持在linux下开启
+                // تفعيل مراقبة الذاكرة، Linux فقط
                 'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',
             ]
         ]
@@ -171,13 +169,13 @@ return [
 
 #### container.php
 ```php
-// 返回一个psr-11依赖注入容器实例
+// إرجاع مثيل حاوية حقن التبعيات PSR-11
 return new Webman\Container;
 ```
 
 #### dependence.php
 ```php
-// 用于配置依赖注入容器中的服务和依赖关系
+// تكوين الخدمات والتبعيات في حاوية حقن التبعيات
 return [];
 ```
 
@@ -185,7 +183,7 @@ return [];
 ```php
 
 use support\Route;
-// 定义/test路径的路由
+// تعريف المسار لـ /test
 Route::any('/test', function (Request $request) {
     return response('test');
 });
@@ -199,13 +197,13 @@ use support\view\Blade;
 use support\view\ThinkPHP;
 
 return [
-    'handler' => Raw::class // 默认视图处理类 
+    'handler' => Raw::class // فئة معالج العرض الافتراضية
 ];
 ```
 
 ### autoload.php
 ```php
-// 配置框架自动加载的文件
+// تكوين ملفات التحميل التلقائي للإطار
 return [
     'files' => [
         base_path() . '/app/functions.php',
@@ -217,20 +215,20 @@ return [
 
 #### cache.php
 ```php
-// 缓存配置
+// تكوين التخزين المؤقت
 return [
-    'default' => 'file', // 默认文件
+    'default' => 'file', // السائق الافتراضي
     'stores' => [
         'file' => [
             'driver' => 'file',
-            'path' => runtime_path('cache') // 缓存文件存储位置
+            'path' => runtime_path('cache') // مسار تخزين ملفات التخزين المؤقت
         ],
         'redis' => [
             'driver' => 'redis',
-            'connection' => 'default' // redis连接名，对应redis.php里的配置
+            'connection' => 'default' // اسم اتصال Redis، يشير إلى التكوين في redis.php
         ],
         'array' => [
-            'driver' => 'array' // 内存缓存，重启后失效
+            'driver' => 'array' // تخزين مؤقت في الذاكرة، يُمسح عند إعادة التشغيل
         ]
     ]
 ];
@@ -251,9 +249,9 @@ return [
 #### database.php
 ```php
 return [
- // 默认数据库
+ // قاعدة البيانات الافتراضية
  'default' => 'mysql',
- // 各种数据库配置
+ // تكوينات اتصالات قاعدة البيانات
  'connections' => [
 
      'mysql' => [
@@ -307,7 +305,7 @@ return [
 #### exception.php
 ```php
 return [
-    // 设置异常处理类 
+    // تعيين فئة معالج الاستثناءات
     '' => support\exception\Handler::class,
 ];
 ```
@@ -318,15 +316,15 @@ return [
     'default' => [
         'handlers' => [
             [
-                'class' => Monolog\Handler\RotatingFileHandler::class, // 处理器
+                'class' => Monolog\Handler\RotatingFileHandler::class, // المعالج
                 'constructor' => [
-                    runtime_path() . '/logs/webman.log', // 日志名
-                    7, //$maxFiles // 保留7天内的日志
-                    Monolog\Logger::DEBUG, // 日志级别
+                    runtime_path() . '/logs/webman.log', // اسم ملف السجل
+                    7, //$maxFiles // الاحتفاظ بالسجلات لمدة 7 أيام
+                    Monolog\Logger::DEBUG, // مستوى السجل
                 ],
                 'formatter' => [
-                    'class' => Monolog\Formatter\LineFormatter::class, // 格式化器
-                    'constructor' => [null, 'Y-m-d H:i:s', true], // 格式化参数
+                    'class' => Monolog\Formatter\LineFormatter::class, // المُنسِّق
+                    'constructor' => [null, 'Y-m-d H:i:s', true], // معاملات المُنسِّق
                 ],
             ]
         ],
@@ -337,14 +335,14 @@ return [
 #### session.php
 ```php
 return [
-     // 类型
-    'type' => 'file', // or redis or redis_cluster
-     // 处理器
+     // النوع
+    'type' => 'file', // أو redis أو redis_cluster
+     // المعالج
     'handler' => FileSessionHandler::class,
-     // 配置
+     // التكوين
     'config' => [
         'file' => [
-            'save_path' => runtime_path() . '/sessions', // 存储目录
+            'save_path' => runtime_path() . '/sessions', // مجلد التخزين
         ],
         'redis' => [
             'host' => '127.0.0.1',
@@ -361,30 +359,30 @@ return [
             'prefix' => 'redis_session_',
         ]
     ],
-    'session_name' => 'PHPSID', // session名
-    'auto_update_timestamp' => false, // 是否自动更新时间戳，避免session过期
-    'lifetime' => 7*24*60*60, // 生命周期
-    'cookie_lifetime' => 365*24*60*60, // cookie生命周期
-    'cookie_path' => '/', // cookie路径
-    'domain' => '', // cookie域
-    'http_only' => true, // 仅http访问
-    'secure' => false, // 仅https访问
-    'same_site' => '', // SameSite属性
-    'gc_probability' => [1, 1000], // session回收概率
+    'session_name' => 'PHPSID', // اسم الجلسة
+    'auto_update_timestamp' => false, // تحديث الطابع الزمني تلقائياً لمنع انتهاء صلاحية الجلسة
+    'lifetime' => 7*24*60*60, // المدة
+    'cookie_lifetime' => 365*24*60*60, // مدة ملف تعريف الارتباط
+    'cookie_path' => '/', // مسار ملف تعريف الارتباط
+    'domain' => '', // نطاق ملف تعريف الارتباط
+    'http_only' => true, // HTTP فقط
+    'secure' => false, // HTTPS فقط
+    'same_site' => '', // خاصية SameSite
+    'gc_probability' => [1, 1000], // احتمال جمع نفايات الجلسة
 ];
 ```
 
 #### middleware.php
 ```php
-// 设置中间件
+// تكوين البرمجيات الوسيطة
 return [];
 ```
 
 #### static.php
 ```php
 return [
-    'enable' => true, // 是否开启webman的静态文件访问
-    'middleware' => [ // 静态文件中间件，可用于设置缓存策略、跨域等
+    'enable' => true, // تفعيل تقديم الملفات الثابتة لـ webman
+    'middleware' => [ // برمجية وسيطة للملفات الثابتة، لسياسة التخزين المؤقت، CORS إلخ
         //app\middleware\StaticFile::class,
     ],
 ];
@@ -393,11 +391,11 @@ return [
 #### translation.php
 ```php
 return [
-    // 默认语言
+    // اللغة الافتراضية
     'locale' => 'zh_CN',
-    // 回退语言
+    // اللغات الاحتياطية
     'fallback_locale' => ['zh_CN', 'en'],
-    // 语言文件存储位置
+    // موقع ملف الترجمة
     'path' => base_path() . '/resource/translations',
 ];
 ```

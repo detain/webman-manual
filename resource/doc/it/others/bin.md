@@ -1,105 +1,60 @@
 # Imballaggio binario
 
-webman supporta l'opzione di imballare il progetto in un file binario, che consente a webman di essere eseguito su sistemi Linux anche senza l'ambiente PHP.
+webman supporta l'imballaggio del progetto in un unico file binario, consentendo l'esecuzione su Linux senza ambiente PHP.
 
 > **Nota**
-> Dopo l'imballaggio, il file supporta solo l'esecuzione su sistemi Linux basati su architettura x86_64 e non supporta macOS.
-> È necessario disattivare l'opzione di configurazione phar del file `php.ini`, impostando `phar.readonly = 0`.
+> Il file impacchettato supporta attualmente solo l'esecuzione su sistemi Linux x86_64. Windows e macOS non sono supportati.
+> È necessario disattivare l'opzione phar in `php.ini` impostando `phar.readonly = 0`.
 
-## Installazione dello strumento della riga di comando
-Eseguire il comando
-```shell
-composer require webman/console ^1.2.24
-```
-
-## Configurazione
-Aprire il file `config/plugin/webman/console/app.php` e impostare
-```php
-'exclude_pattern'   => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$#'
-```
-per escludere alcune directory e file inutili durante l'imballaggio, al fine di evitare dimensioni eccessive.
+## Installare lo strumento da riga di comando
+`composer require webman/console`
 
 ## Imballaggio
 Eseguire il comando
-```shell
+```
 php webman build:bin
 ```
-È inoltre possibile specificare con quale versione di PHP eseguire l'imballaggio, ad esempio
-```shell
+È possibile specificare la versione di PHP da usare per l'imballaggio, ad esempio
+```
 php webman build:bin 8.1
 ```
-Dopo l'imballaggio, verrà generato un file `webman.bin` nella directory di build.
+
+Dopo l'imballaggio, verrà generato un file `webman.bin` nella directory build.
 
 ## Avvio
-Caricare webman.bin sul server Linux e eseguire `./webman.bin start` o `./webman.bin start -d` per avviarlo.
+Caricare webman.bin sul server Linux ed eseguire `./webman.bin start` o `./webman.bin start -d` per avviare.
 
 ## Principio
-* In primo luogo, il progetto webman locale verrà imballato in un file phar.
-* Successivamente, verrà scaricato il file php8.x.micro.sfx in remoto.
-* Infine, php8.x.micro.sfx e il file phar verranno concatenati in un file binario.
+* Innanzitutto il progetto webman locale viene impacchettato in un file phar
+* Poi php8.x.micro.sfx viene scaricato da remoto
+* php8.x.micro.sfx e il file phar vengono concatenati in un unico file binario
 
 ## Note
-* Possono essere eseguiti comandi di imballaggio con una versione locale di PHP >= 7.2, ma verrà solo prodotto un file binario per PHP 8.
-* Si consiglia vivamente di utilizzare la stessa versione locale di PHP e di imballaggio per evitare problemi di compatibilità. Ad esempio, se la versione locale è PHP 8.0, utilizzare anche PHP 8.0 per l'imballaggio.
-* Durante l'imballaggio, viene scaricato il codice sorgente di PHP 8, ma non viene installato localmente e non influisce sull'ambiente PHP locale.
-* Al momento, webman.bin è supportato solo su sistemi Linux basati su architettura x86_64 e non su macOS.
-* Per impostazione predefinita, non è incluso il file env nell'imballaggio (`config/plugin/webman/console/app.php` controlla exclude_files), pertanto il file env dovrebbe essere posizionato nella stessa directory di webman.bin al momento dell'avvio.
-* Durante l'esecuzione, verrà creata una directory runtime nella stessa directory di webman.bin per memorizzare i file di registro.
-* Attualmente, webman.bin non leggerà file php.ini esterni. Se è necessario personalizzare php.ini, è possibile farlo nel file `/config/plugin/webman/console/app.php` custom_ini.
+* Si consiglia vivamente di usare la stessa versione di PHP in locale e per l'imballaggio (es. PHP 8.1 per entrambi) per evitare problemi di compatibilità
+* L'imballaggio scarica il codice sorgente di PHP 8 ma non lo installa localmente, senza impatto sull'ambiente PHP locale
+* webman.bin supporta attualmente solo Linux x86_64 e non macOS
+* I progetti impacchettati non supportano reload; gli aggiornamenti al codice richiedono un riavvio
+* Di default il file env non viene impacchettato (controllato da exclude_files in `config/plugin/webman/console/app.php`). All'avvio il file env deve trovarsi nella stessa directory di webman.bin
+* Durante l'esecuzione viene creata una directory runtime nella directory di webman.bin per i file di log
+* webman.bin attualmente non legge file php.ini esterni. Per personalizzare php.ini, configurarlo in custom_ini in `config/plugin/webman/console/app.php`
+* Alcuni file non vanno impacchettati; configurate le esclusioni in `config/plugin/webman/console/app.php` per evitare pacchetti troppo grandi
+* L'imballaggio binario non supporta le coroutine Swoole
+* Non memorizzare mai file caricati dagli utenti nel pacchetto binario. Utilizzarli tramite il protocollo `phar://` è molto pericoloso (vulnerabilità di deserializzazione phar). I file caricati devono essere memorizzati separatamente su disco fuori dal pacchetto
+* Se l'applicazione deve caricare file nella directory public, collocate la directory public nella stessa posizione di webman.bin, configurate `config/app.php` come segue e impacchettate di nuovo:
+```
+'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
+```
 
-## Download di PHP statici separatamente
-A volte potresti non voler distribuire l'ambiente PHP, ma avere solo un file eseguibile per PHP. Fare clic [qui](https://www.workerman.net/download) per scaricare PHP statici.
+## Scaricare PHP statico separatamente
+Se serve solo un eseguibile PHP senza distribuire un ambiente PHP completo, [scaricare PHP statico qui](https://www.workerman.net/download).
 
-> **Nota**
-> Se è necessario specificare un file php.ini per PHP statici, utilizzare il seguente comando `php -c /your/path/php.ini start.php start -d`.
+> **Suggerimento**
+> Per specificare un file php.ini per PHP statico: `php -c /your/path/php.ini start.php start -d`
 
 ## Estensioni supportate
-bcmath
-calendar
-Core
-ctype
-curl
-date
-dom
-event
-exif
-FFI
-fileinfo
-filter
-gd
-hash
-iconv
-json
-libxml
-mbstring
-mongodb
-mysqlnd
-openssl
-pcntl
-pcre
-PDO
-pdo_mysql
-pdo_sqlite
-Phar
-posix
-readline
-redis
-Reflection
-session
-shmop
-SimpleXML
-soap
-sockets
-SPL
-sqlite3
-standard
-tokenizer
-xml
-xmlreader
-xmlwriter
-zip
-zlib
+apcu, bcmath, bz2, calendar, Core, ctype, curl, date, dba, dom, event, exif, fileinfo, filter, ftp, gd, gmp, hash, iconv, imagick, imap, intl, json, libxml, mbstring, mysqli, mysqlnd, openssl, pcntl, pcre, PDO, pdo_mysql, pgsql, Phar, posix, protobuf, readline, redis, Reflection, session, shmop, SimpleXML, soap, sockets, sodium, SPL, sqlite3, standard, swoole, sysvmsg, sysvsem, sysvshm, tokenizer, xml, xmlreader, xmlwriter, xsl, Zend OPcache, zip, zlib
 
 ## Origine del progetto
+
 https://github.com/crazywhalecc/static-php-cli
 https://github.com/walkor/static-php-cli

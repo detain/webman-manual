@@ -1,21 +1,22 @@
 # 安裝
 
-應用程式插件的安裝有兩種方式：
+應用插件安裝有兩種方式：
 
 ## 在插件市場安裝
-進入[官方管理後台webman-admin](https://www.workerman.net/plugin/82)的應用程式插件頁面，點擊安裝按鈕以安裝相應的應用程式插件。
+進入 [官方管理後台webman-admin](https://www.workerman.net/plugin/82) 的應用插件頁點擊安裝按鈕安裝對應的應用插件。
 
 ## 源碼包安裝
-從應用市場下載應用程式插件壓縮包，解壓並將解壓目錄上傳至`{主項目}/plugin/`目錄下（如果plugin目錄不存在，需要手動創建），然後執行 `php webman app-plugin:install 插件名` 完成安裝。
+從應用市場下載應用插件壓縮包，解壓並將解壓目錄上傳到`{主項目}/plugin/`目錄下(如plugin目錄不存在需要手動創建)，執行 `php webman app-plugin:install 插件名`完成安裝。
 
-例如，下載的壓縮包名稱為ai.zip，解壓至`{主項目}/plugin/ai`，執行`php webman app-plugin:install ai`完成安裝。
+例如下載的壓縮包名稱為ai.zip，解壓到 `{主項目}/plugin/ai`，執行`php webman app-plugin:install ai` 完成安裝。
+
 
 # 卸載
 
-同樣應用程式插件的卸載方法也有兩種：
+同樣應用插件卸載也有兩種方式：
 
 ## 在插件市場卸載
-進入[官方管理後台webman-admin](https://www.workerman.net/plugin/82)的應用程式插件頁面，點擊卸載按鈕以卸載相應的應用程式插件。
+進入 [官方管理後台webman-admin](https://www.workerman.net/plugin/82) 的應用插件頁點擊卸載按鈕卸載對應的應用插件。
 
-## 源碼包安裝
-執行`php webman app-plugin:uninstall 插件名` 完成卸載，執行完畢後手動刪除`{主項目}/plugin/`目錄下對應的插件目錄。
+## 源碼包卸載
+執行 `php webman app-plugin:uninstall 插件名`完成卸載，執行完後手動刪除`{主項目}/plugin/`目錄下對應的插件目錄。

@@ -62,7 +62,7 @@ return [
 이렇게 하면 비즈니스 초기화 과정이 완료됩니다.
 
 ## 추가 설명
-[사용자 정의 프로세스](../process.md)가 시작되면 `config/bootstrap.php`에 설정된 start 메서드도 실행됩니다. 우리는 `$worker->name`을 사용하여 현재 프로세스가 무엇인지 판단하고, 해당 프로세스에서 비즈니스 초기화 코드를 실행할지를 결정할 수 있습니다. 예를 들어 모니터 프로세스를 감시할 필요가 없는 경우, `MemReport.php`의 내용은 다음과 같습니다:
+[사용자 정의 프로세스](../process.md)도 시작되면 `config/bootstrap.php`에 설정된 start 메서드를 실행합니다. 우리는 `$worker->name`으로 현재 프로세스가 무엇인지 판단하고, `$worker->id`로 프로세스 번호를 판단할 수 있습니다. 이를 바탕으로 해당 프로세스에서 비즈니스 초기화 코드를 실행할지 결정할 수 있습니다. 예를 들어 webman의 0번 프로세스에서만 실행해야 하는 경우, `MemReport.php`의 내용은 다음과 같습니다:
 ```php
 <?php
 
@@ -74,15 +74,15 @@ class MemReport implements Bootstrap
 {
     public static function start($worker)
     {
-        // 명령행 환경인가 ?
+        // 명령행 환경인가?
         $is_console = !$worker;
         if ($is_console) {
             // 명령행 환경에서 이 초기화를 실행하고 싶지 않다면 여기서 바로 반환합니다.
             return;
         }
-        
-        // 모니터 프로세스는 타이머를 실행하지 않음
-        if ($worker->name == 'monitor') {
+
+        // webman의 0번 프로세스에서만 실행
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

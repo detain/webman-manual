@@ -14,20 +14,21 @@ class FooController
 {
     public function index(Request $request)
     {
-        return response('xin chào index');
+        return response('hello index');
     }
     
     public function hello(Request $request)
     {
-        return response('xin chào webman');
+        return response('hello webman');
     }
 }
 ```
 
-Khi truy cập `http://127.0.0.1:8787/app/foo/foo` thì trang web sẽ trả về `xin chào index`
+Khi truy cập `http://127.0.0.1:8787/app/foo/foo`, trang sẽ trả về `hello index`
 
-Khi truy cập `http://127.0.0.1:8787/app/foo/foo/hello` thì trang web sẽ trả về `xin chào webman`
-  
+Khi truy cập `http://127.0.0.1:8787/app/foo/foo/hello`, trang sẽ trả về `hello webman`
+
+
 ## Truy cập URL
-Đường dẫn URL của ứng dụng plugin bắt đầu bằng `/app`, tiếp theo là plugin_identifier, sau đó là điều khiển cụ thể và phương pháp.
-Ví dụ, đường dẫn URL của `plugin\foo\app\controller\UserController` là `http://127.0.0.1:8787/app/foo/user`
+Đường dẫn địa chỉ URL của plugin ứng dụng đều bắt đầu bằng `/app`, tiếp theo là định danh plugin, rồi đến controller và method cụ thể.
+Ví dụ: địa chỉ URL của `plugin\foo\app\controller\UserController` là `http://127.0.0.1:8787/app/foo/user`

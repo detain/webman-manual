@@ -1,12 +1,13 @@
 # Composant de captcha
 
-## webman/captcha
 Adresse du projet https://github.com/webman-php/captcha
 
-### Installation
-```composer require webman/captcha```
+## Installation
+```
+composer require webman/captcha
+```
 
-### Utilisation
+## Utilisation
 
 **Créer le fichier `app/controller/LoginController.php`**
 
@@ -32,15 +33,15 @@ class LoginController
      */
     public function captcha(Request $request)
     {
-        // Initialisation de la classe de captcha
+        // Initialiser la classe captcha
         $builder = new CaptchaBuilder;
         // Générer le captcha
         $builder->build();
         // Stocker la valeur du captcha dans la session
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Obtenir les données binaires de l'image du captcha
+        // Récupérer les données binaires de l'image du captcha
         $img_content = $builder->get();
-        // Afficher les données binaires du captcha
+        // Renvoyer les données binaires du captcha
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
@@ -49,9 +50,9 @@ class LoginController
      */
     public function check(Request $request)
     {
-        // Obtenir le champ captcha de la requête post
+        // Récupérer le champ captcha de la requête POST
         $captcha = $request->post('captcha');
-        // Comparer la valeur du captcha dans la session
+        // Comparer avec la valeur du captcha en session
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
             return json(['code' => 400, 'msg' => 'Le captcha saisi est incorrect']);
         }
@@ -80,31 +81,21 @@ class LoginController
 </html>
 ```
 
-Accédez à la page `http://127.0.0.1:8787/login`, l'interface ressemble à ceci :
+Accéder à la page `http://127.0.0.1:8787/login`, l'interface ressemble à ceci :
   ![](../../assets/img/captcha.png)
 
-### Paramètres courants
+## Paramètres courants
 ```php
     /**
      * Afficher l'image du captcha
      */
     public function captcha(Request $request)
     {
-        // Initialiser la classe de captcha
-        $builder = new CaptchaBuilder;
-        // Longueur du captcha
-        $length = 4;
-        // Caractères inclus
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // Générer le captcha
-        $builder->build();
-        // Stocker la valeur du captcha dans la session
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Obtenir les données binaires de l'image du captcha
-        $img_content = $builder->get();
-        // Afficher les données binaires du captcha
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```

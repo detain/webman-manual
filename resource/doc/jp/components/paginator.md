@@ -1,20 +1,18 @@
 # ページネーションコンポーネント
 
-## jasongrimes/php-paginator
-
-### プロジェクトのURL
+## プロジェクトのURL
 
 https://github.com/jasongrimes/php-paginator
   
-### インストール
+## インストール
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### 使用方法
+## 使用方法
 
-新しい `app/controller/UserController.php` を作成する
+新規作成 `app/controller/UserController.php`
 ```php
 <?php
 namespace app\controller;
@@ -25,7 +23,7 @@ use JasonGrimes\Paginator;
 class UserController
 {
     /**
-     * ユーザーリスト
+     * ユーザー一覧
      */
     public function get(Request $request)
     {
@@ -39,11 +37,12 @@ class UserController
     
 }
 ```
-**テンプレート(生PHP)**<br>新しいテンプレート app/view/user/get.html
+**テンプレート（ネイティブPHP）**
+新規テンプレート `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- 組み込みのBootstrapページネーションスタイルをサポート -->
+  <!-- Bootstrapページネーションスタイルの組み込みサポート -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -54,11 +53,12 @@ class UserController
 </html>
 ```
 
-**テンプレート(twig)**<br>新しいテンプレート app/view/user/get.html
+**テンプレート（Twig）**
+新規テンプレート `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- 組み込みのBootstrapページネーションスタイルをサポート -->
+  <!-- Bootstrapページネーションスタイルの組み込みサポート -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -71,11 +71,12 @@ class UserController
 </html>
 ```
 
-**テンプレート(blade)**<br>新しいテンプレート app/view/user/get.blade.php
+**テンプレート（Blade）**
+新規テンプレート `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-  <!-- 組み込みのBootstrapページネーションスタイルをサポート -->
+  <!-- Bootstrapページネーションスタイルの組み込みサポート -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -86,11 +87,12 @@ class UserController
 </html>
 ```
 
-**テンプレート(thinkphp)**<br>新しいテンプレート app/view/user/get.blade.php
+**テンプレート（ThinkPHP）**
+新規テンプレート `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-    <!-- 組み込みのBootstrapページネーションスタイルをサポート -->
+    <!-- Bootstrapページネーションスタイルの組み込みサポート -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -101,9 +103,10 @@ class UserController
 </html>
 ```
 
-以下は効果です：
+表示結果は以下のとおりです：
 ![](../../assets/img/paginator.png)
+  
+## 詳細情報
 
-### 追加情報
-
-https://github.com/jasongrimes/php-paginator をご覧ください。
+https://github.com/jasongrimes/php-paginator をご覧ください
+  

@@ -1,18 +1,14 @@
-# Medoo 数据库
+# قاعدة بيانات Medoo
 
-[webman/medoo](https://github.com/webman-php/medoo)在[Medoo](https://medoo.in/)的基础上增加了连接池功能，并支持协程和非协程环境，用法与Medoo相同。
+[webman/medoo](https://github.com/webman-php/medoo) يمتد [Medoo](https://medoo.in/) بدعم مجمع الاتصالات ويعمل في بيئات الروتينات التآزرية وغير التآزرية. الاستخدام مطابق لـ Medoo.
 
-
-> **注意**
-> 当前手册为 webman v2 版本，如果您使用的是webman v1版本，请查看 [v1版本手册](/doc/webman-v1/db/medoo.html)
-
-## 安装
+## التثبيت
 `composer require webman/medoo`
 
-## Medoo数据库配置
-配置文件位置在 `config/plugin/webman/medoo/database.php`
+## تكوين قاعدة بيانات Medoo
+موقع ملف التكوين: `config/plugin/webman/medoo/database.php`
 
-## Medoo数据库使用
+## استخدام قاعدة بيانات Medoo
 ```php
 <?php
 namespace app\controller;
@@ -30,15 +26,15 @@ class Index
 }
 ```
 
-> **提示**
+> **تلميح**
 > `Medoo::get('user', '*', ['uid' => 1]);`
-> 等同于
+> يعادل
 > `Medoo::instance('default')->get('user', '*', ['uid' => 1]);`
 
-## Medoo多数据库配置
+## تكوين قواعد بيانات Medoo المتعددة
 
-**配置**  
-`config/plugin/webman/medoo/database.php` 里新增一个配置，key任意，这里使用的是`other`。
+**التكوين**
+أضف تكوينًا جديدًا في `config/plugin/webman/medoo/database.php` بأي مفتاح؛ هنا نستخدم `other`.
 
 ```php
 <?php
@@ -61,15 +57,15 @@ return [
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
         ],
-        'pool' => [ // 连接池配置
-            'max_connections' => 5, // 最大连接数
-            'min_connections' => 1, // 最小连接数
-            'wait_timeout' => 60,   // 从连接池获取连接等待的最大时间，超时后会抛出异常
-            'idle_timeout' => 3,    // 连接池中连接最大空闲时间，超时后会关闭回收，直到连接数为min_connections
-            'heartbeat_interval' => 50, // 连接池心跳检测时间，单位秒，建议小于60秒
+        'pool' => [ // تكوين مجمع الاتصالات
+            'max_connections' => 5, // الحد الأقصى لعدد الاتصالات
+            'min_connections' => 1, // الحد الأدنى لعدد الاتصالات
+            'wait_timeout' => 60,   // أقصى وقت انتظار للحصول على اتصال من المجمع؛ استثناء عند التجاوز
+            'idle_timeout' => 3,    // أقصى وقت خمول للاتصالات في المجمع؛ تتوقف عند التجاوز حتى min_connections
+            'heartbeat_interval' => 50, // فاصل نبضات المجمع بالثواني؛ يُوصى بأقل من 60 ثانية
         ]
     ],
-    // 这里新增了一个other的配置
+    // إضافة تكوين 'other' هنا
     'other' => [
         'type' => 'mysql',
         'host' => 'localhost',
@@ -99,10 +95,9 @@ return [
 ];
 ```
 
-## Medoo数据库使用
+## استخدام قاعدة بيانات Medoo
 ```php
 $user = Medoo::instance('other')->get('user', '*', ['uid' => 1]);
 ```
 
-参见 [Medoo官方文档](https://medoo.in/api/select)
-
+راجع [التوثيق الرسمي لـ Medoo](https://medoo.in/api/select)

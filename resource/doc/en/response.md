@@ -343,3 +343,93 @@ class ImageController
     }
 }
 ```
+
+## Chunked Response
+
+Sometimes we want to send responses in chunks. You can refer to the following example.
+
+```php
+<?php
+
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+use Workerman\Timer;
+
+class IndexController
+{
+    public function index(Request $request): Response
+    {
+        // Get connection
+        $connection = $request->connection;
+        // Send HTTP body periodically
+        $timer = Timer::add(1, function () use ($connection, &$timer) {
+            static $i = 0;
+            if ($i++ < 10) {
+                // Send HTTP body
+                $connection->send(new Chunk($i));
+            } else {
+                // Remove unused timer to prevent memory leaks from accumulating timers
+                Timer::del($timer);
+                // Output empty Chunk to notify client that response is complete
+                $connection->send(new Chunk(''));
+            }
+        });
+        // First output an HTTP header with Transfer-Encoding: chunked, then send HTTP body asynchronously
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+
+}
+```
+
+If you are calling a large language model, refer to the following example.
+
+```
+composer require webman/openai
+```
+
+```php
+<?php
+namespace app\controller;
+use support\Request;
+
+use Webman\Openai\Chat;
+use Workerman\Protocols\Http\Chunk;
+
+class ChatController
+{
+    public function completions(Request $request)
+    {
+        $connection = $request->connection;
+        // If https://api.openai.com is not accessible in your region, you can use https://api.openai-proxy.com instead
+        $chat = new Chat(['apikey' => 'sk-xx', 'api' => 'https://api.openai.com']);
+        $chat->completions(
+            [
+                'model' => 'gpt-3.5-turbo',
+                'stream' => true,
+                'messages' => [['role' => 'user', 'content' => 'hello']],
+            ], [
+            'stream' => function($data) use ($connection) {
+                // Forward data to browser when OpenAI API returns
+                $connection->send(new Chunk(json_encode($data, JSON_UNESCAPED_UNICODE) . "\n"));
+            },
+            'complete' => function($result, $response) use ($connection) {
+                // Check for errors when response completes
+                if (isset($result['error'])) {
+                    $connection->send(new Chunk(json_encode($result, JSON_UNESCAPED_UNICODE) . "\n"));
+                }
+                // Return empty chunk to indicate response end
+                $connection->send(new Chunk(''));
+            },
+        ]);
+        // Return HTTP header first, data will be returned asynchronously
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+}
+```

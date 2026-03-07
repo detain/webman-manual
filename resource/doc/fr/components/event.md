@@ -1,34 +1,34 @@
 # Gestion des événements
-
-`webman/event` fournit un mécanisme d'événement sophistiqué qui permet d'exécuter certaines logiques métier sans modifier le code, réalisant ainsi le découplage entre les modules métier. Un scénario typique consiste à publier un événement personnalisé tel que `user.register` chaque fois qu'un nouvel utilisateur s'inscrit, afin que chaque module puisse recevoir cet événement et exécuter la logique métier correspondante.
+`webman/event` fournit un mécanisme d'événements sophistiqué qui permet d'exécuter une logique métier sans modifier le code, en découplant les modules. Scénario typique : lorsqu'un nouvel utilisateur s'inscrit, il suffit de publier un événement personnalisé comme `user.register`, et chaque module peut le recevoir et exécuter la logique correspondante.
 
 ## Installation
 `composer require webman/event`
 
-## Abonnement aux événements
-L'abonnement aux événements se fait de manière uniforme via le fichier `config/event.php`:
+## S'abonner aux événements
+Les abonnements se configurent de manière unifiée via le fichier `config/event.php`.
 
 ```php
 <?php
 return [
     'user.register' => [
         [app\event\User::class, 'register'],
-        // ...autres fonctions de traitement d'événements...
+        // ...autres fonctions de traitement...
     ],
     'user.logout' => [
         [app\event\User::class, 'logout'],
-        // ...autres fonctions de traitement d'événements...
+        // ...autres fonctions de traitement...
     ]
 ];
 ```
 
 **Remarque :**
-- `user.register`, `user.logout`, etc. sont des noms d'événements de type chaîne, il est recommandé d'utiliser des mots en minuscules et de les séparer par des points (`.`).
-- Un événement peut avoir plusieurs fonctions de traitement d'événements, qui seront appelées dans l'ordre configuré.
+- `user.register`, `user.logout`, etc. sont des noms d'événements (chaînes). Il est recommandé d'utiliser des mots en minuscules séparés par des points (`.`).
+- Un événement peut être traité par plusieurs fonctions ; elles sont appelées dans l'ordre de la configuration.
 
-## Fonctions de traitement des événements
-Les fonctions de traitement des événements peuvent être n'importe quelle méthode de classe, fonction, fonction de fermeture, etc.
-Par exemple, créez une classe de traitement d'événements `app/event/User.php` (créez le répertoire s'il n'existe pas) :
+## Fonctions de traitement
+Les fonctions de traitement peuvent être des méthodes de classe, des fonctions ou des closures.
+
+Exemple : créez la classe `app/event/User.php` (créez le répertoire si nécessaire) :
 
 ```php
 <?php
@@ -47,8 +47,8 @@ class User
 }
 ```
 
-## Publication d'événements
-Utilisez `Event::emit($event_name, $data)` pour publier un événement, par exemple :
+## Publier un événement
+Utilisez `Event::dispatch($event_name, $data);` ou `Event::emit($event_name, $data);` pour publier un événement. Par exemple :
 
 ```php
 <?php
@@ -63,16 +63,18 @@ class User
             'name' => 'webman',
             'age' => 2
         ];
-        Event::emit('user.register', $user);
+        Event::dispatch('user.register', $user);
     }
 }
 ```
 
-> **Remarque :**
-> Le paramètre `$data` de `Event::emit($event_name, $data)` peut être n'importe quel type de données, telles qu'un tableau, une instance de classe, une chaîne, etc.
+Deux méthodes permettent de publier : `Event::dispatch($event_name, $data);` et `Event::emit($event_name, $data);` — les paramètres sont identiques. La différence : `emit` intercepte les exceptions en interne ; si une fonction lève une exception, les autres continuent. Avec `dispatch`, les exceptions ne sont pas interceptées ; si une fonction lève une exception, l'exécution s'arrête et l'exception est propagée.
+
+> **Conseil**
+> Le paramètre `$data` peut être n'importe quel type de données (tableau, instance de classe, chaîne, etc.).
 
 ## Écoute d'événements par joker
-L'écoute enregistrée par joker vous permet de gérer plusieurs événements avec un même écouteur. Par exemple, dans `config/event.php` :
+L'écoute par joker permet de gérer plusieurs événements avec un même listener. Par exemple dans `config/event.php` :
 
 ```php
 <?php
@@ -83,7 +85,7 @@ return [
 ];
 ```
 
-Nous pouvons obtenir le nom d'événement spécifique via le 2ème paramètre de la fonction de traitement de l'événement `$event_data` :
+Le nom concret de l'événement est obtenu via le deuxième paramètre `$event_data` de la fonction de traitement :
 
 ```php
 <?php
@@ -92,17 +94,17 @@ class User
 {
     function deal($user, $event_name)
     {
-        echo $event_name; // Nom spécifique de l'événement, tel que user.register, user.logout, etc.
+        echo $event_name; // nom concret, ex. user.register, user.logout, etc.
         var_export($user);
     }
 }
 ```
 
-## Arrêt de la transmission d'événements
-Lorsque nous retournons `false` dans une fonction de traitement d'événements, la transmission de cet événement sera stoppée.
+## Arrêter la transmission
+Si une fonction de traitement retourne `false`, la transmission de l'événement s'arrête.
 
-## Fonction de traitement des événements par fonction de fermeture
-Une fonction de traitement d'événements peut être une méthode de classe ou une fonction de fermeture, par exemple :
+## Closures pour le traitement
+La fonction de traitement peut être une méthode de classe ou une closure. Par exemple :
 
 ```php
 <?php
@@ -115,8 +117,13 @@ return [
 ];
 ```
 
-## Vérification des événements et des écouteurs
-Utilisez la commande `php webman event:list` pour afficher tous les événements et écouteurs configurés dans le projet.
+## Voir les événements et listeners
+Utilisez la commande `php webman event:list` pour afficher tous les événements et listeners configurés.
+
+## Périmètre de prise en charge
+Outre le projet principal, les [plugins de base](../plugin/base.md) et les [plugins d'application](../app/app.md) prennent en charge la configuration `event.php`.
+**Fichier de configuration plugin de base :** `config/plugin/éditeur/nom-plugin/event.php`
+**Fichier de configuration plugin d'application :** `plugin/nom-plugin/config/event.php`
 
 ## Remarques
-La gestion des événements n'est pas asynchrone. Elle n'est pas adaptée pour traiter les tâches métier lentes, qui devraient être gérées par une file d'attente de messages, telle que [webman/redis-queue](https://www.workerman.net/plugin/12).
+La gestion des événements n'est pas asynchrone. Elle n'est pas adaptée aux traitements lents ; ceux-ci doivent passer par des files de messages, par exemple [webman/redis-queue](https://www.workerman.net/plugin/12).

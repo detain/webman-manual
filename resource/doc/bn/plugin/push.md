@@ -4,8 +4,6 @@
 
 প্লাগইনে একটি সাইট JavaScript ক্লায়েন্ট `push.js` এবং uniapp ক্লায়েন্ট `uniapp-push.js` সহজে থাকে, অন্যান্য ভাষার ক্লায়েন্টের জন্য https://pusher.com/docs/channels/channels_libraries/libraries/ থেকে ডাউনলোড করা যায়।
 
-> প্লাগইনটি কিছু দ্বারা প্রয়োজনীয় হবে `webman-framework>=1.2.0`
-
 ## ইনস্টল করুন
 
 ```sh

@@ -14,8 +14,8 @@ class FooController
 {
     public function index(Request $request)
     {
-        Log::info('тестирование журнала');
-        return response('привет, index');
+        Log::info('log test');
+        return response('hello index');
     }
 }
 ```
@@ -139,8 +139,8 @@ class FooController
     public function index(Request $request)
     {
         $log = Log::channel('log2');
-        $log->info('тестирование log2');
-        return response('привет, index');
+        $log->info('log2 test');
+        return response('hello index');
     }
 }
 ```

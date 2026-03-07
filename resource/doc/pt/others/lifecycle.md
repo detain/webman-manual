@@ -7,11 +7,11 @@
 - Quando um processo recebe os comandos `stop`, `reload` ou `restart`, ele encerrará e terminará o ciclo de vida atual
 
 > **Dica**
-> Cada processo é independente e não interfere uns com os outros, o que significa que cada processo mantém seus próprios recursos, variáveis e instâncias de classe, resultando em cada processo tendo sua própria conexão de banco de dados. Alguns singletons são inicializados em cada processo, o que significa que eles serão inicializados várias vezes quando houver vários processos.
+> Cada processo é independente e não interfere uns com os outros, o que significa que cada processo mantém seus próprios recursos, variáveis e instâncias de classe. Isso se reflete em cada processo ter sua própria conexão de banco de dados; alguns singletons são inicializados uma vez por processo, portanto múltiplos processos resultarão em múltiplas inicializações.
 
 ## Ciclo de Vida do Pedido
 - Cada pedido gera um objeto `$request`
-- O objeto `$request` é liberado após o processamento do pedido
+- O objeto `$request` é reciclado após o processamento do pedido
 
 ## Ciclo de Vida do Controlador
 - Cada controlador é instanciado apenas uma vez por processo, mas é instanciado várias vezes em vários processos (exceto quando o reuso de controlador é desativado, consulte [Ciclo de Vida do Controlador](https://www.workerman.net/doc/webman/controller.html#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F))

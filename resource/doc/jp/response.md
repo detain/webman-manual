@@ -344,3 +344,93 @@ class ImageController
     }
 }
 ```
+
+## チャンク送信レスポンス
+
+レスポンスをチャンク単位で送信したい場合は、以下の例を参照してください。
+
+```php
+<?php
+
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+use Workerman\Timer;
+
+class IndexController
+{
+    public function index(Request $request): Response
+    {
+        // 接続を取得
+        $connection = $request->connection;
+        // HTTPボディを定期的に送信
+        $timer = Timer::add(1, function () use ($connection, &$timer) {
+            static $i = 0;
+            if ($i++ < 10) {
+                // HTTPボディを送信
+                $connection->send(new Chunk($i));
+            } else {
+                // 未使用のタイマーを削除し、タイマーが増え続けてメモリリークを防ぐ
+                Timer::del($timer);
+                // 空のChunkを出力してクライアントにレスポンス終了を通知
+                $connection->send(new Chunk(''));
+            }
+        });
+        // Transfer-Encoding: chunked のHTTPヘッダを先に出力し、HTTPボディは非同期で送信
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+
+}
+```
+
+大規模言語モデルを呼び出す場合は、以下の例を参照してください。
+
+```
+composer require webman/openai
+```
+
+```php
+<?php
+namespace app\controller;
+use support\Request;
+
+use Webman\Openai\Chat;
+use Workerman\Protocols\Http\Chunk;
+
+class ChatController
+{
+    public function completions(Request $request)
+    {
+        $connection = $request->connection;
+        // https://api.openai.com に国内からアクセスできない場合は、https://api.openai-proxy.com の使用を検討してください
+        $chat = new Chat(['apikey' => 'sk-xx', 'api' => 'https://api.openai.com']);
+        $chat->completions(
+            [
+                'model' => 'gpt-3.5-turbo',
+                'stream' => true,
+                'messages' => [['role' => 'user', 'content' => 'hello']],
+            ], [
+            'stream' => function($data) use ($connection) {
+                // OpenAI APIからデータが返ってきたらブラウザに転送
+                $connection->send(new Chunk(json_encode($data, JSON_UNESCAPED_UNICODE) . "\n"));
+            },
+            'complete' => function($result, $response) use ($connection) {
+                // レスポンス終了時にエラーをチェック
+                if (isset($result['error'])) {
+                    $connection->send(new Chunk(json_encode($result, JSON_UNESCAPED_UNICODE) . "\n"));
+                }
+                // 空のchunkを返してレスポンス終了を通知
+                $connection->send(new Chunk(''));
+            },
+        ]);
+        // 先にHTTPヘッダを返し、その後のデータは非同期で返す
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+}
+```

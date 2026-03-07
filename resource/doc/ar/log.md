@@ -1,7 +1,7 @@
-# 日志
-webman使用 [monolog/monolog](https://github.com/Seldaek/monolog) 处理日志。
+# السجلات (Log)
+يستخدم webman مكتبة [monolog/monolog](https://github.com/Seldaek/monolog) لمعالجة السجلات.
 
-## 使用
+## الاستخدام
 ```php
 <?php
 namespace app\controller;
@@ -19,7 +19,7 @@ class FooController
 }
 ```
 
-## 提供的方法
+## الطرق المتاحة
 ```php
 Log::log($level, $message, array $context = [])
 Log::debug($message, array $context = [])
@@ -31,7 +31,7 @@ Log::critical($message, array $context = [])
 Log::alert($message, array $context = [])
 Log::emergency($message, array $context = [])
 ```
-等价于
+يعادل
 ```php
 $log = Log::channel('default');
 $log->log($level, $message, array $context = [])
@@ -45,26 +45,26 @@ $log->alert($message, array $context = [])
 $log->emergency($message, array $context = [])
 ```
 
-## 配置
+## الإعدادات
 ```php
 return [
-    // 默认日志通道
+    // قناة السجل الافتراضية
     'default' => [
-        // 处理默认通道的handler，可以设置多个
+        // معالجات القناة الافتراضية، يمكن تعيين عدة معالجات
         'handlers' => [
             [   
-                // handler类的名字
+                // اسم فئة المعالج
                 'class' => Monolog\Handler\RotatingFileHandler::class,
-                // handler类的构造函数参数
+                // معاملات مُنشئ فئة المعالج
                 'constructor' => [
                     runtime_path() . '/logs/webman.log',
                     Monolog\Logger::DEBUG,
                 ],
-                // 格式相关
+                // متعلق بالتنسيق
                 'formatter' => [
-                    // 格式化处理类的名字
+                    // اسم فئة معالج التنسيق
                     'class' => Monolog\Formatter\LineFormatter::class,
-                    // 格式化处理类的构造函数参数
+                    // معاملات مُنشئ فئة معالج التنسيق
                     'constructor' => [ null, 'Y-m-d H:i:s', true],
                 ],
             ]
@@ -73,49 +73,49 @@ return [
 ];
 ```
 
-## 多通道
-monolog支持多通道，默认使用`default`通道。如果想增加一个`log2`通道，配置类似如下：
+## قنوات متعددة
+يدعم monolog القنوات المتعددة، ويستخدم قناة `default` افتراضياً. إذا أردت إضافة قناة `log2`، يكون الإعداد مشابهاً لما يلي:
 ```php
 return [
-    // 默认日志通道
+    // قناة السجل الافتراضية
     'default' => [
-        // 处理默认通道的handler，可以设置多个
+        // معالجات القناة الافتراضية، يمكن تعيين عدة معالجات
         'handlers' => [
             [   
-                // handler类的名字
+                // اسم فئة المعالج
                 'class' => Monolog\Handler\RotatingFileHandler::class,
-                // handler类的构造函数参数
+                // معاملات مُنشئ فئة المعالج
                 'constructor' => [
                     runtime_path() . '/logs/webman.log',
                     Monolog\Logger::DEBUG,
                 ],
-                // 格式相关
+                // متعلق بالتنسيق
                 'formatter' => [
-                    // 格式化处理类的名字
+                    // اسم فئة معالج التنسيق
                     'class' => Monolog\Formatter\LineFormatter::class,
-                    // 格式化处理类的构造函数参数
+                    // معاملات مُنشئ فئة معالج التنسيق
                     'constructor' => [ null, 'Y-m-d H:i:s', true],
                 ],
             ]
         ],
     ],
-    // log2通道
+    // قناة log2
     'log2' => [
-        // 处理默认通道的handler，可以设置多个
+        // معالجات قناة log2، يمكن تعيين عدة معالجات
         'handlers' => [
             [   
-                // handler类的名字
+                // اسم فئة المعالج
                 'class' => Monolog\Handler\RotatingFileHandler::class,
-                // handler类的构造函数参数
+                // معاملات مُنشئ فئة المعالج
                 'constructor' => [
                     runtime_path() . '/logs/log2.log',
                     Monolog\Logger::DEBUG,
                 ],
-                // 格式相关
+                // متعلق بالتنسيق
                 'formatter' => [
-                    // 格式化处理类的名字
+                    // اسم فئة معالج التنسيق
                     'class' => Monolog\Formatter\LineFormatter::class,
-                    // 格式化处理类的构造函数参数
+                    // معاملات مُنشئ فئة معالج التنسيق
                     'constructor' => [ null, 'Y-m-d H:i:s', true],
                 ],
             ]
@@ -124,7 +124,7 @@ return [
 ];
 ```
 
-使用`log2`通道时用法如下：
+استخدام قناة `log2` كالتالي:
 ```php
 <?php
 namespace app\controller;

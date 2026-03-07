@@ -1,14 +1,49 @@
-# 单元测试
+# اختبار الوحدة
 
-  
-## 安装
- 
+## التثبيت
+
 ```php
 composer require --dev phpunit/phpunit
 ```
-  
-## 使用
-新建文件 `tests/TestConfig.php`，用于测试数据库配置
+
+## التكوين
+
+أضف ملف التكوين `phpunit.xml` في الدليل الجذري للمشروع. يمكنك تخصيصه وفقًا لاحتياجات مشروعك. راجع [وثائق تكوين phpunit.xml](https://docs.phpunit.de/en/12.4/configuration.html).
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="support/bootstrap.php"
+    cacheDirectory=".phpunit.cache"
+    executionOrder="depends,defects"
+    shortenArraysForExportThreshold="10"
+    requireCoverageMetadata="false"
+    beStrictAboutCoverageMetadata="true"
+    beStrictAboutOutputDuringTests="true"
+    displayDetailsOnPhpunitDeprecations="true"
+    failOnPhpunitDeprecation="true"
+    failOnRisky="true"
+    failOnWarning="true"
+    colors="true">
+    <testsuites>
+        <testsuite name="tests">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </source>
+</phpunit>
+
+```
+
+## الاستخدام
+
+أنشئ ملفًا جديدًا `tests/TestConfig.php` لاختبار تكوين التطبيق:
+
 ```php
 <?php
 use PHPUnit\Framework\TestCase;
@@ -27,11 +62,22 @@ class TestConfig extends TestCase
 }
 ```
   
-## 运行
+## التشغيل
 
-项目根目录里运行 `./vendor/bin/phpunit --bootstrap support/bootstrap.php tests/TestConfig.php`
+نفّذ جميع حالات الاختبار من الدليل الجذري للمشروع:
 
-结果类似如下：
+```bash
+./vendor/bin/phpunit
+```
+
+نفّذ حالة اختبار معينة من الدليل الجذري للمشروع:
+
+```bash
+./vendor/bin/phpunit tests/TestConfig.php
+```
+
+ستكون النتيجة مشابهة لما يلي:
+
 ```
 PHPUnit 9.5.10 by Sebastian Bergmann and contributors.
 

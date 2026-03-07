@@ -2,7 +2,7 @@
 
 使用這個腳本檢查是否有禁用函數。在命令行運行```curl -Ss https://www.workerman.net/webman/check | php```
 
-如果提示```Functions 函数名 has be disabled. Please check disable_functions in php.ini```
+如果提示```Functions 函數名 has been disabled. Please check disable_functions in php.ini```
 表示 webman 依賴的函數被禁用，需要在 php.ini 中解除禁用才能正常使用 webman。
 解除禁用可選以下方法之一。
 
@@ -27,6 +27,7 @@ pcntl_signal_dispatch
 pcntl_signal
 pcntl_alarm
 pcntl_fork
+pcntl_wait
 posix_getuid
 posix_getpwuid
 posix_kill
@@ -43,4 +44,7 @@ proc_open
 proc_get_status
 proc_close
 shell_exec
+exec
+putenv
+getenv
 ```

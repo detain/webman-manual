@@ -1,18 +1,18 @@
-# Yapılandırma Dosyası
+# Yapılandırma dosyası
 
-Eklentinin yapılandırması normal webman projesiyle aynıdır, ancak genellikle eklentinin yapılandırması yalnızca mevcut eklenti için geçerlidir ve ana projeyi genellikle etkilemez.
-Örneğin, `plugin.foo.app.controller_suffix` değeri yalnızca eklentinin denetleyici son ekini etkiler, ana projeyi etkilemez.
+Eklenti yapılandırması normal bir webman projesiyle aynı şekilde çalışır, ancak genellikle yalnızca ilgili eklenti için geçerlidir ve ana projeyi etkilemez.
+Örneğin, `plugin.foo.app.controller_suffix` değeri yalnızca eklentinin denetleyici sonekini etkiler, ana projeyi etkilemez.
 Örneğin, `plugin.foo.app.controller_reuse` değeri yalnızca eklentinin denetleyiciyi yeniden kullanıp kullanmayacağını etkiler, ana projeyi etkilemez.
-Örneğin, `plugin.foo.middleware` değeri yalnızca eklentinin ara yazılımını etkiler, ana projeyi etkilemez.
-Örneğin, `plugin.foo.view` değeri yalnızca eklentinin kullandığı görünümü etkiler, ana projeyi etkilemez.
-Örneğin, `plugin.foo.container` değeri yalnızca eklentinin kullandığı konteynırı etkiler, ana projeyi etkilemez.
-Örneğin, `plugin.foo.exception` değeri yalnızca eklentinin istisna işleme sınıfını etkiler, ana projeyi etkilemez.
+Örneğin, `plugin.foo.middleware` değeri yalnızca eklentinin ara katman yazılımını etkiler, ana projeyi etkilemez.
+Örneğin, `plugin.foo.view` değeri yalnızca eklentinin kullandığı görünümleri etkiler, ana projeyi etkilemez.
+Örneğin, `plugin.foo.container` değeri yalnızca eklentinin kullandığı kapsayıcıyı etkiler, ana projeyi etkilemez.
+Örneğin, `plugin.foo.exception` değeri yalnızca eklentinin özel durum işleme sınıfını etkiler, ana projeyi etkilemez.
 
-Ancak, çünkü yönlendirme geneldir, bu nedenle eklentinin yapılandırması da genel olarak etkilidir.
+Ancak yönlendirme küresel olduğu için, eklentinin yapılandırdığı rotalar da küresel yönlendirmeyi etkiler.
 
-## Yapılandırmayı Alma
-Bir eklentinin yapılandırmasını almak için `config('plugin.{eklenti}.{belirli yapılandırma}');` yöntemini kullanın, örneğin `plugin/foo/config/app.php` dosyasının tüm yapılandırmasını almak için `config('plugin.foo.app')` yöntemini kullanın.
-Aynı şekilde ana proje veya diğer eklentiler de `config('plugin.foo.xxx')` kullanarak foo eklentisinin yapılandırmasını alabilir.
+## Yapılandırmayı alma
+Bir eklentinin yapılandırmasını almak için `config('plugin.{plugin}.{özel_yapılandırma}');` kullanın. Örneğin, `plugin/foo/config/app.php` dosyasının tüm yapılandırmasını almak için `config('plugin.foo.app')` kullanın.
+Benzer şekilde, ana proje veya diğer eklentiler de `config('plugin.foo.xxx')` kullanarak foo eklentisinin yapılandırmasını alabilir.
 
-## Desteklenmeyen Yapılandırmalar
-Uygulama eklentileri server.php, session.php yapılandırmalarını desteklemez, `app.request_class`, `app.public_path`, `app.runtime_path` yapılandırmalarını desteklemez.
+## Desteklenmeyen yapılandırmalar
+Uygulama eklentileri `server.php` ve `session.php` yapılandırmalarını desteklemez; `app.request_class`, `app.public_path` ve `app.runtime_path` yapılandırmalarını da desteklemez.

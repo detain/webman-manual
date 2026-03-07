@@ -1,18 +1,16 @@
-# Sayfa Bileşeni
+# Sayfalama Bileşeni
 
-## jasongrimes/php-paginator
-
-### Proje Adresi
+## Proje Adresi
 
 https://github.com/jasongrimes/php-paginator
   
-### Kurulum
+## Kurulum
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### Kullanım
+## Kullanım
 
 Yeni oluştur `app/controller/UserController.php`
 ```php
@@ -25,7 +23,7 @@ use JasonGrimes\Paginator;
 class UserController
 {
     /**
-     * Kullanıcı Listesi
+     * Kullanıcı listesi
      */
     public function get(Request $request)
     {
@@ -39,12 +37,12 @@ class UserController
     
 }
 ```
-**Şablon (php orijinal)**
+**Şablon (Yerel PHP)**
 Yeni şablon oluştur `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- Dahili olarak Bootstrap sayfalama stili desteği -->
+  <!-- Bootstrap sayfalama stilleri için yerleşik destek -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -55,12 +53,12 @@ Yeni şablon oluştur `app/view/user/get.html`
 </html>
 ```
 
-**Şablon (twig)**
+**Şablon (Twig)**
 Yeni şablon oluştur `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- Dahili olarak Bootstrap sayfalama stili desteği -->
+  <!-- Bootstrap sayfalama stilleri için yerleşik destek -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -73,12 +71,12 @@ Yeni şablon oluştur `app/view/user/get.html`
 </html>
 ```
 
-**Şablon (blade)**
+**Şablon (Blade)**
 Yeni şablon oluştur `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-  <!-- Dahili olarak Bootstrap sayfalama stili desteği -->
+  <!-- Bootstrap sayfalama stilleri için yerleşik destek -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -89,12 +87,12 @@ Yeni şablon oluştur `app/view/user/get.blade.php`
 </html>
 ```
 
-**Şablon (thinkphp)**
+**Şablon (ThinkPHP)**
 Yeni şablon oluştur `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-    <!-- Dahili olarak Bootstrap sayfalama stili desteği -->
+    <!-- Bootstrap sayfalama stilleri için yerleşik destek -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -105,9 +103,10 @@ Yeni şablon oluştur `app/view/user/get.blade.php`
 </html>
 ```
 
-Sonuç:
+Sonuç aşağıdaki gibidir:
 ![](../../assets/img/paginator.png)
   
-### Daha Fazla İçerik
+## Daha Fazla Bilgi
 
-Ziyaret et: https://github.com/jasongrimes/php-paginator
+https://github.com/jasongrimes/php-paginator adresini ziyaret edin
+  

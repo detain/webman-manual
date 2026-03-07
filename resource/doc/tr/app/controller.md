@@ -1,6 +1,6 @@
 # Kontrolcü
 
-PSR4 standartlarına göre, kontrolcü sınıfının ad alanı `{plugin-identifier}` ile başlar, örneğin
+PSR4 standartlarına göre, kontrolcü sınıfının ad alanı `plugin\{eklenti_tanımlayıcı}` ile başlar, örneğin
 
 `plugin/foo/app/controller/FooController.php` adında yeni bir kontrolcü dosyası oluşturun.
 

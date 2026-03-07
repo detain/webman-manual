@@ -64,6 +64,21 @@ $request->post('name');
 $request->post('name', 'tom');
 ```
 
+## 助手函數input()
+與`$request->input()`函數類似，可以獲取到所有參數。input()助手函數一共有兩個參數：
+1. name: 獲取的參數名稱（如果為空，可以獲取所有參數的陣列）
+2. default: 預設值（透過第一個參數獲取失敗後，會使用該參數的值）
+
+**例如**
+```php
+// 獲取參數name
+$name = input('name');
+// 獲取參數name，如果不存在則使用預設值
+$name = input('name','張三');
+// 獲取全部參數
+$all_params = input();
+```
+
 ## 獲取原始請求post包體
 ```php
 $post = $request->rawBody();
@@ -126,15 +141,54 @@ $only = $request->only(['username', 'password']);
 // 獲得除了avatar 和 age 以外的所有輸入
 $except = $request->except(['avatar', 'age']);
 ```
+
+## 透過控制器參數獲取輸入
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+程式碼邏輯類似於
+```php
+<?php
+namespace app\controller;
+use support\Request;
+use support\Response;
+
+class UserController
+{
+    public function create(Request $request): Response
+    {
+        $name = $request->input('name');
+        $age = (int)$request->input('age', 18);
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+更多資訊請參考[控制器參數綁定](controller.md#控制器參數綁定)
+
 ## 獲取上傳檔案
+
+> **提示**
+> 上傳檔案需要使用 `multipart/form-data` 格式的表單
+
 **獲取整個上傳檔案陣列**
 ```php
 $request->file();
 ```
 
-類似表單:
+表單類似:
 ```html
-<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
+<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data">
 <input name="file1" multiple="multiple" type="file">
 <input name="file2" multiple="multiple" type="file">
 <input type="submit">
@@ -304,9 +358,9 @@ $request->getRealIp($safe_mode=true);
 
 當專案使用代理（例如nginx）時，使用`$request->getRemoteIp()`得到的往往是代理伺服器IP（類似`127.0.0.1`、`192.168.x.x`），並非客戶端真實IP。這時候可以嘗試使用`$request->getRealIp()`取得客戶端真實IP。
 
-`$request->getRealIp()`會嘗試從HTTP頭的`x-real-ip`、`x-forwarded-for`、`client-ip`、`x-client-ip`、`via`字段中獲取真實IP。
+`$request->getRealIp()`會嘗試從HTTP頭的`x-forwarded-for`、`x-real-ip`、`client-ip`、`x-client-ip`、`via`欄位中獲取真實IP。
 
-> 由於HTTP頭很容易被偽造，所以此方法獲得的客戶端IP並非100%可信，尤其是`$safe_mode`為false時。透過代理獲得客戶端真實IP的比較可靠的方法是，已知安全的代理伺服器IP，並且明確知道攜帶真實IP是哪個HTTP頭，如果`$request->getRemoteIp()`返回的IP確認為已知的安全的代理伺服器，然後通過`$request->header('攜帶真實IP的HTTP頭')`獲取真實IP。
+> 由於HTTP頭很容易被偽造，所以此方法獲得的客戶端IP並非100%可信，尤其是`$safe_mode`為false時。透過代理獲得客戶端真實IP的比較可靠的方法是，已知安全的代理伺服器IP，並且明確知道攜帶真實IP的是哪個HTTP頭，如果`$request->getRemoteIp()`返回的IP確認為已知的安全的代理伺服器，然後透過`$request->header('攜帶真實IP的HTTP頭')`獲取真實IP。
 
 
 ## 取得伺服端IP
@@ -344,7 +398,6 @@ $request->acceptJson();
 ```php
 $request->plugin;
 ```
-> 此特性需要webman>=1.4.0
 
 ## 獲得請求的應用名稱
 單應用的時候始終返回空字串`''`，[多應用](multiapp.md)的時候返回應用名稱
@@ -373,3 +426,32 @@ $request->action;
 
 > 因為閉包函數不屬於任何控制器，所以來自閉包路由的請求`$request->action`始終返回空字串`''`
 > 閉包路由參見 [路由](route.md)
+
+## 重寫參數
+有時候我們想重寫請求的參數，例如將請求過濾，然後重新賦值給請求物件，這時候我們可以使用`setGet()`、`setPost()`、`setHeader()`方法。
+
+#### 重寫GET參數
+```php
+$request->get(); // 假設得到 ['name' => 'tom', 'age' => 18]
+$request->setGet(['name' => 'tom']);
+$request->get(); // 最終得到 ['name' => 'tom']
+```
+
+> **注意**
+> 如範例所示，`setGet()`是重寫所有GET參數，`setPost()`、`setHeader()`也是同樣的行為。
+
+#### 重寫POST參數
+```php
+$post = $request->post();
+foreach ($post as $key => $value) {
+    $post[$key] = htmlspecialchars($value);
+}
+$request->setPost($post);
+$request->post(); // 得到過濾後的post參數
+```
+
+#### 重寫HEADER參數
+```php
+$request->setHeader(['host' => 'example.com']);
+$request->header('host'); // 輸出 example.com
+```

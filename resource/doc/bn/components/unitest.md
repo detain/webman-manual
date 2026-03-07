@@ -6,9 +6,43 @@
 composer require --dev phpunit/phpunit
 ```
 
+## কনফিগারেশন
+
+প্রজেক্টের রুট ফোল্ডারে `phpunit.xml` কনফিগারেশন ফাইল যোগ করুন। প্রোজেক্টের প্রয়োজনের উপর ভিত্তি করে কাস্টমাইজ করতে পারবেন। [phpunit.xml কনফিগারেশন ডকুমেন্টেশন](https://docs.phpunit.de/en/12.4/configuration.html) দেখুন।
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="support/bootstrap.php"
+    cacheDirectory=".phpunit.cache"
+    executionOrder="depends,defects"
+    shortenArraysForExportThreshold="10"
+    requireCoverageMetadata="false"
+    beStrictAboutCoverageMetadata="true"
+    beStrictAboutOutputDuringTests="true"
+    displayDetailsOnPhpunitDeprecations="true"
+    failOnPhpunitDeprecation="true"
+    failOnRisky="true"
+    failOnWarning="true"
+    colors="true">
+    <testsuites>
+        <testsuite name="tests">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </source>
+</phpunit>
+
+```
+
 ## ব্যবহার
 
-ডেটাবেস কনফিগারেশন পরীক্ষা করার জন্য `tests/TestConfig.php` নামে নতুন ফাইল তৈরি করুন
+অ্যাপ্লিকেশন কনফিগারেশন পরীক্ষার জন্য `tests/TestConfig.php` নতুন ফাইল তৈরি করুন:
 
 ```php
 <?php
@@ -27,13 +61,24 @@ class TestConfig extends TestCase
     }
 }
 ```
-
+  
 ## চালান
 
-প্রজেক্ট রুট ফোল্ডারে নিচের কমান্ড চালান: `./vendor/bin/phpunit --bootstrap support/bootstrap.php tests/TestConfig.php`
+প্রজেক্টের রুট ফোল্ডার থেকে সব টেস্ট কেস চালান:
+
+```bash
+./vendor/bin/phpunit
+```
+
+প্রজেক্টের রুট ফোল্ডার থেকে নির্দিষ্ট টেস্ট কেস চালান:
+
+```bash
+./vendor/bin/phpunit tests/TestConfig.php
+```
 
 ফলাফল এরকম দেখা যাবে:
-```bash
+
+```
 PHPUnit 9.5.10 by Sebastian Bergmann and contributors.
 
 .                                                                   1 / 1 (100%)

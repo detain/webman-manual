@@ -64,6 +64,21 @@ Tương tự như phương thức get, bạn cũng có thể truyền một giá
 $request->post('name', 'tom');
 ```
 
+## Hàm trợ giúp input()
+Tương tự như `$request->input()`, hàm trợ giúp `input()` có thể lấy tất cả các tham số. Nó có hai tham số:
+1. name: tên tham số cần lấy (nếu để trống, trả về mảng tất cả các tham số)
+2. default: giá trị mặc định (được sử dụng khi không tìm thấy tham số từ đối số đầu tiên)
+
+**Ví dụ**
+```php
+// Lấy tham số name
+$name = input('name');
+// Lấy tham số name, dùng giá trị mặc định nếu không tồn tại
+$name = input('name', 'Nam');
+// Lấy tất cả các tham số
+$all_params = input();
+```
+
 ## Lấy gói tin post gốc của yêu cầu
 ```php
 $post = $request->rawBody();
@@ -127,15 +142,54 @@ $only = $request->only(['username', 'password']);
 // Lấy tất cả dữ liệu trừ avatar và age
 $except = $request->except(['avatar', 'age']);
 ```
+
+## Lấy dữ liệu thông qua tham số bộ điều khiển
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Logic trên tương đương với:
+```php
+<?php
+namespace app\controller;
+use support\Request;
+use support\Response;
+
+class UserController
+{
+    public function create(Request $request): Response
+    {
+        $name = $request->input('name');
+        $age = (int)$request->input('age', 18);
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Thông tin chi tiết xem [Ràng buộc tham số bộ điều khiển](controller.md#ràng-buộc-tham-số-bộ-điều-khiển).
+
 ## Nhận tệp tải lên
+
+> **Lưu ý**
+> Tải lên tệp cần biểu mẫu có định dạng `multipart/form-data`.
+
 **Nhận mảng tệp tải lên toàn bộ**
 ```php
 $request->file();
 ```
 
-Mẫu biểu đạng như sau:
+Ví dụ biểu mẫu:
 ```html
-<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
+<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data">
 <input name="file1" multiple="multiple" type="file">
 <input name="file2" multiple="multiple" type="file">
 <input type="submit">
@@ -291,7 +345,7 @@ $request->getRealIp($safe_mode=true);
 
 Khi dự án sử dụng proxy (ví dụ như nginx), việc sử dụng `$request->getRemoteIp()` thường sẽ trả về địa chỉ IP của máy chủ proxy (giống như `127.0.0.1` `192.168.x.x`) thay vì địa chỉ IP thực sự của khách hàng. Lúc này, bạn có thể dùng `$request->getRealIp()` để lấy địa chỉ IP thực sự của khách hàng.
 
-`$request->getRealIp()` sẽ cố gắng lấy địa chỉ IP thực sự từ các trường `x-real-ip`, `x-forwarded-for`, `client-ip`, `x-client-ip`, `via` của tiêu đề HTTP.
+`$request->getRealIp()` sẽ cố gắng lấy địa chỉ IP thực sự từ các trường `x-forwarded-for`, `x-real-ip`, `client-ip`, `x-client-ip`, `via` của tiêu đề HTTP.
 
 > Do tiêu đề HTTP dễ bị giả mạo, nên địa chỉ IP của khách hàng lấy được từ phương thức này không phải luôn đáng tin cậy 100%, đặc biệt là khi `$safe_mode` là false. Phương pháp đáng tin cậy hơn để lấy địa chỉ IP thực sự của khách hàng thông qua proxy là biết địa chỉ IP của máy chủ proxy an toàn và biết chắc chắn tiêu đề HTTP nào chứa địa chỉ IP thực sự. Nếu địa chỉ IP trả về từ `$request->getRemoteIp()` xác nhận là của máy chủ proxy an toàn biết, sau đó có thể dùng `$request->header('tiêu đề chứa địa chỉ IP thực sự')` để lấy địa chỉ IP thực sự.
 
@@ -331,7 +385,6 @@ $request->acceptJson();
 ```php
 $request->plugin;
 ```
-> Tính năng này yêu cầu webman>=1.4.0
 
 ## Lấy tên của ứng dụng mà yêu cầu đang gửi đến
 Khi chỉ có một ứng dụng, sẽ luôn trả về chuỗi rỗng `''`, [khi có nhiều ứng dụng](multiapp.md) sẽ trả về tên ứng dụng.
@@ -361,3 +414,33 @@ Sẽ trả về giống như `index`
 
 > Vì hàm vô danh không thuộc về bất kỳ điều khiển nào, nên yêu cầu từ router vô danh `$request->action` sẽ luôn trả về chuỗi rỗng `''`.
 > Xem thêm về router vô danh tại [Định tuyến](route.md)
+
+## Ghi đè tham số
+
+Đôi khi chúng ta muốn ghi đè tham số yêu cầu, ví dụ để lọc yêu cầu rồi gán lại giá trị cho đối tượng yêu cầu. Trong những trường hợp này, chúng ta có thể sử dụng các phương thức `setGet()`, `setPost()` và `setHeader()`.
+
+#### Ghi đè tham số GET
+```php
+$request->get(); // Giả sử kết quả là ['name' => 'tom', 'age' => 18]
+$request->setGet(['name' => 'tom']);
+$request->get(); // Kết quả cuối cùng là ['name' => 'tom']
+```
+
+> **Lưu ý**
+> Như ví dụ trên, `setGet()` ghi đè tất cả tham số GET. `setPost()` và `setHeader()` cũng hoạt động tương tự.
+
+#### Ghi đè tham số POST
+```php
+$post = $request->post();
+foreach ($post as $key => $value) {
+    $post[$key] = htmlspecialchars($value);
+}
+$request->setPost($post);
+$request->post(); // Lấy tham số post đã lọc
+```
+
+#### Ghi đè tham số HEADER
+```php
+$request->setHeader(['host' => 'example.com']);
+$request->header('host'); // Kết quả: example.com
+```

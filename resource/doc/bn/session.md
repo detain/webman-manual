@@ -1,4 +1,4 @@
-# সেশন ব্যবস্থাপনা
+# webman সেশন ব্যবস্থাপনা
 
 ## উদাহরণ
 ```php
@@ -19,141 +19,150 @@ class UserController
 }
 ```
 
-`$request->session();` দ্বারা `Workerman\Protocols\Http\Session` ইনস্ট্যান্স পেতে এবং ইনস্ট্যান্সের মেথড ব্যবহার করে সেশন ডেটা যোগ করা, পরিবর্তন করা, বা মুছে ফেলা যায়।
+`$request->session();` দিয়ে `Workerman\Protocols\Http\Session` ইনস্ট্যান্স নিন এবং এর মেথড দিয়ে সেশন ডেটা যোগ, পরিবর্তন বা মুছুন।
 
-> লক্ষ্য করুন: সেশন অবজেক্ট পরিনাম অন্তর্ভুক্ত ডেটা স্বতঃমুক্ত হওয়ার সময় সেশন ডেটা স্বয়ংক্রিয়ভাবে সংরক্ষণ করা হবে, তাই সেশন অবজেক্টকে পুরোপুরি গ্লোবাল অ্যারে বা ক্লাস মেম্বারে সংরক্ষণ করা না হলে সেশন সাংভাবিকভাবে সংরক্ষিত না হওয়ার জন্য না ভুলে যাবেন।
+> **নোট**
+> সেশন অবজেক্ট ধ্বংস হলে সেশন ডেটা স্বয়ংক্রিয়ভাবে সংরক্ষিত হয়।
+> সেশন অবজেক্ট গ্লোবাল ভেরিয়েবলে রাখলে তা ধ্বংস হয় না এবং স্বয়ংক্রিয়ভাবে সংরক্ষিত হয় না। এমন ক্ষেত্রে ডেটা সংরক্ষণ করতে `$session->save()` ম্যানুয়ালি কল করুন।
 
-## সমস্ত সেশন ডেটা পেতে
+## সব সেশন ডেটা আনুন
 ```php
 $session = $request->session();
 $all = $session->all();
 ```
-এটি একটি অ্যারে প্রদান করে। যদি কোনো সেশন ডেটা না থাকে তবে এটি খালি অ্যারে রিটার্ন করে।
+এটি একটি অ্যারে ফেরত দেয়। কোনো সেশন ডেটা না থাকলে খালি অ্যারে ফেরত দেয়।
 
-## সেশনে কোনো মান পেতে
+
+## সেশন থেকে একটি মান আনুন
 ```php
 $session = $request->session();
 $name = $session->get('name');
 ```
-যদি ডেটা অস্তিত্ব না থাকে তবে এটি null রিটার্ন করে।
+ডেটা না থাকলে null ফেরত দেয়।
 
-আপনি যদি ডিফল্ট ভ্যালু পাঠান তাহলে গেট মেথডে দ্বিতীয় আর্গুমেন্ট হিসেবে পাঠান। যদি সেশন অ্যারেতে পাওয়া না যায় তবে ডিফল্ট ভ্যালুটি রিটার্ন করে। যেমন:
+get মেথডের দ্বিতীয় আর্গুমেন্ট হিসেবে ডিফল্ট মান পাঠাতে পারেন। সেশন অ্যারেতে সংগত মান না পেলে ডিফল্ট মান ফেরত দেয়। উদাহরণ:
 ```php
 $session = $request->session();
-$name = $session->get('name', 'টম');
+$name = $session->get('name', 'tom');
 ```
 
-## সেশন সংরক্ষণ
-ডাটা সংরক্ষণ করার সময় set মেথড ব্যবহার করুন।
-```php
-$session = $request->session();
-$session->set('name', 'টম');
-```
-set এর কোনো রিটার্ন মূল্য নেই, সেশন অবজেক্ট পরিনাম অতএব সেশন স্বতঃমুক্তভাবে সংরক্ষিত হবে।
 
-একাধিক মান সংরক্ষণ করার সময় পুট মেথড ব্যবহার করুন।
+## সেশন সংরক্ষণ করুন
+একটি ডেটা সংরক্ষণ করতে set মেথড ব্যবহার করুন।
 ```php
 $session = $request->session();
-$session->put(['name' => 'টম', 'বয়স' => 12]);
+$session->set('name', 'tom');
 ```
-এই মধ্যেও পুটের কোনো রিটার্ন মূল্য নেই।
+set কোনো মান ফেরত দেয় না। সেশন অবজেক্ট ধ্বংস হলে সেশন স্বয়ংক্রিয়ভাবে সংরক্ষিত হয়।
 
-## সেশন ডেটা মুছে ফেলা
-যখন কোনো স্পেশাল কীটি ডেটা মুছে ফেলতে হবে তখন ফরগেট মেথডটি ব্যবহার করুন।
+কয়েকটি মান সংরক্ষণ করতে put মেথড ব্যবহার করুন।
 ```php
 $session = $request->session();
-// একটি আইটেম মুছে ফেলা
+$session->put(['name' => 'tom', 'age' => 12]);
+```
+একইভাবে putও কোনো মান ফেরত দেয় না।
+
+## সেশন ডেটা মুছুন
+এক বা একাধিক সেশন ডেটা মুছতে `forget` মেথড ব্যবহার করুন।
+```php
+$session = $request->session();
+// একটি আইটেম মুছুন
 $session->forget('name');
-// একাধিক মুছে ফেলা
-$session->forget(['name', 'বয়স']);
+// একাধিক আইটেম মুছুন
+$session->forget(['name', 'age']);
 ```
 
-আরও অন্যান্য মেথড উপলব্ধ, ফরগেট মেথডের সাথে তুলনা করা হলে, মুছে ফেলা মেথড একটি আইটেম মুছে ফেলতে পারে।
+সিস্টেম delete মেথডও দেয়। forget থেকে আলাদা, delete শুধুমাত্র একটি আইটেম মুছতে পারে।
 ```php
 $session = $request->session();
-// delete মেথড আমদানি
+// $session->forget('name'); এর সমতুল্য
 $session->delete('name');
-// এটি একইভাবে $session->forget('name'); এর সাথে সমান
 ```
 
-## সেশনের মান পেতে এবং মুছে ফেলতে
+
+## সেশন থেকে মান আনুন এবং মুছুন
 ```php
 $session = $request->session();
 $name = $session->pull('name');
 ```
-এটির ফলে নিম্নলিখিত কোডের সাথে একই ফলাফল পেতে পারে
+নিচের কোডের সমতুল্য:
 ```php
 $session = $request->session();
-$value = $session->get($name);
-$session->delete($name);
+$value = $session->get('name');
+$session->delete('name');
 ```
-যদি মূল্য অনুপস্থিত হয়, তাহলে null রিটার্ন করে।
+সংগত সেশন না থাকলে null ফেরত দেয়।
 
-## সমস্ত সেশন ডেটা মুছা
+
+## সব সেশন ডেটা মুছুন
 ```php
 $request->session()->flush();
 ```
-কোনো রিটার্ন মূল্য নেই, সেশন অবজেক্ট পরিনাম অতএব সেশন স্বতঃমুক্তভাবে সংরক্ষণ থেকে মুছে ফেলবে।
+কোনো মান ফেরত দেয় না। সেশন অবজেক্ট ধ্বংস হলে সেশন স্বয়ংক্রিয়ভাবে স্টোরেজ থেকে মুছে যায়।
 
-## বিশেষ কীটি ডেটা অস্তিত্ব পরীক্ষা করা
+
+## সেশন মানের অস্তিত্ব পরীক্ষা করুন
 ```php
 $session = $request->session();
 $has = $session->has('name');
 ```
-উপরোক্ত কোডাটির মাধ্যমে যদি বিশেষ কীটি ডেটা অস্তিত্ব না থাকে বা কোনো বিশেষ কীটির মান null মান হয় তাহলে ফলাফল হবে false, অন্যথায় হ্যাঁ ফলাফল দেয়া হবে।
+সেশন মান না থাকলে বা null হলে false ফেরত দেয়; অন্যথায় true ফেরত দেয়।
+
 ```php
 $session = $request->session();
 $has = $session->exists('name');
 ```
-উপরোক্ত কোডটিও বিশেষ কীটি ডেটা অস্তিত্ব পরীক্ষা করার জন্য ব্যবহৃত হয়, তবে, যখন বিশেষ কীটির মান null হয় তখনই এটি সত্য মান প্রদান করে।
+উপরের কোডও সেশন মানের অস্তিত্ব পরীক্ষা করে। পার্থক্য: মান null হলেও `exists` true ফেরত দেয়।
 
-## সাহায্যকারী হেল্পার ফাংশন session()
-> 2020-12-09 যোগ করা হয়েছে
+## হেল্পার ফাংশন session()
 
-ওয়েবম্যান সমতুল্য করার জন্য হেল্পার ফাংশন `session()` প্রদান করে।
+webman একই কাজের জন্য হেল্পার ফাংশন `session()` সরবরাহ করে।
 ```php
-// সেশন ইনস্ট্যান্স পেতে
+// সেশন ইনস্ট্যান্স আনুন
 $session = session();
-// সমান
+// সমতুল্য
 $session = $request->session();
 
-// কোনো মান পেতে
-$value = session('key', 'ডিফল্ট');
-// সমান
-$value = session()->get('key', 'ডিফল্ট');
-// সমান
-$value = $request->session()->get('key', 'ডিফল্ট');
+// মান আনুন
+$value = session('key', 'default');
+// সমতুল্য
+$value = session()->get('key', 'default');
+// সমতুল্য
+$value = $request->session()->get('key', 'default');
 
-// সেশন প্রদান করা
+// সেশনে মান নির্ধারণ করুন
 session(['key1'=>'value1', 'key2' => 'value2']);
-// সমান
+// সমতুল্য
 session()->put(['key1'=>'value1', 'key2' => 'value2']);
-// সমান
+// সমতুল্য
 $request->session()->put(['key1'=>'value1', 'key2' => 'value2']);
+
 ```
-# কনফিগ ফাইল
-সেশন কনফিগারেশন ফাইলটি `config/session.php` তে থাকে, যা নিম্নলিখিত অনুরূপ তথ্য ধারণ করে:
+
+
+## কনফিগ ফাইল
+সেশন কনফিগ ফাইল `config/session.php` এ আছে। বিষয়বস্তু এরকম:
 ```php
 use Webman\Session\FileSessionHandler;
 use Webman\Session\RedisSessionHandler;
 use Webman\Session\RedisClusterSessionHandler;
 
 return [
-    // FileSessionHandler::class অথবা RedisSessionHandler::class অথবা RedisClusterSessionHandler::class 
+    // FileSessionHandler::class বা RedisSessionHandler::class বা RedisClusterSessionHandler::class 
     'handler' => FileSessionHandler::class,
     
-    // handler যখন FileSessionHandler::class হলে type এর মান হবে file,
-    // handler যখন RedisSessionHandler::class হলে type এর মান হবে redis
-    // handler যখন RedisClusterSessionHandler::class হলে type এর মান হবে redis_cluster, অর্থাৎ redis ক্লাস্টার
+    // handler FileSessionHandler::class হলে মান 'file',
+    // handler RedisSessionHandler::class হলে মান 'redis'
+    // handler RedisClusterSessionHandler::class হলে মান 'redis_cluster' (Redis ক্লাস্টার)
     'type'    => 'file',
 
-    // পূর্ণ হ্যান্ডলারগুলির জন্য বিভিন্ন সেটিং
+    // বিভিন্ন হ্যান্ডলার বিভিন্ন কনফিগ ব্যবহার করে
     'config' => [
-        // type যখন file হলে কনফিগারেশন
+        // type 'file' এর কনফিগ
         'file' => [
             'save_path' => runtime_path() . '/sessions',
         ],
-        // type যখন redis হলে কনফিগারেশন
+        // type 'redis' এর কনফিগ
         'redis' => [
             'host'      => '127.0.0.1',
             'port'      => 6379,
@@ -171,50 +180,19 @@ return [
         
     ],
 
-    'session_name' => 'PHPSID', // সেশন আইডির কুকির নাম
-    
-    // === webman-framework>=1.3.14 এবং workerman>=4.0.37 এর জন্য নিম্নলিখিত সেটিং ===
-    'auto_update_timestamp' => false,  // সেশন নিজভুক্তি পূনঃচলিত সাথে নিজভোক্তি করবে কিনা, ডিফল্ট অফ
-    'lifetime' => 7*24*60*60,          // সেশন মেয়াদ উত্তীর্ণ হইবার পর সময়সীমা
-    'cookie_lifetime' => 365*24*60*60, // সেশন আইডির কুকি মেয়াদ উত্তীর্ণ হইবার পর সময়সীমা
-    'cookie_path' => '/',              // সেশন আইডির কুকির পথ
-    'domain' => '',                    // সেশন আইডির কুকির ডোমেইন
-    'http_only' => true,               // httpOnly চালু করা হবে কিনা, ডিফল্ট চালু
-    'secure' => false,                 // শুধুমাত্র https এ সেশন চালু করা হবে কিনা, ডিফল্ট বন্ধ
-    'same_site' => '',                 // CSRF হামলা এবং ব্যবহারকারীর ট্র্যাকিং প্রতিরোধে ব্যবহৃত হয়, বিকল্প মান strict/lax/none
-    'gc_probability' => [1, 1000],     // সেশন পুনরায় উদ্ধারের সম্ভাবনা
+    'session_name' => 'PHPSID', // session_id সংরক্ষণকারী কুকির নাম
+    'auto_update_timestamp' => false,  // সেশন স্বয়ংক্রিয় রিফ্রেশ কিনা, ডিফল্ট: বন্ধ
+    'lifetime' => 7*24*60*60,          // সেশন মেয়াদ
+    'cookie_lifetime' => 365*24*60*60, // session_id কুকির মেয়াদ
+    'cookie_path' => '/',              // session_id কুকির পথ
+    'domain' => '',                    // session_id কুকির ডোমেইন
+    'http_only' => true,               // httpOnly সক্ষম কিনা, ডিফল্ট: সক্ষম
+    'secure' => false,                 // শুধু HTTPS এ সেশন সক্ষম, ডিফল্ট: বন্ধ
+    'same_site' => '',                 // CSRF আক্রমণ ও ব্যবহারকারী ট্র্যাকিং রোধে, মান: strict/lax/none
+    'gc_probability' => [1, 1000],     // সেশন গারবেজ কালেকশন সম্ভাবনা
 ];
 ```
 
-> **লক্ষ্য করুন** 
-> webman 1.4.0 থেকে SessionHandler এর নেমস্পেসের পরিবর্তন করা হয়েছে, অবশেষে পূর্বের মত
-> `use Webman\FileSessionHandler;`  
-> `use Webman\RedisSessionHandler;`  
-> `use Webman\RedisClusterSessionHandler;`  
-> এখন  
-> `use Webman\Session\FileSessionHandler;`  
-> `use Webman\Session\RedisSessionHandler;`  
-> `use Webman\Session\RedisClusterSessionHandler;`  
-> হয়েছে।  
+## নিরাপত্তা
+সেশনে ক্লাস ইনস্ট্যান্স সরাসরি সংরক্ষণ করতে সুপারিশ করা হয় না, বিশেষত অবিশ্বস্ত উৎস থেকে। ডিসিরিয়ালাইজেশন নিরাপত্তা ঝুঁকি তৈরি করতে পারে।
 
-
-## মেয়াদ সেটিং
-webman-framework < 1.3.14 এর জন্য, সেশন মেয়াদ সেটিংগুলি `php.ini` কনফিগারেশনে আছে।
-
-```
-session.gc_maxlifetime = x
-session.cookie_lifetime = x
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-মেয়াদ সেট করার জন্য, 1440 সেকেন্ডের জন্য কনফিগার অথবা যদি আপনি ইংরেজিতে মেয়াদ বিরাম দেন তবে আপনি নিম্নলিখিত চেক করুন
-```php
-session.gc_maxlifetime = 1440
-session.cookie_lifetime = 1440
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-> **নোট**  
-> আপনি যদি `php.ini` ফাইলটি খুঁজে পান না তাহলে আপনি `php --ini` কমান্ড ব্যবহার করতে পারেন।

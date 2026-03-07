@@ -1,9 +1,8 @@
-## Özel 404 Sayfası
-webman, 404 hatası durumunda otomatik olarak `public/404.html` içeriğini döndürecektir, bu nedenle geliştiriciler doğrudan `public/404.html` dosyasını değiştirebilir.
+# Özel 404
 
-Eğer 404 içeriğini dinamik olarak kontrol etmek istiyorsanız, örneğin ajax isteği durumunda JSON veri döndürmek `{"code:"404", "msg":"404 sayfa bulunamadı"}`, sayfa isteği durumunda `app/view/404.html` şablonunu döndürmek istiyorsanız aşağıdaki örneğe bakınız.
+404 içeriğini dinamik olarak kontrol etmek istiyorsanız, örneğin AJAX isteklerinde JSON verisi `{"code:"404", "msg":"404 not found"}` döndürmek ve sayfa isteklerinde `app/view/404.html` şablonunu döndürmek istiyorsanız aşağıdaki örneğe bakınız.
 
-> Aşağıda PHP templatelere örnek olarak kullanılan, diğer template'ler `twig` `blade` `think-template` gibi, benzer prensiplere sahiptir.
+> Aşağıda PHP native şablon örneği kullanılmaktadır. `twig`, `blade`, `think-template` gibi diğer şablonlar da aynı prensibi izler.
 
 **`app/view/404.html` dosyasını oluşturun**
 ```html
@@ -11,7 +10,7 @@ Eğer 404 içeriğini dinamik olarak kontrol etmek istiyorsanız, örneğin ajax
 <html>
 <head>
     <meta charset="utf-8">
-    <title>404 Sayfa Bulunamadı</title>
+    <title>404 not found</title>
 </head>
 <body>
 <?=htmlspecialchars($error)?>
@@ -25,24 +24,42 @@ use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // ajax isteği durumunda JSON olarak dön
+    // AJAX isteklerinde JSON döndür
     if ($request->expectsJson()) {
-        return json(['code' => 404, 'msg' => '404 sayfa bulunamadı']);
+        return json(['code' => 404, 'msg' => '404 not found']);
     }
-    // Sayfa isteği durumunda 404.html şablonunu döndür
-    return view('404', ['error' => 'bir hata'])->withStatus(404);
+    // Sayfa isteklerinde 404.html şablonunu döndür
+    return view('404', ['error' => 'some error'])->withStatus(404);
 });
 ```
 
-## Özel 500 Sayfası
-**Yeni `app/view/500.html` dosyasını oluşturun**
+# Özel 405
+
+webman-framework 1.5.23 sürümünden itibaren fallback callback `status` parametresini destekler. 404 isteğin mevcut olmadığını, 405 ise mevcut istek yönteminin desteklenmediğini belirtir (örn. `Route::post()` ile tanımlanmış bir rotaya GET ile erişmek).
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# Özel 500
+
+**`app/view/500.html` oluşturun**
 
 ```html
 <!doctype html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>500 Dahili Sunucu Hatası</title>
+    <title>500 Internal Server Error</title>
 </head>
 <body>
 Özel hata şablonu:
@@ -51,7 +68,7 @@ Route::fallback(function(Request $request){
 </html>
 ```
 
-**Yeni** `app/exception/Handler.php` **(klasör yoksa kendiniz oluşturun)**
+**`app/exception/Handler.php` oluşturun** (klasör yoksa kendiniz oluşturun)
 ```php
 <?php
 
@@ -64,7 +81,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * Renderlama işlemi
+     * Yanıtı render edip döndür
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -72,11 +89,11 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // ajax isteği durumunda JSON veri döndür
+        // AJAX isteklerinde JSON verisi döndür
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
-        // Sayfa isteği durumunda 500.html şablonunu döndür
+        // Sayfa isteklerinde 500.html şablonunu döndür
         return view('500', ['exception' => $exception], '')->withStatus(500);
     }
 }

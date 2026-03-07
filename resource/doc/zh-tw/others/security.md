@@ -9,10 +9,11 @@
 ## XSS過濾
 考慮通用性，webman沒有對請求進行XSS轉譯。webman強烈推薦在渲染時進行XSS轉譯，而不是在入庫前進行轉譯。並且twig、blade、think-template等模板會自動執行XSS轉譯，無需手動轉譯，非常方便。
 
-> **提示** 如果你在入庫前進行XSS轉譯，很可能造成一些應用插件的不兼容問題
+> **提示**
+> 如果你在入庫前進行XSS轉譯，很可能造成一些應用插件的不兼容問題
 
 ## 防止SQL注入
 為了防止SQL注入，請儘量使用ORM，如 [illuminate/database](https://www.workerman.net/doc/webman/db/tutorial.html)、[think-orm](https://www.workerman.net/doc/webman/db/thinkorm.html)，使用時請儘量不要自己組裝SQL。
 
 ## nginx代理
-當你的應用需要暴露給外網使用者時，強烈建議在webman前增加一個nginx代理，這樣可以過濾一些非法HTTP請求，提高安全性。具體請參考[nginx代理](nginx-proxy.md)
+當你的應用需要暴露給外網使用者時，強烈建議在webman前增加一個nginx代理，這樣可以過濾一些非法HTTP請求，提高安全性。具體請參考[nginx代理](nginx-proxy.md)。

@@ -1,21 +1,25 @@
-# webman处理静态文件
-webman支持静态文件访问，静态文件都放置于`public`目录下，例如访问 `http://127.0.0.8787/upload/avatar.png`实际上是访问`{主项目目录}/public/upload/avatar.png`。
+# معالجة الملفات الثابتة في webman
 
-> **注意**
-> 以`/app/xx/文件名`开头的静态文件访问实际是访问应用插件的`public`目录，也就是说不支持 `{主项目目录}/public/app/`下的目录访问。
-> 更多请参考[应用插件](./plugin/app.md)
+يدعم webman الوصول إلى الملفات الثابتة، وتُوضع جميع الملفات الثابتة في المجلد `public`. على سبيل المثال، الوصول إلى `http://127.0.0.8787/upload/avatar.png` يُعد في الواقع وصولاً إلى `{الدليل الرئيسي للمشروع}/public/upload/avatar.png`.
 
-## 关闭静态文件支持
-如果不需要静态文件支持，打开`config/static.php`将`enable`选项改成false。关闭后所有静态文件的访问会返回404。
+> **ملاحظة**
+> الوصول إلى الملفات الثابتة الذي يبدأ بـ`/app/xx/اسم_الملف` يُعد في الواقع وصولاً إلى مجلد `public` الخاص بملحق التطبيق. بمعنى آخر، لا يُدعم الوصول إلى المجلدات الواقعة تحت `{الدليل الرئيسي للمشروع}/public/app/`.
+> لمزيد من المعلومات، راجع [ملحقات التطبيق](./plugin/app.md).
 
-## 更改静态文件目录
-webman默认使用public目录为静态文件目录。如需修改请更改`support/helpers.php`的中的`public_path()`助手函数。
+## إيقاف دعم الملفات الثابتة
 
-## 静态文件中间件
-webman自带一个静态文件中间件，位置`app/middleware/StaticFile.php`。
-有时我们需要对静态文件做一些处理，例如给静态文件增加跨域http头，禁止访问以点(`.`)开头的文件可以使用这个中间件
+إذا لم تكن هناك حاجة لدعم الملفات الثابتة، افتح `config/static.php` وغيِّر الخيار `enable` إلى false. بعد الإيقاف، سيُرجع جميع محاولات الوصول إلى الملفات الثابتة خطأ 404.
 
-`app/middleware/StaticFile.php` 内容类似如下：
+## تغيير مجلد الملفات الثابتة
+
+يُستخدم webman افتراضياً المجلد `public` كمجلد للملفات الثابتة. للتعديل، عدّل الدالة المساعدة `public_path()` في الملف `support/helpers.php`.
+
+## وسيط الملفات الثابتة
+
+يتضمّن webman وسيطاً للملفات الثابتة موجوداً في `app/middleware/StaticFile.php`.
+أحياناً نحتاج إلى معالجة الملفات الثابتة، مثل إضافة رؤوس HTTP للسماح بالوصول العابر للنطاقات، أو منع الوصول إلى الملفات التي تبدأ بنقطة (`.`)، يمكن استخدام هذا الوسيط.
+
+محتويات `app/middleware/StaticFile.php` شبيهة بما يلي:
 ```php
 <?php
 namespace support\middleware;
@@ -28,13 +32,13 @@ class StaticFile implements MiddlewareInterface
 {
     public function process(Request $request, callable $next) : Response
     {
-        // 禁止访问.开头的隐藏文件
+        // منع الوصول إلى الملفات المخفية التي تبدأ بنقطة
         if (strpos($request->path(), '/.') !== false) {
             return response('<h1>403 forbidden</h1>', 403);
         }
         /** @var Response $response */
         $response = $next($request);
-        // 增加跨域http头
+        // إضافة رؤوس الوصول العابر للنطاقات
         /*$response->withHeaders([
             'Access-Control-Allow-Origin'      => '*',
             'Access-Control-Allow-Credentials' => 'true',
@@ -43,4 +47,4 @@ class StaticFile implements MiddlewareInterface
     }
 }
 ```
-如果需要此中间件时，需要到`config/static.php`中`middleware`选项中开启。
+إذا تطلّب الأمر استخدام هذا الوسيط، يجب تفعيله في خيار `middleware` في ملف `config/static.php`.

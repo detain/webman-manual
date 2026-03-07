@@ -1,8 +1,8 @@
-# АОП
+# AOP
 
-> Благодарим автора Hyperf за предоставление материалов
+> Благодарим автора Hyperf за вклад в проект.
 
-### Установка
+## Установка
 
 - Установите aop-integration
 
@@ -10,9 +10,9 @@
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### Добавление соответствующей конфигурации AOP
+## Добавление конфигурации AOP
 
-Нам нужно добавить конфигурацию `config.php` в каталог `config`
+Необходимо добавить файл конфигурации `config.php` в каталог `config`.
 
 ```php
 <?php
@@ -36,18 +36,18 @@ return [
         ],
     ],
     'aspects' => [
-        // Здесь напишите соответствующий Aspect
+        // Укажите здесь соответствующий Aspect
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### Настройка точки входа start.php
+## Настройка файла входа start.php
 
-> Мы разместим инициализирующий метод ниже описания timezone, остальной код опущен
+> Разместите код инициализации после настройки часового пояса. Остальной код ниже опущен.
 
-```php
+```
 use Hyperf\AopIntegration\ClassLoader;
 
 if ($timezone = config('app.default_timezone')) {
@@ -58,9 +58,9 @@ if ($timezone = config('app.default_timezone')) {
 ClassLoader::init();
 ```
 
-### Тестирование
+## Тестирование
 
-Сначала давайте напишем класс для встраивания
+Сначала создадим класс для перехвата:
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-Затем добавим соответствующий `DebugAspect`
+Затем добавим соответствующий `DebugAspect`:
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-Затем отредактируем контроллер `app/controller/IndexController.php`
+Далее отредактируйте контроллер `app/controller/IndexController.php`:
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-Затем настроим маршрут
+Затем настройте маршрут:
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-Наконец, запустите службу и проведите тестирование.
+Наконец, запустите сервис и выполните тест:
 
 ```shell
 php start.php start

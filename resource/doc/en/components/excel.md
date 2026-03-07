@@ -1,18 +1,16 @@
 # Excel
 
-## phpoffice/phpspreadsheet
-
-### Project Address
+## Project Address
 
 https://github.com/PHPOffice/PhpSpreadsheet
-
-### Installation
-
-```php
-composer require phpoffice/phpspreadsheet
-```
-
-### Usage
+  
+## Installation
+ 
+  ```php
+  composer require phpoffice/phpspreadsheet
+  ```
+  
+## Usage
 
 ```php
 <?php
@@ -36,9 +34,11 @@ class ExcelController
         // Download file
         return response()->download($file_path, 'filename.xlsx');
     }
+
 }
 ```
 
-### Read More
+## More Information
 
 Visit https://phpspreadsheet.readthedocs.io/en/latest/
+  

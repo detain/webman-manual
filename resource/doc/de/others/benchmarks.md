@@ -12,6 +12,7 @@
 Der HTTP Keep-Alive-Mechanismus wird verwendet, um mehrere HTTP-Anfragen und -Antworten über eine einzige TCP-Verbindung zu senden. Dies hat einen großen Einfluss auf die Leistungstestergebnisse. Wenn Keep-Alive deaktiviert wird, kann die QPS um ein Vielfaches sinken.
 Derzeit sind Browser standardmäßig so eingestellt, dass Keep-Alive aktiviert ist. Wenn ein Browser also eine bestimmte HTTP-Adresse aufruft, wird die Verbindung vorübergehend offengehalten und nicht geschlossen, um sie bei der nächsten Anfrage wiederzuverwenden und die Leistung zu verbessern.
 Es wird empfohlen, Keep-Alive während der Leistungsprüfung zu aktivieren.
+Wenn Sie die Leistungsprüfung ohne aktiviertes Keep-Alive durchführen, werden die lokalen Ports des Clients schnell durch Verbindungen im TIME_WAIT-Zustand erschöpft. Dies führt dazu, dass ab einer bestimmten Gesamtanzahl von Anfragen (typischerweise etwa 28.000) fehlgeschlagene Anfragen auftreten.
 
 ### Wie aktiviert man HTTP Keep-Alive während der Leistungsprüfung?
 Wenn Sie das ab-Programm für die Leistungsprüfung verwenden, müssen Sie das -k-Argument verwenden, z.B. `ab -n100000 -c200 -k http://127.0.0.1:8787/`.
@@ -42,7 +43,7 @@ Wenn Ihre Ergebnisse abweichen, liegt dies möglicherweise daran, dass Sie in We
 Hier sind einige Leistungstests:
 
 **Umgebung**
-Alibaba Cloud Server mit 4 Kernen und 4 GB RAM. Eine zufällige Abfrage eines Datensatzes aus 100.000 Datensätzen und Rückgabe als JSON.
+Alibaba Cloud Server mit 4 Kernen und 4 GB RAM, lokale MySQL-Datenbank, zufällige Abfrage eines Datensatzes aus 100.000 Datensätzen und Rückgabe als JSON, lokale Leistungsprüfung.
 
 **Bei Verwendung von Native PDO**
 Webman QPS beträgt 17.800
@@ -56,7 +57,8 @@ Webman QPS sinkt auf 7.200 QPS
 Das Ergebnis ist ähnlich für ThinkORM und weist keine großen Unterschiede auf.
 
 > **Hinweis**
-> Obwohl die Verwendung von ORM zu einer gewissen Leistungsminderung führen kann, reicht dies für die meisten Geschäfte aus. Wir sollten einen Ausgleich zwischen Entwicklungszeit, Wartbarkeit und Leistung sowie anderen Kriterien finden, anstatt nur auf die Leistung zu setzen.
+> Obwohl die Verwendung von ORM zu einer gewissen Leistungsminderung führen kann, ist die Leistung für 99 % der Geschäftsszenarien bereits mehr als ausreichend. Falls Sie zu den übrigen 1 % gehören, können Sie dies einfach durch Hinzufügen von CPUs oder Servern beheben.
+> Wir sollten einen Ausgleich zwischen Entwicklungszeit, Wartbarkeit und Leistung sowie anderen Kriterien finden, anstatt nur auf die Leistung zu setzen.
 
 ### Warum ist die QPS in Apipost-Leistungstests so niedrig?
 Das Leistungstestmodul von Apipost hat einen Fehler. Wenn der Server keinen Gzip-Header zurückschickt, kann keine Keep-Alive-Verbindung aufrechterhalten werden, was zu erheblicher Leistungsminderung führt.

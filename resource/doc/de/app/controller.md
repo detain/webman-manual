@@ -28,6 +28,7 @@ Beim Aufrufen von `http://127.0.0.1:8787/app/foo/foo` wird die Seite `hello inde
 
 Beim Aufrufen von `http://127.0.0.1:8787/app/foo/foo/hello` wird die Seite `hello webman` zurückgegeben.
 
+
 ## URL-Zugriff
-Die URL-Pfade für die Plugin-Anwendungen beginnen alle mit `/app`, gefolgt von der Plugin-Kennung und dann dem konkreten Controller und der Methode.
-Zum Beispiel ist die URL für `plugin\foo\app\controller\UserController` `http://127.0.0.1:8787/app/foo/user`.
+Die URL-Adresspfade der Anwendungs-Plugins beginnen alle mit `/app`, gefolgt von der Plugin-Kennung und dann dem jeweiligen Controller und der Methode.
+Beispiel: Die URL-Adresse von `plugin\foo\app\controller\UserController` ist `http://127.0.0.1:8787/app/foo/user`.

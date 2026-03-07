@@ -1,21 +1,25 @@
-## Behandlung von statischen Dateien
-Webman unterstützt den Zugriff auf statische Dateien, die alle im Verzeichnis `public` platziert sind. Zum Beispiel wird der Zugriff auf `http://127.0.0.8787/upload/avatar.png` tatsächlich auf `{Hauptprojektverzeichnis}/public/upload/avatar.png` zugreifen.
+# webman – Behandlung statischer Dateien
+
+webman unterstützt den Zugriff auf statische Dateien, die alle im Verzeichnis `public` abgelegt sind. Beispielsweise bedeutet der Zugriff auf `http://127.0.0.8787/upload/avatar.png` tatsächlich den Zugriff auf `{Hauptprojektverzeichnis}/public/upload/avatar.png`.
 
 > **Hinweis**
-> Ab Version 1.4 unterstützt Webman die Anwendungs-Plugins. Der Zugriff auf statische Dateien, die mit `/app/xx/Dateiname` beginnen, erfolgt tatsächlich auf das `public`-Verzeichnis des Anwendungs-Plugins. Das heißt, Webman ab Version >=1.4.0 unterstützt den Zugriff auf Verzeichnisse unter `{Hauptprojektverzeichnis}/public/app/` nicht.
-> Weitere Informationen finden Sie unter [Application Plugins](./plugin/app.md).
+> Der Zugriff auf statische Dateien, der mit `/app/xx/Dateiname` beginnt, erfolgt tatsächlich auf das `public`-Verzeichnis des Anwendungs-Plugins. Das heißt, der Zugriff auf Verzeichnisse unter `{Hauptprojektverzeichnis}/public/app/` wird nicht unterstützt.
+> Weitere Informationen finden Sie unter [Anwendungs-Plugins](./plugin/app.md).
 
-### Deaktivieren der statischen Dateiunterstützung
-Wenn keine Unterstützung für statische Dateien benötigt wird, ändern Sie die Option `enable` in der Datei `config/static.php` auf `false`. Nach der Deaktivierung wird für alle Anfragen an statische Dateien ein 404-Fehler zurückgegeben.
+## Deaktivieren der Unterstützung für statische Dateien
 
-### Ändern des Verzeichnisses für statische Dateien
-Standardmäßig verwendet Webman das Verzeichnis `public` als Verzeichnis für statische Dateien. Wenn Sie dies ändern müssen, ändern Sie bitte die Funktion `public_path()` in der Datei `support/helpers.php`.
+Wenn keine Unterstützung für statische Dateien benötigt wird, öffnen Sie die Datei `config/static.php` und ändern Sie die Option `enable` auf `false`. Nach der Deaktivierung wird bei allen Zugriffen auf statische Dateien ein 404-Fehler zurückgegeben.
 
-### Middleware für statische Dateien
-Webman bietet standardmäßig eine Middleware für statische Dateien an, die sich im Verzeichnis `app/middleware/StaticFile.php` befindet.
-Manchmal müssen wir statische Dateien bearbeiten, z.B. um statischen Dateien Header für Cross-Origin hinzuzufügen oder den Zugriff auf Dateien zu verbieten, die mit einem Punkt (`.`) beginnen.
+## Ändern des Verzeichnisses für statische Dateien
 
-Der Inhalt von `app/middleware/StaticFile.php` ähnelt dem folgenden Beispiel:
+Standardmäßig verwendet webman das Verzeichnis `public` für statische Dateien. Zum Ändern bearbeiten Sie die Hilfsfunktion `public_path()` in der Datei `support/helpers.php`.
+
+## Middleware für statische Dateien
+
+webman enthält eine Middleware für statische Dateien unter `app/middleware/StaticFile.php`.
+Gelegentlich müssen statische Dateien behandelt werden, z. B. um Cross-Origin-HTTP-Header hinzuzufügen oder den Zugriff auf Dateien zu verbieten, die mit einem Punkt (`.`) beginnen. Hierfür kann diese Middleware verwendet werden.
+
+Der Inhalt von `app/middleware/StaticFile.php` entspricht etwa Folgendem:
 ```php
 <?php
 namespace support\middleware;

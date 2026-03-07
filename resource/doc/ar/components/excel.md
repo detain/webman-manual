@@ -1,16 +1,16 @@
-# Excel表格
+# جداول Excel
 
-## 项目地址
+## عنوان المشروع
 
 https://github.com/PHPOffice/PhpSpreadsheet
   
-## 安装
+## التثبيت
  
   ```php
   composer require phpoffice/phpspreadsheet
   ```
   
-## 使用
+## الاستخدام
 
 ```php
 <?php
@@ -29,17 +29,16 @@ class ExcelController
 
         $writer = new Xlsx($spreadsheet);
         $file_path = public_path().'/hello_world.xlsx';
-        // 保存文件到 public 下
+        // حفظ الملف في مجلد public
         $writer->save($file_path);
-        // 下载文件
-        return response()->download($file_path, '文件名.xlsx');
+        // تنزيل الملف
+        return response()->download($file_path, 'اسم_الملف.xlsx');
     }
 
 }
 ```
 
-## 更多内容
+## المزيد من المحتوى
 
-访问 https://phpspreadsheet.readthedocs.io/en/latest/
+قم بزيارة https://phpspreadsheet.readthedocs.io/en/latest/
   
-

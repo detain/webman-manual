@@ -1,3 +1,4 @@
 # ไฟล์แบบสถิต
-ไฟล์แบบสถิตจะถูกวางไว้ที่ `plugin/{ชื่อปลั๊กอิน}/public`  
-ตัวอย่างเช่น เมื่อเข้าถึง `http://127.0.0.1:8787/app/foo/avatar.png` จริง ๆ คือการเข้าถึงไฟล์ `plugin/foo/public/avatar.png` 
+ไฟล์แบบสถิตถูกวางไว้ใต้ `plugin/{ปลั๊กอิน}/public`
+เช่น การเข้าถึง `http://127.0.0.1:8787/app/foo/avatar.png` จะดึงไฟล์ `plugin/foo/public/avatar.png` จริงๆ
+

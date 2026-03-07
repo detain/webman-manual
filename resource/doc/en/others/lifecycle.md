@@ -11,7 +11,7 @@
 
 ## Request Lifecycle
 - Each request generates a `$request` object.
-- The `$request` object is recycled after the request is processed.
+- The `$request` object is reclaimed after the request is processed.
 
 ## Controller Lifecycle
 - Each controller is instantiated only once per process, but multiple instantiations are possible across processes (unless controller reusing is disabled, see [Controller Lifecycle](https://www.workerman.net/doc/webman/controller.html#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F)).
@@ -61,7 +61,7 @@ The `Container::get()` method is used to create and save class instances, so tha
 > **Note**
 > `Container::get()` can only initialize instances without constructor parameters. `Container::make()` can create instances with constructor parameters, but unlike `Container::get()`, `Container::make()` does not reuse instances, meaning that it always returns a new instance, even with the same parameters.
 
-# About Memory Leaks
+## About Memory Leaks
 In most cases, our business code does not cause memory leaks (very few users have reported memory leaks). We just need to be mindful not to infinitely expand long-lived array data. Consider the following code:
 ```php
 <?php

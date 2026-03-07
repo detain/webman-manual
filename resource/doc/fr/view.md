@@ -236,7 +236,7 @@ Pour plus de documentation, voir [think-template](https://www.kancloud.cn/manual
 
 ## Attribution de modèle
 
-En plus d'utiliser `view(模版, 变量数组)` pour attribuer le modèle, nous pouvons également attribuer le modèle à tout endroit en appelant `View::assign()`. Par exemple :
+En plus d'utiliser `view(template, tableau_de_variables)` pour attribuer le modèle, nous pouvons également attribuer le modèle à tout endroit en appelant `View::assign()`. Par exemple :
 ```php
 <?php
 namespace app\controller;
@@ -257,18 +257,36 @@ class UserController
     }
 }
 ```
-`View::assign()` est très utile dans certains scénarios. Par exemple, si chaque page d'un système doit afficher les informations de l'utilisateur connecté dans l'en-tête, il serait fastidieux de transmettre ces informations à chaque page en utilisant `view('模版', ['user_info' => 'informations_utilisateur'])`. La solution consiste à obtenir les informations de l'utilisateur dans le middleware, puis à attribuer les informations de l'utilisateur au modèle via `View::assign()`.
+`View::assign()` est très utile dans certains scénarios. Par exemple, si chaque page d'un système doit afficher les informations de l'utilisateur connecté dans l'en-tête, il serait fastidieux de transmettre ces informations à chaque page en utilisant `view('template', ['user_info' => 'informations_utilisateur'])`. La solution consiste à obtenir les informations de l'utilisateur dans le middleware, puis à attribuer les informations de l'utilisateur au modèle via `View::assign()`.
 
 ## Concernant les chemins de fichier modèle
 
 #### Contrôleur
 
-Lorsqu'un contrôleur appelle `view('模版名',[]);`, le modèle est recherché selon les règles suivantes :
+Lorsqu'un contrôleur appelle `view('nom_du_modèle',[]);`, le fichier de vue est recherché selon les règles suivantes :
 
-1. En l'absence de plusieurs applications, le modèle correspondant est recherché dans `app/view/`.
-2. En cas de [multiples applications](multiapp.md), le modèle correspondant est recherché dans `app/应用名/view/`.
+1. Si le chemin commence par `/`, ce chemin est utilisé directement pour localiser le fichier de vue.
+2. Si le chemin ne commence pas par `/` et qu'il ne s'agit pas d'une application multiple, le fichier de vue correspondant est recherché dans `app/view/`.
+3. Si le chemin ne commence pas par `/` et qu'il s'agit d'[applications multiples](multiapp.md), le fichier de vue correspondant est recherché dans `app/nom_application/view/`.
+4. Si aucun paramètre de modèle n'est transmis, le fichier de modèle est automatiquement localisé selon les règles 2 et 3.
 
-En résumé, si `$request->app` est vide, le modèle est recherché dans `app/view/`, sinon il est recherché dans `app/{$request->app}/view/`.
+Exemple :
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Équivalent à return view('user/hello', ['name' => 'webman']);
+        // Équivalent à return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### Fonction de fermeture
 
@@ -283,6 +301,26 @@ le modèle utilisé sera `app/view/user.html` (lorsque le modèle Blade est util
 #### Spécifier l'application
 
 Pour permettre la réutilisation des modèles dans le cas de multiples applications, `view($template, $data, $app = null)` propose un troisième argument `$app` qui permet de spécifier le dossier d'application à partir duquel le modèle doit être chargé. Par exemple, `view('user', [], 'admin')` forcera l'utilisation du modèle dans `app/admin/view/`.
+
+#### Omettre le paramètre de modèle
+
+Dans les contrôleurs basés sur des classes, vous pouvez omettre le paramètre de modèle. Par exemple :
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Équivalent à return view('user/hello', ['name' => 'webman']);
+        // Équivalent à return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## Extension de twig
 

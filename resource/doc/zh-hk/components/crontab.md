@@ -1,41 +1,39 @@
-# crontab定時任務組件
+# crontab 定時任務元件
 
-## workerman/crontab
+## 說明
 
-### 說明
-
-`workerman/crontab`類似linux的crontab，不同的是`workerman/crontab`支持秒級定時。
+`workerman/crontab` 類似於 Linux 的 crontab，不同的是 `workerman/crontab` 支援秒級定時。
 
 時間說明：
 
 ```
 0   1   2   3   4   5
 |   |   |   |   |   |
-|   |   |   |   |   +------ 週幾 (0 - 6) (星期日=0)
-|   |   |   |   +------ 月份 (1 - 12)
-|   |   |   +-------- 日期 (1 - 31)
-|   |   +---------- 小時 (0 - 23)
-|   +------------ 分鐘 (0 - 59)
-+-------------- 秒 (0-59)[可省略，如果沒有0位,則最小時間粒度是分鐘]
-``` 
+|   |   |   |   |   +------ day of week (0 - 6) (Sunday=0)
+|   |   |   |   +------ month (1 - 12)
+|   |   |   +-------- day of month (1 - 31)
+|   |   +---------- hour (0 - 23)
+|   +------------ min (0 - 59)
++-------------- sec (0-59)[可省略，若沒有第 0 位，則最小時間粒度為分鐘]
+```
 
-### 專案地址
+## 專案網址
 
 https://github.com/walkor/crontab
-
-### 安裝
-
+  
+## 安裝
+ 
 ```php
 composer require workerman/crontab
 ```
+  
+## 使用
 
-### 使用
-
-**步驟一：新建進程檔 `process/Task.php`**
+**步驟一：建立進程檔 `app/process/Task.php`**
 
 ```php
 <?php
-namespace process;
+namespace app\process;
 
 use Workerman\Crontab\Crontab;
 
@@ -44,12 +42,12 @@ class Task
     public function onWorkerStart()
     {
     
-        // 每秒鐘執行一次
+        // 每秒執行一次
         new Crontab('*/1 * * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
         
-        // 每5秒執行一次
+        // 每 5 秒執行一次
         new Crontab('*/5 * * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -59,7 +57,7 @@ class Task
             echo date('Y-m-d H:i:s')."\n";
         });
         
-        // 每5分鐘執行一次
+        // 每 5 分鐘執行一次
         new Crontab('0 */5 * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -69,7 +67,7 @@ class Task
             echo date('Y-m-d H:i:s')."\n";
         });
       
-        // 每天的7點50執行，注意這裡省略了秒位
+        // 每日 7 點 50 分執行，此處省略了秒位
         new Crontab('50 7 * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -77,32 +75,32 @@ class Task
     }
 }
 ```
-
-**步驟二：配置進程檔隨webman啟動**
- 
-打開配置檔 `config/process.php`，新增如下配置
+  
+**步驟二：設定進程隨 webman 啟動**
+  
+開啟設定檔 `config/process.php`，新增以下設定：
 
 ```php
 return [
-    ....其它配置，這裡省略....
+    ....其他設定此處省略....
   
     'task'  => [
-        'handler'  => process\Task::class
+        'handler'  => app\process\Task::class
     ],
 ];
 ```
+  
+**步驟三：重新啟動 webman**
 
-**步驟三：重啟webman**
+> 注意：定時任務不會即時執行，所有定時任務要等到下一分鐘才會開始計時執行。
 
-> 注意：定時任務不會馬上執行，所有定時任務進入下一分鐘才會開始計時執行
-
-### 說明
-crontab並不是異步的，例如一個task進程裡設置了A和B兩個定時器，都是每秒執行一次任務，但是A任務耗時10秒，那麼B需要等待A執行完才能被執行，導致B執行會有延遲。
-如果業務對於時間間隔很敏感，需要將敏感的定時任務放到單獨的進程去運行，防止被其它定時任務影響。例如 `config/process.php` 做如下配置
+## 說明
+crontab 並非非同步。例如在一個 task 進程中設定了 A、B 兩個計時器，皆為每秒執行一次，若 A 任務需時 10 秒，則 B 須等 A 執行完畢才能執行，導致 B 執行延遲。
+若業務對時間間隔較敏感，應將這些定時任務放到獨立進程執行，以免受其他定時任務影響。範例 `config/process.php` 設定如下：
 
 ```php
 return [
-    ....其它配置，這裡省略....
+    ....其他設定此處省略....
   
     'task1'  => [
         'handler'  => process\Task1::class
@@ -112,7 +110,6 @@ return [
     ],
 ];
 ```
-將時間敏感的定時任務放在 `process/Task1.php` 裡，其它定時任務放在 `process/Task2.php` 裡
+將對時間敏感的定時任務放在 `process/Task1.php` 中，其他定時任務放在 `process/Task2.php` 中。
 
-### 更多
-更多`config/process.php`配置說明，請參考 [自定義進程](../process.md)
+更多 `config/process.php` 設定說明，請參考 [自訂進程](../process.md)

@@ -5,8 +5,7 @@
 * El código fuente de los complementos debe ser completo y no puede estar encriptado.
 * Los complementos deben tener funcionalidades completas y no pueden ser simples.
 * Deben incluir una introducción completa de sus funcionalidades y documentación.
-* Los complementos no pueden incluir submercados.
-* No pueden contener textos o enlaces de promoción.
+* No se recomienda el uso de corrutinas en los complementos, ya que los usuarios pueden no tenerlas habilitadas.
 
 ## Identificación de complementos de la aplicación
 Cada complemento de la aplicación tiene una identificación única, la cual está compuesta por letras. Esta identificación afecta al nombre del directorio donde se encuentra el código fuente del complemento, al espacio de nombres de la clase y al prefijo de la tabla de la base de datos del complemento.

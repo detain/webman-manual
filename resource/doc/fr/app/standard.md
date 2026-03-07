@@ -5,8 +5,7 @@
 * Le code source du plugin doit être complet et ne doit pas être crypté.
 * Le plugin doit offrir des fonctionnalités complètes et ne doit pas être simplement une fonctionnalité simple.
 * Une documentation complète des fonctionnalités doit être fournie.
-* Les plugins ne doivent pas inclure de sous-marché.
-* Aucun texte ou lien promotionnel ne doit figurer dans le plugin.
+* L'utilisation des coroutines n'est pas recommandée dans les plugins, car les utilisateurs peuvent ne pas les avoir activées.
 
 ### Identification des plugins d'application
 Chaque plugin d'application a une identification unique, composée de lettres. Cette identification affecte le nom du répertoire source du plugin, l'espace de noms de la classe, et le préfixe de la table de la base de données du plugin.

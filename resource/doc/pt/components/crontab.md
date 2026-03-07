@@ -1,41 +1,39 @@
-# Componente de tarefas agendadas crontab
+# Componente de tarefas agendadas Crontab
 
-## workerman/crontab
+## Descrição
 
-### Descrição
+`workerman/crontab` é semelhante ao crontab do Linux; a diferença é que suporta agendamento ao nível de segundos.
 
-`workerman/crontab` é semelhante ao crontab do Linux, a diferença é que o `workerman/crontab` suporta tarefas agendadas com precisão de segundos.
+Formato de tempo:
 
-Explicação do tempo:
-
-``` 
-0    1    2    3    4    5
-|    |    |    |    |    |
-|    |    |    |    |    +------ dia da semana (0 - 6) (Domingo=0)
-|    |    |    |    +------ mês (1 - 12)
-|    |    |    +-------- dia do mês (1 - 31)
-|    |    +---------- hora (0 - 23)
-|    +------------ minuto (0 - 59)
-+-------------- segundo (0-59) [pode ser omitido, se omitido, a menor unidade de tempo é o minuto]
+```
+0   1   2   3   4   5
+|   |   |   |   |   |
+|   |   |   |   |   +------ day of week (0 - 6) (Sunday=0)
+|   |   |   |   +------ month (1 - 12)
+|   |   |   +-------- day of month (1 - 31)
+|   |   +---------- hour (0 - 23)
+|   +------------ min (0 - 59)
++-------------- sec (0-59)[opcional; se omitido, a granularidade mínima é o minuto]
 ```
 
-### Endereço do projeto
+## URL do projeto
 
 https://github.com/walkor/crontab
-
-### Instalação
-
+  
+## Instalação
+ 
 ```php
 composer require workerman/crontab
 ```
+  
+## Uso
 
-### Uso
-
-**Passo 1: Criar o arquivo de processo `process/Task.php`**
+**Passo 1: Criar o arquivo de processo `app/process/Task.php`**
 
 ```php
 <?php
-namespace process;
+namespace app\process;
 
 use Workerman\Crontab\Crontab;
 
@@ -69,7 +67,7 @@ class Task
             echo date('Y-m-d H:i:s')."\n";
         });
       
-        // Executar às 7:50 diariamente, observação: o segundo foi omitido aqui
+        // Executar às 7:50 diariamente (o campo de segundos é omitido aqui)
         new Crontab('50 7 * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -77,33 +75,32 @@ class Task
     }
 }
 ```
-
-**Passo 2: Configurar o arquivo de processo para iniciar com o webman**
-
-Abra o arquivo de configuração `config/process.php` e adicione a seguinte configuração
+  
+**Passo 2: Configurar o processo para iniciar com webman**
+  
+Abrir o arquivo de configuração `config/process.php` e adicionar o seguinte:
 
 ```php
 return [
-    ....outras configurações, omitidas aqui....
+    ....outras configurações omitidas....
   
     'task'  => [
-        'handler'  => process\Task::class
+        'handler'  => app\process\Task::class
     ],
 ];
 ```
+  
+**Passo 3: Reiniciar webman**
 
-**Passo 3: Reiniciar o webman**
+> Observação: As tarefas agendadas não são executadas imediatamente; começam a contar e executar a partir do próximo minuto.
 
-> Observação: As tarefas agendadas não serão executadas imediatamente. Todas as tarefas agendadas serão iniciadas a cada minuto.
-
-### Explicação
-
-O crontab não é assíncrono, por exemplo, em um processo de tarefa são configurados dois cronômetros, A e B, que executam uma tarefa a cada segundo. No entanto, se a tarefa A demorar 10 segundos para ser concluída, a tarefa B precisará esperar a conclusão de A antes de ser executada, causando um atraso na execução da tarefa B.
-Se o negócio for sensível ao intervalo de tempo, as tarefas agendadas sensíveis ao tempo devem ser executadas em um processo separado para evitar a interferência de outras tarefas agendadas. Por exemplo, configure o arquivo `config/process.php` da seguinte maneira.
+## Notas
+O crontab não é assíncrono. Exemplo: um processo task configura dois timers A e B, ambos executados a cada segundo. Se a tarefa A demorar 10 segundos, B precisa esperar A terminar antes de executar, causando atraso em B.
+Se a lógica for sensível ao intervalo de tempo, executar as tarefas sensíveis em processos separados para evitar interferência. Exemplo em `config/process.php`:
 
 ```php
 return [
-    ....outras configurações, omitidas aqui....
+    ....outras configurações omitidas....
   
     'task1'  => [
         'handler'  => process\Task1::class
@@ -113,8 +110,6 @@ return [
     ],
 ];
 ```
-Coloque as tarefas agendadas sensíveis ao tempo em `process/Task1.php` e as outras tarefas agendadas em `process/Task2.php`.
+Colocar as tarefas sensíveis ao tempo em `process/Task1.php` e as restantes em `process/Task2.php`.
 
-### Mais
-
-Para mais explicações sobre configuração em `config/process.php`, consulte [Processo Personalizado](../process.md).
+Para mais informações sobre `config/process.php`, consultar [Processos personalizados](../process.md).

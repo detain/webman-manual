@@ -101,7 +101,7 @@ return [
     ],
     // log2通道
     'log2' => [
-        // 处理默认通道的handler，可以设置多个
+        // 处理log2通道的handler，可以设置多个
         'handlers' => [
             [   
                 // handler类的名字

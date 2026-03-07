@@ -87,8 +87,8 @@ $name = $session->pull('name');
 效果与如下代码相同
 ```php
 $session = $request->session();
-$value = $session->get($name);
-$session->delete($name);
+$value = $session->get('name');
+$session->delete('name');
 ```
 如果对应session不存在，则返回null。
 
@@ -107,7 +107,7 @@ $has = $session->has('name');
 ```
 以上当对应的session不存在或者对应的session值为null时返回false，否则返回true。
 
-```
+```php
 $session = $request->session();
 $has = $session->exists('name');
 ```
@@ -124,7 +124,7 @@ $session = $request->session();
 
 // 获取某个值
 $value = session('key', 'default');
-// 等价与
+// 等价于
 $value = session()->get('key', 'default');
 // 等价于
 $value = $request->session()->get('key', 'default');

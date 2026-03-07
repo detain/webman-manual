@@ -8,7 +8,7 @@ return [
     '' => support\exception\Handler::class,
 ];
 ```
-Trong chế độ ứng dụng nhiều, bạn có thể cấu hình riêng cho từng ứng dụng lớp xử lý ngoại lệ, xem thêm ở [multipleapp.md](multiapp.md)
+Trong chế độ ứng dụng nhiều, bạn có thể cấu hình riêng cho từng ứng dụng lớp xử lý ngoại lệ, xem thêm ở [Ứng dụng nhiều](multiapp.md)
 
 
 ## Lớp xử lý ngoại lệ mặc định
@@ -66,11 +66,11 @@ class FooController
 {
     public function index(Request $request)
     {
-        $this->chackInpout($request->post());
+        $this->checkInput($request->post());
         return response('hello index');
     }
     
-    protected function chackInpout($input)
+    protected function checkInput($input)
     {
         if (!isset($input['token'])) {
             throw new BusinessException('Tham số sai', 3000);
@@ -126,8 +126,8 @@ yêu cầu trả về json sẽ nhận được phản hồi json tương tự n
 {"code": 3000, "message": "Tham số sai"}
 ```
 
-> **Lưu ý**
-> Vì BusinessException thuộc loại ngoại lệ kinh doanh (ví dụ: lỗi đầu vào của người dùng), nó có thể được dự đoán, vì vậy framework sẽ không coi nó là lỗi chết người và không ghi nhật ký.
+> **Gợi ý**
+> Vì BusinessException thuộc loại ngoại lệ kinh doanh (ví dụ: lỗi đầu vào của người dùng), nó có thể dự đoán được, do đó framework không coi đây là lỗi nghiêm trọng và sẽ không ghi nhật ký.
 
 ## Tóm lược
 Khi cần ngừng yêu cầu hiện tại và trả về thông tin cho máy khách, bạn có thể xem xét sử dụng `BusinessException`.

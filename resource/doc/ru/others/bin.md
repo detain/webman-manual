@@ -1,103 +1,58 @@
 # Бинарная упаковка
 
-webman поддерживает упаковку проекта в один бинарный файл, что позволяет webman запускаться на системах Linux без необходимости наличия среды PHP.
+webman позволяет упаковать проект в один бинарный файл, что даёт возможность запускать webman на Linux без среды PHP.
 
 > **Внимание**
-> Упакованный файл в настоящее время поддерживает запуск только на системах Linux архитектуры x86_64, не поддерживается на системах Mac.
-> Необходимо отключить опцию конфигурации `phar` в `php.ini`, установив `phar.readonly = 0`.
+> Упакованный файл в настоящее время работает только на Linux с архитектурой x86_64. Windows и macOS не поддерживаются.
+> Необходимо отключить опцию phar в `php.ini`, установив `phar.readonly = 0`.
 
-## Установка командной строки инструментов
-`composer require webman/console ^1.2.24`
-
-## Настройки конфигурации
-Откройте файл `config/plugin/webman/console/app.php` и установите:
-```php
-'exclude_pattern'   => '#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|vendor/webman/admin))(.*)$#'
-```
-для исключения некоторых ненужных каталогов и файлов во время упаковки, чтобы избежать излишнего увеличения размера упаковки.
+## Установка инструмента командной строки
+`composer require webman/console`
 
 ## Упаковка
 Выполните команду
-```sh
+```
 php webman build:bin
 ```
-Также можно указать, с какой версией PHP упаковывать, например
-```sh
+Можно указать версию PHP для упаковки, например
+```
 php webman build:bin 8.1
 ```
 
-После упаковки будет создан файл `webman.bin` в каталоге `build`.
+После упаковки в каталоге build будет создан файл `webman.bin`.
 
 ## Запуск
-Загрузите webman.bin на сервер Linux, выполните `./webman.bin start` или `./webman.bin start -d` для запуска.
+Загрузите webman.bin на сервер Linux и выполните `./webman.bin start` или `./webman.bin start -d`.
 
 ## Принцип работы
-* Сначала локальный проект webman упаковывается в файл phar.
-* Затем удаленно загружается php8.x.micro.sfx на локальный компьютер.
-* Файлы php8.x.micro.sfx и phar объединяются в один бинарный файл.
+* Сначала локальный проект webman упаковывается в файл phar
+* Затем удалённо загружается php8.x.micro.sfx
+* Файлы php8.x.micro.sfx и phar объединяются в один бинарный файл
 
 ## Важно
-* Упаковку можно выполнять на локальной машине с версией PHP не ниже 7.2.
-* Однако бинарный файл будет создан только для PHP 8.
-* Рекомендуется использовать одинаковую версию локальной и упакованной PHP, чтобы избежать проблем совместимости.
-* Во время упаковки будет загружен исходный код PHP 8, однако он не будет установлен локально и не повлияет на среду PHP на локальной машине.
-* В настоящее время webman.bin поддерживает запуск только на системах Linux архитектуры x86_64, не поддерживается на системах Mac.
-* По умолчанию файлы `.env` не упаковываются (управляется параметром `exclude_files` в `config/plugin/webman/console/app.php`), поэтому файл `.env` должен быть размещен в одной папке с webman.bin.
-* В процессе работы будет создан каталог `runtime` в каталоге, где находится webman.bin, для хранения файлов журналов.
-* В настоящее время webman.bin не будет читать внешний файл php.ini. Если требуется настроить файл php.ini, укажите его в `custom_ini` в файле `/config/plugin/webman/console/app.php`.
+* Рекомендуется использовать одну и ту же версию PHP при разработке и упаковке (например, PHP 8.1 в обоих случаях), чтобы избежать проблем совместимости
+* При упаковке загружается исходный код PHP 8, но он не устанавливается локально и не влияет на локальную среду PHP
+* webman.bin в настоящее время работает только на Linux x86_64 и не поддерживает macOS
+* Упакованные проекты не поддерживают reload; обновление кода требует перезапуска
+* По умолчанию файл env не упаковывается (управляется exclude_files в `config/plugin/webman/console/app.php`). При запуске файл env должен находиться в том же каталоге, что и webman.bin
+* Во время работы в каталоге с webman.bin создаётся каталог runtime для хранения логов
+* webman.bin не читает внешние php.ini. Для настройки php.ini укажите параметры в custom_ini в `config/plugin/webman/console/app.php`
+* Некоторые файлы можно исключить из упаковки в `config/plugin/webman/console/app.php`, чтобы уменьшить размер пакета
+* Бинарная упаковка не поддерживает корутины Swoole
+* Никогда не храните файлы, загруженные пользователями, внутри бинарного пакета. Работа с ними через протокол `phar://` опасна (уязвимость десериализации phar). Загруженные файлы должны храниться отдельно на диске вне пакета
+* Если приложению нужно загружать файлы в каталог public, поместите каталог public рядом с webman.bin, настройте `config/app.php` следующим образом и пересоберите пакет:
+```
+'public_path' => base_path(false) . DIRECTORY_SEPARATOR . 'public',
+```
 
 ## Отдельная загрузка статического PHP
-Иногда вам может потребоваться только выполнить PHP-файл без установки среды PHP. Щелкните здесь, чтобы скачать статический PHP [здесь](https://www.workerman.net/download).
+Если нужен только исполняемый файл PHP без установки окружения, [скачайте статический PHP здесь](https://www.workerman.net/download).
 
-> **Совет**
-> Если требуется указать файл php.ini для статического PHP, используйте следующую команду: `php -c /your/path/php.ini start.php start -d`.
+> **Подсказка**
+> Для указания файла php.ini для статического PHP: `php -c /your/path/php.ini start.php start -d`
 
 ## Поддерживаемые расширения
-bcmath
-calendar
-Core
-ctype
-curl
-date
-dom
-event
-exif
-FFI
-fileinfo
-filter
-gd
-hash
-iconv
-json
-libxml
-mbstring
-mongodb
-mysqlnd
-openssl
-pcntl
-pcre
-PDO
-pdo_mysql
-pdo_sqlite
-Phar
-posix
-readline
-redis
-Reflection
-session
-shmop
-SimpleXML
-soap
-sockets
-SPL
-sqlite3
-standard
-tokenizer
-xml
-xmlreader
-xmlwriter
-zip
-zlib
+apcu, bcmath, bz2, calendar, Core, ctype, curl, date, dba, dom, event, exif, fileinfo, filter, ftp, gd, gmp, hash, iconv, imagick, imap, intl, json, libxml, mbstring, mysqli, mysqlnd, openssl, pcntl, pcre, PDO, pdo_mysql, pgsql, Phar, posix, protobuf, readline, redis, Reflection, session, shmop, SimpleXML, soap, sockets, sodium, SPL, sqlite3, standard, swoole, sysvmsg, sysvsem, sysvshm, tokenizer, xml, xmlreader, xmlwriter, xsl, Zend OPcache, zip, zlib
 
 ## Источники проекта
 

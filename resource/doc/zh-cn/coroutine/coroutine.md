@@ -131,7 +131,7 @@ http://127.0.0.1:8787/test?name=hanmeimei
 我们期望两个请求返回的结果分别是 `lilei` 和 `hanmeimei`，但实际上返回的都是`hanmeimei`。
 这是因为第二个请求将静态变量`$name`覆盖了，第一个请求睡眠结束时返回时静态变量`$name`已经成为`hanmeimei`。
 
-**正确但方法应该是使用context存储请求状态数据**
+**正确的方法应该是使用context存储请求状态数据**
 ```php
 <?php
 

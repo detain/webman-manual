@@ -67,11 +67,11 @@ class FooController
 {
     public function index(Request $request)
     {
-        $this->chackInpout($request->post());
+        $this->checkInput($request->post());
         return response('hello index');
     }
     
-    protected function chackInpout($input)
+    protected function checkInput($input)
     {
         if (!isset($input['token'])) {
             throw new BusinessException('पैरामीटर त्रुटि', 3000);
@@ -86,14 +86,14 @@ class FooController
 ```
 
 > **ध्यान दें**
-> व्यावसायिक असामान्यता BusinessException को कोई कारोबार try नहीं पकड़ना होता, परिदेश आपूर्ति प्रकार के अनुसार समायोजित आउटपुट वापस किया जाएगा।
+> व्यावसायिक असामान्यता BusinessException को try-catch से पकड़ने की आवश्यकता नहीं है, फ्रेमवर्क स्वतः इसे पकड़ लेगा और अनुरोध प्रकार के अनुसार उचित आउटपुट वापस करेगा।
 
 ## स्वनिर्धारित व्यावसायिक असामान्यता
 
 यदि उपरोक्त प्रतिक्रिया आपकी आवश्यकताओं को पूरा नहीं करती है, जैसे सूचना को `msg` को `message` में बदलना चाहते हैं, तो आप एक `MyBusinessException` स्वनिर्धारित कर सकते हैं
 
 
-`app/exception/MyBusinessException.php` नमक एक नया फ़ाइल बनाएँ
+`app/exception/MyBusinessException.php` नाम से एक नई फ़ाइल बनाएँ
 ```php
 <?php
 
@@ -122,8 +122,8 @@ class MyBusinessException extends BusinessException
 {"code": 3000, "message": "पैरामीटर त्रुटि"}
 ```
 
-> **सूचना**
-> क्योंकि BusinessException असामान्यता व्यावसायिक असामान्यता के अंतर्गत आती है (उदाहरण के लिए उपयोगकर्ता इनपुट पैरामीटर त्रुटि), इसलिए यह पूर्वीनिर्धारित त्रुटि के रूप में नहीं लिया जाएगा और नहीं रिकॉर्ड किया जाएगा।
+> **सुझाव**
+> क्योंकि BusinessException असामान्यता व्यावसायिक असामान्यता के अंतर्गत आती है (उदाहरण के लिए उपयोगकर्ता इनपुट पैरामीटर त्रुटि), यह पूर्वानुमेय है, इसलिए फ्रेमवर्क इसे घातक त्रुटि नहीं मानेगा और लॉग में रिकॉर्ड नहीं करेगा।
 
 ## संक्षेप
 किसी भी समय जब वर्तमान अनुरोध को रोकना और ग्राहक को प्रतिक्रिया देने के लिए विचार किया जा सकता है, तो विचार से `BusinessException` असामान्यता का उपयोग करना उपयुक्त है।

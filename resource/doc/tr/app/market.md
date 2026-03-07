@@ -1,3 +1,3 @@
 # Eklenti Mağazası
 
-[Mağaza için buraya tıklayın](https://www.workerman.net/apps)
+[Uygulama mağazasına girmek için buraya tıklayın](https://www.workerman.net/apps)

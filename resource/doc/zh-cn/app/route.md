@@ -12,7 +12,7 @@ Route::disableDefaultRoute('foo');
 
 ## 处理404回调
 如果想给某个应用插件设置fallback，需要通过第二个参数传递插件名，例如
-```
+```php
 Route::fallback(function(){
     return redirect('/');
 }, 'foo');

@@ -1,13 +1,12 @@
-# webman-admin Entegrasyonu
+# webman-admin entegrasyonu
 
-[webman-admin](https://www.workerman.net/plugin/82), webman tarafından geliştirilen yönetim panelidir. 
-Yetkilendirme ayarlarını destekler, menü oluşturma (tek tuşla curd), kendi kullanıcı tablosu ile farklı uygulama eklentileri arasında kullanıcı verilerinin paylaşımını kolaylaştırır.
+[webman-admin](https://www.workerman.net/plugin/82), webman tarafından geliştirilen resmi yönetim panelidir. Yetki ayarları, menü oluşturma (tek tıkla CRUD) destekler ve uygulama eklentileri arasında kullanıcı verisi paylaşımını kolaylaştırmak için kullanıcı tablosu ile birlikte gelir.
 
-## webman-admin Entegrasyonunun Avantajları
+## webman-admin entegrasyonunun avantajları
 
-* Farklı uygulama eklentileri için birleşik bir yönetim paneli girişi sağlar, kullanıcı deneyimini artırır
-* Uygulama eklentisi yönetim paneli geliştirme süresini azaltır, bakım maliyetini düşürür
-* Yönetim paneli, eklenti yönetim özelliği ile eklentilerin merkezi olarak aranmasını, kurulmasını kolaylaştırır
+* Çeşitli uygulama eklentileri için birleşik arka plan girişi sağlar, kullanıcı deneyimini iyileştirir
+* Uygulama eklentilerinin arka plan geliştirme süresini azaltır, bakım maliyetini düşürür
+* Yönetim paneli eklenti yönetim işlevi içerir, eklentilerin merkezi arama ve kurulumunu kolaylaştırır
 
-## Entegrasyon Belgeleri
+## Entegrasyon belgeleri
 https://www.workerman.net/doc/webman-admin/development/link.html

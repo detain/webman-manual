@@ -1,31 +1,35 @@
-# Event Eventverarbeitung
-`webman/event` bietet einen raffinierten Ereignismechanismus, der es ermöglicht, einige Geschäftslogiken auszuführen, ohne den Code zu ändern, um eine Entkopplung zwischen Geschäftsmodulen zu erreichen. Ein typisches Szenario ist beispielsweise, dass bei erfolgreicher Registrierung eines neuen Benutzers einfach ein benutzerdefiniertes Ereignis wie `user.register` veröffentlicht wird, und die verschiedenen Module das Ereignis erhalten und die entsprechenden Geschäftslogiken ausführen.
+# Event-Eventverarbeitung
+`webman/event` bietet einen raffinierten Ereignismechanismus, der es ermöglicht, Geschäftslogiken auszuführen, ohne den Code zu ändern, und damit die Entkopplung zwischen Geschäftsmodulen zu erreichen. Typisches Szenario: Wenn ein neuer Benutzer sich erfolgreich registriert, wird einfach ein benutzerdefiniertes Ereignis wie `user.register` veröffentlicht, und jedes Modul kann dieses Ereignis empfangen und die entsprechende Geschäftslogik ausführen.
 
 ## Installation
 `composer require webman/event`
 
 ## Ereignis abonnieren
-Das Abonnieren von Ereignissen wird einheitlich in der Datei `config/event.php` konfiguriert
+Ereignis-Abonnements werden einheitlich in der Datei `config/event.php` konfiguriert.
+
 ```php
 <?php
 return [
     'user.register' => [
         [app\event\User::class, 'register'],
-        // ...andere Ereignisfunktionen...
+        // ...andere Ereignisverarbeitungsfunktionen...
     ],
     'user.logout' => [
         [app\event\User::class, 'logout'],
-        // ...andere Ereignisfunktionen...
+        // ...andere Ereignisverarbeitungsfunktionen...
     ]
 ];
 ```
-**Erklärung:**
-- `user.register`, `user.logout` usw. sind Ereignisnamen, Strings, die aus kleinen Wörtern bestehen und durch Punkte (`.`) getrennt sind.
-- Ein Ereignis kann mehreren Ereignisfunktionen entsprechen, die in der Reihenfolge der Konfiguration aufgerufen werden.
 
-## Ereignisverarbeitungsfunktion
-Ereignisverarbeitungsfunktionen können beliebige Klassenmethoden, Funktionen, Closure-Funktionen usw. sein.
-Zum Beispiel, erstellen Sie eine Ereignisverarbeitungsklasse `app/event/User.php` (Erstellen Sie das Verzeichnis, falls es nicht existiert)
+**Hinweis:**
+- `user.register`, `user.logout` usw. sind Ereignisnamen (Zeichenketten). Empfohlen werden Kleinbuchstaben, mit Punkt (`.`) getrennt.
+- Ein Ereignis kann mehreren Ereignisverarbeitungsfunktionen entsprechen; sie werden in der Reihenfolge der Konfiguration aufgerufen.
+
+## Ereignisverarbeitungsfunktionen
+Ereignisverarbeitungsfunktionen können beliebige Klassenmethoden, Funktionen oder Closure-Funktionen sein.
+
+Erstellen Sie z. B. die Ereignisverarbeitungsklasse `app/event/User.php` (Verzeichnis bei Bedarf anlegen).
+
 ```php
 <?php
 namespace app\event;
@@ -44,7 +48,8 @@ class User
 ```
 
 ## Ereignis veröffentlichen
-Verwenden Sie `Event::emit($event_name, $data);` zur Veröffentlichung von Ereignissen, beispielsweise
+Verwenden Sie `Event::dispatch($event_name, $data);` oder `Event::emit($event_name, $data);` zum Veröffentlichen von Ereignissen, z. B.:
+
 ```php
 <?php
 namespace app\controller;
@@ -58,16 +63,19 @@ class User
             'name' => 'webman',
             'age' => 2
         ];
-        Event::emit('user.register', $user);
+        Event::dispatch('user.register', $user);
     }
 }
 ```
 
+Es gibt zwei Funktionen zum Veröffentlichen: `Event::dispatch($event_name, $data);` und `Event::emit($event_name, $data);` — beide mit denselben Parametern. Der Unterschied: `emit` fängt Ausnahmen intern ab; wirft eine Verarbeitungsfunktion eine Ausnahme, laufen die anderen dennoch weiter. Bei `dispatch` werden Ausnahmen nicht abgefangen; wirft eine Verarbeitungsfunktion eine Ausnahme, bricht die Ausführung ab und die Ausnahme wird weitergeworfen.
+
 > **Hinweis**
-> Der Parameter `$data` von `Event::emit($event_name, $data);` kann beliebige Daten wie Arrays, Klasseninstanzen, Strings usw. sein.
+> Der Parameter `$data` kann beliebige Daten sein (z. B. Arrays, Klasseninstanzen, Zeichenketten).
 
 ## Wildcard-Ereignisüberwachung
-Die Registrierung von Wildcard-Beobachtern ermöglicht es Ihnen, mehrere Ereignisse mit demselben Listener zu verarbeiten, beispielsweise wie in der Konfigurationsdatei `config/event.php`:
+Mit Wildcard-Registrierung können Sie mehrere Ereignisse mit demselben Listener behandeln, z. B. in `config/event.php`:
+
 ```php
 <?php
 return [
@@ -76,7 +84,9 @@ return [
     ],
 ];
 ```
-Durch den zweiten Parameter `$event_data` in der Ereignisverarbeitungsfunktion erhalten wir den spezifischen Ereignisnamen.
+
+Über den zweiten Parameter `$event_data` der Ereignisverarbeitungsfunktion erhalten Sie den konkreten Ereignisnamen:
+
 ```php
 <?php
 namespace app\event;
@@ -84,17 +94,18 @@ class User
 {
     function deal($user, $event_name)
     {
-        echo $event_name; // Spezifischer Ereignisname, z.B. user.register, user.logout, usw.
+        echo $event_name; // konkreter Ereignisname, z. B. user.register, user.logout usw.
         var_export($user);
     }
 }
 ```
 
 ## Ereignisübertragung stoppen
-Wenn wir in der Ereignisverarbeitungsfunktion `false` zurückgeben, wird das Ereignis abgebrochen.
+Wenn die Ereignisverarbeitungsfunktion `false` zurückgibt, wird die Übertragung des Ereignisses gestoppt.
 
-## Closure-Funktion zur Ereignisverarbeitung
-Die Ereignisverarbeitungsfunktion kann eine Klassenmethode oder eine Closure-Funktion sein. Zum Beispiel:
+## Ereignisverarbeitung mit Closure
+Die Ereignisverarbeitungsfunktion kann eine Klassenmethode oder eine Closure sein, z. B.:
+
 ```php
 <?php
 return [
@@ -106,8 +117,13 @@ return [
 ];
 ```
 
-## Ereignisse und Zuhörer anzeigen
-Verwenden Sie den Befehl `php webman event:list`, um alle im Projekt konfigurierten Ereignisse und Zuhörer anzuzeigen.
+## Ereignisse und Listener anzeigen
+Mit dem Befehl `php webman event:list` können Sie alle im Projekt konfigurierten Ereignisse und Listener anzeigen.
+
+## Unterstützte Bereiche
+Neben dem Hauptprojekt unterstützen auch [Basis-Plugins](../plugin/base.md) und [App-Plugins](../app/app.md) die `event.php`-Konfiguration.
+**Basis-Plugin-Konfiguration:** `config/plugin/Hersteller/Pluginname/event.php`
+**App-Plugin-Konfiguration:** `plugin/Pluginname/config/event.php`
 
 ## Hinweise
-Event-Eventverarbeitung ist nicht asynchron und eignet sich nicht für die Verarbeitung von langsamen Geschäftslogiken, die in Warteschlangen verarbeitet werden sollten, z.B. mit [webman/redis-queue](https://www.workerman.net/plugin/12).
+Die Event-Verarbeitung ist nicht asynchron und nicht für langsame Geschäftslogik geeignet; diese sollte über Message Queues abgearbeitet werden, z. B. [webman/redis-queue](https://www.workerman.net/plugin/12).

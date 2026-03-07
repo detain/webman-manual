@@ -2,7 +2,7 @@
 
 ## Giới thiệu
 
-Casbin là một framework quản lý truy cập nguồn mở mạnh mẽ và hiệu quả, cơ chế quản lý quyền hỗ trợ nhiều mô hình kiểm soát truy cập.
+Casbin là một framework kiểm soát truy cập mã nguồn mở mạnh mẽ và hiệu quả. Cơ chế quản lý quyền của nó hỗ trợ nhiều mô hình kiểm soát truy cập.
 
 ## Địa chỉ dự án
 
@@ -14,23 +14,23 @@ https://github.com/teamones-open/casbin
 composer require teamones/casbin
 ```
 
-## Trang chủ của Casbin
+## Trang web chính thức Casbin
 
-Bạn có thể xem chi tiết sử dụng tại trang chủ thông qua tài liệu tiếng Trung, ở đây chỉ giải thích cách cấu hình và sử dụng trong webman.
+Để sử dụng chi tiết, vui lòng tham khảo tài liệu chính thức bằng tiếng Trung. Tài liệu này chỉ giải thích cách cấu hình và sử dụng Casbin trong webman.
 
 https://casbin.org/docs/zh-CN/overview
 
 ## Cấu trúc thư mục
 
-```plaintext
+```
 .
 ├── config                        Thư mục cấu hình
-│   ├── casbin-restful-model.conf Tập tin cấu hình mô hình quyền hạn được sử dụng
-│   ├── casbin.php                Cấu hình casbin
+│   ├── casbin-restful-model.conf Tệp cấu hình mô hình quyền
+│   ├── casbin.php                Cấu hình Casbin
 ......
 ├── database                      Tệp cơ sở dữ liệu
-│   ├── migrations                Tệp di cư
-│   │   └── 20210218074218_create_rule_table.php
+│   ├── migrations                Tệp di cư
+│   │   └── 20210218074218_create_rule_table.php
 ......
 ```
 
@@ -44,15 +44,15 @@ use Phinx\Migration\AbstractMigration;
 class CreateRuleTable extends AbstractMigration
 {
     /**
-     * Phương thức Thay đổi.
+     * Change Method.
      *
-     * Viết các di cư có thể hoán đổi của bạn bằng phương pháp này.
+     * Write your reversible migrations using this method.
      *
-     * Thêm thông tin về viết di cư có sẵn tại đây:
+     * More information on writing migrations is available here:
      * http://docs.phinx.org/en/latest/migrations.html#the-abstractmigration-class
      *
-     * Các lệnh sau có thể được sử dụng trong phương pháp này và Phinx sẽ
-     * tự động hoán đổi chúng khi quay trở lại:
+     * The following commands can be used in this method and Phinx will
+     * automatically reverse them when rolling back:
      *
      *    createTable
      *    renameTable
@@ -62,18 +62,18 @@ class CreateRuleTable extends AbstractMigration
      *    addIndex
      *    addForeignKey
      *
-     * Mọi thay đổi phá hủy khác sẽ dẫn đến lỗi khi cố gắng
-     * quay trở lại di cư.
+     * Any other destructive changes will result in an error when trying to
+     * rollback the migration.
      *
-     * Nhớ gọi "create()" hoặc "update()" và KHÔNG PHẢI "save()" khi làm việc
-     * với class Bảng.
+     * Remember to call "create()" or "update()" and NOT "save()" when working
+     * with the Table class.
      */
     public function change()
     {
         $table = $this->table('rule', ['id' => false, 'primary_key' => ['id'], 'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => 'Bảng quy tắc']);
 
-        // Thêm cột dữ liệu
-        $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => 'ID chính'])
+        // Thêm các trường dữ liệu
+        $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => 'ID khóa chính'])
             ->addColumn('ptype', 'char', ['default' => '', 'limit' => 8, 'comment' => 'Loại quy tắc'])
             ->addColumn('v0', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v1', 'string', ['default' => '', 'limit' => 128])
@@ -82,15 +82,15 @@ class CreateRuleTable extends AbstractMigration
             ->addColumn('v4', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v5', 'string', ['default' => '', 'limit' => 128]);
 
-        // Thực hiện tạo
+        // Thực thi tạo
         $table->create();
     }
 }
 ```
 
-## Cấu hình casbin
+## Cấu hình Casbin
 
-Về cú pháp cấu hình mô hình quyền hạn, vui lòng xem tại: https://casbin.org/docs/zh-CN/syntax-for-models
+Để xem cú pháp cấu hình mô hình quy tắc quyền, tham khảo: https://casbin.org/docs/zh-CN/syntax-for-models
 
 ```php
 <?php
@@ -99,50 +99,51 @@ return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Tập tin cấu hình mô hình quyền hạn
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Tệp cấu hình mô hình quy tắc quyền
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'model', // model hoặc adapter
+            'type' => 'model', // model or adapter
             'class' => \app\model\Rule::class,
         ],
     ],
-    // Bạn có thể cấu hình nhiều mô hình quyền hạn
+    // Có thể cấu hình nhiều mô hình quyền
     'rbac' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // Tập tin cấu hình mô hình quyền hạn
+            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // Tệp cấu hình mô hình quy tắc quyền
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'model', // model hoặc adapter
+            'type' => 'model', // model or adapter
             'class' => \app\model\RBACRule::class,
         ],
     ],
 ];
-``` 
+```
 
-### Adapter
+### Bộ chuyển đổi
 
-Gói Composer hiện tại hỗ trợ phương thức model của think-orm, cho các orm khác, vui lòng xem tại vendor/teamones/src/adapters/DatabaseAdapter.php
+Gói Composer hiện tại được thiết lập tương thích với các phương thức model của think-orm. Đối với các ORM khác, tham khảo vendor/teamones/src/adapters/DatabaseAdapter.php
 
-Sau đó, chỉnh sửa cấu hình
+Sau đó sửa đổi cấu hình:
 
 ```php
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Tập tin cấu hình mô hình quyền hạn
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Tệp cấu hình mô hình quy tắc quyền
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'adapter', // Ở đây loại được cấu hình thành chế độ Adapter
+            'type' => 'adapter', // Cấu hình loại ở chế độ bộ chuyển đổi tại đây
             'class' => \app\adapter\DatabaseAdapter::class,
         ],
     ],
 ];
 ```
+
 ## Hướng dẫn sử dụng
 
 ### Nhập
@@ -162,12 +163,12 @@ Enforcer::addPermissionForUser('user1', '/user', 'read');
 Enforcer::instance('rbac')->addPermissionForUser('user1', '/user', 'read');
 ```
 
-### Giới thiệu API phổ biến
+### Giới thiệu API thông dụng
 
-Để biết thêm về cách sử dụng API, vui lòng xem tại trang chính thức
+Để biết thêm cách sử dụng API, vui lòng tham khảo tài liệu chính thức:
 
-- API quản lý: https://casbin.org/docs/zh-CN/management-api
-- API RBAC: https://casbin.org/docs/zh-CN/rbac-api
+- Management API: https://casbin.org/docs/zh-CN/management-api
+- RBAC API: https://casbin.org/docs/zh-CN/rbac-api
 
 ```php
 # Thêm quyền cho người dùng
@@ -180,7 +181,7 @@ Enforcer::deletePermissionForUser('user1', '/user', 'read');
 
 # Lấy tất cả quyền của người dùng
 
-Enforcer::getPermissionsForUser('user1'); 
+Enforcer::getPermissionsForUser('user1');
 
 # Thêm vai trò cho người dùng
 
@@ -198,21 +199,21 @@ Enforcer::getAllRoles();
 
 Enforcer::getRolesForUser('user1');
 
-# Lấy người dùng dựa trên vai trò
+# Lấy người dùng theo vai trò
 
 Enforcer::getUsersForRole('role1');
 
-# Kiểm tra xem người dùng có thuộc một vai trò không
+# Kiểm tra người dùng có thuộc vai trò hay không
 
-Enforcer::hasRoleForUser('use1', 'role1');
+Enforcer::hasRoleForUser('user1', 'role1');
 
 # Xóa vai trò của người dùng
 
-Enforcer::deleteRoleForUser('use1', 'role1');
+Enforcer::deleteRoleForUser('user1', 'role1');
 
 # Xóa tất cả vai trò của người dùng
 
-Enforcer::deleteRolesForUser('use1');
+Enforcer::deleteRolesForUser('user1');
 
 # Xóa vai trò
 

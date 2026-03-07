@@ -1,8 +1,8 @@
 # AOP
 
-> Hyperf yazarına çok teşekkürler
+> Hyperf yazarının katkısı için teşekkürler.
 
-### Kurulum
+## Kurulum
 
 - aop-integration kurulumu
 
@@ -10,9 +10,9 @@
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### AOP ile ilgili yapılandırma ekleme
+## AOP ile ilgili yapılandırma ekleme
 
-`config` dizini altında `config.php` konfigürasyonunu eklememiz gerekiyor
+`config` dizinine `config.php` yapılandırma dosyasını eklememiz gerekiyor.
 
 ```php
 <?php
@@ -36,31 +36,31 @@ return [
         ],
     ],
     'aspects' => [
-        // Buraya ilgili Aspect yazın
+        // Buraya ilgili Aspect'i ekleyin
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### Config.php giriş dosyasını yapılandırma
+## Giriş dosyası start.php yapılandırması
 
-> Başlatma yöntemini zaman diliminin altına yerleştireceğiz, diğer kodlar burada atlanmıştır.
+> Başlatma kodunu timezone ayarının altına yerleştirin. Diğer kodlar aşağıda atlanmıştır.
 
-```php
+```
 use Hyperf\AopIntegration\ClassLoader;
 
 if ($timezone = config('app.default_timezone')) {
     date_default_timezone_set($timezone);
 }
 
-// İlklenme
+// Başlatma
 ClassLoader::init();
 ```
 
-### Test
+## Test
 
-Öncelikle kesilmesi gereken sınıfı yazalım
+Önce kesilecek sınıfı oluşturalım:
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-Daha sonra ilgili `DebugAspect` dosyasını ekleyin
+Ardından ilgili `DebugAspect`'i ekleyin:
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-Daha sonra kontrolcüyü düzenleyin `app/controller/IndexController.php`
+Sonra `app/controller/IndexController.php` denetleyicisini düzenleyin:
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-Sonra rotayı yapılandırın
+Ardından rota yapılandırması yapın:
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-Son olarak sunucuyu başlatın ve test edin.
+Son olarak servisi başlatın ve testi çalıştırın:
 
 ```shell
 php start.php start

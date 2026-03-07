@@ -1,28 +1,29 @@
-## थिंकओआरएम (ThinkORM)
+# think-orm
 
-### थिंकओआरएम को इंस्टॉल करें
+[webman/think-orm](https://github.com/webman-php/think-orm) [top-think/think-orm](https://github.com/top-think/think-orm) पर आधारित एक डेटाबेस घटक है। यह कनेक्शन पूल का समर्थन करता है और कॉरोटाइन तथा गैर-कॉरोटाइन दोनों वातावरण में काम करता है।
+
+## इंस्टॉलेशन
 
 `composer require -W webman/think-orm`
 
-इंस्टॉलेशन के बाद restart यानी कि पुनरारंभ की आवश्यकता होगी (reload कार्यरत नहीं होगा)
+इंस्टॉलेशन के बाद restart (पुनः आरंभ) आवश्यक है (reload प्रभावी नहीं होता)।
 
-> **सुझाव**
-> यदि इंस्टॉलेशन विफल हो जाती है, तो यह संभावना है कि आपने कंपोजर प्रोक्सी का उपयोग किया है, कृपया `composer config -g --unset repos.packagist` कमांड को चलाकर कंपोजर प्रोक्सी को निष्क्रिय करें।
+## कॉन्फ़िगरेशन फ़ाइल
 
-> [webman/think-orm](https://www.workerman.net/plugin/14) वास्तव में `toptink/think-orm` को स्वचालित रूप से इंस्टॉल करने वाला एक प्लगइन है। यदि आपकी webman संस्करण `1.2` से कम है तो आप इस प्लगइन का उपयोग नहीं कर सकते हैं। कृपया [मैन्युअल इंस्टॉलेशन और think-orm कॉन्फ़िगर करने](https://www.workerman.net/a/1289) वाले लेख का उपयोग करें।
+अपनी आवश्यकता के अनुसार कॉन्फ़िगरेशन फ़ाइल `config/think-orm.php` संशोधित करें।
 
-### कॉन्फ़िग फ़ाइल
+## प्रलेखन
 
-वास्तविक स्थिति के अनुसार `config/thinkorm.php` कॉन्फ़िग फ़ाइल को संशोधित करें।
+https://www.kancloud.cn/manual/think-orm
 
-### उपयोग
+## उपयोग
 
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use think\facade\Db;
+use support\think\Db;
 
 class FooController
 {
@@ -34,42 +35,43 @@ class FooController
 }
 ```
 
-### मॉडल बनाएँ
+## मॉडल बनाना
 
-ThinkOrm मॉडल `think\Model` को extend करता है, जैसा कि निम्नलिखित है
-```php
+think-orm मॉडल `support\think\Model` को विस्तारित करते हैं, नीचे दिखाए अनुसार:
+
+```
 <?php
 namespace app\model;
 
-use think\Model;
+use support\think\Model;
 
 class User extends Model
 {
     /**
-     * मॉडल के साथ संबद्ध तालिका।
+     * The table associated with the model.
      *
      * @var string
      */
     protected $table = 'user';
 
     /**
-     * तालिका के प्राथमिक कुंजी।
+     * The primary key associated with the table.
      *
      * @var string
      */
     protected $pk = 'id';
 
-    
 }
 ```
 
-आप निम्नलिखित कमांड का उपयोग करके thinkorm पर आधारित मॉडल बना सकते हैं
-```bash
-php webman make:model टेबल_नाम
+आप निम्न कमांड से भी think-orm मॉडल बना सकते हैं:
+
+```
+php webman make:model तालिका_नाम
 ```
 
 > **सुझाव**
-> इस कमांड के लिए `webman/console` की इंस्टॉलेशन की आवश्यकता होती है, नीचे दिए गए कमांड का उपयोग करके इंस्टॉल करें - `composer require webman/console ^1.2.13`
+> इस कमांड के लिए `webman/console` आवश्यक है। इसे इससे इंस्टॉल करें: `composer require webman/console ^1.2.13`
 
 > **ध्यान दें**
-> make:model कमांड यदि मुख्य प्रोजेक्ट में `illuminate/database` का उपयोग किया जा रहा है, तो वह `illuminate/database` पर आधारित मॉडल फ़ाइल बनाएगा, अगर ऐसा होता है तो tp पैरामीटर का उपयोग करके थिंक-ओआरएम पर आधारित मॉडल को बनाने के लिए कमांड यह प्रकार होगा - `php webman make:model टेबल_नाम tp` (अगर यह प्रभावी नहीं होता है तो कृपया `webman/console` को अपडेट करें)
+> यदि `make:model` को पता चलता है कि मुख्य प्रोजेक्ट `illuminate/database` का उपयोग कर रहा है, तो वह think-orm की बजाय Illuminate-आधारित मॉडल फ़ाइलें बनाएगा। उस स्थिति में, `tp` पैरामीटर जोड़कर think-orm मॉडल बनाएं: `php webman make:model तालिका_नाम tp` (काम न करे तो `webman/console` अपडेट करें)।

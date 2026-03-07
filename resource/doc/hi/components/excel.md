@@ -1,18 +1,16 @@
-# एक्सेल
+# Excel स्प्रेडशीट
 
-## phpoffice/phpspreadsheet
-
-### परियोजना पता
+## परियोजना पता
 
 https://github.com/PHPOffice/PhpSpreadsheet
-
-### स्थापना
-
-```php
-composer require phpoffice/phpspreadsheet
-```
-
-### प्रयोग
+  
+## स्थापना
+ 
+  ```php
+  composer require phpoffice/phpspreadsheet
+  ```
+  
+## उपयोग
 
 ```php
 <?php
@@ -31,15 +29,16 @@ class ExcelController
 
         $writer = new Xlsx($spreadsheet);
         $file_path = public_path().'/hello_world.xlsx';
-        // पब्लिक नजरबंद/ डुबान मार्ग पर फाइल सहेजें
+        // public निर्देशिका में फ़ाइल सहेजें
         $writer->save($file_path);
-        // फाइल डाउनलोड करें
-        return response()->download($file_path, 'फ़ाइल्नाम.xlsx');
+        // फ़ाइल डाउनलोड करें
+        return response()->download($file_path, 'फ़ाइल_नाम.xlsx');
     }
 
 }
 ```
 
-### अधिक सामग्री
+## अधिक जानकारी
 
-https://phpspreadsheet.readthedocs.io/en/latest/
+यहाँ देखें https://phpspreadsheet.readthedocs.io/en/latest/
+  

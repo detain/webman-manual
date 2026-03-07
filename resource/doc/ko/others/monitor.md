@@ -1,10 +1,10 @@
 # 프로세스 모니터링
-webman에는 내장된 monitor 프로세스 모니터링이 있으며, 두 가지 기능을 지원합니다.
-1. 파일 업데이트 모니터링 및 자동으로 새 비즈니스 코드를 리로드합니다(일반적으로 개발 중에 사용됨).
-2. 모든 프로세스의 메모리 사용량을 모니터링하며, 특정 프로세스의 메모리 사용량이 `php.ini`의 `memory_limit` 제한을 거의 초과하는 경우 해당 프로세스를 안전하게 다시 시작합니다(비즈니스에는 영향을 주지 않음).
+webman에는 기본 제공되는 monitor 프로세스가 있으며, 두 가지 기능을 지원합니다.
+1. 파일 업데이트를 모니터링하고 새로운 비즈니스 코드를 자동으로 리로드합니다(일반적으로 개발 시 사용).
+2. 모든 프로세스의 메모리 사용량을 모니터링하며, 프로세스가 `php.ini`의 `memory_limit`을 초과하기 직전이면 해당 프로세스를 자동으로 안전하게 재시작합니다(비즈니스에 영향 없음).
 
 ## 모니터링 구성
-구성 파일 `config/process.php`에 `monitor` 구성이 있습니다.
+`config/process.php`의 `monitor` 구성:
 ```php
 
 global $argv;
@@ -15,8 +15,8 @@ return [
         'handler' => process\Monitor::class,
         'reloadable' => false,
         'constructor' => [
-            // 이 디렉터리를 모니터링합니다
-            'monitorDir' => array_merge([    // 감시해야 할 디렉터리
+            // 이 디렉터리를 모니터링
+            'monitorDir' => array_merge([    // 모니터링할 디렉터리의 파일
                 app_path(),
                 config_path(),
                 base_path() . '/process',
@@ -24,7 +24,7 @@ return [
                 base_path() . '/resource',
                 base_path() . '/.env',
             ], glob(base_path() . '/plugin/*/app'), glob(base_path() . '/plugin/*/config'), glob(base_path() . '/plugin/*/api')),
-            // 다음 접미사가 있는 파일을 모니터링합니다
+            // 다음 확장자를 가진 파일을 모니터링
             'monitorExtensions' => [
                 'php', 'html', 'htm', 'env'
             ],
@@ -36,10 +36,10 @@ return [
     ]
 ];
 ```
-`monitorDir`은 어떤 디렉터리의 업데이트를 모니터링할지 구성하는 데 사용됩니다(너무 많은 파일을 모니터링하는 것은 좋지 않음).
-`monitorExtensions`은 `monitorDir` 디렉터리에서 어떤 파일 접미사를 모니터링할지 구성하는 데 사용됩니다.
-`options.enable_file_monitor`는 `true`인 경우 파일 업데이트 모니터링을 활성화하고(linux 시스템에서 디버그 모드로 실행하는 경우 기본적으로 파일 모니터링이 활성화됩니다).
-`options.enable_memory_monitor`는 `true`인 경우 메모리 사용량 모니터링을 활성화하며(메모리 사용량 모니터링은 Windows 시스템에서 지원되지 않음).
+`monitorDir`은 업데이트를 모니터링할 디렉터리를 구성합니다(모니터링하는 파일 수가 너무 많으면 안 됨).
+`monitorExtensions`은 `monitorDir` 디렉터리에서 모니터링할 파일 확장자를 구성합니다.
+`options.enable_file_monitor`가 `true`이면 파일 업데이트 모니터링이 활성화됩니다(Linux에서 디버그 모드로 실행 시 기본 활성화).
+`options.enable_memory_monitor`가 `true`이면 메모리 사용량 모니터링이 활성화됩니다(Windows에서는 지원되지 않음).
 
 > **팁**
-> Windows 시스템에서는 `windows.bat` 또는 `php windows.php`를 실행해야 파일 업데이트 모니터링을 활성화할 수 있습니다.
+> Windows에서는 파일 업데이트 모니터링을 활성화하려면 `windows.bat` 또는 `php windows.php`를 실행해야 합니다.

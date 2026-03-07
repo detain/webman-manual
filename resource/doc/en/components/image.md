@@ -1,20 +1,18 @@
 # Image Processing Component
 
-## intervention/image
-
-### Project link
+## Project Address
 
 https://github.com/Intervention/image
-
-### Installation
-
+  
+## Installation
+ 
 ```php
 composer require intervention/image
 ```
+  
+## Usage
 
-### Usage
-
-**Upload page fragment**
+**Upload Page Snippet**
 
 ```html
   <form method="post" action="/user/img" enctype="multipart/form-data">
@@ -29,7 +27,8 @@ composer require intervention/image
 <?php
 namespace app\controller;
 use support\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class UserController
 {
@@ -37,8 +36,9 @@ class UserController
     {
         $file = $request->file('file');
         if ($file && $file->isValid()) {
-            $image = Image::make($file)->resize(100, 100);
-            return response($image->encode('png'), 200, ['Content-Type' => 'image/png']);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file)->scale(100, 100);
+            return response($image->encode(), 200, ['Content-Type' => 'image/png']);
         }
         return response('file not found');
     }
@@ -46,7 +46,10 @@ class UserController
 }
 ```
 
+> **Note**
+> The above example uses the v3 API.
 
-### More Information
+## More Information
 
-Visit http://image.intervention.io/getting_started/introduction
+Visit https://image.intervention.io/v3
+  

@@ -346,3 +346,93 @@ class ImageController
     }
 }
 ```
+
+## Phản hồi phân đoạn
+
+Đôi khi chúng ta muốn gửi phản hồi theo từng đoạn. Bạn có thể tham khảo ví dụ sau.
+
+```php
+<?php
+
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+use Workerman\Timer;
+
+class IndexController
+{
+    public function index(Request $request): Response
+    {
+        // Lấy kết nối
+        $connection = $request->connection;
+        // Gửi phần thân HTTP theo chu kỳ
+        $timer = Timer::add(1, function () use ($connection, &$timer) {
+            static $i = 0;
+            if ($i++ < 10) {
+                // Gửi phần thân HTTP
+                $connection->send(new Chunk($i));
+            } else {
+                // Xóa bộ hẹn giờ không dùng để tránh rò rỉ bộ nhớ
+                Timer::del($timer);
+                // Gửi Chunk rỗng để thông báo cho máy khách biết phản hồi đã hoàn tất
+                $connection->send(new Chunk(''));
+            }
+        });
+        // Trước tiên xuất tiêu đề HTTP với Transfer-Encoding: chunked, sau đó gửi phần thân HTTP không đồng bộ
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+
+}
+```
+
+Nếu bạn đang gọi mô hình ngôn ngữ lớn, hãy tham khảo ví dụ sau.
+
+```
+composer require webman/openai
+```
+
+```php
+<?php
+namespace app\controller;
+use support\Request;
+
+use Webman\Openai\Chat;
+use Workerman\Protocols\Http\Chunk;
+
+class ChatController
+{
+    public function completions(Request $request)
+    {
+        $connection = $request->connection;
+        // Nếu https://api.openai.com không truy cập được từ khu vực của bạn, có thể dùng https://api.openai-proxy.com thay thế
+        $chat = new Chat(['apikey' => 'sk-xx', 'api' => 'https://api.openai.com']);
+        $chat->completions(
+            [
+                'model' => 'gpt-3.5-turbo',
+                'stream' => true,
+                'messages' => [['role' => 'user', 'content' => 'hello']],
+            ], [
+            'stream' => function($data) use ($connection) {
+                // Chuyển tiếp dữ liệu tới trình duyệt khi API OpenAI trả về
+                $connection->send(new Chunk(json_encode($data, JSON_UNESCAPED_UNICODE) . "\n"));
+            },
+            'complete' => function($result, $response) use ($connection) {
+                // Kiểm tra lỗi khi phản hồi hoàn tất
+                if (isset($result['error'])) {
+                    $connection->send(new Chunk(json_encode($result, JSON_UNESCAPED_UNICODE) . "\n"));
+                }
+                // Gửi chunk rỗng để báo hiệu kết thúc phản hồi
+                $connection->send(new Chunk(''));
+            },
+        ]);
+        // Trước tiên trả về tiêu đề HTTP, dữ liệu sẽ được trả về không đồng bộ
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+}
+```

@@ -1,14 +1,13 @@
-# Captcha-related components
+# Captcha Component
 
-## webman/captcha
-Project address: https://github.com/webman-php/captcha
+Project address https://github.com/webman-php/captcha
 
-### Installation
+## Installation
 ```
 composer require webman/captcha
 ```
 
-### Usage
+## Usage
 
 **Create file `app/controller/LoginController.php`**
 
@@ -51,9 +50,9 @@ class LoginController
      */
     public function check(Request $request)
     {
-        // Get the 'captcha' field from the post request
+        // Get the captcha field from the POST request
         $captcha = $request->post('captcha');
-        // Compare the value of the captcha stored in the session
+        // Compare with the captcha value in the session
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
             return json(['code' => 400, 'msg' => 'The captcha entered is incorrect']);
         }
@@ -82,33 +81,23 @@ class LoginController
 </html>
 ```
 
-Enter the page `http://127.0.0.1:8787/login`, the interface is similar to the following:
+Enter the page `http://127.0.0.1:8787/login`, the interface will look similar to the following:
   ![](../../assets/img/captcha.png)
 
-### Common Parameter Settings
+## Common Parameter Settings
 ```php
     /**
      * Output captcha image
      */
     public function captcha(Request $request)
     {
-        // Initialize captcha class
-        $builder = new CaptchaBuilder;
-        // Captcha length
-        $length = 4;
-        // Characters to include
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // Generate captcha
-        $builder->build();
-        // Store the value of the captcha in the session
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Get captcha image binary data
-        $img_content = $builder->get();
-        // Output captcha binary data
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```
 
-For more interfaces and parameters, please refer to https://github.com/webman-php/captcha
+For more interfaces and parameters, refer to https://github.com/webman-php/captcha

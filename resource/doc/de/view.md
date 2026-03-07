@@ -283,10 +283,28 @@ class UserController
 #### Controller
 Wenn ein Controller `view('template_name', [])` aufruft, werden die Vorlagendateien gemäß den folgenden Regeln gesucht:
 
-1. Wenn es sich nicht um eine Mehrfachanwendung handelt, werden die entsprechenden Vorlagendateien unter `app/view/` verwendet.
-2. Im Falle einer [Mehrfachanwendung](multiapp.md) werden die entsprechenden Vorlagendateien unter `app/application_name/view/` verwendet.
+1. Beginnt der Pfad mit `/`, wird dieser Pfad direkt zur Suche der Vorlagendatei verwendet.
+2. Beginnt der Pfad nicht mit `/` und handelt es sich nicht um eine Mehrfachanwendung, werden die entsprechenden Vorlagendateien unter `app/view/` verwendet.
+3. Beginnt der Pfad nicht mit `/` und handelt es sich um eine [Mehrfachanwendung](multiapp.md), werden die entsprechenden Vorlagendateien unter `app/application_name/view/` verwendet.
+4. Wird kein Vorlagenparameter übergeben, wird die Vorlagendatei automatisch gemäß den Regeln 2 und 3 ermittelt.
 
-Zusammenfassend lässt sich sagen, dass, wenn `$request->app` leer ist, die Vorlagendateien unter `app/view/` verwendet werden. Andernfalls werden die Vorlagendateien unter `app/{$request->app}/view/` verwendet.
+Beispiel:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Entspricht return view('user/hello', ['name' => 'webman']);
+        // Entspricht return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### Closure-Funktion
 Die Closure-Funktion mit `$request->app` leer gehört keiner Anwendung an. Daher verwendet sie die Vorlagendateien unter `app/view/`, z.B. wenn Routen in der Datei `config/route.php` definiert sind:
@@ -301,6 +319,25 @@ Es werden die Vorlagendateien unter `app/view/user.html` (bei Verwendung von Bla
 
 #### Anwendung spezifizieren
 Um Vorlagen in einer Mehrfachanwendung wiederverwenden zu können, bietet `view($template, $data, $app = null)` einen dritten Parameter `$app`, um anzugeben, welche Anwendungsverzeichnisse für Vorlagen verwendet werden sollen. Zum Beispiel wird `view('user', [], 'admin')` dazu führen, dass die Vorlagendateien unter `app/admin/view/` verwendet werden.
+
+#### Vorlagenparameter weglassen
+In klassenbasierten Controllern kann der Vorlagenparameter weggelassen werden. Beispiel:
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // Entspricht return view('user/hello', ['name' => 'webman']);
+        // Entspricht return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## Twig erweitern
 

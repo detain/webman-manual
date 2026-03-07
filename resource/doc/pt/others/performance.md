@@ -1,7 +1,7 @@
 # Desempenho do webman
 
 
-### Fluxo de processamento de solicitação do framework tradicional
+## Fluxo de processamento de solicitação do framework tradicional
 
 1. O nginx/apache recebe a solicitação.
 2. O nginx/apache repassa a solicitação ao php-fpm.
@@ -20,10 +20,10 @@
 15. O nginx/apache retorna o resultado para o cliente.
 
 
-### Fluxo de processamento de solicitação do webman
+## Fluxo de processamento de solicitação do webman
 
 1. O framework recebe a solicitação.
-2. O framework executa a lógica de negócios.
+2. O framework executa a lógica de negócios (bytecode opcode).
 3. O framework retorna o resultado para o cliente.
 
 Sim, sem a situação de proxy reverso do nginx, o framework possui apenas essas 3 etapas. Pode-se dizer que isso é o ápice de um framework PHP, o que torna o desempenho do webman várias vezes ou até dezenas de vezes melhor do que o framework tradicional.

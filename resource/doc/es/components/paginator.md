@@ -1,18 +1,16 @@
 # Componente de paginación
 
-## jasongrimes/php-paginator
-
-### Dirección del proyecto
+## Dirección del proyecto
 
 https://github.com/jasongrimes/php-paginator
   
-### Instalación
+## Instalación
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### Uso
+## Uso
 
 Crear `app/controller/UserController.php`
 ```php
@@ -40,7 +38,7 @@ class UserController
 }
 ```
 **Plantilla (PHP nativo)**
-Crear la plantilla app/view/user/get.html
+Crear plantilla `app/view/user/get.html`
 ```html
 <html>
 <head>
@@ -55,8 +53,8 @@ Crear la plantilla app/view/user/get.html
 </html>
 ```
 
-**Plantilla (twig)**
-Crear la plantilla app/view/user/get.html
+**Plantilla (Twig)**
+Crear plantilla `app/view/user/get.html`
 ```html
 <html>
 <head>
@@ -73,8 +71,8 @@ Crear la plantilla app/view/user/get.html
 </html>
 ```
 
-**Plantilla (blade)**
-Crear la plantilla app/view/user/get.blade.php
+**Plantilla (Blade)**
+Crear plantilla `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
@@ -89,8 +87,8 @@ Crear la plantilla app/view/user/get.blade.php
 </html>
 ```
 
-**Plantilla (thinkphp)**
-Crear la plantilla app/view/user/get.blade.php
+**Plantilla (ThinkPHP)**
+Crear plantilla `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
@@ -105,9 +103,10 @@ Crear la plantilla app/view/user/get.blade.php
 </html>
 ```
 
-Efecto visual:
+El resultado es el siguiente:
 ![](../../assets/img/paginator.png)
   
-### Más contenido
+## Más información
 
-Visita https://github.com/jasongrimes/php-paginator
+Visite https://github.com/jasongrimes/php-paginator
+  

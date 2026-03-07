@@ -1,43 +1,46 @@
 # ディレクトリ構造
 
-```plaintext
+```
 plugin/
 └── foo
     ├── app
-    │   ├── controller
-    │   │   └── IndexController.php
-    │   ├── exception
-    │   │   └── Handler.php
-    │   ├── functions.php
-    │   ├── middleware
-    │   ├── model
-    │   └── view
-    │       └── index
-    │           └── index.html
+    │   ├── controller
+    │   │   └── IndexController.php
+    │   ├── exception
+    │   │   └── Handler.php
+    │   ├── functions.php
+    │   ├── middleware
+    │   ├── model
+    │   └── view
+    │       └── index
+    │           └── index.html
     ├── config
-    │   ├── app.php
-    │   ├── autoload.php
-    │   ├── container.php
-    │   ├── database.php
-    │   ├── exception.php
-    │   ├── log.php
-    │   ├── middleware.php
-    │   ├── process.php
-    │   ├── redis.php
-    │   ├── route.php
-    │   ├── static.php
-    │   ├── thinkorm.php
-    │   ├── translation.php
-    │   └── view.php
+    │   ├── app.php
+    │   ├── autoload.php
+    │   ├── container.php
+    │   ├── database.php
+    │   ├── exception.php
+    │   ├── log.php
+    │   ├── middleware.php
+    │   ├── process.php
+    │   ├── redis.php
+    │   ├── route.php
+    │   ├── static.php
+    │   ├── thinkorm.php
+    │   ├── translation.php
+    │   └── view.php
     ├── public
     └── api
 ```
 
-私たちは、アプリケーションプラグインがwebmanと同じディレクトリ構造と設定ファイルを持っていることに気づきました。実際、プラグインの開発体験はwebmanの通常のアプリケーションの開発とほとんど違いがありません。
-プラグインのディレクトリと命名はPSR4規格に従います。プラグインはpluginディレクトリに配置されているため、名前空間はすべてpluginで始まります。例えば、`plugin\foo\app\controller\UserController`のようなものです。
+アプリケーションプラグインは、webman と同じディレクトリ構造と設定ファイルを持ちます。実務上、開発体験は通常の webman アプリケーション開発とほぼ同じです。
 
-## apiディレクトリについて
-各プラグインにはapiディレクトリがあり、アプリケーションが他のアプリケーションから呼び出されるいくつかの内部インターフェースを提供する場合は、そのインターフェースをapiディレクトリに配置する必要があります。
-ここで言及しているインターフェースは、関数呼び出しのインターフェースであり、ネットワーク呼び出しのインターフェースではありません。
-たとえば、`Emailプラグイン`は `plugin/email/api/Email.php` に `Email::send()`インターフェースを提供しており、他のアプリケーションからメールを送信するために呼び出されます。
-また、plugin/email/api/Install.php は自動生成されたもので、webman-adminプラグインマーケットからのインストールまたはアンインストール操作を実行するために使用されます。
+プラグインのディレクトリと命名は PSR-4 規約に従います。プラグインはすべて `plugin` ディレクトリ以下に配置されるため、名前空間は `plugin` で始まります。例：`plugin\foo\app\controller\UserController`。
+
+## api ディレクトリについて
+
+各プラグインには `api` ディレクトリがあります。他アプリケーションから呼び出す内部インターフェースを提供する場合は、そのインターフェースを `api` ディレクトリに配置してください。
+
+注意：ここでいうインターフェースは、関数呼び出しのインターフェースであり、ネットワーク／HTTP インターフェースではありません。
+
+例えば、メールプラグインは `plugin/email/api/Email.php` に `Email::send()` インターフェースを提供し、他アプリケーションからメール送信時に呼び出されます。また、`plugin/email/api/Install.php` は自動生成され、webman-admin プラグインマーケットがインストール／アンインストール処理を実行する際に使われます。

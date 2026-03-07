@@ -1,20 +1,18 @@
 # Компонент пагинации
 
-## jasongrimes/php-paginator
-
-### Ссылка на проект
+## Адрес проекта
 
 https://github.com/jasongrimes/php-paginator
   
-### Установка
+## Установка
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### Использование
+## Использование
 
-Создайте файл `app/controller/UserController.php`
+Создать файл `app/controller/UserController.php`
 ```php
 <?php
 namespace app\controller;
@@ -40,8 +38,7 @@ class UserController
 }
 ```
 **Шаблон (чистый PHP)**
-
-Создайте шаблон в файле app/view/user/get.html
+Создать шаблон `app/view/user/get.html`
 ```html
 <html>
 <head>
@@ -56,9 +53,8 @@ class UserController
 </html>
 ```
 
-**Шаблон (twig)**
-
-Создайте шаблон в файле app/view/user/get.html
+**Шаблон (Twig)**
+Создать шаблон `app/view/user/get.html`
 ```html
 <html>
 <head>
@@ -75,9 +71,8 @@ class UserController
 </html>
 ```
 
-**Шаблон (blade)**
-
-Создайте шаблон в файле app/view/user/get.blade.php
+**Шаблон (Blade)**
+Создать шаблон `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
@@ -92,9 +87,8 @@ class UserController
 </html>
 ```
 
-**Шаблон (thinkphp)**
-
-Создайте шаблон в файле app/view/user/get.blade.php
+**Шаблон (ThinkPHP)**
+Создать шаблон `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
@@ -109,10 +103,10 @@ class UserController
 </html>
 ```
 
-Результат:
-
+Результат будет следующим:
 ![](../../assets/img/paginator.png)
   
-### Дополнительная информация
+## Дополнительная информация
 
 Посетите https://github.com/jasongrimes/php-paginator
+  

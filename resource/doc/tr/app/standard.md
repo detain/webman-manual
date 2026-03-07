@@ -5,8 +5,7 @@
 * Eklenti kaynak kodu şifrelenmemiş ve eksiksiz olmalıdır.
 * Eklenti tam işlevsellik sağlamalı, basit bir işlev olmamalıdır.
 * Tam işlevsellik tanıtımı ve belgeler sunulmalıdır.
-* Eklentiler alt pazarı içeremez.
-* Eklenti içinde herhangi bir metin veya tanıtım bağlantısı bulunmamalıdır.
+* Eklentilerde coroutine kullanımı önerilmez; kullanıcılar coroutine'i etkinleştirmemiş olabilir.
 
 ## Uygulama Eklentisi Tanımlama
 Her uygulama eklentisi benzersiz bir tanımlayıcıya sahiptir, bu tanımlayıcı harflerden oluşur. Bu tanımlayıcı, eklentinin kaynak kodunun bulunduğu dizini, sınıfın ad alanını ve eklenti veritabanı tablo öneki etkiler.

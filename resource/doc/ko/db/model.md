@@ -1,4 +1,4 @@
-# 빠른 시작
+# 데이터베이스 모델 Model 사용법 (Laravel 스타일)
 
 webman 모델은 [Eloquent ORM](https://laravel.com/docs/7.x/eloquent)에 기반을 두고 있습니다. 각 데이터베이스 테이블은 해당 테이블과 상호 작용하는 "모델"을 가지고 있습니다. 모델을 사용하여 데이터베이스 테이블에서 데이터를 조회하거나 새 레코드를 삽입할 수 있습니다.
 
@@ -6,7 +6,7 @@ webman 모델은 [Eloquent ORM](https://laravel.com/docs/7.x/eloquent)에 기반
 
 > 참고: Eloquent ORM이 모델 옵저버를 지원하려면 `composer require "illuminate/events"`를 추가해야 합니다. [예제](#모델-옵저버)
 
-## 예제
+## 데이터베이스 모델 예제
 ```php
 <?php
 namespace app\model;
@@ -191,7 +191,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -558,7 +558,7 @@ if ($post->is($anotherPost)) {
 
 참조: [라라벨의 모델 이벤트와 옵저버](https://learnku.com/articles/6657/model-events-and-observer-in-laravel)
 
-주의: Eloquent ORM은 모델 옵저버를 지원하기 위해 별도로 "illuminate/events"를 가져와야 합니다.
+주의: Eloquent ORM은 모델 옵저버를 지원하기 위해 별도로 `composer require "illuminate/events"`를 가져와야 합니다.
 
 ```php
 <?php
@@ -576,3 +576,6 @@ class User extends Model
     }
 }
 ```
+
+## 트랜잭션
+[데이터베이스 트랜잭션](../others/transaction.md) 참조

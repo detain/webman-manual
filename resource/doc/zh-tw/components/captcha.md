@@ -1,17 +1,15 @@
-# 驗證碼相關組件
+# 驗證碼組件
 
-
-## webman/captcha
 專案地址 https://github.com/webman-php/captcha
 
-### 安裝
-``` 
+## 安裝
+```
 composer require webman/captcha
-``` 
+```
 
-### 使用
+## 使用
 
-**建立文件 `app/controller/LoginController.php`**
+**建立檔案 `app/controller/LoginController.php`**
 
 ```php
 <?php
@@ -39,11 +37,11 @@ class LoginController
         $builder = new CaptchaBuilder;
         // 生成驗證碼
         $builder->build();
-        // 將驗證碼的值存儲到session中
+        // 將驗證碼的值儲存到 session 中
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // 獲得驗證碼圖片二進制數據
+        // 取得驗證碼圖片二進位資料
         $img_content = $builder->get();
-        // 輸出驗證碼二進制數據
+        // 輸出驗證碼二進位資料
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
@@ -52,9 +50,9 @@ class LoginController
      */
     public function check(Request $request)
     {
-        // 獲取post請求中的captcha字段
+        // 取得 POST 請求中的 captcha 欄位
         $captcha = $request->post('captcha');
-        // 對比session中的captcha值
+        // 比對 session 中的 captcha 值
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
             return json(['code' => 400, 'msg' => '輸入的驗證碼不正確']);
         }
@@ -64,7 +62,7 @@ class LoginController
 }
 ```
 
-**建立模板文件 `app/view/login/index.html`**
+**建立範本檔案 `app/view/login/index.html`**
 
 ```html
 <!doctype html>
@@ -83,33 +81,23 @@ class LoginController
 </html>
 ```
 
-進入頁面 `http://127.0.0.1:8787/login` 界面類似如下：
+進入頁面 `http://127.0.0.1:8787/login` 後，介面類似如下：
   ![](../../assets/img/captcha.png)
 
-### 常見參數設置
+## 常見參數設置
 ```php
     /**
      * 輸出驗證碼圖像
      */
     public function captcha(Request $request)
     {
-        // 初始化驗證碼類
-        $builder = new CaptchaBuilder;
-        // 驗證碼長度
-        $length = 4;
-        // 包含哪些字符
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // 生成驗證碼
-        $builder->build();
-        // 將驗證碼的值存儲到session中
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // 獲得驗證碼圖片二進制數據
-        $img_content = $builder->get();
-        // 輸出驗證碼二進制數據
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```
 
-更多介面及參數參考 https://github.com/webman-php/captcha
+更多介面及參數請參考 https://github.com/webman-php/captcha

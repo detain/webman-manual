@@ -1,6 +1,6 @@
 # Documentation
 
-## Obtaining the request object
+## Obtaining the Request Object
 Webman will automatically inject the request object into the first parameter of the action method, for example:
 
 **Example**
@@ -63,7 +63,22 @@ Similar to the get method, you can also pass a default value as the second param
 $request->post('name', 'tom');
 ```
 
-## Getting the raw request body from post
+## Helper Function input()
+Similar to `$request->input()`, the `input()` helper can retrieve all parameters. It accepts two parameters:
+1. name: The name of the parameter to retrieve (if empty, returns an array of all parameters)
+2. default: Default value (used when the parameter from the first argument is not found)
+
+**Example**
+```php
+// Get parameter name
+$name = input('name');
+// Get parameter name, use default value if not present
+$name = input('name', 'John');
+// Get all parameters
+$all_params = input();
+```
+
+## Getting the Raw Request Body
 ```php
 $post = $request->rawBody();
 ```
@@ -126,7 +141,45 @@ $only = $request->only(['username', 'password']);
 $except = $request->except(['avatar', 'age']);
 ```
 
-## Getting uploaded files
+## Getting Input via Controller Parameters
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+The logic above is equivalent to:
+```php
+<?php
+namespace app\controller;
+use support\Request;
+use support\Response;
+
+class UserController
+{
+    public function create(Request $request): Response
+    {
+        $name = $request->input('name');
+        $age = (int)$request->input('age', 18);
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+For more information, see [Controller Parameter Binding](controller.md#controller-parameter-binding).
+
+## Getting Uploaded Files
+
+> **Note**
+> File uploads require forms with `multipart/form-data` encoding.
+
 **Get the entire uploaded file array**
 ```php
 $request->file();
@@ -134,7 +187,7 @@ $request->file();
 
 Form example:
 ```html
-<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
+<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data">
 <input name="file1" multiple="multiple" type="file">
 <input name="file2" multiple="multiple" type="file">
 <input type="submit">
@@ -307,7 +360,7 @@ $request->getRealIp($safe_mode = true);
 
 When the project is using a proxy (such as nginx), using `$request->getRemoteIp()` often returns the proxy server's IP (like `127.0.0.1` or `192.168.x.x`) instead of the client's real IP. In such cases, you can try using `$request->getRealIp()` to obtain the client's real IP.
 
-`$request->getRealIp()` will attempt to obtain the real IP from the `x-real-ip`, `x-forwarded-for`, `client-ip`, `x-client-ip`, and `via` fields in the HTTP header.
+`$request->getRealIp()` will attempt to obtain the real IP from the `x-forwarded-for`, `x-real-ip`, `client-ip`, `x-client-ip`, and `via` fields in the HTTP header.
 
 > Since HTTP headers can be easily spoofed, the client IP obtained from this method is not 100% reliable, especially when `$safe_mode` is set to `false`. A more reliable method for obtaining the client's real IP through a proxy is to know the secure proxy server IP and explicitly know which HTTP header carries the real IP. If the IP returned by `$request->getRemoteIp()` confirms a known secure proxy server, then use `$request->header('Header carrying the real IP')` to obtain the real IP.
 
@@ -347,14 +400,13 @@ $request->expectsJson();
 $request->acceptJson();
 ```
 
-## Getting the requested plugin name
+## Getting the Requested Plugin Name
 Returns an empty string `''` for non-plugin requests.
 ```php
 $request->plugin;
 ```
-> This feature requires webman>=1.4.0
 
-## Getting the requested application name
+## Getting the Requested Application Name
 Returns an empty string `''` for single applications, and the application name for [multiple applications](multiapp.md).
 ```php
 $request->app;
@@ -372,7 +424,7 @@ Returns something like `app\controller\IndexController`.
 > Because closures do not belong to any controller, the request from a closure route will always return an empty string `''`.
 > Refer to [Route](route.md) for closure routes.
 
-## Getting the requested method name
+## Getting the Requested Method Name
 Gets the method name corresponding to the request's controller method
 ```php
 $request->action;
@@ -381,3 +433,33 @@ Returns something like `index`.
 
 > Because closures do not belong to any controller, the request from a closure route will always return an empty string `''`.
 > Refer to [Route](route.md) for closure routes.
+
+## Overwriting Parameters
+
+Sometimes we need to overwrite request parameters, for example to filter the request and reassign values to the request object. In such cases, we can use the `setGet()`, `setPost()`, and `setHeader()` methods.
+
+#### Overwriting GET Parameters
+```php
+$request->get(); // Assume result is ['name' => 'tom', 'age' => 18]
+$request->setGet(['name' => 'tom']);
+$request->get(); // Final result is ['name' => 'tom']
+```
+
+> **Note**
+> As shown in the example, `setGet()` overwrites all GET parameters. `setPost()` and `setHeader()` behave the same way.
+
+#### Overwriting POST Parameters
+```php
+$post = $request->post();
+foreach ($post as $key => $value) {
+    $post[$key] = htmlspecialchars($value);
+}
+$request->setPost($post);
+$request->post(); // Get filtered post parameters
+```
+
+#### Overwriting HEADER Parameters
+```php
+$request->setHeader(['host' => 'example.com']);
+$request->header('host'); // Output: example.com
+```

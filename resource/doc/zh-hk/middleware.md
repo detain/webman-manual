@@ -186,7 +186,7 @@ class AccessControlTest implements MiddlewareInterface
 {
     public function process(Request $request, callable $handler) : Response
     {
-        // 如果是options請求則返回一個空響應，否則繼續向洋蔥芯穿越，并得到一個響應
+        // 如果是options請求則返回一個空響應，否則繼續向洋蔥芯穿越，並得到一個響應
         $response = $request->method() == 'OPTIONS' ? response('') : $handler($request);
         
         // 給響應添加跨域相關的http頭
@@ -222,7 +222,6 @@ return [
 ## 說明
 
 - 中間件分為全局中間件、應用程式中間件（僅在多應用程式模式下有效，請參見[多應用程式](multiapp.md)）、路由中間件
-- 目前不支持單個控制器的中間件（但可以在中間件中通過判斷`$request->controller`來實現類似控制器中間件功能）
 - 中間件配置文件位置在 `config/middleware.php`
 - 全局中間件配置在 key `''` 下
 - 應用程式中間件配置在具體的應用程式名下，例如
@@ -239,6 +238,31 @@ return [
         app\middleware\ApiOnly::class,
     ]
 ];
+```
+
+## 控制器中間件和方法中間件
+
+利用註解，我們可以給某個控制器或者控制器的某個方法設置中間件。
+
+```php
+<?php
+namespace app\controller;
+use app\middleware\Controller1Middleware;
+use app\middleware\Controller2Middleware;
+use app\middleware\Method1Middleware;
+use app\middleware\Method2Middleware;
+use support\annotation\Middleware;
+use support\Request;
+
+#[Middleware(Controller1Middleware::class, Controller2Middleware::class)]
+class IndexController
+{
+    #[Middleware(Method1Middleware::class, Method2Middleware::class)]
+    public function index(Request $request): string
+    {
+        return 'hello';
+    }
+}
 ```
 
 ## 路由中間件
@@ -268,19 +292,14 @@ Route::group('/blog', function () {
 
 ## 中間件構造函數傳參
 
-> **注意**
-> 此特性需要webman-framework >= 1.4.8
-
-1.4.8版本之後，配置文件支持直接實例化中間件或匿名函數，這樣可以方便通過構造函數向中間件傳參。
+配置文件支持直接實例化中間件，這樣可以方便通過構造函數向中間件傳參。
 例如`config/middleware.php`裡也可以這樣配置
 ```
 return [
     // 全局中間件
     '' => [
         new app\middleware\AuthCheckTest($param1, $param2, ...),
-        function(){
-            return new app\middleware\AccessControlTest($param1, $param2, ...);
-        },
+        new app\middleware\AccessControlTest($param1, $param2, ...)
     ],
     // api應用程式中間件（應用程式中間件僅在多應用程式模式下有效）
     'api' => [
@@ -293,17 +312,44 @@ return [
 ```
 Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->middleware([
     new app\middleware\MiddlewareA($param1, $param2, ...),
-    function(){
-        return new app\middleware\MiddlewareB($param1, $param2, ...);
-    },
+    new app\middleware\MiddlewareB($param1, $param2, ...),
 ]);
+```
+
+中間件裡使用參數示例
+```
+<?php
+namespace app\middleware;
+
+use Webman\MiddlewareInterface;
+use Webman\Http\Response;
+use Webman\Http\Request;
+
+class MiddlewareA implements MiddlewareInterface
+{
+    protected $param1;
+
+    protected $param2;
+
+    public function __construct($param1, $param2)
+    {
+        $this->param1 = $param1;
+        $this->param2 = $param2;
+    }
+
+    public function process(Request $request, callable $handler) : Response
+    {
+        var_dump($this->param1, $this->param2);
+        return $handler($request);
+    }
+}
 ```
 
 ## 中間件執行順序
 
-- 中間件執行順序為`全局中間件`->`應用程式中間件`->`路由中間件`。
-- 有多個全局中間件時，按照中間件實際配置順序執行（應用程式中間件、路由中間件同理）。
-- 404請求不會觸發任何中間件，包括全局中間件
+- 中間件執行順序為`全局中間件`->`應用程式中間件`->`控制器中間件`->`路由中間件`->`方法中間件`。
+- 當同一個層次有多個中間件時，按照同層次中間件實際配置順序執行。
+- 404請求默認不會觸發任何中間件（不過仍然可以通過`Route::fallback(function(){})->middleware()`添加中間件）。
 
 ## 路由向中間件傳參（route->setParams）
 
@@ -378,8 +424,6 @@ class FooController
 }
 ```
 ## 中間件獲取當前請求路由信息
-> **注意**
-> 需要 webman-framework >= 1.3.2
 
 我們可以使用 `$request->route` 獲取路由對象，通過調用對應的方法獲取相應信息。
 
@@ -422,13 +466,7 @@ class Hello implements MiddlewareInterface
 }
 ```
 
-> **注意**
-> `$route->param()` 方法需要 webman-framework >= 1.3.16
-
-
 ## 中間件獲取異常
-> **注意**
-> 需要 webman-framework >= 1.3.15
 
 業務處理過程中可能會產生異常，在中間件裡使用 `$response->exception()` 獲取異常。
 
@@ -468,9 +506,6 @@ class Hello implements MiddlewareInterface
 
 ## 超全局中間件
 
-> **注意**
-> 此特性要求 webman-framework >= 1.5.16
-
 主項目的全局中間件只影響主項目，不會對[應用插件](app/app.md)產生影響。有時候我們想要加一個影響全局包括所有插件的中間件，則可以使用超全局中間件。
 
 在`config/middleware.php`中配置如下：
@@ -488,16 +523,13 @@ return [
 
 ## 給某個插件增加中間件
 
-> **注意**
-> 此特性要求 webman-framework >= 1.5.16
-
 有時候我們想給某個[應用插件](app/app.md)增加一個中間件，又不想改插件的代碼(因為升級會被覆蓋)，這時候我們可以在主項目中給它配置中間件。
 
 在`config/middleware.php`中配置如下：
 ```php
 return [
     'plugin.ai' => [], // 給ai插件增加中間件
-    'plugin.ai.admin' => [], // 給ai插件的admin模組增加中間件
+    'plugin.ai.admin' => [], // 給ai插件的admin模組(plugin\ai\app\admin目錄)增加中間件
 ];
 ```
 

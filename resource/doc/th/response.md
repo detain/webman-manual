@@ -354,3 +354,93 @@ class ImageController
     }
 }
 ```
+
+## การตอบกลับแบบแบ่งส่วน
+
+บางครั้งเราต้องการส่งการตอบกลับแบบแบ่งส่วน สามารถอ้างอิงตัวอย่างด้านล่างได้
+
+```php
+<?php
+
+namespace app\controller;
+
+use support\Request;
+use support\Response;
+use Workerman\Protocols\Http\Chunk;
+use Workerman\Timer;
+
+class IndexController
+{
+    public function index(Request $request): Response
+    {
+        // รับการเชื่อมต่อ
+        $connection = $request->connection;
+        // ส่งเนื้อหา HTTP เป็นระยะ
+        $timer = Timer::add(1, function () use ($connection, &$timer) {
+            static $i = 0;
+            if ($i++ < 10) {
+                // ส่งเนื้อหา HTTP
+                $connection->send(new Chunk($i));
+            } else {
+                // ลบตัวจับเวลาที่ไม่ใช้เพื่อป้องกันการรั่วไหลของหน่วยความจำ
+                Timer::del($timer);
+                // ส่ง Chunk ว่างเพื่อแจ้งไคลเอนต์ว่าการตอบกลับเสร็จสิ้น
+                $connection->send(new Chunk(''));
+            }
+        });
+        // ส่งหัว HTTP พร้อม Transfer-Encoding: chunked ก่อน จากนั้นส่งเนื้อหา HTTP แบบอะซิงโครนัส
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+
+}
+```
+
+หากคุณเรียกใช้โมเดลภาษาขนาดใหญ่ โปรดอ้างอิงตัวอย่างด้านล่าง
+
+```
+composer require webman/openai
+```
+
+```php
+<?php
+namespace app\controller;
+use support\Request;
+
+use Webman\Openai\Chat;
+use Workerman\Protocols\Http\Chunk;
+
+class ChatController
+{
+    public function completions(Request $request)
+    {
+        $connection = $request->connection;
+        // หาก https://api.openai.com เข้าถึงไม่ได้ในภูมิภาคของคุณ สามารถใช้ https://api.openai-proxy.com แทนได้
+        $chat = new Chat(['apikey' => 'sk-xx', 'api' => 'https://api.openai.com']);
+        $chat->completions(
+            [
+                'model' => 'gpt-3.5-turbo',
+                'stream' => true,
+                'messages' => [['role' => 'user', 'content' => 'hello']],
+            ], [
+            'stream' => function($data) use ($connection) {
+                // ส่งข้อมูลไปยังเบราว์เซอร์เมื่อ OpenAI API คืนค่า
+                $connection->send(new Chunk(json_encode($data, JSON_UNESCAPED_UNICODE) . "\n"));
+            },
+            'complete' => function($result, $response) use ($connection) {
+                // ตรวจสอบข้อผิดพลาดเมื่อการตอบกลับเสร็จสิ้น
+                if (isset($result['error'])) {
+                    $connection->send(new Chunk(json_encode($result, JSON_UNESCAPED_UNICODE) . "\n"));
+                }
+                // ส่ง chunk ว่างเพื่อระบุการสิ้นสุดการตอบกลับ
+                $connection->send(new Chunk(''));
+            },
+        ]);
+        // ส่งหัว HTTP ก่อน ข้อมูลจะถูกส่งกลับแบบอะซิงโครนัส
+        return response()->withHeaders([
+            "Transfer-Encoding" => "chunked",
+        ]);
+    }
+}
+```

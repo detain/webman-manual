@@ -62,7 +62,7 @@ return [
 Như vậy chúng ta đã hoàn tất một quy trình khởi tạo kinh doanh.
 
 ## Thông tin bổ sung
-Sau khi **[tùy chỉnh quá trình thực hiện](../process.md)** được khởi động, cũng sẽ thực hiện phương thức khởi đầu được cấu hình trong `config/bootstrap.php`. Chúng ta có thể sử dụng `$worker->name` để xác định quá trình hiện tại là quá trình gì, rồi quyết định xem có nên thực hiện mã khởi tạo kinh doanh trong quá trình đó hay không, ví dụ nếu chúng ta không cần theo dõi quá trình monitor, thì nội dung của `MemReport.php` sẽ tương tự như sau:
+Sau khi [quá trình tùy chỉnh](../process.md) được khởi động, cũng sẽ thực hiện phương thức khởi đầu được cấu hình trong `config/bootstrap.php`. Chúng ta có thể sử dụng `$worker->name` để xác định quá trình hiện tại là quá trình gì, thêm nữa có thể dùng `$worker->id` để xác định số thứ tự quá trình, rồi quyết định có nên thực hiện mã khởi tạo kinh doanh trong quá trình đó hay không. Ví dụ nếu chúng ta chỉ cần thực hiện trong quá trình số 0 của webman, thì nội dung của `MemReport.php` sẽ tương tự như sau:
 ```php
 <?php
 
@@ -81,8 +81,8 @@ class MemReport implements Bootstrap
             return;
         }
         
-        // Quá trình monitor không thực hiện bộ hẹn giờ
-        if ($worker->name == 'monitor') {
+        // Chỉ thực hiện trong quá trình số 0 của webman
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

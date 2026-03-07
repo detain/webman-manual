@@ -2,5 +2,5 @@
 
 `composer require workerman/webman-framework ^1.4.3 && composer require webman/console ^1.0.27 && php webman install`
 
-> **দ্য এটেনশন**
-> আলিবাবা কম্পোজার প্রযুক্তিগত কারণে বর্তমানে কম্পোজার সরবরাহ থেকে ডাটা সিঙ্ক্রোনাইজ করা বন্ধ করেছে, তাই এখন সর্বশেষ webman-কে এলার আপগ্রেড করতে আলিবাবা কম্পোজারের বাজার প্রকৃতি ডাটা সোর্স ব্যবহার করা যাবে না, দয়া করে নিম্নলিখিত কমান্ড ব্যবহার করে কম্পোজার সরবরাহ থেকে আবার নির্দিষ্ট ডাটা সোর্স ব্যবহার করুন `composer config -g --unset repos.packagist`
+> **দেখুন**
+> Alibaba Cloud-এর Composer প্রক্সি Composer-এর অফিসিয়াল সোর্স থেকে ডেটা সিঙ্ক করা বন্ধ করেছে। Alibaba Cloud Composer প্রক্সি ব্যবহার করে সর্বশেষ webman-এ আপগ্রেড করা সম্ভব নয়। Composer-এর অফিসিয়াল ডেটা সোর্স পুনরায় ব্যবহার করতে নিচের কমান্ডটি চালান: `composer config -g --unset repos.packagist`

@@ -1,6 +1,6 @@
 # 페이징
 
-# 1. 라라벨의 ORM을 기반으로 한 페이징 방법
+# Laravel ORM을 기반으로 한 페이징
 라라벨의 `illuminate/database`는 편리한 페이징 기능을 제공합니다.
 
 ## 설치
@@ -138,8 +138,9 @@ app/view/user/get.html에 새 템플릿 생성
 아래는 효과입니다:
 ![](../../assets/img/paginator.png)
 
-# 2. Thinkphp의 ORM을 기반으로 한 페이징 방법
-추가적인 라이브러리 설치가 필요하지 않으며, think-orm을 설치한 경우에만 사용할 수 있습니다.
+# ThinkPHP ORM을 기반으로 한 페이징
+
+추가 라이브러리 설치가 필요 없으며, think-orm만 설치되어 있으면 됩니다.
 ## 사용
 ```php
 public function index(Request $request)

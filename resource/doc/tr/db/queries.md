@@ -1,4 +1,5 @@
-# Sorgu Oluşturucu
+# Veritabanı sorguları (Laravel veritabanı bileşeni)
+
 ## Tüm satırları alın
 ```php
 <?php
@@ -379,6 +380,9 @@ Eğer tabloyu boşaltmanız gerekiyorsa, tüm satırları silecek ve artan kimli
 ```php
 Db::table('users')->truncate();
 ```
+
+## İşlemler
+Bkz. [Veritabanı işlemleri](../others/transaction.md)
 
 ## Pessimistic Lock
 Sorgu oluşturucu aynı zamanda "pessimistik kilit"i select sorgularında kullanmanıza olanak tanıyan bazı yöntemleri içerir. Bir "paylaşılan kilit" eklemek istiyorsanız, `sharedLock` methodunu kullanabilirsiniz. Paylaşılan kilit, seçilen veri satırlarının işlem tamamlanana kadar değiştirilmesini önler:

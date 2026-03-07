@@ -5,8 +5,7 @@
 * O código-fonte do plugin deve ser completo e não pode ser criptografado.
 * Os plugins devem oferecer funcionalidades completas e não podem fornecer apenas funcionalidades simples.
 * Deve ser fornecida uma documentação completa e uma introdução detalhada das funcionalidades do plugin.
-* Os plugins não podem incluir submercados.
-* Não podem conter qualquer texto ou links de promoção dentro do plugin.
+* O uso de corrotinas não é recomendado nos plugins, pois os usuários podem não ter as corrotinas habilitadas.
 
 ## Identificação do plugin de aplicativo
 Cada plugin de aplicativo tem uma identificação única, composta por letras. Esta identificação afeta o nome do diretório onde o código do plugin está localizado, o namespace da classe e o prefixo da tabela do banco de dados do plugin.

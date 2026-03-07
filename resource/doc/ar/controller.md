@@ -1,6 +1,6 @@
-# 控制器
+# المتحكم
 
-新建控制器文件 `app/controller/FooController.php`。
+أنشئ ملف المتحكم الجديد `app/controller/FooController.php`.
 
 ```php
 <?php
@@ -22,19 +22,19 @@ class FooController
 }
 ```
 
-当访问 `http://127.0.0.1:8787/foo` 时，页面返回 `hello index`。
+عند الوصول إلى `http://127.0.0.1:8787/foo`، تعيد الصفحة `hello index`.
 
-当访问 `http://127.0.0.1:8787/foo/hello` 时，页面返回 `hello webman`。
+عند الوصول إلى `http://127.0.0.1:8787/foo/hello`، تعيد الصفحة `hello webman`.
 
-当然你可以通过路由配置来更改路由规则，参见[路由](route.md)。
+يمكنك تغيير قواعد التوجيه من خلال إعداد المسارات، راجع [المسارات](route.md).
 
-> **提示**
-> 如果出现404无法访问，请打开`config/app.php`，将`controller_suffix`设置为`Controller`，并重启。
+> **تلميح**
+> إذا ظهر خطأ 404، افتح `config/app.php`، عيّن `controller_suffix` إلى `Controller` وأعد التشغيل.
 
-## 控制器后缀
-webman从1.3版本开始，支持在`config/app.php`设置控制器后缀，如果`config/app.php`里`controller_suffix`设置为空`''`，则控制器类似如下
+## لاحقة المتحكم
+بدءًا من الإصدار 1.3، يدعم webman تعيين لاحقة المتحكم في `config/app.php`. إذا كان `controller_suffix` مُعيَّنًا على سلسلة فارغة `''`، فالمتحكم يبدو كالتالي:
 
-`app\controller\Foo.php`。
+`app\controller\Foo.php`.
 
 ```php
 <?php
@@ -56,18 +56,18 @@ class Foo
 }
 ```
 
-强烈建议将控制器后缀设置为`Controller`，这样能能避免控制器与模型类名冲突，同时增加安全性。
+يُوصى بشدة بتعيين لاحقة المتحكم على `Controller` لتجنب التضارب مع أسماء فئات النماذج وزيادة الأمان.
 
-## 说明
- - 框架会自动向控制器传递`support\Request` 对象，通过它可以获取用户输入数据(get post header cookie等数据)，参见[请求](request.md)
- - 控制器里可以返回数字、字符串或者`support\Response` 对象，但是不能返回其它类型的数据。
- - `support\Response` 对象可以通过`response()` `json()` `xml()` `jsonp()` `redirect()`等助手函数创建。
- 
+## الشرح
+- يمرر الإطار تلقائيًا كائن `support\Request` إلى المتحكم، والذي يمكن من خلاله الحصول على بيانات إدخال المستخدم (get، post، header، cookie، إلخ)، راجع [الطلب](request.md).
+- يمكن للمتحكم إرجاع أرقام أو سلاسل أو كائنات `support\Response`، لكن لا يمكنه إرجاع أنواع بيانات أخرى.
+- يمكن إنشاء كائنات `support\Response` باستخدام الدوال المساعدة مثل `response()`، `json()`، `xml()`، `jsonp()`، `redirect()`، إلخ.
 
-## 控制器参数绑定
+## ربط معلمات المتحكم
 
-#### 例子
-webman支持通过控制器方法参数自动绑定请求参数，例如
+#### مثال
+يدعم webman الربط التلقائي لمعلمات الطلب بمعلمات أساليب المتحكم. على سبيل المثال:
+
 ```php
 <?php
 namespace app\controller;
@@ -82,22 +82,23 @@ class UserController
 }
 ```
 
-你可以通过`GET` `POST`方式传递`name`和`age`的值，也可以通过路由参数传递`name`和`age`参数，例如
+يمكنك تمرير قيم `name` و `age` عبر `GET` أو `POST`، أو عبر معلمات المسار. على سبيل المثال:
 
 ```php
 Route::any('/user/{name}/{age}', [app\controller\UserController::class, 'create']);
 ```
 
-优先级为`路由参数` > `GET` > `POST`参数
+الأولوية هي: `معلمات المسار` > `GET` > `POST`.
 
-#### 默认值
+#### القيم الافتراضية
 
-假设我们访问 `/user/create?name=tom`，我们将得到如下的错误
+عند الوصول إلى `/user/create?name=tom`، ستحصل على الخطأ التالي:
 
 ```html
 Missing input parameter age
 ```
-原因是我们没有传递`age`参数，可以通过给参数设置默认值来解决这个问题，例如
+
+السبب أننا لم نمرر المعلمة `age`. يمكن الحل بتعيين قيمة افتراضية. على سبيل المثال:
 
 ```php
 <?php
@@ -113,36 +114,34 @@ class UserController
 }
 ```
 
-#### 参数类型
-当我们访问 `/user/create?name=tom&age=not_int`，我们将得到如下的错误
+#### أنواع المعلمات
+عند الوصول إلى `/user/create?name=tom&age=not_int`، ستحصل على الخطأ التالي:
 
-> **提示**
-> 这里为了方便测试，我们直接在浏览器地址栏输入参数，实际开发中应该通过`POST`方式传递参数
+> **تلميح**
+> للراحة في الاختبار نمرر المعلمات مباشرة في شريط العنوان. في التطوير الفعلي يجب تمرير المعلمات عبر `POST`.
 
 ```html
 Input age must be of type int, string given
 ```
 
-这是因为接受的数据会按照类型进行转换，如果无法转换则会抛出`support\exception\InputTypeException`异常，
-因为传递的`age`参数无法转换为`int`类型，所以得到如上错误。
+ذلك لأن البيانات المستلمة تُحوَّل وفقًا للنوع. عند فشل التحويل يتم رمي الاستثناء `support\exception\InputTypeException`. بما أن `age` لا يمكن تحويله إلى `int`، يظهر هذا الخطأ.
 
-#### 自定义错误
-我们可以利用多语言自定义`Missing input parameter age` 和 `Input age must be of type int, string given` 这样的错误，
-参考如下命令
+#### رسائل الأخطاء المخصصة
+يمكن تخصيص رسائل مثل `Missing input parameter age` و `Input age must be of type int, string given` عبر الترجمة. راجع الأوامر التالية:
 
 ```
 composer require symfony/translation
 mkdir resource/translations/zh_CN/ -p
 echo "<?php
 return [
-    'Input :parameter must be of type :exceptType, :actualType given' => '输入参数 :parameter 必须是 :exceptType 类型，传递的类型是 :actualType',
-    'Missing input parameter :parameter' => '缺少输入参数 :parameter',
+    'Input :parameter must be of type :exceptType, :actualType given' => 'يجب أن يكون المعلمة :parameter من نوع :exceptType، النوع المرسل هو :actualType',
+    'Missing input parameter :parameter' => 'معلمة الإدخال :parameter مفقودة',
 ];" > resource/translations/zh_CN/messages.php
 php start.php restart
 ```
 
-#### 其它类型
-webman支持的参数类型有`int` `float` `string` `bool` `array` `object` `类实例`等，例如
+#### أنواع أخرى
+يدعم webman أنواعًا مثل `int`، `float`، `string`، `bool`، `array`، `object` و`مثيلات الفئات`. على سبيل المثال:
 
 ```php
 <?php
@@ -164,7 +163,7 @@ class UserController
 }
 ```
 
-当我们访问 `/user/create?name=tom&age=18&balance=100.5&vip=true&extension[foo]=bar`，我们将得到如下的结果
+عند الوصول إلى `/user/create?name=tom&age=18&balance=100.5&vip=true&extension[foo]=bar`، ستحصل على:
 
 ```json
 {
@@ -178,8 +177,8 @@ class UserController
 }
 ```
 
-#### 类实例
-webman支持通过参数类型提示传递类实例，例如
+#### مثيل الفئة
+يدعم webman تمرير مثيلات الفئات عبر تلميحات النوع. على سبيل المثال:
 
 **app\service\Blog.php**
 ```php
@@ -220,7 +219,7 @@ class BlogController
 }
 ```
 
-当访问 `/blog/create?blog[title]=hello&blog[content]=world`，我们将得到如下的结果
+عند الوصول إلى `/blog/create?blog[title]=hello&blog[content]=world`، ستحصل على:
 
 ```json
 {
@@ -229,7 +228,7 @@ class BlogController
 }
 ```
 
-#### 模型实例
+#### مثيل النموذج
 
 **app\model\User.php**
 ```php
@@ -242,7 +241,7 @@ class User extends Model
     protected $table = 'user';
     protected $primaryKey = 'id';
     public $timestamps = false;
-    // 这里需要添加可填充字段，防止前端传入不安全字段
+    // أضف هنا الحقول القابلة للملء لمنع الحقول غير الآمنة من الواجهة الأمامية
     protected $fillable = ['name', 'age'];
 }
 ```
@@ -262,20 +261,20 @@ class UserController
 }
 ```
 
-当访问 `/user/create?user[name]=tom&user[age]=18`，我们将得到类似如下的结果
+عند الوصول إلى `/user/create?user[name]=tom&user[age]=18`، ستحصل على نتيجة شبيهة بـ:
 
 ```json
 1
 ```
 
-## 控制器生命周期
+## دورة حياة المتحكم
 
-当`config/app.php`里`controller_reuse`为`false`时，每个请求都会初始化一次对应的控制器实例，请求结束后控制器实例销毁，这与传统框架运行机制相同。
+عندما يكون `controller_reuse` في `config/app.php` بقيمة `false`، يتم تهيئة مثيل المتحكم مرة واحدة لكل طلب، ويُدمَّر بعد انتهاء الطلب. نفس آلية الأطر التقليدية.
 
-当`config/app.php`里`controller_reuse`为`true`时，所有请求将复用控制器实例，也就是控制器实例一旦创建便常驻内存，所有请求复用。
+عندما يكون `true`، تعيد جميع الطلبات استخدام نفس مثيل المتحكم، أي أن المثيل يبقى في الذاكرة بعد الإنشاء.
 
-> **注意**
-> 开启控制器复用时，请求不应该更改控制器的任何属性，因为这些更改将影响后续请求，例如
+> **تنبيه**
+> عند إعادة الاستخدام، لا ينبغي للطلبات تغيير أي خصائص للمتحكم لأن ذلك يؤثر على الطلبات التالية. مثال:
 
 ```php
 <?php
@@ -303,8 +302,8 @@ class FooController
     
     protected function getModel($id)
     {
-        // 该方法将在第一次请求 update?id=1 后会保留下 model
-        // 如果再次请求 delete?id=2 时，会删除 1 的数据
+        // سيبقى هذا النموذج بعد أول طلب update?id=1
+        // إذا طُلِب delete?id=2، ستُحذف بيانات id=1
         if (!$this->model) {
             $this->model = Model::find($id);
         }
@@ -313,8 +312,8 @@ class FooController
 }
 ```
 
-> **提示**
-> 在控制器`__construct()`构造函数中return数据不会有任何效果，例如
+> **تلميح**
+> إرجاع بيانات في المُنشئ `__construct()` للمتحكم لا ينتج أي تأثير. مثال:
 
 ```php
 <?php
@@ -326,25 +325,22 @@ class FooController
 {
     public function __construct()
     {
-        // 构造函数中return数据没有任何效果，浏览器不会收到此响应
+        // return في المُنشئ لا ينتج أي تأثير، المتصفح لن يستقبل هذه الاستجابة
         return response('hello'); 
     }
 }
 ```
 
-## 控制器不复用与复用区别
-区别如下
+## الفرق بين عدم إعادة الاستخدام وإعادة الاستخدام
 
-#### 不复用控制器
-每个请求都会重新new一个新的控制器实例，请求结束后释放该实例，并回收内存。不复用控制器和传统框架一样，符合大部分开发者习惯。由于控制器反复的创建销毁，所以性能会比复用控制器略差(helloworld压测性能差10%左右，带业务可以基本忽略)
+#### عدم إعادة الاستخدام
+يُنشأ مثيل جديد للمتحكم لكل طلب، ويُحرَّر بعد انتهاء الطلب. مطابق للأطر التقليدية وعادات معظم المطورين. أداء أقل قليلًا (حوالي 10% في اختبار helloworld، عادةً غير مهم مع الأعمال الفعلية).
 
-#### 复用控制器
-复用的话一个进程只new一次控制器，请求结束后不释放这个控制器实例，当前进程的后续请求会复用这个实例。复用控制器性能更好，但是不符合大部分开发者习惯。
+#### إعادة الاستخدام
+يُنشأ المتحكم مرة واحدة لكل عملية ولا يُحرَّر بعد الطلب. الطلبات التالية تعيد استخدام المثيل ذاته. أداء أفضل، لكنه لا يتوافق مع عادات الكثير من المطورين.
 
-#### 以下情况不能使用控制器复用
+#### حالات لا يمكن فيها إعادة الاستخدام
 
-当请求会改变控制器的属性时，不能开启控制器复用，因为这些属性的更改会影响后续请求。
+عندما يغيّر الطلب خصائص المتحكم — هذه التغييرات تؤثر على الطلبات التالية.
 
-有些开发者喜欢在控制器构造函数`__construct()`里针对每个请求做一些初始化，这时候就不能复用控制器，因为当前进程构造函数只会调用一次，并不是每个请求都会调用。
-
-
+عند تنفيذ تهيئة في `__construct()` لكل طلب — المُنشئ يُستدعى مرة واحدة لكل عملية، وليس لكل طلب.

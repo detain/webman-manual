@@ -6,10 +6,44 @@
 composer require --dev phpunit/phpunit
 ```
 
+## Конфигурация
+
+Добавьте файл конфигурации `phpunit.xml` в корневую директорию проекта. Его можно настроить в соответствии с требованиями вашего проекта. См. [документацию по конфигурации phpunit.xml](https://docs.phpunit.de/en/12.4/configuration.html).
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="support/bootstrap.php"
+    cacheDirectory=".phpunit.cache"
+    executionOrder="depends,defects"
+    shortenArraysForExportThreshold="10"
+    requireCoverageMetadata="false"
+    beStrictAboutCoverageMetadata="true"
+    beStrictAboutOutputDuringTests="true"
+    displayDetailsOnPhpunitDeprecations="true"
+    failOnPhpunitDeprecation="true"
+    failOnRisky="true"
+    failOnWarning="true"
+    colors="true">
+    <testsuites>
+        <testsuite name="tests">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </source>
+</phpunit>
+
+```
 
 ## Использование
 
-Создайте файл `tests/TestConfig.php` для тестирования конфигурации базы данных
+Создайте файл `tests/TestConfig.php` для тестирования конфигурации приложения:
+
 ```php
 <?php
 use PHPUnit\Framework\TestCase;
@@ -27,14 +61,24 @@ class TestConfig extends TestCase
     }
 }
 ```
-
+  
 ## Запуск
 
-Запустите в корневой директории проекта `./vendor/bin/phpunit --bootstrap support/bootstrap.php tests/TestConfig.php`
+Запустите все тесты из корневой директории проекта:
+
+```bash
+./vendor/bin/phpunit
+```
+
+Запустите определённый тест из корневой директории проекта:
+
+```bash
+./vendor/bin/phpunit tests/TestConfig.php
+```
 
 Результат будет примерно следующим:
 
-``` 
+```
 PHPUnit 9.5.10 by Sebastian Bergmann and contributors.
 
 .                                                                   1 / 1 (100%)

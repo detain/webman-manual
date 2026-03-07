@@ -1,8 +1,8 @@
 # AOP
 
-> হাইপারফ রাইটার এর সাবমিট এর জন্য ধন্যবাদ।
+> Hyperf লেখকের অবদানের জন্য ধন্যবাদ।
 
-### ইনস্টলেশন
+## ইনস্টলেশন
 
 - aop-integration ইনস্টল করুন
 
@@ -10,9 +10,9 @@
 composer require "hyperf/aop-integration: ^1.1"
 ```
 
-### AOP সংক্রান্ত কনফিগারেশন যোগ করুন
+## AOP-সম্পর্কিত কনফিগারেশন যোগ করুন
 
-আমাদের একটি `config.php` কনফিগারেশন ফাইল যোগ করতে হবে কনফিগ ফোল্ডারে
+config ফোল্ডারে config.php কনফিগারেশন ফাইল যোগ করতে হবে।
 
 ```php
 <?php
@@ -36,31 +36,31 @@ return [
         ],
     ],
     'aspects' => [
-        // এখানে ম্যাচিং এসপেক্ট এড করুন
+        // এখানে সংশ্লিষ্ট Aspect যোগ করুন
         app\aspect\DebugAspect::class,
     ]
 ];
 
 ```
 
-### এন্ট্রি ফাইল start.php কনফিগার করুন
+## এন্ট্রি ফাইল start.php কনফিগার করুন
 
-> আমরা তারিখ সেট করার পরিবেশনা কোডটি timezone নীচে রেখেছি, অন্য কোডগুলি জাতীয় থাকলে এগুলিকে বাদ দেয়া হবে 
+> timezone সেটিং এর নিচে ইনিশিয়ালাইজেশন কোড রাখুন। নিচে অন্যান্য কোড বাদ দেওয়া হয়েছে।
 
-```php
+```
 use Hyperf\AopIntegration\ClassLoader;
 
 if ($timezone = config('app.default_timezone')) {
     date_default_timezone_set($timezone);
 }
 
-// আইনিটিয়ালাইজেশন
+// ইনিশিয়ালাইজেশন
 ClassLoader::init();
 ```
 
-### পরীক্ষা
+## পরীক্ষা
 
-প্রথমে আমাদের কাটা ক্লাস লিখি
+প্রথমে ইন্টারসেপ্ট করার ক্লাস তৈরি করুন:
 
 ```php
 <?php
@@ -75,7 +75,7 @@ class UserService
 }
 ```
 
-পরবর্তীতে সাথে যুক্ত করুন `DebugAspect`
+তারপর সংশ্লিষ্ট DebugAspect যোগ করুন:
 
 ```php
 <?php
@@ -99,7 +99,7 @@ class DebugAspect extends AbstractAspect
 }
 ```
 
-তারপরে নিয়ে অনুপাত আপডেট করুন `app/controller/IndexController.php`
+এরপর কন্ট্রোলার app/controller/IndexController.php সম্পাদনা করুন:
 
 ```php
 <?php
@@ -117,7 +117,7 @@ class IndexController
 }
 ```
 
-এরপর রাউট কনফিগার করুন
+তারপর রাউট কনফিগার করুন:
 
 ```php
 <?php
@@ -126,7 +126,7 @@ use Webman\Route;
 Route::any('/json', [app\controller\IndexController::class, 'json']);
 ```
 
-শেষ অবস্থিতি এবং পরীক্ষা করুন।
+শেষে সার্ভিস চালু করুন এবং পরীক্ষা চালান:
 
 ```shell
 php start.php start

@@ -1,18 +1,16 @@
 # 分頁元件
 
-## jasongrimes/php-paginator
-
-### 專案連結
+## 專案連結
 
 https://github.com/jasongrimes/php-paginator
-
-### 安裝
+  
+## 安裝
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
-
-### 使用
+  
+## 使用
 
 建立 `app/controller/UserController.php`
 ```php
@@ -36,6 +34,7 @@ class UserController
         $paginator = new Paginator($total_items, $items_perPage, $current_page, $url_pattern);
         return view('user/get', ['paginator' => $paginator]);
     }
+    
 }
 ```
 **模板(原生 PHP)**
@@ -106,7 +105,8 @@ class UserController
 
 效果如下：
 ![](../../assets/img/paginator.png)
-
-### 更多內容
+  
+## 更多內容
 
 請造訪 https://github.com/jasongrimes/php-paginator
+  

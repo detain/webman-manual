@@ -6,8 +6,8 @@
 - Ogni processo può gestire più richieste durante il suo ciclo di vita.
 - Quando un processo riceve i comandi `stop`, `reload` o `restart`, termina e pone fine al ciclo di vita corrente.
 
-> **Nota**
-> Ogni processo è indipendente e non interferisce con gli altri, il che significa che ogni processo mantiene le proprie risorse, variabili, istanze di classe, ecc. In altre parole, ogni processo ha la propria connessione al database e inizializza le istanze di singoletto ogni volta che un processo inizia. Di conseguenza, multipli processi comportano inizializzazioni multiple.
+> **Suggerimento**
+> Ogni processo è indipendente e non interferisce con gli altri, il che significa che ogni processo mantiene le proprie risorse, variabili, istanze di classe, ecc. Ciò si riflette nel fatto che ogni processo ha la propria connessione al database e alcuni singleton vengono inizializzati una volta per processo, quindi multipli processi daranno luogo a inizializzazioni multiple.
 
 ## Ciclo di vita della richiesta
 - Ogni richiesta produce un oggetto `$request`.
@@ -58,11 +58,11 @@ class IndexController
 ```
 Il metodo `Container::get()` viene utilizzato per creare e memorizzare l'istanza della classe, in modo che quando viene chiamato nuovamente con gli stessi argomenti, restituirà l'istanza creata in precedenza.
 
-> **Importante**
+> **Nota**
 > `Container::get()` può inizializzare solo istanze senza parametri costruttore. `Container::make()` può creare istanze con parametri costruttore, ma a differenza di `Container::get()`, non riutilizza l'istanza. In altre parole, anche se chiamato con gli stessi argomenti, `Container::make()` restituirà sempre una nuova istanza.
 
-## Sull'overflow di memoria
-Nella stragrande maggioranza dei casi, il nostro codice aziendale non causerà overflow di memoria (è estremamente raro che gli utenti segnalino overflow di memoria). Basta fare attenzione a non far espandere all'infinito i dati dell'array a lunga durata. Ad esempio:
+## Sulle perdite di memoria
+Nella stragrande maggioranza dei casi, il nostro codice aziendale non causerà perdite di memoria (è estremamente raro che gli utenti segnalino perdite di memoria). Basta fare attenzione a non far espandere all'infinito i dati dell'array a lunga durata. Si consideri il seguente codice:
 ```php
 <?php
 namespace app\controller;
@@ -86,6 +86,6 @@ class FooController
     }
 }
 ```
-I controller hanno di default un lungo ciclo di vita (a meno che il riutilizzo del controller sia disattivato), allo stesso modo, la proprietà dell'array `$data` del controller ha un lungo ciclo di vita. Man mano che le richieste verso `foo/index` aumentano, gli elementi dell'array `$data` aumentano di conseguenza, portando all'overflow di memoria.
+I controller hanno di default un lungo ciclo di vita (a meno che il riutilizzo del controller sia disattivato), allo stesso modo, la proprietà dell'array `$data` del controller ha un lungo ciclo di vita. Man mano che le richieste verso `foo/index` aumentano, gli elementi dell'array `$data` aumentano di conseguenza, portando a perdite di memoria.
 
-Per ulteriori informazioni, consultare [Overflow di memoria](./memory-leak.md)
+Per ulteriori informazioni, consultare [Perdite di memoria](./memory-leak.md)

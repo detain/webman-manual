@@ -5,8 +5,7 @@
 * Der Quellcode des Plugins muss vollständiger Code sein und darf nicht verschlüsselt sein.
 * Das Plugin muss vollständige Funktionen bieten und darf keine einfachen Funktionen enthalten.
 * Eine vollständige Funktionsbeschreibung und Dokumentation müssen bereitgestellt werden.
-* Das Plugin darf keine Submarktplätze enthalten.
-* Im Plugin dürfen keine Texte oder Werbelinks enthalten sein.
+* Die Verwendung von Coroutines wird in Plugins nicht empfohlen, da Benutzer möglicherweise keine Coroutines aktiviert haben.
 
 ## Kennzeichnung von Anwendungs-Plugins
 Jedes Anwendungs-Plugin hat eine eindeutige Kennzeichnung, die aus Buchstaben besteht. Diese Kennzeichnung beeinflusst den Verzeichnisnamen des Plugins, den Namensraum der Klasse und das Präfix der Plugin-Datenbanktabelle.

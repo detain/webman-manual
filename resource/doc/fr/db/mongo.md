@@ -1,23 +1,19 @@
 # MongoDB
 
-webman utilise par défaut [jenssegers/mongodb](https://github.com/jenssegers/laravel-mongodb) comme composant MongoDB, qui a été extrait du projet Laravel et s'utilise de la même manière.
+webman utilise par défaut [mongodb/laravel-mongodb](https://github.com/mongodb/laravel-mongodb) comme composant MongoDB. Ce composant a été extrait du projet Laravel et fonctionne de la même manière.
 
-Avant d'utiliser `jenssegers/mongodb`, vous devez d'abord installer l'extension mongodb pour `php-cli`.
+Vous devez d'abord installer l'extension MongoDB pour `php-cli` avant d'utiliser `mongodb/laravel-mongodb`.
 
-> Utilisez la commande `php -m | grep mongodb` pour vérifier si l'extension mongodb est installée pour `php-cli`. Notez que même si vous avez installé l'extension mongodb pour `php-fpm`, cela ne signifie pas que vous pouvez l'utiliser pour `php-cli` car `php-cli` et `php-fpm` sont des applications différentes et peuvent utiliser des fichiers de configuration `php.ini` différents. Utilisez la commande `php --ini` pour voir quel fichier de configuration `php.ini` est utilisé par votre `php-cli`.
+> **Note**
+> Utilisez la commande `php -m | grep mongodb` pour vérifier si l'extension MongoDB est installée pour `php-cli`. Notez que même si vous avez installé l'extension MongoDB pour `php-fpm`, cela ne signifie pas que vous pouvez l'utiliser pour `php-cli`, car `php-cli` et `php-fpm` sont des applications différentes et peuvent utiliser des fichiers de configuration `php.ini` différents. Utilisez la commande `php --ini` pour voir quel fichier de configuration `php.ini` est utilisé par votre `php-cli`.
 
 ## Installation
 
-Pour PHP>7.2
 ```php
-composer require -W illuminate/database jenssegers/mongodb ^3.8.0
-```
-Pour PHP=7.2
-```php
-composer require -W illuminate/database jenssegers/mongodb ^3.7.0
+composer require -W webman/database mongodb/laravel-mongodb ^4.8
 ```
 
-Après l'installation, redémarrez (reload ne fonctionne pas).
+Après l'installation, un redémarrage est nécessaire (reload ne fonctionne pas).
 
 ## Configuration
 Ajoutez une connexion `mongodb` dans le fichier `config/database.php`, similaire à ce qui suit :
@@ -28,7 +24,7 @@ return [
 
     'connections' => [
 
-         ... autres configurations ici ...
+         ...autres configurations omises ici...
 
         'mongodb' => [
             'driver'   => 'mongodb',
@@ -60,12 +56,39 @@ class UserController
 {
     public function db(Request $request)
     {
-        Db::connection('mongodb')->collection('test')->insert([1,2,3]);
-        return json(Db::connection('mongodb')->collection('test')->get());
+        Db::connection('mongodb')->table('test')->insert([1,2,3]);
+        return json(Db::connection('mongodb')->table('test')->get());
+    }
+}
+```
+
+## Exemple de modèle
+```php
+<?php
+namespace app\model;
+
+use DateTimeInterface;
+use support\MongoModel as Model;
+
+class Test extends Model
+{
+    protected $connection = 'mongodb';
+
+    protected $table = 'test';
+
+    public $timestamps = true;
+
+    /**
+     * @param DateTimeInterface $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
     }
 }
 ```
 
 ## Pour plus d'informations, veuillez visiter
 
-https://github.com/jenssegers/laravel-mongodb
+https://github.com/mongodb/laravel-mongodb

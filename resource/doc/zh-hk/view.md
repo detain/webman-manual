@@ -248,10 +248,28 @@ class UserController
 #### 控制器
 當控制器調用 `view('模版名',[])` 時，視圖檔案按照如下規則尋找：
 
-1. 非多應用時，使用 `app/view/` 下對應的視圖檔案
-2. [多應用](multiapp.md) 時，使用 `app/應用名/view/` 下對應的視圖檔案
+1. 以`/`開頭則直接使用該路徑查找視圖檔案
+2. 不是以`/`開頭並且非多應用時，使用 `app/view/` 下對應的視圖檔案
+3. 不是以`/`開頭並且是[多應用](multiapp.md)時，使用 `app/應用名/view/` 下對應的視圖檔案
+4. 如果不傳模板參數，自動根據2、3規則查找模板檔案
 
-總結來說就是如果 `$request->app` 為空，則使用 `app/view/` 下的視圖檔案，否則使用 `app/{$request->app}/view/` 下的視圖檔案。
+例子：
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // 等價於 return view('user/hello', ['name' => 'webman']);
+        // 等價於 return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 #### 閉包函數
 閉包函數 `$request->app` 為空，不屬於任何應用，因此閉包函數使用 `app/view/` 下的視圖檔案，例如 `config/route.php` 裡定義路由
@@ -264,6 +282,25 @@ Route::any('/admin/user/get', function (Reqeust $reqeust) {
 
 #### 指定應用
 為了多應用模式下模版可以複用，view($template, $data, $app = null) 提供了第三個參數 `$app`，可以用來指定使用哪個應用目錄下的模版。例如 `view('user', [], 'admin');` 會強制使用 `app/admin/view/` 下的視圖檔案。
+
+#### 省略模板參數
+在類的控制器裡可以省略模板參數，例如
+```php
+<?php
+namespace app\controller;
+
+use support\Request;
+
+class UserController
+{
+    public function hello(Request $request)
+    {
+        // 等價於 return view('user/hello', ['name' => 'webman']);
+        // 等價於 return view('/app/view/user/hello', ['name' => 'webman']);
+        return view(['name' => 'webman']);
+    }
+}
+```
 
 ## 擴展twig
 

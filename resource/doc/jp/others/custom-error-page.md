@@ -1,11 +1,10 @@
-## カスタム404ページ
-webmanは404の際に`public/404.html`の内容を自動的に返しますので、開発者は`public/404.html`ファイルを直接変更することができます。
+# カスタム404
 
-404の内容を動的にコントロールしたい場合、例えばajaxリクエストでjsonデータ `{"code:"404", "msg":"404 not found"}` を返し、ページリクエスト時には`app/view/404.html`テンプレートを返したい場合は、以下の例を参照してください。
+404の内容を動的に制御したい場合、例えば AJAX リクエストでは JSON データ `{"code:"404", "msg":"404 not found"}` を返し、ページリクエストでは `app/view/404.html` テンプレートを返す場合は、以下の例を参照してください。
 
-> 以下の例はPHPのネイティブテンプレートを使用していますが、他のテンプレート`twig` `blade` `think-tmplate`も同様の原理です。
+> 以下は PHP ネイティブテンプレートの例です。`twig`、`blade`、`think-template` などの他のテンプレートも同様の原理です。
 
-**`app/view/404.html`ファイルを作成**
+**`app/view/404.html` ファイルを作成**
 ```html
 <!doctype html>
 <html>
@@ -19,23 +18,41 @@ webmanは404の際に`public/404.html`の内容を自動的に返しますので
 </html>
 ```
 
-**`config/route.php`に以下のコードを追加：**
+**`config/route.php` に以下のコードを追加：**
 ```php
 use support\Request;
 use Webman\Route;
 
 Route::fallback(function(Request $request){
-    // ajaxリクエスト時にjsonを返す
+    // AJAX リクエストでは JSON を返す
     if ($request->expectsJson()) {
         return json(['code' => 404, 'msg' => '404 not found']);
     }
-    // ページリクエスト時には404.htmlテンプレートを返す
+    // ページリクエストでは 404.html テンプレートを返す
     return view('404', ['error' => 'some error'])->withStatus(404);
 });
 ```
 
-## カスタム500ページ
-**`app/view/500.html`を新規作成**
+# カスタム405
+
+webman-framework 1.5.23 から、フォールバックコールバックは `status` パラメータをサポートします。404 はリクエストが存在しないこと、405 は現在のリクエストメソッドがサポートされていないことを示します（例：`Route::post()` で定義したルートを GET でアクセスする場合）。
+
+```php
+use support\Request;
+use Webman\Route;
+
+Route::fallback(function(Request $request, $status) {
+    $map = [
+        404 => '404 not found',
+        405 => '405 method not allowed',
+    ];
+    return response($map[$status], $status);
+});
+```
+
+# カスタム500
+
+**`app/view/500.html` を新規作成**
 
 ```html
 <!doctype html>
@@ -51,7 +68,7 @@ Route::fallback(function(Request $request){
 </html>
 ```
 
-**`app/exception/Handler.php`を新規作成** (ディレクトリが存在しない場合は作成してください)
+**`app/exception/Handler.php` を新規作成**（ディレクトリが存在しない場合は作成してください）
 ```php
 <?php
 
@@ -64,7 +81,7 @@ use Webman\Http\Response;
 class Handler extends \support\exception\Handler
 {
     /**
-     * レンダリングと返信
+     * レンダリングして返す
      * @param Request $request
      * @param Throwable $exception
      * @return Response
@@ -72,17 +89,17 @@ class Handler extends \support\exception\Handler
     public function render(Request $request, Throwable $exception) : Response
     {
         $code = $exception->getCode();
-        // ajaxリクエスト時にはjsonデータを返す
+        // AJAX リクエストでは JSON データを返す
         if ($request->expectsJson()) {
             return json(['code' => $code ? $code : 500, 'msg' => $exception->getMessage()]);
         }
-        // ページリクエスト時には500.htmlテンプレートを返す
+        // ページリクエストでは 500.html テンプレートを返す
         return view('500', ['exception' => $exception], '')->withStatus(500);
     }
 }
 ```
 
-**`config/exception.php`を構成**
+**`config/exception.php` を設定**
 ```php
 return [
     '' => \app\exception\Handler::class,

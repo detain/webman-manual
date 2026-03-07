@@ -1,16 +1,15 @@
 # Publicação
 
-Os desenvolvedores podem enviar plugins com direitos autorais para a loja de aplicativos, ajudando outras pessoas e também se beneficiando.
+Os desenvolvedores podem enviar os seus plugins com direitos autorais para o mercado de aplicações, ajudando outros e beneficiando-se ao mesmo tempo.
+Endereço de publicação: https://www.workerman.net/app/create
 
-Link para a publicação: https://www.workerman.net/app/create
-
-Nota: O **número da versão** fornecido durante a publicação deve ser consistente com o número da versão em `plugin/{插件}/config/app.php`.
+Nota: O **número da versão** indicado na publicação deve corresponder ao de `plugin/{plugin}/config/app.php`.
 
 ## Restrições de publicação
-**Os seguintes tipos de aplicativos não são suportados para publicação:**
+**As seguintes categorias de aplicações não são suportadas para publicação:**
 
-**Financeiros:** Incluindo, mas não se limitando a, pagamentos agregados, cashback, empréstimos, leilões, moedas digitais, blockchain.
-**Jogos de azar:** Incluindo, mas não se limitando a, sorteios, raspadinhas, touro, cartões pré-pagos, etc.
-**Coleta de dados:** Incluindo, mas não se limitando a, novels, quadrinhos, filmes, compartilhamento de recursos.
-**Aplicativos relacionados ao exterior:** Incluindo, mas não se limitando a, hospedagem na nuvem, VPN.
-**Chat e atendimento ao cliente:** Não são suportados para publicação no momento.
+**Financeira** Incluindo, entre outros: pagamentos agregados, reembolsos, empréstimos, leilões, criptomoeda, blockchain  
+**Jogos de mesa e cartas** Incluindo, entre outros: loteria, caça ao tesouro, NiuNiu, cartões pré-pagos, etc.  
+**Recolha de dados** Incluindo, entre outros: romances, banda desenhada, filmes, séries, partilha de recursos, etc.  
+**Aplicações no estrangeiro** Incluindo, entre outros: alojamento em nuvem, VPN, etc.  
+**Chat e atendimento ao cliente** Atualmente não suportados para publicação.

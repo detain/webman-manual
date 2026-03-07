@@ -1,9 +1,9 @@
-# webman快速上手简单示例
+# مثال بسيط للبدء السريع بـ webman
 
-## 返回字符串
-**新建控制器**
+## إرجاع نص
+**إنشاء وحدة تحكم جديدة**
 
-新建文件 `app/controller/UserController.php` 如下
+أنشئ الملف `app/controller/UserController.php` كما يلي
 
 ```php
 <?php
@@ -16,22 +16,22 @@ class UserController
     public function hello(Request $request)
     {
         $default_name = 'webman';
-        // 从get请求里获得name参数，如果没有传递name参数则返回$default_name
+        // الحصول على المعلمة name من طلب GET، وإرجاع $default_name إذا لم يتم تمرير name
         $name = $request->get('name', $default_name);
-        // 向浏览器返回字符串
+        // إرجاع النص إلى المتصفح
         return response('hello ' . $name);
     }
 }
 ```
 
-**访问**
+**الوصول**
 
-在浏览器里访问 `http://127.0.0.1:8787/user/hello?name=tom`
+افتح `http://127.0.0.1:8787/user/hello?name=tom` في المتصفح
 
-浏览器将返回 `hello tom`
+ستعرض المتصفح `hello tom`
 
-## 返回json
-更改文件 `app/controller/UserController.php` 如下
+## إرجاع JSON
+غيّر الملف `app/controller/UserController.php` كما يلي
 
 ```php
 <?php
@@ -54,24 +54,24 @@ class UserController
 }
 ```
 
-**访问**
+**الوصول**
 
-在浏览器里访问 `http://127.0.0.1:8787/user/hello?name=tom`
+افتح `http://127.0.0.1:8787/user/hello?name=tom` في المتصفح
 
-浏览器将返回 `{"code":0,"msg":"ok","data":"tom""}`
+ستعرض المتصفح `{"code":0,"msg":"ok","data":"tom"}`
 
-使用json助手函数返回数据将自动加上一个header头 `Content-Type: application/json`
+استخدام الدالة المساعدة json لإرجاع البيانات سيضيف تلقائياً رأس `Content-Type: application/json`
 
-## 返回xml
-同理，使用助手函数 `xml($xml)` 将返回一个带 `Content-Type: text/xml` 头的`xml`响应。
+## إرجاع XML
+وبالمثل، استخدام الدالة المساعدة `xml($xml)` سيعيد استجابة `xml` مع رأس `Content-Type: text/xml`.
 
-其中`$xml`参数可以是`xml`字符串，也可以是`SimpleXMLElement`对象
+يمكن أن تكون المعلمة `$xml` إما سلسلة `xml` أو كائن `SimpleXMLElement`
 
-## 返回jsonp
-同理，使用助手函数 `jsonp($data, $callback_name = 'callback')` 将返回一个`jsonp`响应。
+## إرجاع JSONP
+وبالمثل، استخدام الدالة المساعدة `jsonp($data, $callback_name = 'callback')` سيعيد استجابة `jsonp`.
 
-## 返回视图
-更改文件 `app/controller/UserController.php` 如下
+## إرجاع واجهة عرض
+غيّر الملف `app/controller/UserController.php` كما يلي
 
 ```php
 <?php
@@ -90,7 +90,7 @@ class UserController
 }
 ```
 
-新建文件 `app/view/user/hello.html` 如下
+أنشئ الملف `app/view/user/hello.html` كما يلي
 
 ```html
 <!doctype html>
@@ -105,9 +105,7 @@ hello <?=htmlspecialchars($name)?>
 </html>
 ```
 
-在浏览器里访问 `http://127.0.0.1:8787/user/hello?name=tom`
-将返回一个内容为 `hello tom` 的html页面。
+افتح `http://127.0.0.1:8787/user/hello?name=tom` في المتصفح
+ستتم إعادة صفحة HTML بمحتوى `hello tom`.
 
-注意：webman默认使用的是php原生语法作为模版。如果想使用其它视图参见[视图](view.md)。
-
-
+ملاحظة: يستخدم webman افتراضياً بناء جملة PHP الأصلي كقالب. لاستخدام واجهات عرض أخرى، راجع [الواجهات](view.md).

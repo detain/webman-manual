@@ -74,7 +74,7 @@ return [
 ```
 
 ## 多通道
-monolog支持多通道，默认使用`default`通道。如果想增加一個`log2`通道，配置類似如下：
+monolog支持多通道，默認使用`default`通道。如果想增加一個`log2`通道，配置類似如下：
 ```php
 return [
     // 默認日誌通道
@@ -101,7 +101,7 @@ return [
     ],
     // log2通道
     'log2' => [
-        // 處理默認通道的handler，可以設置多個
+        // 處理log2通道的handler，可以設置多個
         'handlers' => [
             [   
                 // handler類的名字

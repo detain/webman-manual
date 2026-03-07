@@ -1,22 +1,22 @@
-# 业务初始化
+# تهيئة الأعمال
 
-有时我们需要在进程启动后做一些业务初始化，这个初始化在进程生命周期只执行一次，例如进程启动后设置一个定时器，或者初始化数据库连接等。下面我们将对此进行讲解。
+في بعض الأحيان نحتاج إلى تنفيذ بعض عمليات تهيئة الأعمال بعد بدء العملية، وتُنفَّذ هذه التهيئة مرة واحدة فقط خلال دورة حياة العملية، مثل إعداد مؤقت بعد بدء العملية أو تهيئة اتصال قاعدة البيانات وغير ذلك. فيما يلي سنشرح هذا الموضوع.
 
-## 原理
-根据 **[执行流程](process.md)** 中的说明，webman在进程启动后会加载`config/bootstrap.php`(包括`config/plugin/*/*/bootstrap.php`)中设置的类，并执行类的start方法。我们在start方法中可以加入业务代码，即可完成进程启动后业务初始化操作。
+## المبدأ
+وفقًا لما ورد في **[سير التنفيذ](process.md)**، يقوم webman بعد بدء العملية بتحميل الفئات المعرفة في `config/bootstrap.php` (بما فيها `config/plugin/*/*/bootstrap.php`) وينفذ طريقة start للفئة. يمكننا إضافة كود الأعمال إلى طريقة start لإكمال تهيئة الأعمال بعد بدء العملية.
 
-## 流程
-假设我们要做一个定时器，用于定时上报当前进程的内存占用，这个类取名为`MemReport`。
+## الإجراء
+لنفترض أننا نريد إنشاء مؤقت للإبلاغ الدوري عن استهلاك الذاكرة للعملية الحالية، ونسمي هذه الفئة `MemReport`.
 
-#### 执行命令
+#### تنفيذ الأمر
 
-执行命令 `php webman make:bootstrap MemReport` 生成初始化文件 `app/bootstrap/MemReport.php`
+نفّذ الأمر `php webman make:bootstrap MemReport` لإنشاء ملف التهيئة `app/bootstrap/MemReport.php`
 
-> **提示**
-> 如果你的webman没有安装 `webman/console`，执行命令 `composer require webman/console` 安装
+> **تلميح**
+> إذا لم يكن لديك `webman/console` مثبتًا، نفّذ الأمر `composer require webman/console` للتثبيت
 
-#### 编辑初始化文件
-编辑`app/bootstrap/MemReport.php`，内容类似如下：
+#### تعديل ملف التهيئة
+عدّل الملف `app/bootstrap/MemReport.php` بمحتوى شبيه بالتالي:
 ```php
 <?php
 
@@ -28,16 +28,16 @@ class MemReport implements Bootstrap
 {
     public static function start($worker)
     {
-        // 是否是命令行环境 ?
+        // هل هي بيئة سطر الأوامر؟
         $is_console = !$worker;
         if ($is_console) {
-            // 如果你不想命令行环境执行这个初始化，则在这里直接返回
+            // إذا كنت لا تريد تنفيذ هذه التهيئة في بيئة سطر الأوامر، أعد مباشرةً هنا
             return;
         }
         
-        // 每隔10秒执行一次
+        // تنفيذ كل 10 ثوانٍ
         \Workerman\Timer::add(10, function () {
-            // 为了方便演示，这里使用输出代替上报过程
+            // من أجل التوضيح، نستخدم المخرجات بدل عملية الإبلاغ
             echo memory_get_usage() . "\n";
         });
         
@@ -46,23 +46,23 @@ class MemReport implements Bootstrap
 }
 ```
 
-> **提示**
-> 在使用命令行时，框架也会执行`config/bootstrap.php`配置的start方法，我们可以通过`$worker`是否是null来判断是否是命令行环境，从而决定是否执行业务初始化代码。
+> **تلميح**
+> عند استخدام سطر الأوامر، سينفّذ الإطار أيضًا طريقة start المعرفة في `config/bootstrap.php`، ويمكننا التحقق مما إذا كانت البيئة هي سطر الأوامر عبر التحقق من كون `$worker` يساوي null، ومن ثمّ نقرر ما إذا كنا سننفذ كود تهيئة الأعمال أم لا.
 
-#### 配置随进程启动
-打开 `config/bootstrap.php`将`MemReport`类加入到启动项中。
+#### الإعداد لبدء العملية
+افتح `config/bootstrap.php` وأضف فئة `MemReport` إلى عناصر البدء.
 ```php
 return [
-    // ...这里省略了其它配置...
+    // ...الإعدادات الأخرى محذوفة هنا...
     
     app\bootstrap\MemReport::class,
 ];
 ```
 
-这样我们就完成了一个业务初始化流程。
+بهذا نكون قد أكملنا إجراء تهيئة الأعمال.
 
-## 补充说明
-[自定义进程](../process.md)启动后也会执行`config/bootstrap.php`配置的start方法，我们可以通过`$worker->name` 来判断当前进程是什么进程，进一步可以通过`$worker->id`判断是几号进程，然后决定是否在该进程执行你的业务初始化代码，例如我们只需要在webman的0号进程执行，则`MemReport.php`内容类似如下：
+## توضيحات إضافية
+تقوم [العمليات المخصصة](../process.md) بعد بدئها بتنفيذ طريقة start المعرفة في `config/bootstrap.php`. يمكننا استخدام `$worker->name` لتحديد العملية الحالية، واستخدام `$worker->id` لتحديد رقم العملية، ومن ثمّ نقرر تنفيذ كود تهيئة الأعمال في تلك العملية أم لا. فعلى سبيل المثال، إذا كنا نريد التنفيذ فقط في العملية رقم 0 من webman، فمحتوى `MemReport.php` يكون شبيهًا بالتالي:
 ```php
 <?php
 
@@ -74,21 +74,21 @@ class MemReport implements Bootstrap
 {
     public static function start($worker)
     {
-        // 是否是命令行环境 ?
+        // هل هي بيئة سطر الأوامر؟
         $is_console = !$worker;
         if ($is_console) {
-            // 如果你不想命令行环境执行这个初始化，则在这里直接返回
+            // إذا كنت لا تريد تنفيذ هذه التهيئة في بيئة سطر الأوامر، أعد مباشرةً هنا
             return;
         }
 
-        // 只在webman的0号进程执行
-        if ($worker->name != 'webman' && $worker->id != 0) {
+        // التنفيذ فقط في العملية رقم 0 من webman
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         
-        // 每隔10秒执行一次
+        // تنفيذ كل 10 ثوانٍ
         \Workerman\Timer::add(10, function () {
-            // 为了方便演示，这里使用输出代替上报过程
+            // من أجل التوضيح، نستخدم المخرجات بدل عملية الإبلاغ
             echo memory_get_usage() . "\n";
         });
         

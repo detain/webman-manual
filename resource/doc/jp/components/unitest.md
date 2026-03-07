@@ -1,4 +1,3 @@
-
 # ユニットテスト
 
 ## インストール
@@ -7,8 +6,43 @@
 composer require --dev phpunit/phpunit
 ```
 
+## 設定
+
+プロジェクトのルートディレクトリに設定ファイル `phpunit.xml` を追加します。プロジェクトのニーズに合わせてカスタマイズできます。[phpunit.xml 設定オプションのドキュメント](https://docs.phpunit.de/en/12.4/configuration.html) をご参照ください。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="support/bootstrap.php"
+    cacheDirectory=".phpunit.cache"
+    executionOrder="depends,defects"
+    shortenArraysForExportThreshold="10"
+    requireCoverageMetadata="false"
+    beStrictAboutCoverageMetadata="true"
+    beStrictAboutOutputDuringTests="true"
+    displayDetailsOnPhpunitDeprecations="true"
+    failOnPhpunitDeprecation="true"
+    failOnRisky="true"
+    failOnWarning="true"
+    colors="true">
+    <testsuites>
+        <testsuite name="tests">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </source>
+</phpunit>
+
+```
+
 ## 使用法
-`tests/TestConfig.php`というファイルを作成し、データベース設定のテストに使用します。
+
+アプリケーション設定のテスト用に `tests/TestConfig.php` ファイルを作成します：
 
 ```php
 <?php
@@ -27,10 +61,20 @@ class TestConfig extends TestCase
     }
 }
 ```
-
+  
 ## 実行
 
-プロジェクトのルートディレクトリで、`./vendor/bin/phpunit --bootstrap support/bootstrap.php tests/TestConfig.php`を実行します。
+プロジェクトのルートディレクトリで全てのテストケースを実行します：
+
+```bash
+./vendor/bin/phpunit
+```
+
+プロジェクトのルートディレクトリで指定したテストケースを実行します：
+
+```bash
+./vendor/bin/phpunit tests/TestConfig.php
+```
 
 以下のような結果が表示されます：
 

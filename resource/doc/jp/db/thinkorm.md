@@ -1,27 +1,29 @@
-## ThinkORM
+# think-orm
 
-### ThinkORMのインストール
+[webman/think-orm](https://github.com/webman-php/think-orm) は [top-think/think-orm](https://github.com/top-think/think-orm) を基に開発されたデータベースコンポーネントで、コネクションプール、コルーチン環境および非コルーチン環境の両方をサポートしています。
+
+## think-ormのインストール
 
 `composer require -W webman/think-orm`
 
-インストール後はrestart再起動が必要です（reloadは無効です）
+インストール後はrestart（再起動）が必要です（reloadは無効です）。
 
-> **ヒント**
-> インストールに失敗した場合、おそらくcomposerプロキシを使用しているためです。`composer config -g --unset repos.packagist` を実行してcomposerプロキシを解除してみてください。
+## 設定ファイル
 
-> [webman/think-orm](https://www.workerman.net/plugin/14) は、実際には`toptink/think-orm`を自動的にインストールするプラグインです。webmanのバージョンが`1.2`未満の場合、このプラグインを使用できません。その場合は、[手動でthink-ormをインストールして設定する](https://www.workerman.net/a/1289) 記事を参照してください。
+実際の状況に応じて設定ファイル `config/think-orm.php` を修正してください。
 
-### 設定ファイル
-実際の状況に応じて`config/thinkorm.php` 設定ファイルを修正してください。
+## ドキュメント
 
-### 使用方法
+https://www.kancloud.cn/manual/think-orm
+
+## 使用方法
 
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use think\facade\Db;
+use support\think\Db;
 
 class FooController
 {
@@ -33,14 +35,15 @@ class FooController
 }
 ```
 
-### モデルの作成
+## モデルの作成
 
-ThinkOrmモデルは `think\Model` を継承します。以下のようになります。
+think-ormモデルは `support\think\Model` を継承します。以下を参考にしてください。
+
 ```
 <?php
 namespace app\model;
 
-use think\Model;
+use support\think\Model;
 
 class User extends Model
 {
@@ -58,17 +61,17 @@ class User extends Model
      */
     protected $pk = 'id';
 
-    
 }
 ```
 
-また、以下のコマンドを使用してthinkormベースのモデルを作成することもできます。
+以下のコマンドでも、think-ormベースのモデルを作成できます。
+
 ```
 php webman make:model テーブル名
 ```
 
 > **ヒント**
-> このコマンドを使用するには、`webman/console` をインストールする必要があります。インストールコマンドは`composer require webman/console ^1.2.13`です。
+> このコマンドには `webman/console` のインストールが必要です。インストールコマンド：`composer require webman/console ^1.2.13`
 
 > **注意**
-> make:model コマンドは、親プロジェクトが`illuminate/database`を使用していることが検出された場合には、`illuminate/database`ベースのモデルファイルを作成し、thinkormベースのモデルではありません。この場合は、追加パラメータtpを使用して強制的にthink-ormのモデルを生成することができます。コマンドは次のようになります： `php webman make:model テーブル名 tp`（機能しない場合は`webman/console`をアップグレードしてください）。
+> make:model コマンドは、親プロジェクトで `illuminate/database` を使用していることを検出すると、think-orm ではなく `illuminate/database` ベースのモデルファイルを作成します。その場合は、追加パラメータ `tp` を付けて think-orm のモデルを強制的に生成できます。例：`php webman make:model テーブル名 tp`（動作しない場合は `webman/console` をアップグレードしてください）。

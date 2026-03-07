@@ -1,4 +1,5 @@
-# Constructor de consultas
+# Consultas de base de datos (componente Laravel)
+
 ## Obtener todas las filas
 ```php
 <?php
@@ -381,6 +382,9 @@ Si necesitas vaciar una tabla, puedes usar el método truncate, que eliminará t
 ```php
 Db::table('users')->truncate();
 ```
+
+## Transacciones
+Consulte [Transacciones de base de datos](../others/transaction.md)
 
 ## Bloqueo Pesimista
 El constructor de consultas también incluye funciones que te permiten implementar "bloqueos pesimistas" en la sintaxis select. Si deseas implementar un "bloqueo compartido" en la consulta, puedes usar el método sharedLock. El bloqueo compartido evita que las columnas de datos seleccionadas sean modificadas hasta que la transacción se confirme:

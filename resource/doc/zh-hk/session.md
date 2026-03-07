@@ -1,4 +1,4 @@
-# 會話管理
+# webman session 管理
 
 ## 範例
 ```php
@@ -19,47 +19,51 @@ class UserController
 }
 ```
 
-通過`$request->session();` 取得`Workerman\Protocols\Http\Session`實例，並通過實例的方法來增加、修改、刪除會話資料。
+透過 `$request->session();` 取得 `Workerman\Protocols\Http\Session` 實例，並透過實例的方法來新增、修改、刪除 session 資料。
 
-> 注意：會話對象銷毀時會自動保存會話資料，因此不要將`$request->session()` 返回的對象保存在全局陣列或者類成員中導致會話無法保存。
+> **注意**
+> session 物件銷毀時會自動儲存 session 資料
+> 將 session 物件儲存到全域變數會阻止 session 銷毀，導致無法自動儲存 session 資料，此時需手動呼叫 `$session->save()` 儲存
 
-## 獲取所有會話資料
+## 取得所有 session 資料
 ```php
 $session = $request->session();
 $all = $session->all();
 ```
-返回的是一個陣列。如果沒有任何會話資料，則返回一個空陣列。
+回傳值為陣列。若沒有任何 session 資料，則回傳空陣列。
 
-## 獲取會話中某個值
+
+## 取得 session 中某個值
 ```php
 $session = $request->session();
 $name = $session->get('name');
 ```
-如果數據不存在則返回null。
+若資料不存在則回傳 null。
 
-你也可以給get方法第二個參數傳遞一個默認值，如果會話陣列中沒找到對應值則返回默認值。例如：
+你也可以在 get 方法的第二個參數傳入預設值，若 session 陣列中沒找到對應值則回傳該預設值。例如：
 ```php
 $session = $request->session();
 $name = $session->get('name', 'tom');
 ```
 
-## 存儲會話
-存儲某一項數據時用set方法。
+
+## 儲存 session
+儲存單一筆資料時使用 set 方法。
 ```php
 $session = $request->session();
 $session->set('name', 'tom');
 ```
-set沒有返回值，會話對象銷毀時會自動保存。
+set 沒有回傳值，session 物件銷毀時 session 會自動儲存。
 
-當存儲多個值時使用put方法。
+當儲存多個值時使用 put 方法。
 ```php
 $session = $request->session();
 $session->put(['name' => 'tom', 'age' => 12]);
 ```
-同樣的，put也沒有返回值。
+同樣地，put 也沒有回傳值。
 
-## 刪除會話資料
-刪除某個或者某些會話資料時用`forget`方法。
+## 刪除 session 資料
+刪除單一項或多項 session 資料時使用 `forget` 方法。
 ```php
 $session = $request->session();
 // 刪除一項
@@ -68,63 +72,64 @@ $session->forget('name');
 $session->forget(['name', 'age']);
 ```
 
-另外系統提供了delete方法，與forget方法區別是，delete只能刪除一項。
+另外系統提供了 delete 方法，與 forget 方法不同的是，delete 只能刪除一項。
 ```php
 $session = $request->session();
 // 等同於 $session->forget('name');
 $session->delete('name');
 ```
 
-## 獲取並刪除會話某個值
+## 取得並刪除 session 某個值
 ```php
 $session = $request->session();
 $name = $session->pull('name');
 ```
-效果與如下代碼相同
+效果與以下程式碼相同
 ```php
 $session = $request->session();
-$value = $session->get($name);
-$session->delete($name);
+$value = $session->get('name');
+$session->delete('name');
 ```
-如果對應會話不存在，則返回null。
+若對應的 session 不存在，則回傳 null。
 
-## 刪除所有會話資料
+
+## 刪除所有 session 資料
 ```php
 $request->session()->flush();
 ```
-沒有返回值，會話對象銷毀時會自動從存儲中刪除。
+沒有回傳值，session 物件銷毀時 session 會自動從儲存中刪除。
 
-## 判斷對應會話資料是否存在
+
+## 判斷對應 session 資料是否存在
 ```php
 $session = $request->session();
 $has = $session->has('name');
 ```
-以上當對應的會話不存在或者對應的會話值為null時返回false，否則返回true。
+以上當對應的 session 不存在或對應的 session 值為 null 時回傳 false，否則回傳 true。
 
 ```php
 $session = $request->session();
 $has = $session->exists('name');
 ```
-以上代碼也是用來判斷會話數據是否存在，區別是當對應的會話項值為null時，也返回true。
+以上程式碼也可用來判斷 session 資料是否存在，差別在於當對應的 session 項值為 null 時，也會回傳 true。
 
-## 助手函數session()
-> 2020-12-09 新增
+## 輔助函數 session()
 
-webman提供了助手函數`session()`完成相同的功能。
+webman 提供了輔助函數 `session()` 來完成相同功能。
 ```php
-// 獲取session實例
+// 取得 session 實例
 $session = session();
-// 等價於
+// 等同於
 $session = $request->session();
 
-// 獲取某個值
+// 取得某個值
 $value = session('key', 'default');
-// 等價於
+// 等同於
 $value = session()->get('key', 'default');
-// 等於
+// 等同於
 $value = $request->session()->get('key', 'default');
 
-// 給session賦值
+// 給 session 賦值
 session(['key1'=>'value1', 'key2' => 'value2']);
 // 相當於
 session()->put(['key1'=>'value1', 'key2' => 'value2']);
@@ -132,30 +137,31 @@ session()->put(['key1'=>'value1', 'key2' => 'value2']);
 $request->session()->put(['key1'=>'value1', 'key2' => 'value2']);
 
 ```
-## 設定檔
-會話設定檔位於`config/session.php`，內容類似如下：
 
+
+## 設定檔
+session 設定檔位於 `config/session.php`，內容類似如下：
 ```php
 use Webman\Session\FileSessionHandler;
 use Webman\Session\RedisSessionHandler;
 use Webman\Session\RedisClusterSessionHandler;
 
 return [
-    // FileSessionHandler::class 或者 RedisSessionHandler::class 或者 RedisClusterSessionHandler::class 
+    // FileSessionHandler::class 或 RedisSessionHandler::class 或 RedisClusterSessionHandler::class 
     'handler' => FileSessionHandler::class,
     
-    // handler為FileSessionHandler::class時值為file，
-    // handler為RedisSessionHandler::class時值為redis
-    // handler為RedisClusterSessionHandler::class時值為redis_cluster 即Redis集群
+    // handler 為 FileSessionHandler::class 時值為 file，
+    // handler 為 RedisSessionHandler::class 時值為 redis
+    // handler 為 RedisClusterSessionHandler::class 時值為 redis_cluster（即 Redis 叢集）
     'type'    => 'file',
 
-    // 不同的handler使用不同的配置
+    // 不同的 handler 使用不同的設定
     'config' => [
-        // type為file時的配置
+        // type 為 file 時的設定
         'file' => [
             'save_path' => runtime_path() . '/sessions',
         ],
-        // type為redis時的配置
+        // type 為 redis 時的設定
         'redis' => [
             'host'      => '127.0.0.1',
             'port'      => 6379,
@@ -173,50 +179,19 @@ return [
         
     ],
 
-    'session_name' => 'PHPSID', // 存儲session_id的cookie名
-    
-    // === 以下配置需要 webman-framework>=1.3.14 workerman>=4.0.37 ===
-    'auto_update_timestamp' => false,  // 是否自動刷新session，默认關閉
-    'lifetime' => 7*24*60*60,          // session過期時間
-    'cookie_lifetime' => 365*24*60*60, // 存儲session_id的cookie過期時間
-    'cookie_path' => '/',              // 存儲session_id的cookie路徑
-    'domain' => '',                    // 存儲session_id的cookie域名
-    'http_only' => true,               // 是否開啟httpOnly，默认開啟
-    'secure' => false,                 // 僅在https下開啟session，默认關閉
-    'same_site' => '',                 // 用於防止CSRF攻擊和使用者追蹤，可選值strict/lax/none
-    'gc_probability' => [1, 1000],     // 回收session的機率
+    'session_name' => 'PHPSID', // 儲存 session_id 的 cookie 名稱
+    'auto_update_timestamp' => false,  // 是否自動重新整理 session，預設關閉
+    'lifetime' => 7*24*60*60,          // session 過期時間
+    'cookie_lifetime' => 365*24*60*60, // 儲存 session_id 的 cookie 過期時間
+    'cookie_path' => '/',              // 儲存 session_id 的 cookie 路徑
+    'domain' => '',                    // 儲存 session_id 的 cookie 網域
+    'http_only' => true,               // 是否開啟 httpOnly，預設開啟
+    'secure' => false,                 // 僅在 https 下開啟 session，預設關閉
+    'same_site' => '',                 // 用於防止 CSRF 攻擊與使用者追蹤，可選值 strict/lax/none
+    'gc_probability' => [1, 1000],     // 回收 session 的機率
 ];
 ```
 
-> **備註**
-> 從webman 1.4.0 開始，SessionHandler的命名空間已更改為
-> use Webman\Session\FileSessionHandler;
-> use Webman\Session\RedisSessionHandler;
-> use Webman\Session\RedisClusterSessionHandler;
-> 原本為
-> use Webman\FileSessionHandler;  
-> use Webman\RedisSessionHandler;  
-> use Webman\RedisClusterSessionHandler;  
-> 更改後請留意 namespace 的調整。
+## 安全性
+使用 session 時不建議直接儲存類的實例物件，尤其來自不可控來源的類實例，反序列化時可能造成潛在安全風險。
 
-
-## 有效期設定
-當webman-framework < 1.3.14 時，webman中session過期時間需在`php.ini`設定。
-
-```ini
-session.gc_maxlifetime = x
-session.cookie_lifetime = x
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-假設設定有效期為1440秒，則配置如下：
-```ini
-session.gc_maxlifetime = 1440
-session.cookie_lifetime = 1440
-session.gc_probability = 1
-session.gc_divisor = 1000
-```
-
-> **提示**
-> 可使用命令 `php --ini` 來查找`php.ini`的位置。

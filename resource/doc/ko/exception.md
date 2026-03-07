@@ -66,11 +66,11 @@ class FooController
 {
     public function index(Request $request)
     {
-        $this->chackInpout($request->post());
+        $this->checkInput($request->post());
         return response('hello index');
     }
     
-    protected function chackInpout($input)
+    protected function checkInput($input)
     {
         if (!isset($input['token'])) {
             throw new BusinessException('매개변수 오류', 3000);
@@ -84,8 +84,8 @@ class FooController
 {"code": 3000, "msg": "매개변수 오류"}
 ```
 
-> **참고:**
-> 비즈니스 예외 BusinessException은 비즈니스에서 예상 가능하므로, 프레임워크가 치명적 오류로 간주하지 않으며 로그를 기록하지 않습니다.
+> **참고**
+> 비즈니스 예외 BusinessException은 try-catch로 캐치할 필요가 없습니다. 프레임워크가 자동으로 캐치하여 요청 유형에 맞는 출력을 반환합니다.
 
 ## 사용자 정의 비즈니스 예외
 

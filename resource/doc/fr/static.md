@@ -1,19 +1,23 @@
-## Traitement des fichiers statiques
+# webman – Traitement des fichiers statiques
+
 webman prend en charge l'accès aux fichiers statiques, qui sont tous situés dans le répertoire `public`. Par exemple, lors de l'accès à `http://127.0.0.8787/upload/avatar.png`, il s'agit en réalité de l'accès à `{répertoire principal du projet}/public/upload/avatar.png`.
 
 > **Remarque**
-> À partir de la version 1.4, webman prend en charge les plugins d'application. L'accès aux fichiers statiques commençant par `/app/xx/nom_du_fichier` correspond en réalité à l'accès au répertoire `public` du plugin d'application. Autrement dit, à partir de webman >=1.4.0, l'accès au répertoire `{répertoire principal du projet}/public/app/` n'est pas pris en charge.
+> L'accès aux fichiers statiques commençant par `/app/xx/nom_du_fichier` correspond en réalité à l'accès au répertoire `public` du plugin d'application. En d'autres termes, l'accès au répertoire `{répertoire principal du projet}/public/app/` et à ses sous-répertoires n'est pas pris en charge.
 > Pour plus d'informations, veuillez consulter le document sur les [plugins d'application](./plugin/app.md).
 
-### Désactiver la prise en charge des fichiers statiques
-Si la prise en charge des fichiers statiques n'est pas nécessaire, modifiez le fichier `config/static.php` pour passer l'option `enable` à `false`. Une fois la prise en charge désactivée, l'accès à tous les fichiers statiques renverra un code 404.
+## Désactiver la prise en charge des fichiers statiques
 
-### Changement du répertoire des fichiers statiques
-Par défaut, webman utilise le répertoire public comme répertoire des fichiers statiques. Si vous souhaitez le modifier, veuillez modifier la fonction d'assistance `public_path()` dans le fichier `support/helpers.php`.
+Si la prise en charge des fichiers statiques n'est pas nécessaire, ouvrez le fichier `config/static.php` et passez l'option `enable` à `false`. Une fois la prise en charge désactivée, l'accès à tous les fichiers statiques renverra un code 404.
 
-### Middleware pour les fichiers statiques
+## Changer le répertoire des fichiers statiques
+
+Par défaut, webman utilise le répertoire `public` comme répertoire des fichiers statiques. Pour le modifier, éditez la fonction d'assistance `public_path()` dans le fichier `support/helpers.php`.
+
+## Middleware pour les fichiers statiques
+
 webman inclut par défaut un middleware pour les fichiers statiques, situé dans `app/middleware/StaticFile.php`.
-Parfois, nous devons effectuer des traitements sur les fichiers statiques, par exemple ajouter des en-têtes HTTP de type Cross-Origin Resource Sharing (CORS) ou interdire l'accès aux fichiers commençant par un point (`.`). Cela peut être réalisé à l'aide de ce middleware.
+Parfois, nous devons effectuer des traitements sur les fichiers statiques, par exemple ajouter des en-têtes HTTP CORS ou interdire l'accès aux fichiers commençant par un point (`.`). Ce middleware peut être utilisé pour cela.
 
 Le contenu de `app/middleware/StaticFile.php` est similaire à ce qui suit :
 ```php

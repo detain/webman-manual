@@ -1,20 +1,18 @@
 # Componente de paginação
 
-## jasongrimes/php-paginator
-
-### Endereço do projeto
+## Endereço do projeto
 
 https://github.com/jasongrimes/php-paginator
   
-### Instalação
+## Instalação
 
 ```php
 composer require "jasongrimes/paginator:^1.0.3"
 ```
   
-### Utilização
+## Utilização
 
-Crie um novo arquivo `app/controller/UserController.php`
+Criar `app/controller/UserController.php`
 ```php
 <?php
 namespace app\controller;
@@ -39,12 +37,12 @@ class UserController
     
 }
 ```
-**Modelo (nativo php)**
-Crie um novo modelo em app/view/user/get.html
+**Modelo (PHP nativo)**
+Criar modelo `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- Suporte embutido para o estilo de paginação do Bootstrap -->
+  <!-- Suporte embutido para estilos de paginação do Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -55,12 +53,12 @@ Crie um novo modelo em app/view/user/get.html
 </html>
 ```
 
-**Modelo (twig)**
-Crie um novo modelo em app/view/user/get.html
+**Modelo (Twig)**
+Criar modelo `app/view/user/get.html`
 ```html
 <html>
 <head>
-  <!-- Suporte embutido para o estilo de paginação do Bootstrap -->
+  <!-- Suporte embutido para estilos de paginação do Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -73,12 +71,12 @@ Crie um novo modelo em app/view/user/get.html
 </html>
 ```
 
-**Modelo (blade)**
-Crie um novo modelo em app/view/user/get.blade.php
+**Modelo (Blade)**
+Criar modelo `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-  <!-- Suporte embutido para o estilo de paginação do Bootstrap -->
+  <!-- Suporte embutido para estilos de paginação do Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -89,12 +87,12 @@ Crie um novo modelo em app/view/user/get.blade.php
 </html>
 ```
 
-**Modelo (thinkphp)**
-Crie um novo modelo em app/view/user/get.blade.php
+**Modelo (ThinkPHP)**
+Criar modelo `app/view/user/get.blade.php`
 ```html
 <html>
 <head>
-    <!-- Suporte embutido para o estilo de paginação do Bootstrap -->
+    <!-- Suporte embutido para estilos de paginação do Bootstrap -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -105,9 +103,10 @@ Crie um novo modelo em app/view/user/get.blade.php
 </html>
 ```
 
-Efeito visual:
+O resultado será o seguinte:
 ![](../../assets/img/paginator.png)
   
-### Mais conteúdo
+## Mais informações
 
 Visite https://github.com/jasongrimes/php-paginator
+  

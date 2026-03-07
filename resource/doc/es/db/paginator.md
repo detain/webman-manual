@@ -1,6 +1,6 @@
 # Paginación
 
-# 1. Método de paginación basado en el ORM de Laravel
+# Paginación basada en el ORM de Laravel
 `illuminate/database` de Laravel proporciona una manera conveniente de paginar.
 
 ## Instalación
@@ -138,8 +138,9 @@ Crear una plantilla llamada app/view/user/get.html
 El resultado es el siguiente:
 ![](../../assets/img/paginator.png)
 
-# 2. Método de paginación basado en el ORM de Thinkphp
-No es necesario instalar bibliotecas adicionales, solo es necesario haber instalado think-orm.
+# Paginación basada en el ORM de ThinkPHP
+
+No es necesario instalar bibliotecas adicionales; basta con tener think-orm instalado.
 
 ## Uso
 ```php

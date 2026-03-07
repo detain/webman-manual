@@ -1,30 +1,30 @@
-# 禁用函数检查
+# التحقق من الدوال المعطلة
 
-使用这个脚本检查是否有禁用函数。命令行运行```curl -Ss https://www.workerman.net/webman/check | php```
+استخدم هذا السكريبت للتحقق من وجود دوال معطلة. نفّذ الأمر التالي في سطر الأوامر: ```curl -Ss https://www.workerman.net/webman/check | php```
 
-如果有提示```Functions 函数名 has be disabled. Please check disable_functions in php.ini```说明webman依赖的函数被禁用，需要在php.ini中解除禁用才能正常使用webman。
-解除禁用参考以下方法任选其一即可。
+إذا ظهرت الرسالة ```Functions اسم_الدالة has been disabled. Please check disable_functions in php.ini``` فهذا يعني أن الدوال التي يعتمد عليها webman معطلة، ولا بد من إلغاء تعطيلها في ملف php.ini لاستخدام webman بشكل صحيح.
+لإلغاء التعطيل، اختر إحدى الطرق التالية.
 
-## 方法一
-安装`webman/console` 
+## الطريقة الأولى
+تثبيت `webman/console`
 ```
 composer require webman/console ^v1.2.35
 ```
 
-执行命令
+نفّذ الأمر التالي
 ```
 php webman fix-disable-functions
 ```
 
-## 方法二
+## الطريقة الثانية
 
-执行脚本 `curl -Ss https://www.workerman.net/webman/fix-disable-functions | php` 以解除禁用
+نفّذ السكريبت `curl -Ss https://www.workerman.net/webman/fix-disable-functions | php` لإلغاء التعطيل
 
-## 方法三
+## الطريقة الثالثة
 
-运行`php --ini` 找到php cli所使用的php.ini文件位置
+نفّذ الأمر `php --ini` للعثور على موقع ملف php.ini المستخدم من طرف php cli
 
-打开php.ini，找到`disable_functions`，解除以下函数的调用
+افتح ملف php.ini، وابحث عن `disable_functions`، وأزل الدوال التالية من قائمة التعطيل:
 ```
 stream_socket_server
 stream_socket_client
@@ -53,5 +53,3 @@ exec
 putenv
 getenv
 ```
-
-

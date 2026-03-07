@@ -202,8 +202,9 @@ class AccessControlTest implements MiddlewareInterface
 }
 ```
 
-> **Not**
-> CORS'un OPTIONS isteği gönderebileceği unutulmamalıdır. OPTIONS isteğinin denetleyiciye gitmesini istemiyorsak, direkt olarak boş bir yanıt döndürmeliyiz (`response('')`). İsteğinizin yönlendirilmesi gerekiyorsa, `Route::any(..)` veya `Route::add(['POST', 'OPTIONS'], ..)` kullanarak üzerinde bir rota belirlemelisiniz.
+> **İpucu**
+> Cross-origin istekleri OPTIONS ön uçuş istekleri tetikleyebilir. OPTIONS isteklerinin denetleyiciye ulaşmasını istemiyoruz, bu yüzden onları engellemek için doğrudan boş bir yanıt döndürüyoruz (`response('')`).
+> API'nizin yönlendirmeye ihtiyacı varsa, `Route::any(..)` veya `Route::add(['POST', 'OPTIONS'], ..)` kullanın.
 
 `config/middleware.php` içine global bir orta yazılım ekleyin:
 ```php
@@ -221,7 +222,6 @@ return [
 ## Açıklama
 
 - Middleware, genel middleware, uygulama middleware (yalnızca çoklu uygulama modunda geçerlidir, bkz. [Çoklu Uygulama](multiapp.md)) ve route (yol) middleware olarak üçe ayrılır.
-- Şu anda tek bir denetleyici için middleware desteği yoktur (ancak middleware içinde `$request->controller` kontrollerine benzer işlevsellik elde etmek için kontrol edilebilir).
 - Middleware yapılandırma dosyası konumu `config/middleware.php` içindedir.
 - Genel middleware yapılandırması `''` anahtarı altında yapılır.
 - Uygulama middleware yapılandırması belirli bir uygulama adının altında yapılır, örneğin
@@ -238,6 +238,31 @@ return [
         app\middleware\ApiOnly::class,
     ]
 ];
+```
+
+## Denetleyici Middleware ve Metot Middleware
+
+Açıklamalar (annotations) kullanarak, bir denetleyiciye veya denetleyicinin belirli metotlarına middleware atayabiliriz.
+
+```php
+<?php
+namespace app\controller;
+use app\middleware\Controller1Middleware;
+use app\middleware\Controller2Middleware;
+use app\middleware\Method1Middleware;
+use app\middleware\Method2Middleware;
+use support\annotation\Middleware;
+use support\Request;
+
+#[Middleware(Controller1Middleware::class, Controller2Middleware::class)]
+class IndexController
+{
+    #[Middleware(Method1Middleware::class, Method2Middleware::class)]
+    public function index(Request $request): string
+    {
+        return 'hello';
+    }
+}
 ```
 
 ## Route (Yol) Middleware
@@ -267,10 +292,8 @@ Route::group('/blog', function () {
 
 ## Middleware İnşa Fonksiyonuna Parametre Geçme
 
-> **Not**
-> Bu özellik webman-framework >= 1.4.8 sürümünde desteklenmektedir
+Yapılandırma dosyası doğrudan middleware örneklemesini destekler, böylece constructor üzerinden middleware'e parametre geçmek kolaylaşır.
 
-1.4.8 sürümünden itibaren, yapılandırma dosyası doğrudan middleware'i veya anonim işlevi örnekleyebilmektedir, bu şekilde middleware'e inşa fonksiyonu ile parametre geçmek kolaylaşır.
 Örneğin `config/middleware.php` dosyasında şu şekilde yapılandırma yapılabilir:
 
 ```php
@@ -278,9 +301,7 @@ return [
     // Genel middleware
     '' => [
         new app\middleware\AuthCheckTest($param1, $param2, ...),
-        function(){
-            return new app\middleware\AccessControlTest($param1, $param2, ...);
-        },
+        new app\middleware\AccessControlTest($param1, $param2, ...)
     ],
     // api uygulama middleware (uygulama middleware yalnızca çoklu uygulama modunda geçerlidir)
     'api' => [
@@ -289,21 +310,49 @@ return [
 ];
 ```
 
-Aynı zamanda route (yol) middleware de inşa fonksiyonu ile parametre geçebilir, örneğin `config/route.php` içinde:
+Aynı zamanda route (yol) middleware de constructor üzerinden parametre geçebilir, örneğin `config/route.php` içinde:
 
 ```php
 Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->middleware([
     new app\middleware\MiddlewareA($param1, $param2, ...),
-    function(){
-        return new app\middleware\MiddlewareB($param1, $param2, ...);
-    },
+    new app\middleware\MiddlewareB($param1, $param2, ...),
 ]);
 ```
 
+Middleware içinde parametre kullanım örneği:
+
+```php
+<?php
+namespace app\middleware;
+
+use Webman\MiddlewareInterface;
+use Webman\Http\Response;
+use Webman\Http\Request;
+
+class MiddlewareA implements MiddlewareInterface
+{
+    protected $param1;
+
+    protected $param2;
+
+    public function __construct($param1, $param2)
+    {
+        $this->param1 = $param1;
+        $this->param2 = $param2;
+    }
+
+    public function process(Request $request, callable $handler) : Response
+    {
+        var_dump($this->param1, $this->param2);
+        return $handler($request);
+    }
+}
+```
+
 ## Middleware Yürütme Sırası
-- Middleware yürütme sırası `genel middleware`-> `uygulama middleware`-> `route (yol) middleware` şeklindedir.
-- Birden fazla genel middleware olduğunda, yapılandırılan sıraya göre işlem yapılır (uygulama middleware ve route middleware de aynı prensibe göre çalışır).
-- 404 istekleri hiçbir middleware'i tetiklemez, genel middlewareleri de içermez.
+- Middleware yürütme sırası: `genel middleware` -> `uygulama middleware` -> `denetleyici middleware` -> `route (yol) middleware` -> `metot middleware`.
+- Aynı seviyede birden fazla middleware olduğunda, yapılandırılan sıraya göre çalışır.
+- 404 istekleri varsayılan olarak hiçbir middleware tetiklemez (yine de `Route::fallback(function(){})->middleware()` ile middleware eklenebilir).
 
 ## Route (Yol) Middleware'e Parametre Geçme (route->setParams)
 
@@ -379,9 +428,6 @@ class FooController
 ```
 ## Middleware, mevcut istek rota bilgilerini almak
 
-> **Not**
-> webman-framework >= 1.3.2 gereklidir
-
 `$request->route` kullanarak route objesini alabiliriz ve ilgili bilgileri almak için ilgili yöntemleri çağırabiliriz.
 
 **Route Ayarı**
@@ -423,14 +469,7 @@ class Hello implements MiddlewareInterface
 }
 ```
 
-> **Not**
-> `$route->param()` yöntemi için webman-framework >= 1.3.16 gereklidir.
-
-
 ## Middleware, istisnaları almak
-
-> **Not**
-> webman-framework >= 1.3.15 gereklidir
 
 Middleware içerisinde `$response->exception()` kullanarak işlem sırasında oluşan istisnaları alabiliriz.
 
@@ -471,9 +510,6 @@ class Hello implements MiddlewareInterface
 
 ## Süper Global Middleware
 
-> **Not**
-> Bu özellik için webman-framework >= 1.5.16 gereklidir
-
 Ana projenin küresel middleware'leri sadece ana projeyi etkiler, [uygulama eklentileri](app/app.md) üzerinde herhangi bir etkiye sahip değildir. Bazı durumlarda, tüm eklentileri de etkileyen bir middleware eklemek isteyebiliriz, bu durumda süper global middleware'i kullanabiliriz.
 
 `config/middleware.php` dosyasında aşağıdaki gibi yapılandırın:
@@ -492,16 +528,13 @@ return [
 
 ## Belirli bir eklentiye middleware ekleme
 
-> **Not**
-> Bu özellik için webman-framework >= 1.5.16 gereklidir
-
 Bazen [uygulama eklentileri](app/app.md) için belirli bir middleware eklemek isteyebiliriz, ancak eklentinin kodunu değiştirmek istemeyiz (çünkü güncellemelerde üzerine yazılabilir), bu durumda ana projede middleware ekleyebiliriz.
 
 `config/middleware.php` dosyasında aşağıdaki gibi yapılandırın:
 ```php
 return [
     'plugin.ai' => [], // ai eklentisine middleware ekleyin
-    'plugin.ai.admin' => [], // ai eklentisinin admin modülüne middleware ekleyin
+    'plugin.ai.admin' => [], // ai eklentisinin admin modülüne middleware ekleyin (plugin\ai\app\admin dizini)
 ];
 ```
 

@@ -1,15 +1,13 @@
 # Application Plugins
 
-> Application plugins require webman>=1.4.0
-
 ## Concept
-Build your own application quickly like building blocks.
+Build your own application quickly, like assembling building blocks.
 
 ## Introduction
-An application plugin is actually a complete application that can be installed as a plugin into the main project, allowing the main project to quickly gain a specific module or functionality. For example, if the main project needs a Q&A system, you can install a Q&A application plugin. If you need a shopping mall system, you can install a shopping mall application plugin. All plugins are independent and can be used immediately without affecting each other. They can be easily removed when not needed.
+An application plugin is a complete application that can be installed as a plugin into the main project, enabling the main project to quickly gain specific module functionality. For example, if the main project needs a Q&A system, you can install a Q&A application plugin; if it needs an e-commerce system, you can install an e-commerce application plugin. All plugins are independent of each other, plug-and-play, and can be removed with one click when no longer needed.
 
 ## Impact
-Application plugins greatly improve the reusability of webman projects. Developers can transform their own projects into plugins and provide them to other projects for installation, benefiting other projects and gaining profits themselves.
+Application plugins greatly improve the reusability of webman projects. Any developer can convert their project into a plugin and offer it for installation in other projects, benefiting those projects while gaining revenue for themselves.
 
-## Earning Profits
-webman provides an official [Application Marketplace](https://www.workerman.net/apps), where developers can submit their developed applications and earn profits from them.
+## Earning Revenue
+webman provides an official [Application Marketplace](https://www.workerman.net/apps) where developers can submit their developed applications and earn revenue from them.

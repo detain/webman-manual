@@ -1,17 +1,17 @@
 # भुगतान SDK
 
 
-### प्रोजेक्ट पता
+## प्रोजेक्ट पता
 
-https://github.com/yansongda/pay
+ https://github.com/yansongda/pay
 
-### स्थापना
+## स्थापना
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### उपयोग
+## उपयोग
 
 **अलीपे**
 
@@ -92,7 +92,7 @@ class PayController
 }
 ```
 
-**व्यापा**
+**WeChat**
 
 ```php
 <?php
@@ -162,6 +162,6 @@ class PayController
 }
 ```
 
-### अधिक सामग्री
+## अधिक जानकारी
 
-जाएं https://pay.yanda.net.cn/docs/2.x/overview
+भ्रमण करें https://pay.yanda.net.cn/docs/2.x/overview

@@ -1,48 +1,43 @@
-# webman是什么
-Webman是一款基于Workerman构建的高性能服务框架，集成了HTTP、WebSocket、TCP、UDP等多种模块。通过常驻内存、协程、连接池等先进技术，Webman不仅突破了传统PHP的性能瓶颈，还极大地扩展了其应用场景。
+# ما هو webman
 
-此外，Webman还提供了强大的插件机制，使开发者能够快速集成和复用其他开发者开发的功能模块。无论是构建网站、开发HTTP接口、实现即时通讯、搭建物联网系统，还是开发游戏、TCP/UDP服务、Unix Socket服务等，Webman都能轻松应对，展现出卓越的性能和灵活性。
+webman هو إطار عمل خدمة عالي الأداء مبني على Workerman، يدمج HTTP وWebSocket وTCP وUDP وغيرها من الوحدات. من خلال تقنيات متقدمة مثل الذاكرة الدائمة والـ coroutines وـ connection pools، لا يتخطى webman حدود أداء PHP التقليدي فحسب، بل يوسع بشكل كبير سيناريوهات استخدامه أيضاً.
 
-> **注意**
-> 当前文档为`webman v2`版本，如果你使用的是v1版本，请查看[webman v1文档](https://www.workerman.net/doc/webman-v1/)
+علاوة على ذلك، يوفر webman آلية إضافات قوية تُمَكّن المطورين من دمج وإعادة استخدام الوحدات الوظيفية التي طورها مطورون آخرون بسرعة. سواء كان بناء المواقع أو تطوير واجهات HTTP أو تنفيذ المراسلة الفورية أو إنشاء أنظمة إنترنت الأشياء أو تطوير الألعاب وخدمات TCP/UDP وخدمات Unix Socket وغيرها، فإن webman يتعامل مع كل هذا بسهولة مع أداء ومرونة متميزين.
 
-# webman理念
-**以最小内核提供最大的扩展性与最强的性能。**
+# فلسفة webman
+**أقصى قابلية للتوسيع وأقوى أداء بأقل نواة ممكنة.**
 
-webman仅提供最核心的功能(路由、中间件、session、自定义进程接口)。其余功能全部复用composer生态，这意味着你可以在webman里使用最熟悉的功能组件，例如在数据库方面开发者可以选择使用Laravel的[illuminate/database](./db/tutorial.md)，也可以是ThinkPHP的[ThinkORM](./db/thinkorm.md)，还可以是其它组件如`Medoo`。在webman里集成他们是非常容易的事情。
+يقدم webman فقط الوظائف الأساسية (التوجيه والوسيط والجلسة وواجهة العمليات المخصصة). تُعاد استخدام جميع الوظائف الأخرى من نظام Composer، مما يعني أنه يمكنك استخدام مكونات الوظائف الأكثر ألفةً في webman. على سبيل المثال، في جانب قاعدة البيانات، يمكن للمطورين اختيار [illuminate/database](./db/tutorial.md) من Laravel أو [ThinkORM](./db/thinkorm.md) من ThinkPHP أو مكونات أخرى مثل `Medoo`. دمجها في webman أمر سهل جداً.
 
-# webman具有以下特点
+# خصائص webman
 
-1、高稳定性。webman基于workerman开发，workerman一直是业界bug极少的高稳定性socket框架。
+1. استقرار عالٍ. webman مبني على workerman، الذي يُعد إطار socket عالي الاستقرار ونادر الأخطاء في المجال.
 
-2、超高性能。webman性能高于传统php-fpm框架10-100倍左右，比go的gin echo等框架性能高1倍左右。
+2. أداء فائق. أداء webman يتفوق على أطر PHP-FPM التقليدية بحوالي 10-100 ضعف، وحوالي ضعف أطر Go مثل gin وecho.
 
-3、高复用。无需修改，可以复用现有composer生态。
+3. قابلية إعادة استخدام عالية. يمكن إعادة استخدام نظام Composer الحالي دون تعديل.
 
-4、高扩展性。支持自定义进程，可以做workerman能做的任何事情。
+4. قابلية توسيع عالية. يدعم العمليات المخصصة، ويمكنه فعل كل ما يستطيع workerman فعله.
 
-5、超级简单易用，学习成本极低，代码书写与传统框架没有区别。
+5. بسيط وسهل الاستخدام للغاية، بتكلفة تعلم منخفضة، وكتابة الكود لا تختلف عن الأطر التقليدية.
 
-6、支持[二进制打包](./others/bin.md)，无需PHP环境即可直接运行。
+6. يدعم [التغليف الثنائي](./others/bin.md)، يمكن التشغيل مباشرة دون بيئة PHP.
 
-7、使用最为宽松友好的MIT开源协议。
+7. يستخدم رخصة MIT المفتوحة المصدر الأكثر تساهلاً ووديةً.
 
-# 项目地址
-GitHub: https://github.com/walkor/webman **不要吝啬你的小星星哦**
+# روابط المشروع
+GitHub: https://github.com/walkor/webman **لا تبخل بنجمتك!**
 
-码云: https://gitee.com/walkor/webman **不要吝啬你的小星星哦**
+Gitee: https://gitee.com/walkor/webman **لا تبخل بنجمتك!**
 
-# 第三方权威压测数据
-
+# بيانات اختبار الأداء من جهات خارجية معتمدة
 
 [![](../assets/img/benchmark1.png)](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)
 
-带数据库查询业务，webman单机吞吐量达到39万QPS，比传统php-fpm架构的laravel框架高出近80倍。
-
+مع عمليات استعلام قاعدة البيانات، يصل إنتاجية webman على جهاز واحد إلى 390,000 QPS، أي أعلى بحوالي 80 ضعفاً من إطار Laravel على بنية php-fpm التقليدية.
 
 [![](../assets/img/benchmarks-go.png)](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)
 
-带数据库查询业务，webman比同类型go语言的web框架性能高一倍左右。
+مع عمليات استعلام قاعدة البيانات، أداء webman أعلى بحوالي ضعف أطر الويب المماثلة بلغة Go.
 
-
-以上数据来自[techempower.com](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf) 
+البيانات أعلاه من [techempower.com](https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db&l=zik073-sf)

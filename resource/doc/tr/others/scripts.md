@@ -15,4 +15,4 @@ $user = Db::table('user')->find(1);
 var_dump($user);
 ```
 
-Tabii ki, bu tür işlemleri gerçekleştirmek için `webman/console` özelleştirilmiş komutları da kullanabiliriz, bkz. [Command Line](../plugin/console.md)
+Tabii ki, bu tür işlemleri gerçekleştirmek için `webman/console` özelleştirilmiş komutları da kullanabiliriz, bkz. [Komut Satırı](../plugin/console.md)

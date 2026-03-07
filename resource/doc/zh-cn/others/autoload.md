@@ -3,7 +3,7 @@
 ## 利用composer加载PSR-0规范的文件
 webman遵循`PSR-4`自动加载规范。如果你的业务需要加载`PSR-0`规范的代码库，参考以下操作。
 
-- 新建 `extend` 目录用户存放`PSR-0`规范的代码库
+- 新建 `extend` 目录用于存放`PSR-0`规范的代码库
 - 编辑`composer.json`，在`autoload`下增加以下内容
 
 ```js
@@ -36,7 +36,7 @@ webman遵循`PSR-4`自动加载规范。如果你的业务需要加载`PSR-0`规
 
 
 ## 利用框架加载某些文件
-有些文件可能不符合SPR规范，无法自动加载，我们可以通过配置`config/autoload.php`加载这些文件，例如：
+有些文件可能不符合PSR规范，无法自动加载，我们可以通过配置`config/autoload.php`加载这些文件，例如：
 ```php
 return [
     'files' => [

@@ -1,63 +1,73 @@
 # Grundlegender Plugin-Erstellungs- und Veröffentlichungsprozess
 
 ## Prinzip
-1. Als Beispiel für ein Cross-Domain-Plugin ist das Plugin in drei Teile unterteilt: eine Cross-Domain-Middleware-Programmdatei, eine Middleware-Konfigurationsdatei middleware.php und eine durch Befehl automatisch generierte Install.php.
-2. Wir verwenden einen Befehl, um die drei Dateien zu bündeln und auf Composer zu veröffentlichen.
-3. Wenn ein Benutzer das Cross-Domain-Plugin mit Composer installiert, kopiert Install.php die Cross-Domain-Middleware-Programmdatei und die Konfigurationsdatei in `{Hauptprojekt}/config/plugin`, damit webman sie laden kann, um die automatische Konfiguration der Cross-Domain-Middleware-Datei zu ermöglichen.
-4. Wenn ein Benutzer das Plugin mit Composer deinstalliert, löscht Install.php entsprechende Cross-Domain-Middleware-Programm- und Konfigurationsdateien, sodass das Plugin automatisch deinstalliert wird.
+1. Am Beispiel eines Cross-Domain-Plugins besteht ein Plugin aus drei Teilen: einer Cross-Domain-Middleware-Programmdatei, einer Middleware-Konfigurationsdatei `middleware.php` und einer per Befehl automatisch generierten `Install.php`.
+2. Wir nutzen Befehle, um diese drei Dateien zu bündeln und über Composer zu veröffentlichen.
+3. Bei der Composer-Installation des Cross-Domain-Plugins kopiert `Install.php` die Middleware-Programmdatei und die Konfigurationsdatei nach `{Hauptprojekt}/config/plugin`, damit webman sie laden kann. So wird die Cross-Domain-Middleware automatisch aktiv.
+4. Bei der Composer-Deinstallation entfernt `Install.php` die zugehörigen Middleware- und Konfigurationsdateien und führt damit die automatische Plugin-Deinstallation durch.
 
-## Standard
-1. Der Name des Plugins besteht aus zwei Teilen: `Hersteller` und `Plugin-Name`, z.B. `webman/push`, was dem Composer-Paketnamen entspricht.
-2. Die Plugin-Konfigurationsdateien werden standardmäßig unter `config/plugin/Hersteller/Plugin-Name/` gespeichert (der Konsolebefehl erstellt automatisch das Konfigurationsverzeichnis). Wenn das Plugin keine Konfiguration benötigt, müssen Sie das automatisch erstellte Konfigurationsverzeichnis löschen.
-3. Das Plugin-Konfigurationsverzeichnis unterstützt nur app.php (Hauptkonfiguration des Plugins), bootstrap.php (Prozessstartkonfiguration), route.php (Routing-Konfiguration), middleware.php (Middleware-Konfiguration), process.php (Benutzerdefinierte Prozesskonfiguration), database.php (Datenbankkonfiguration), redis.php (Redis-Konfiguration), thinkorm.php (ThinkORM-Konfiguration). Diese Konfigurationen werden automatisch von webman erkannt.
-4. Das Plugin verwendet die folgende Methode, um auf Konfigurationen zuzugreifen: `config('plugin.Hersteller.Plugin-Name.Konfigurationsdatei.spezifische Konfiguration')`, z.B. `config('plugin.webman.push.app.app_key')`.
-5. Wenn das Plugin eigene Datenbankkonfigurationen hat, erfolgt der Zugriff wie folgt: `illuminate/database` ist `Db::connection('plugin.Hersteller.Plugin-Name.spezifische Verbindung')`, `thinkrom` ist `Db::connect('plugin.Hersteller.Plugin-Name.spezifische Verbindung')`.
-6. Wenn das Plugin Geschäftsdateien im `app/`-Verzeichnis ablegen muss, stellen Sie sicher, dass es nicht mit den Dateien des Benutzerprojekts oder anderen Plugins kollidiert.
-7. Das Plugin sollte nach Möglichkeit das Kopieren von Dateien oder Verzeichnissen zum Hauptprojekt vermeiden. Zum Beispiel sollten Cross-Domain-Plugins Middleware-Dateien im `vendor/webman/cros/src`-Verzeichnis platzieren, ohne sie in das Hauptprojekt zu kopieren.
-8. Der Namensraum des Plugins sollte idealerweise in Großbuchstaben sein, z.B. Webman/Console.
+## Vorgaben
+1. Ein Pluginname besteht aus `Vendor` und `Pluginname`, z. B. `webman/push`, passend zum Composer-Paketnamen.
+2. Plugin-Konfigurationsdateien liegen unter `config/plugin/Vendor/Pluginname/` (der Konsolenbefehl erstellt das Konfigurationsverzeichnis automatisch). Braucht ein Plugin keine Konfiguration, muss das automatisch erstellte Verzeichnis gelöscht werden.
+3. Das Plugin-Konfigurationsverzeichnis unterstützt nur: `app.php` (Hauptkonfiguration), `bootstrap.php` (Prozessstart), `route.php` (Routen), `middleware.php` (Middleware), `process.php` (eigene Prozesse), `database.php` (Datenbank), `redis.php` (Redis), `thinkorm.php` (thinkorm). Diese werden von webman automatisch erkannt.
+4. Zugriff auf die Konfiguration: `config('plugin.Vendor.Pluginname.Konfigurationsdatei.Konfigurationseintrag');`, z. B. `config('plugin.webman.push.app.app_key')`.
+5. Bei eigener DB-Konfiguration: `illuminate/database` nutzt `Db::connection('plugin.Vendor.Pluginname.Verbindung')`, `thinkorm` nutzt `Db::connect('plugin.Vendor.Pluginname.Verbindung')`.
+6. Legt ein Plugin Dateien unter `app/` ab, darf es nicht mit dem Hauptprojekt oder anderen Plugins kollidieren.
+7. Plugins sollten nach Möglichkeit keine Dateien oder Verzeichnisse ins Hauptprojekt kopieren. Beim Cross-Domain-Plug-in z. B. nur die Konfiguration; Middleware-Dateien bleiben unter `vendor/webman/cros/src`.
+8. Plugin-Namespaces sollten PascalCase verwenden, z. B. `Webman/Console`.
 
 ## Beispiel
 
-**Installation des Befehlszeilenplugins "webman/console"**
+**`webman/console` installieren**
 
 `composer require webman/console`
 
-#### Erstellen des Plugins
+### Plugin erstellen
 
-Angenommen, das zu erstellende Plugin heißt `foo/admin` (der Name ist auch der Name des Projekts, das später auf Composer veröffentlicht werden muss). Führen Sie den Befehl aus: 
+Angenommen, das zu erstellende Plugin heißt `foo/admin` (entspricht dem später über Composer veröffentlichten Projektnamen, Kleinbuchstaben). Befehl ausführen:
+
 `php webman plugin:create --name=foo/admin`
 
-Nach Erstellung des Plugins wird ein Verzeichnis `vendor/foo/admin` zur Speicherung der Plugin-bezogenen Dateien und ein Verzeichnis `config/plugin/foo/admin` zur Speicherung der Plugin-Konfiguration erstellt.
+Dabei entstehen `vendor/foo/admin` (für Plugin-Dateien) und `config/plugin/foo/admin` (für die Plugin-Konfiguration).
 
-> Beachten Sie
-> `config/plugin/foo/admin` unterstützt die folgenden Konfigurationen: app.php (Hauptkonfiguration des Plugins), bootstrap.php (Prozessstartkonfiguration), route.php (Routing-Konfiguration), middleware.php (Middleware-Konfiguration), process.php (Benutzerdefinierte Prozesskonfiguration), database.php (Datenbankkonfiguration), redis.php (Redis-Konfiguration), thinkorm.php (ThinkORM-Konfiguration). Das Format der Konfigurationen entspricht webman, und diese Konfigurationen werden automatisch von webman erkannt und in die Konfiguration fusioniert. Sie können über den Prefix `plugin` darauf zugreifen, z.B. config('plugin.foo.admin.app').
+> Hinweis
+> `config/plugin/foo/admin` unterstützt: `app.php`, `bootstrap.php`, `route.php`, `middleware.php`, `process.php`, `database.php`, `redis.php`, `thinkorm.php`. Format wie webman, automatische Zusammenführung.
+> Zugriff mit Präfix `plugin`, z. B. `config('plugin.foo.admin.app')`.
 
-#### Veröffentlichen des Plugins
 
-Nachdem das Plugin entwickelt wurde, führen Sie den folgenden Befehl aus, um das Plugin zu veröffentlichen:
+### Plugin exportieren
+
+Nach Abschluss der Entwicklung Export-Befehl ausführen:
+
 `php webman plugin:export --name=foo/admin`
 
-Nach der Veröffentlichung werden die Dateien im Verzeichnis `config/plugin/foo/admin` in das Verzeichnis `vendor/foo/admin/src` kopiert, und gleichzeitig wird eine Datei Install.php automatisch generiert. Install.php wird verwendet, um bei der automatischen Installation und Deinstallation des Plugins bestimmte Aktionen auszuführen.
-Die Standardaktion bei der Installation ist das Kopieren der Konfigurationen aus `vendor/foo/admin/src` in das Konfigurationsverzeichnis des aktuellen Projekts. Beim Entfernen erfolgt die Standardaktion durch das Löschen der Konfigurationsdateien im Konfigurationsverzeichnis des aktuellen Projekts. Sie können Install.php anpassen, um benutzerdefinierte Aktionen bei der Installation und Deinstallation des Plugins auszuführen.
+Export
 
-#### Einreichen des Plugins
-- Angenommen, Sie haben bereits ein Konto auf [GitHub](https://github.com) und [Packagist](https://packagist.org).
-- Erstellen Sie auf [GitHub](https://github.com) ein Projekt mit dem Namen "admin" und laden Sie den Code hoch. Die Adresse des Projekts ist z.B. `https://github.com/your-username/admin`.
-- Gehen Sie zu `https://github.com/your-username/admin/releases/new` und veröffentlichen Sie ein Release, z.B. `v1.0.0`.
-- Gehen Sie zu [Packagist](https://packagist.org), klicken Sie auf `Submit` in der Navigation, und reichen Sie die Adresse Ihres GitHub-Projekts `https://github.com/your-username/admin` ein, um das Plugin zu veröffentlichen.
+> Erläuterung
+> Beim Export wird `config/plugin/foo/admin` nach `vendor/foo/admin/src` kopiert und `Install.php` erzeugt. `Install.php` läuft bei Installation und Deinstallation.
+> Standard-Installation: Konfiguration von `vendor/foo/admin/src` nach `config/plugin` des Projekts kopieren.
+> Standard-Deinstallation: entsprechende Konfigurationsdateien unter `config/plugin` des Projekts entfernen.
+> `Install.php` kann für eigene Install/Deinstall-Logik angepasst werden.
 
-> **Hinweis**
-> Falls bei der Einreichung des Plugins in `Packagist` ein Konflikt angezeigt wird, können Sie einen anderen Hersteller-Namen verwenden, z.B. `foo/admin` kann in `myfoo/admin` geändert werden.
+### Plugin einreichen
+* Voraussetzung: [GitHub](https://github.com)- und [Packagist](https://packagist.org)-Konto.
+* Auf [GitHub](https://github.com) ein `admin`-Repository anlegen und Code pushen, z. B. `https://github.com/dein-benutzername/admin`.
+* Unter `https://github.com/dein-benutzername/admin/releases/new` einen Release erstellen, z. B. `v1.0.0`.
+* Auf [Packagist](https://packagist.org) auf `Submit` klicken und `https://github.com/dein-benutzername/admin` eintragen, um das Plugin zu veröffentlichen.
 
-Wenn Ihr Plugin-Projektcode später aktualisiert wird, müssen Sie den Code auf GitHub aktualisieren und erneut zu `https://github.com/your-username/admin/releases/new` gehen, um ein neues Release zu veröffentlichen. Anschließend klicken Sie auf die Schaltfläche `Update` auf der Seite `https://packagist.org/packages/foo/admin`, um die Version zu aktualisieren.
+> **Tipp**
+> Bei Namenskonflikten auf Packagist einen anderen Vendor-Namen wählen, z. B. `foo/admin` in `myfoo/admin` ändern.
 
-## Hinzufügen von Befehlen zu einem Plugin
-Manchmal benötigt ein Plugin benutzerdefinierte Befehle, um zusätzliche Funktionen bereitzustellen. Wenn z.B. nach der Installation des Plugins `webman/redis-queue` automatisch ein `redis-queue:consumer`-Befehl im Projekt hinzugefügt wird, kann der Benutzer einfach `php webman redis-queue:consumer send-mail` ausführen, um eine SendMail.php-Verbraucherklasse im Projekt zu erzeugen, was die schnelle Entwicklung unterstützt.
+Bei Updates: Code nach GitHub pushen, unter `https://github.com/dein-benutzername/admin/releases/new` einen neuen Release erstellen und auf `https://packagist.org/packages/foo/admin` auf `Update` klicken.
 
-Angenommen, das `foo/admin`-Plugin benötigt den Hinzufügen von `foo-admin:add`-Befehl, hier sind die Schritte dazu.
+## Befehle zum Plugin hinzufügen
+Manche Plugins benötigen eigene Befehle. Z. B. fügt `webman/redis-queue` den Befehl `redis-queue:consumer` hinzu; mit `php webman redis-queue:consumer send-mail` lässt sich schnell eine `SendMail.php`-Consumer-Klasse erzeugen.
 
-#### Hinzufügen eines Befehls
-**Erstellen Sie eine Befehlsdatei in `vendor/foo/admin/src/FooAdminAddCommand.php`**
+Um dem Plugin `foo/admin` den Befehl `foo-admin:add` hinzuzufügen:
+
+### Befehl erstellen
+
+**Datei `vendor/foo/admin/src/FooAdminAddCommand.php` anlegen**
 
 ```php
 <?php
@@ -73,14 +83,14 @@ use Symfony\Component\Console\Input\InputArgument;
 class FooAdminAddCommand extends Command
 {
     protected static $defaultName = 'foo-admin:add';
-    protected static $defaultDescription = 'Hier ist die Beschreibung des Befehls';
+    protected static $defaultDescription = 'Befehlsbeschreibung';
 
     /**
      * @return void
      */
     protected function configure()
     {
-        $this->addArgument('name', InputArgument::REQUIRED, 'Name hinzufügen');
+        $this->addArgument('name', InputArgument::REQUIRED, 'Add name');
     }
 
     /**
@@ -99,10 +109,11 @@ class FooAdminAddCommand extends Command
 ```
 
 > **Hinweis**
-> Um Konflikte zwischen Plugin-Befehlen zu vermeiden, sollte das Format des Befehls `Hersteller-Plugin-Name:konkreter Befehl` sein, z.B. alle Befehle des Plugins `foo/admin` sollten das Präfix `foo-admin:` haben, z.B. `foo-admin:add`.
+> Um Befehls-Konflikte zwischen Plugins zu vermeiden, Format `Vendor-Plugin:Befehl` verwenden. Alle Befehle von `foo/admin` sollten mit `foo-admin:` beginnen, z. B. `foo-admin:add`.
 
-#### Hinzufügen von Konfigurationen
-**Erstellen Sie eine Konfiguration `config/plugin/foo/admin/command.php`**
+### Konfiguration hinzufügen
+**Datei `config/plugin/foo/admin/command.php` anlegen**
+
 ```php
 <?php
 
@@ -110,12 +121,12 @@ use Foo\Admin\FooAdminAddCommand;
 
 return [
     FooAdminAddCommand::class,
-    // ...mehrere Konfigurationen können hinzugefügt werden...
+    // Bei Bedarf weitere Befehle ...
 ];
 ```
 
-> **Hinweis**
-> `command.php` wird verwendet, um benutzerdefinierte Befehle für das Plugin zu konfigurieren. Jedes Element des Arrays entspricht einer Befehlsklassen-Datei, und jede Klassen-Datei entspricht einem Befehl. Wenn ein Benutzer einen Befehl ausführt, werden automatisch alle benutzerdefinierten Befehle aus `command.php` jedes Plugins von `webman/console` geladen. Weitere Informationen zu Befehlszeilen finden Sie im [Befehlszeilen-Dokument](console.md).
+> **Tipp**
+> `command.php` registriert benutzerdefinierte Befehle des Plugins. Jeder Eintrag ist eine Befehlsklasse. `webman/console` lädt diese automatisch. Siehe [Konsolenbefehle](console.md).
 
-#### Durchführen der Exportierung
-Führen Sie den Befehl `php webman plugin:export --name=foo/admin` aus, um das Plugin zu exportieren und bei `packagist` einzureichen. Nach der Installation des `foo/admin`-Plugins wird ein `foo-admin:add`-Befehl hinzugefügt. Durch Ausführen von `php webman foo-admin:add jerry` wird "Admin add jerry" angezeigt.
+### Export ausführen
+`php webman plugin:export --name=foo/admin` ausführen, Plugin exportieren und auf Packagist veröffentlichen. Nach Installation von `foo/admin` steht der Befehl `foo-admin:add` zur Verfügung. `php webman foo-admin:add jerry` gibt `Admin add jerry` aus.

@@ -1,4 +1,5 @@
-# Query Builder
+# Database Queries (Laravel Database Component)
+
 ## Get All Rows
 ```php
 <?php
@@ -386,6 +387,9 @@ If you need to empty a table, you can use the truncate method, which will delete
 ```php
 Db::table('users')->truncate();
 ```
+
+## Transactions
+See [Database Transactions](../others/transaction.md)
 
 ## Pessimistic Lock
 The query builder also includes some functions that can help you achieve "pessimistic locking" on select statements. To achieve a "shared lock" in your query, you can use the sharedLock method. A shared lock will prevent selected data columns from being tampered with until the transaction is committed:

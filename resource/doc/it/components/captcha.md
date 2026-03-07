@@ -1,15 +1,13 @@
-# Componenti relativi ai codici di verifica
+# Componente captcha
 
-
-## webman/captcha
 Indirizzo del progetto https://github.com/webman-php/captcha
 
-### Installazione
+## Installazione
 ```
-compositore richiedere webman/captcha
+composer require webman/captcha
 ```
 
-### Utilizzo
+## Utilizzo
 
 **Creare il file `app/controller/LoginController.php`**
 
@@ -31,32 +29,32 @@ class LoginController
     }
     
     /**
-     * Stampare l'immagine del codice di verifica
+     * Generare l'immagine del captcha
      */
     public function captcha(Request $request)
     {
-        // Inizializza la classe del codice di verifica
+        // Inizializzare la classe del captcha
         $builder = new CaptchaBuilder;
-        // Genera un codice di verifica
+        // Generare il captcha
         $builder->build();
-        // Salva il valore del codice di verifica nella sessione
+        // Salvare il valore del captcha nella sessione
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Ottiene dati binari dell'immagine del codice di verifica
+        // Ottenere i dati binari dell'immagine del captcha
         $img_content = $builder->get();
-        // Restituisce i dati binari del codice di verifica
+        // Restituire i dati binari del captcha
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
     /**
-     * Verifica il codice di verifica
+     * Verificare il captcha
      */
     public function check(Request $request)
     {
-        // Ottiene il campo captcha dalla richiesta POST
+        // Ottenere il campo captcha dalla richiesta POST
         $captcha = $request->post('captcha');
-        // Confronta il valore del captcha nella sessione
+        // Confrontare con il valore del captcha nella sessione
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
-            return json(['code' => 400, 'msg' => 'Il codice di verifica inserito non è corretto']);
+            return json(['code' => 400, 'msg' => 'Il captcha inserito non è corretto']);
         }
         return json(['code' => 0, 'msg' => 'ok']);
     }
@@ -71,7 +69,7 @@ class LoginController
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Test del codice di verifica</title>  
+    <title>Test del captcha</title>  
 </head>
 <body>
     <form method="post" action="/login/check">
@@ -83,33 +81,23 @@ class LoginController
 </html>
 ```
 
-Accedendo alla pagina `http://127.0.0.1:8787/login` l'aspetto sarà simile a quanto segue:
-![](../../assets/img/captcha.png)
+Accedere alla pagina `http://127.0.0.1:8787/login`, l'aspetto sarà simile al seguente:
+  ![](../../assets/img/captcha.png)
 
-### Impostazioni dei parametri comuni
+## Impostazioni dei parametri comuni
 ```php
     /**
-     * Stampare l'immagine del codice di verifica
+     * Generare l'immagine del captcha
      */
     public function captcha(Request $request)
     {
-        // Inizializza la classe del codice di verifica
-        $builder = new CaptchaBuilder;
-        // Lunghezza del codice di verifica
-        $length = 4;
-        // Caratteri inclusi
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // Genera un codice di verifica
-        $builder->build();
-        // Salva il valore del codice di verifica nella sessione
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Ottiene dati binari dell'immagine del codice di verifica
-        $img_content = $builder->get();
-        // Restituisce i dati binari del codice di verifica
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```
 
-Per ulteriori informazioni sull'API e i parametri, fare riferimento a https://github.com/webman-php/captcha
+Per ulteriori interfacce e parametri, fare riferimento a https://github.com/webman-php/captcha

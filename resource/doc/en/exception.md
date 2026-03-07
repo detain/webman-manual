@@ -122,7 +122,7 @@ A JSON request will receive a JSON response like this:
 {"code": 3000, "message": "Parameter error"}
 ```
 
-> **Note**
+> **Tip**
 > BusinessException exceptions are business exceptions (e.g., user input parameter errors) and are expected. Therefore, the framework does not consider them as fatal errors and does not log them.
 
 ## Summary

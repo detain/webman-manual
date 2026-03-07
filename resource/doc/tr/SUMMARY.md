@@ -22,6 +22,7 @@
   - [Günlük](log.md)
   - [Yapılandırma Dosyası](config.md)
   - [Çoklu Uygulama](multiapp.md)
+  - [Korutin](coroutine/coroutine.md)
 
 - Veritabanı
   - [Hızlı Başlangıç](db/tutorial.md)
@@ -44,6 +45,7 @@
 
 - Yaygın Kullanılan Bileşenler
   - [Doğrulayıcı](components/validation.md)
+  - [Hız Sınırlayıcı](components/rate-limiter.md)
   - [Sayfalayıcı Bileşen](components/paginator.md)
   - [Çoklu Dil](components/translation.md)
   - [Görüntü İşleme](components/image.md)
@@ -87,17 +89,18 @@
 - Gelişmiş Seviyeler
   - [Özel İşlemler](process.md)
   - [Bağımlılık Enjeksiyonu](di.md)
+  - [İkili Paketleme](others/bin.md)
   - [AOP](aop.md)
 
 - Diğer
   - [Güvenlik](others/security.md)
+  - [Veritabanı işlemleri](others/transaction.md)
   - [Fonksiyon Engelleme Kontrolü](others/disable-function-check.md)
   - [Özel Komut Dosyaları](others/scripts.md)
   - [Özel 404 500](others/custom-error-page.md)
   - [Yükseltme Yöntemi](others/upgrade.md)
   - [nginx Proxy](others/nginx-proxy.md)
   - [phar Paketleme](others/phar.md)
-  - [İkili Paketleme](others/bin.md)
   - [Başlatma Süreci](others/process.md)
   - [Yaşam Döngüsü](others/lifecycle.md)
   - [Bellek Sızıntısı](others/memory-leak.md)
@@ -110,4 +113,9 @@
 
 - Yükseltmeler
   - [1.4](upgrade/1-4.md)
+  - [1.5](upgrade/1-5.md)
+  - [1.6](upgrade/1-6.md)
+  - [2.0](upgrade/2-0.md)
+  - [2.1](upgrade/2-1.md)
+  - [2.2](upgrade/2-2.md)
   - [Teşekkürler](thanks.md)

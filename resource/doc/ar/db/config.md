@@ -1,39 +1,39 @@
-# 配置数据库(Laravel风格)
-webman/database 数据库及版本支持情况如下：
+# تكوين قاعدة البيانات (أسلوب Laravel)
+يدعم webman/database قواعد البيانات والإصدارات التالية:
 
- - MySQL 5.6+ 
- - PostgreSQL 9.4+ 
- - SQLite 3.8.8+
- - SQL Server 2017+ 
- 
- 数据库配置文件位置为 `config/database.php`。
- 
- ```php
- return [
-     // 默认数据库
-     'default' => 'mysql',
-     // 各种数据库配置
-     'connections' => [
- 
-         'mysql' => [
-             'driver'      => 'mysql',
-             'host'        => '127.0.0.1',
-             'port'        => 3306,
-             'database'    => 'webman',
-             'username'    => 'webman',
-             'password'    => '',
-             'unix_socket' => '',
-             'charset'     => 'utf8',
-             'collation'   => 'utf8_unicode_ci',
-             'prefix'      => '',
-             'strict'      => true,
-             'engine'      => null,
-             'pool' => [ // 连接池配置，仅支持swoole/swow驱动
-                'max_connections' => 5, // 最大连接数
-                'min_connections' => 1, // 最小连接数
-                'wait_timeout' => 3,    // 从连接池获取连接等待的最大时间，超时后会抛出异常
-                'idle_timeout' => 60,   // 连接池中连接最大空闲时间，超时后会关闭回收，直到连接数为min_connections
-                'heartbeat_interval' => 50, // 连接池心跳检测时间，单位秒，建议小于60秒
+- MySQL 5.6+
+- PostgreSQL 9.4+
+- SQLite 3.8.8+
+- SQL Server 2017+
+
+يوجد ملف التكوين في `config/database.php`.
+
+```php
+return [
+    // قاعدة البيانات الافتراضية
+    'default' => 'mysql',
+    // تكوينات قواعد البيانات المختلفة
+    'connections' => [
+
+        'mysql' => [
+            'driver'      => 'mysql',
+            'host'        => '127.0.0.1',
+            'port'        => 3306,
+            'database'    => 'webman',
+            'username'    => 'webman',
+            'password'    => '',
+            'unix_socket' => '',
+            'charset'     => 'utf8',
+            'collation'   => 'utf8_unicode_ci',
+            'prefix'      => '',
+            'strict'      => true,
+            'engine'      => null,
+            'pool' => [ // تكوين تجمع الاتصالات، يدعم فقط سائقي swoole/swow
+                'max_connections' => 5, // الحد الأقصى للاتصالات
+                'min_connections' => 1, // الحد الأدنى للاتصالات
+                'wait_timeout' => 3,    // الحد الأقصى لوقت انتظار الحصول على اتصال، يرمي استثناء عند التجاوز
+                'idle_timeout' => 60,   // الحد الأقصى لوقت الخمول للاتصالات في التجمع، استرجاع عند التجاوز حتى min_connections
+                'heartbeat_interval' => 50, // فترة نبض القلب بالثواني، يُنصح بأقل من 60
             ],
          ],
          
@@ -41,15 +41,15 @@ webman/database 数据库及版本支持情况如下：
              'driver'   => 'sqlite',
              'database' => '',
              'prefix'   => '',
-             'pool' => [ // 连接池配置，仅支持swoole/swow驱动
-                'max_connections' => 5, // 最大连接数
-                'min_connections' => 1, // 最小连接数
-                'wait_timeout' => 3,    // 从连接池获取连接等待的最大时间，超时后会抛出异常
-                'idle_timeout' => 60,   // 连接池中连接最大空闲时间，超时后会关闭回收，直到连接数为min_connections
-                'heartbeat_interval' => 50, // 连接池心跳检测时间，单位秒，建议小于60秒
+             'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
             ],
          ],
- 
+
          'pgsql' => [
              'driver'   => 'pgsql',
              'host'     => '127.0.0.1',
@@ -61,15 +61,15 @@ webman/database 数据库及版本支持情况如下：
              'prefix'   => '',
              'schema'   => 'public',
              'sslmode'  => 'prefer',
-             'pool' => [ // 连接池配置，仅支持swoole/swow驱动
-                'max_connections' => 5, // 最大连接数
-                'min_connections' => 1, // 最小连接数
-                'wait_timeout' => 3,    // 从连接池获取连接等待的最大时间，超时后会抛出异常
-                'idle_timeout' => 60,   // 连接池中连接最大空闲时间，超时后会关闭回收，直到连接数为min_connections
-                'heartbeat_interval' => 50, // 连接池心跳检测时间，单位秒，建议小于60秒
+             'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
             ],
          ],
- 
+
          'sqlsrv' => [
              'driver'   => 'sqlsrv',
              'host'     => 'localhost',
@@ -79,30 +79,28 @@ webman/database 数据库及版本支持情况如下：
              'password' => '',
              'charset'  => 'utf8',
              'prefix'   => '',
-             'pool' => [ // 连接池配置，仅支持swoole/swow驱动
-                'max_connections' => 5, // 最大连接数
-                'min_connections' => 1, // 最小连接数
-                'wait_timeout' => 3,    // 从连接池获取连接等待的最大时间，超时后会抛出异常
-                'idle_timeout' => 60,   // 连接池中连接最大空闲时间，超时后会关闭回收，直到连接数为min_connections
-                'heartbeat_interval' => 50, // 连接池心跳检测时间，单位秒，建议小于60秒
+             'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
             ],
          ],
      ],
  ];
- ```
+```
 
- ## 使用多个数据库
-通过`Db::connection('配置名')`来选择使用哪个数据库，其中`配置名`为配置文件`config/database.php`中的对应配置的`key`。
- 
- 例如如下数据库配置：
+## استخدام عدة قواعد بيانات
+استخدم `Db::connection('اسم_التكوين')` لاختيار قاعدة البيانات، حيث `اسم_التكوين` هو الـ `key` المقابل في ملف `config/database.php`.
+
+مثال مع التكوين التالي:
 
 ```php
  return [
-     // 默认数据库
      'default' => 'mysql',
-     // 各种数据库配置
      'connections' => [
- 
+
          'mysql' => [
              'driver'      => 'mysql',
              'host'        =>   '127.0.0.1',
@@ -147,12 +145,12 @@ webman/database 数据库及版本支持情况如下：
  ];
 ```
 
-像这样切换数据库。
+للتبديل بين قواعد البيانات:
 ```php
-// 使用默认数据库，等价于Db::connection('mysql')->table('users')->where('name', 'John')->first();
-$users = Db::table('users')->where('name', 'John')->first();; 
-// 使用mysql2
+// استخدام القاعدة الافتراضية، يعادل Db::connection('mysql')->table('users')->where('name', 'John')->first();
+$users = Db::table('users')->where('name', 'John')->first(); 
+// استخدام mysql2
 $users = Db::connection('mysql2')->table('users')->where('name', 'John')->first();
-// 使用pgsql
+// استخدام pgsql
 $users = Db::connection('pgsql')->table('users')->where('name', 'John')->first();
 ```

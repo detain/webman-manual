@@ -1,15 +1,11 @@
 # Pagination
 
-# 1. Pagination using Laravel's ORM
+# Pagination using Laravel's ORM
 
-The `illuminate/database` package of Laravel provides convenient pagination functionality.
+Laravel's `illuminate/database` provides convenient pagination functionality.
 
 ## Installation
-
-Run the following command to install the package:
-```bash
-composer require illuminate/pagination
-```
+`composer require illuminate/pagination`
 
 ## Usage
 ```php
@@ -51,10 +47,7 @@ public function index(Request $request)
 In webman, the `$paginator->links()` method cannot be used to render pagination buttons. Instead, you can use other components to render it, for example `jasongrimes/php-paginator`.
 
 **Installation**
-Run the following command to install the package:
-```bash
-composer require "jasongrimes/paginator:~1.0"
-```
+`composer require "jasongrimes/paginator:~1.0"`
 
 **Backend**
 ```php
@@ -144,12 +137,12 @@ Create a new template app/view/user/get.html
 </html>
 ```
 
-The result is as shown in the image below:
+The result is as follows:
 ![](../../assets/img/paginator.png)
 
-# 2. Pagination using ThinkPHP's ORM
+# Pagination using ThinkPHP's ORM
 
-There is no need to install additional libraries, as long as think-orm is installed.
+No additional libraries need to be installed; think-orm alone is sufficient.
 
 ## Usage
 ```php

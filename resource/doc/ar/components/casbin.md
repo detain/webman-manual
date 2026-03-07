@@ -1,40 +1,40 @@
 # Casbin
 
-## 说明
+## الوصف
 
-Casbin是一个强大的、高效的开源访问控制框架，其权限管理机制支持多种访问控制模型。
-  
-## 项目地址
+Casbin هو إطار عمل قوي وفعال للتحكم في الوصول مفتوح المصدر. تدعم آلية إدارة الصلاحيات الخاصة به نماذج متعددة للتحكم في الوصول.
+
+## عنوان المشروع
 
 https://github.com/teamones-open/casbin
 
-## 安装
- 
+## التثبيت
+
 ```php
 composer require teamones/casbin
 ```
 
-## Casbin官网
+## الموقع الرسمي لـ Casbin
 
-详细使用可以去看官方中文文档，这里只讲怎么在webman中配置使用
+للتفاصيل الكاملة حول الاستخدام، راجع الوثائق الرسمية بالصينية. يشرح هذا المستند فقط كيفية تكوين واستخدام Casbin في webman.
 
 https://casbin.org/docs/zh-CN/overview
 
-## 目录结构
+## هيكل الدليل
 
 ```
 .
-├── config                        配置目录
-│   ├── casbin-restful-model.conf 使用的权限模型配置文件
-│   ├── casbin.php                casbin配置
+├── config                        مجلد التكوين
+│   ├── casbin-restful-model.conf ملف تكوين نموذج الصلاحيات
+│   ├── casbin.php                تكوين Casbin
 ......
-├── database                      数据库文件
-│   ├── migrations                迁移文件
-│   │   └── 20210218074218_create_rule_table.php
+├── database                      ملفات قاعدة البيانات
+│   ├── migrations                ملفات الترحيل
+│   │   └── 20210218074218_create_rule_table.php
 ......
 ```
 
-## 数据库迁移文件
+## ملف ترحيل قاعدة البيانات
 
 ```php
 <?php
@@ -70,11 +70,11 @@ class CreateRuleTable extends AbstractMigration
      */
     public function change()
     {
-        $table = $this->table('rule', ['id' => false, 'primary_key' => ['id'], 'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '规则表']);
+        $table = $this->table('rule', ['id' => false, 'primary_key' => ['id'], 'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => 'جدول القواعد']);
 
-        //添加数据字段
-        $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => '主键ID'])
-            ->addColumn('ptype', 'char', ['default' => '', 'limit' => 8, 'comment' => '规则类型'])
+        // إضافة حقول البيانات
+        $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => 'معرف المفتاح الأساسي'])
+            ->addColumn('ptype', 'char', ['default' => '', 'limit' => 8, 'comment' => 'نوع القاعدة'])
             ->addColumn('v0', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v1', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v2', 'string', ['default' => '', 'limit' => 128])
@@ -82,26 +82,24 @@ class CreateRuleTable extends AbstractMigration
             ->addColumn('v4', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v5', 'string', ['default' => '', 'limit' => 128]);
 
-        //执行创建
+        // تنفيذ الإنشاء
         $table->create();
     }
 }
-
 ```
 
-## casbin 配置
+## تكوين Casbin
 
-权限规则模型配置语法请看：https://casbin.org/docs/zh-CN/syntax-for-models
+لتركيب نموذج قواعد الصلاحيات، راجع: https://casbin.org/docs/zh-CN/syntax-for-models
 
 ```php
-
 <?php
 
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // 权限规则模型配置文件
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // ملف تكوين نموذج قواعد الصلاحيات
             'config_text' => '',
         ],
         'adapter' => [
@@ -109,11 +107,11 @@ return [
             'class' => \app\model\Rule::class,
         ],
     ],
-    // 可以配置多个权限model
+    // يمكن تكوين نماذج صلاحيات متعددة
     'rbac' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // 权限规则模型配置文件
+            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // ملف تكوين نموذج قواعد الصلاحيات
             'config_text' => '',
         ],
         'adapter' => [
@@ -124,115 +122,113 @@ return [
 ];
 ```
 
-### 适配器
+### المحول
 
-当前composer封装中适配的是 think-orm 的model方法，其他 orm 请参考 vendor/teamones/src/adapters/DatabaseAdapter.php
+الحزمة الحالية متوافقة مع طرائق model الخاصة بـ think-orm. للـ ORM الأخرى، راجع vendor/teamones/src/adapters/DatabaseAdapter.php
 
-然后修改配置
+ثم عدّل التكوين:
 
 ```php
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // 权限规则模型配置文件
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // ملف تكوين نموذج قواعد الصلاحيات
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'adapter', // 这里类型配置成适配器模式
+            'type' => 'adapter', // تكوين النوع كنمط محول هنا
             'class' => \app\adapter\DatabaseAdapter::class,
         ],
     ],
 ];
 ```
 
-## 使用说明
+## تعليمات الاستخدام
 
-### 引入
+### الاستيراد
 
 ```php
-# 引入
+# الاستيراد
 use teamones\casbin\Enforcer;
 ```
 
-### 两种用法
+### طريقتان للاستخدام
 
 ```php
-# 1. 默认使用 default 配置
+# 1. استخدام التكوين الافتراضي
 Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# 1. 使用自定义的 rbac 配置
+# 2. استخدام تكوين rbac المخصص
 Enforcer::instance('rbac')->addPermissionForUser('user1', '/user', 'read');
 ```
 
-### 常用API介绍
+### مقدمة لـ API الشائعة
 
-更多API用法请去官方查看
+لمزيد من استخدامات API، راجع الوثائق الرسمية:
 
-- 管理API： https://casbin.org/docs/zh-CN/management-api
-- RBAC API： https://casbin.org/docs/zh-CN/rbac-api
+- Management API: https://casbin.org/docs/zh-CN/management-api
+- RBAC API: https://casbin.org/docs/zh-CN/rbac-api
 
 ```php
-# 为用户添加权限
+# إضافة صلاحية للمستخدم
 
 Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# 删除一个用户的权限
+# حذف صلاحية المستخدم
 
 Enforcer::deletePermissionForUser('user1', '/user', 'read');
 
-# 获取用户所有权限
+# الحصول على جميع صلاحيات المستخدم
 
-Enforcer::getPermissionsForUser('user1'); 
+Enforcer::getPermissionsForUser('user1');
 
-# 为用户添加角色
+# إضافة دور للمستخدم
 
 Enforcer::addRoleForUser('user1', 'role1');
 
-# 为角色添加权限
+# إضافة صلاحية للدور
 
 Enforcer::addPermissionForUser('role1', '/user', 'edit');
 
-# 获取所有角色
+# الحصول على جميع الأدوار
 
 Enforcer::getAllRoles();
 
-# 获取用户所有角色
+# الحصول على جميع أدوار المستخدم
 
 Enforcer::getRolesForUser('user1');
 
-# 根据角色获取用户
+# الحصول على المستخدمين حسب الدور
 
 Enforcer::getUsersForRole('role1');
 
-# 判断用户是否属于一个角色
+# التحقق من انتماء المستخدم لدور
 
-Enforcer::hasRoleForUser('use1', 'role1');
+Enforcer::hasRoleForUser('user1', 'role1');
 
-# 删除用户角色
+# حذف دور المستخدم
 
-Enforcer::deleteRoleForUser('use1', 'role1');
+Enforcer::deleteRoleForUser('user1', 'role1');
 
-# 删除用户所有角色
+# حذف جميع أدوار المستخدم
 
-Enforcer::deleteRolesForUser('use1');
+Enforcer::deleteRolesForUser('user1');
 
-# 删除角色
+# حذف الدور
 
 Enforcer::deleteRole('role1');
 
-# 删除权限
+# حذف الصلاحية
 
 Enforcer::deletePermission('/user', 'read');
 
-# 删除用户或者角色的所有权限
+# حذف جميع صلاحيات المستخدم أو الدور
 
 Enforcer::deletePermissionsForUser('user1');
 Enforcer::deletePermissionsForUser('role1');
 
-# 检查权限，返回 true or false
+# التحقق من الصلاحية، إرجاع true أو false
 
 Enforcer::enforce("user1", "/user", "edit");
 ```
-
-

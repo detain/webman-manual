@@ -30,7 +30,7 @@ use Workerman\Worker;
 
 return [
     // ... other configurations are omitted ...
-
+    
     'my-http' => [
         'handler' => app\Server::class,
         'listen' => 'http://0.0.0.0:8686',
@@ -39,19 +39,20 @@ return [
         'group' => '',
         'reusePort' => true,
         'constructor' => [
-            'request_class' => \support\Request::class, // Set request class
+            'requestClass' => \support\Request::class, // Set request class
             'logger' => \support\Log::channel('default'), // Logger instance
-            'app_path' => app_path(), // Location of app directory
-            'public_path' => public_path() // Location of public directory
+            'appPath' => app_path(), // Location of app directory
+            'publicPath' => public_path() // Location of public directory
         ]
     ]
 ];
 ```
 
 > **Tip**
-> To disable the built-in HTTP process of webman, simply set `listen=>''` in the `config/server.php` file.
+> To disable the built-in HTTP process of webman, simply set `listen=>''` in `config/server.php`.
 
 ## Custom Websocket Listener Example
+
 Create `app/Pusher.php`.
 
 ```php
@@ -84,17 +85,17 @@ class Pusher
 }
 ```
 
-> Note: All `onXXX` methods are public.
+> Note: All onXXX methods must be public.
 
 Add the following configuration to `config/process.php`.
 
 ```php
 return [
     // ... Other process configurations are omitted ...
-
+    
     // websocket_test is the process name
     'websocket_test' => [
-        // Specify the process class as the one defined above
+        // Specify the process class here, i.e. the Pusher class defined above
         'handler' => app\Pusher::class,
         'listen'  => 'websocket://0.0.0.0:8888',
         'count'   => 1,
@@ -103,6 +104,7 @@ return [
 ```
 
 ## Custom Non-listening Process Example
+
 Create `app/TaskTest.php`.
 
 ```php
@@ -125,12 +127,13 @@ class TaskTest
     
 }
 ```
+
 Add the following configuration to `config/process.php`.
 
 ```php
 return [
     // ... Other process configurations are omitted ...
-
+    
     'task' => [
         'handler'  => app\TaskTest::class
     ],
@@ -140,17 +143,18 @@ return [
 > Note: If listen is omitted, the process will not listen on any port. If count is omitted, the default number of processes is 1.
 
 ## Configuration File Explanation
-The complete definition of a process configuration is as follows:
+
+A complete process configuration is defined as follows:
 
 ```php
 return [
     // ... 
-
+    
     // websocket_test is the process name
     'websocket_test' => [
         // Specify the process class here
         'handler' => app\Pusher::class,
-        // Protocol, IP, and port to listen on (optional)
+        // Protocol, IP and port to listen on (optional)
         'listen'  => 'websocket://0.0.0.0:8888',
         // Number of processes (optional, default is 1)
         'count'   => 2,
@@ -160,17 +164,20 @@ return [
         'group'   => '',
         // Whether the current process supports reload (optional, default is true)
         'reloadable' => true,
-        // Whether to enable reusePort (optional, requires php>=7.0, default is true)
+        // Whether to enable reusePort
         'reusePort'  => true,
         // Transport (optional, set to 'ssl' when SSL is required, default is 'tcp')
         'transport'  => 'tcp',
         // Context (optional, pass certificate path when transport is 'ssl')
         'context'    => [], 
-        // Constructor parameters for the process class, here for process\Pusher::class (optional)
+        // Constructor parameters for the process class (optional)
         'constructor' => [],
+        // Whether this process is enabled
+        'enable' => true
     ],
 ];
 ```
 
 ## Conclusion
-The custom processes in webman are actually a simple encapsulation of workerman. It separates configuration from business logic and implements workerman's `onXXX` callbacks through class methods, making it fully compatible with workerman's other usage.
+
+The custom processes in webman are essentially a simple encapsulation of workerman. They separate configuration from business logic and implement workerman's `onXXX` callbacks through class methods. All other usage is identical to workerman.

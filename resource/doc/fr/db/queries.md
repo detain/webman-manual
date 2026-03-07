@@ -1,4 +1,5 @@
-# Constructeur de requête
+# Requêtes base de données (composant Laravel)
+
 ## Obtenir toutes les lignes
 ```php
 <?php
@@ -386,6 +387,9 @@ Si vous avez besoin de vider la table, vous pouvez utiliser la méthode truncate
 ```php
 Db::table('users')->truncate();
 ```
+
+## Transactions
+Voir [Transactions base de données](../others/transaction.md)
 
 ## Verrou pessimiste
 Le générateur de requêtes inclut également certaines fonctions qui vous aideront à implémenter des verrouillages pessimistes dans la syntaxe de sélection. Si vous souhaitez implémenter un "verrou partagé" dans votre requête, vous pouvez utiliser la méthode sharedLock. Le verrou partagé empêche les colonnes sélectionnées d'être modifiées jusqu'à ce que la transaction soit validée :

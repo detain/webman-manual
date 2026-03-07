@@ -1,6 +1,6 @@
 # Tùy chỉnh Script
 
-Đôi khi chúng ta cần viết một số script tạm thời, trong đó các script này có thể gọi bất kỳ lớp hoặc giao diện nào giống như webman, hoàn thành các hoạt động như nhập dữ liệu, cập nhật dữ liệu thống kê, v.v. Điều này rất dễ dàng trong webman, ví dụ:
+Đôi khi chúng ta cần viết một số script tạm thời, trong đó các script này có thể gọi bất kỳ lớp hoặc giao diện nào giống như webman, hoàn thành các hoạt động như nhập dữ liệu, cập nhật dữ liệu, thống kê, v.v. Điều này rất dễ dàng trong webman, ví dụ:
 
 **Tạo mới `scripts/update.php`** (Nếu thư mục không tồn tại hãy tự tạo)
 ```php

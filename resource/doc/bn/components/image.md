@@ -1,20 +1,18 @@
 # চিত্র প্রসেসিং কম্পোনেন্ট
 
-## intervention/image
-
-### প্রকল্প ঠিকানা
+## প্রকল্পের ঠিকানা
 
 https://github.com/Intervention/image
-
-### ইনস্টলেশন
-
+  
+## ইনস্টলেশন
+ 
 ```php
 composer require intervention/image
 ```
+  
+## ব্যবহার
 
-### ব্যবহার
-
-**আপলোড পেজ ফ্রেগমেন্ট**
+**আপলোড পেজের খণ্ড**
 
 ```html
   <form method="post" action="/user/img" enctype="multipart/form-data">
@@ -29,7 +27,8 @@ composer require intervention/image
 <?php
 namespace app\controller;
 use support\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class UserController
 {
@@ -37,14 +36,20 @@ class UserController
     {
         $file = $request->file('file');
         if ($file && $file->isValid()) {
-            $image = Image::make($file)->resize(100, 100);
-            return response($image->encode('png'), 200, ['Content-Type' => 'image/png']);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file)->scale(100, 100);
+            return response($image->encode(), 200, ['Content-Type' => 'image/png']);
         }
-        return response('ফাইল পাওয়া যায়নি');
+        return response('file not found');
     }
+    
 }
 ```
 
-### আরও সামগ্রী
+> **দ্রষ্টব্য**
+> উপরের উদাহরণ v3 API ব্যবহার করে।
 
-http://image.intervention.io/getting_started/introduction
+## আরও তথ্য
+
+https://image.intervention.io/v3 ভিজিট করুন
+  

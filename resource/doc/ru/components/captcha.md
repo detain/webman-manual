@@ -1,17 +1,15 @@
-# Компоненты, связанные с капчей
+# Компонент капчи
 
+Ссылка на проект https://github.com/webman-php/captcha
 
-## webman/captcha
-Ссылка на проект: https://github.com/webman-php/captcha
-
-### Установка
-``` 
+## Установка
+```
 composer require webman/captcha
 ```
 
-### Использование
+## Использование
 
-**Создание файла `app/controller/LoginController.php`**
+**Создать файл `app/controller/LoginController.php`**
 
 ```php
 <?php
@@ -54,9 +52,9 @@ class LoginController
     {
         // Получение поля captcha из POST-запроса
         $captcha = $request->post('captcha');
-        // Сравнение значения капчи из сессии
+        // Сравнение с значением капчи из сессии
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
-            return json(['code' => 400, 'msg' => 'Введенный код капчи неверен']);
+            return json(['code' => 400, 'msg' => 'Введённая капча неверна']);
         }
         return json(['code' => 0, 'msg' => 'ok']);
     }
@@ -64,7 +62,7 @@ class LoginController
 }
 ```
 
-**Создание файла шаблона `app/view/login/index.html`**
+**Создать файл шаблона `app/view/login/index.html`**
 
 ```html
 <!doctype html>
@@ -83,33 +81,23 @@ class LoginController
 </html>
 ```
 
-Перейдите на страницу `http://127.0.0.1:8787/login`, внешний вид будет похож на следующий:
+Перейдите на страницу `http://127.0.0.1:8787/login`, интерфейс будет похож на следующий:
   ![](../../assets/img/captcha.png)
 
-### Настройка общих параметров
+## Настройка общих параметров
 ```php
     /**
      * Вывод изображения капчи
      */
     public function captcha(Request $request)
     {
-        // Инициализация класса капчи
-        $builder = new CaptchaBuilder;
-        // Длина капчи
-        $length = 4;
-        // Символы, включаемые в капчу
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // Генерация капчи
-        $builder->build();
-        // Сохранение значения капчи в сессию
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Получение двоичных данных изображения капчи
-        $img_content = $builder->get();
-        // Вывод двоичных данных капчи
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```
 
-Более подробную информацию о доступных методах и параметрах смотрите в документации по ссылке: https://github.com/webman-php/captcha
+Подробнее об интерфейсах и параметрах см. https://github.com/webman-php/captcha

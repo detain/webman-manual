@@ -64,6 +64,22 @@ $request->post('name');
 ```php
 $request->post('name', 'tom');
 ```
+
+## ฟังก์ชัน helper input()
+คล้ายกับ `$request->input()` ฟังก์ชัน helper `input()` สามารถรับพารามิเตอร์ทั้งหมดได้ มีสองพารามิเตอร์:
+1. name: ชื่อพารามิเตอร์ที่ต้องการรับ (ถ้าว่าง จะได้รับอาร์เรย์ของพารามิเตอร์ทั้งหมด)
+2. default: ค่าเริ่มต้น (ใช้เมื่อไม่พบพารามิเตอร์จากอาร์กิวเมนต์แรก)
+
+**ตัวอย่าง**
+```php
+// รับพารามิเตอร์ name
+$name = input('name');
+// รับพารามิเตอร์ name หากไม่มีให้ใช้ค่าเริ่มต้น
+$name = input('name', 'สมชาย');
+// รับพารามิเตอร์ทั้งหมด
+$all_params = input();
+```
+
 ## รับพารามิเตอร์ post ต้นฉบับ
 ```php
 $post = $request->rawBody();
@@ -127,15 +143,53 @@ $only = $request->only(['username', 'password']);
 $except = $request->except(['avatar', 'age']);
 ```
 
+## รับข้อมูลผ่านพารามิเตอร์คอนโทรลเลอร์
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+ โค้ดด้านบนเทียบเท่ากับ:
+```php
+<?php
+namespace app\controller;
+use support\Request;
+use support\Response;
+
+class UserController
+{
+    public function create(Request $request): Response
+    {
+        $name = $request->input('name');
+        $age = (int)$request->input('age', 18);
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+ดูข้อมูลเพิ่มเติมได้ที่ [การผูกพารามิเตอร์คอนโทรลเลอร์](controller.md#การผูกพารามิเตอร์คอนโทรลเลอร์)
+
 ## รับไฟล์ที่อัพโหลด
+
+> **หมายเหตุ**
+> การอัพโหลดไฟล์ต้องใช้ฟอร์มรูปแบบ `multipart/form-data`
+
 **รับอาร์เรย์ทั้งหมดของไฟล์ที่อัพโหลด**
 ```php
 $request->file();
 ```
 
-พร้อมด้วยฟอร์ม:
+ตัวอย่างฟอร์ม:
 ```html
-<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
+<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data">
 <input name="file1" multiple="multiple" type="file">
 <input name="file2" multiple="multiple" type="file">
 <input type="submit">
@@ -293,7 +347,7 @@ $request->getRealIp($safe_mode=true);
 ```
 เมื่อโปรเจกต์ใช้พร็อกซี(เช่น nginx) การใช้ `$request->getRemoteIp()` มักจะได้รับ IP ของเซิร์ฟเวอร์พร็อกซี (เช่น `127.0.0.1` `192.168.x.x`) แทน IP จริงของกลุ่มผู้ใช้งาน (Client) ในกรณีนี้ คุณสามารถลองใช้ `$request->getRealIp()` เพื่อรับ IP จริงของกลุ่มผู้ใช้งาน (Client)
 
-`$request->getRealIp()` จะพยายามจะรับ IP จริงจากเชดอู่การร้องขอ HTTP ของ `x-real-ip`, `x-forwarded-for`, `client-ip`, `x-client-ip`, `via`
+`$request->getRealIp()` จะพยายามรับ IP จริงจากฟิลด์ `x-forwarded-for`, `x-real-ip`, `client-ip`, `x-client-ip`, `via` ใน HTTP header
 
 > เนื่องจากเฮดเดร์ HTTP สามารถปลอมแปลงได้ง่าย ดังนั้นวิธีนี้ในการรับ IP จริงของกลุ่มผู้ใช้งานจึงไม่สามารถเชื่อถือได้ โดยเฉพาะถ้า `$safe_mode` เป็นเท็จ วิธีที่ที่ที่เป็นการนำเข้า IP ผู้ใช้จริงโดยอาจหลือกคือทราย IP ของเซิร์ฟเวอร์พร็อกซีที่มีความปลอดภัยทราบอันดับและมุ่นนร้ายโดยรู้จัก [การใช้งาน $request->getRemoteIp()` และอาจารย์ความปลอดภัย) หาก IP ที่คืนใช้งาน $request->getRemoteIp()` ยืนยันว่าเป็นเซิร์ฟเวอร์พร็อกซีที่ทราบอันดับและมุ่นนร้ายหลังจากนั้นโดยใช้`$request->header('โครงข่ากราง IP ที่จะนำเข้า')` รับ IP จริง
 
@@ -328,11 +382,10 @@ $request->acceptJson();
 ```
 
 ## รับชื่อปลั๊กอินของการร้องขอ
-การร้องขอที่ไม่ใช่แบบปลั๊กอินจะคืนค่าสตริงว่าง
+การร้องขอที่ไม่ใช่แบบปลั๊กอินจะคืนค่าสตริงว่าง `''`
 ```php
 $request->plugin;
 ```
->คุณสมบูรณ์จำเป็นต้องใช้ ว็บแมน>=1.4.0
 
 ## รับชื่อแอพพลิเคชันของการร้องขอ
 เมื่อมีแอพพลิเคชันเดียวเสมอคืนค่าสตริงว่าง
@@ -362,3 +415,33 @@ $request->action;
 
 > เนื่องจากฟังก์ชันปิดไม่ได้อยู่ภายใต้คลาสควบคิลใด ๆ การร้องขอจากเส้นทางปิดในคลาสควบคิลคืนค่าสตริงว่าง
 > ดูเพิ่มเติมที่ [เส้นทาง](route.md)
+
+## ทับพารามิเตอร์
+
+บางครั้งเราต้องการทับพารามิเตอร์ของการร้องขอ เช่น กรองการร้องขอแล้วกำหนดค่าใหม่ให้กับออบเจ็กต์การร้องขอ ในกรณีนี้เราสามารถใช้เมธอด `setGet()` `setPost()` `setHeader()` ได้
+
+#### ทับพารามิเตอร์ GET
+```php
+$request->get(); // สมมติได้ ['name' => 'tom', 'age' => 18]
+$request->setGet(['name' => 'tom']);
+$request->get(); // ผลลัพธ์สุดท้ายคือ ['name' => 'tom']
+```
+
+> **หมายเหตุ**
+> ตามตัวอย่าง `setGet()` จะทับพารามิเตอร์ GET ทั้งหมด `setPost()` `setHeader()` ก็ทำงานเหมือนกัน
+
+#### ทับพารามิเตอร์ POST
+```php
+$post = $request->post();
+foreach ($post as $key => $value) {
+    $post[$key] = htmlspecialchars($value);
+}
+$request->setPost($post);
+$request->post(); // ได้พารามิเตอร์ post ที่กรองแล้ว
+```
+
+#### ทับพารามิเตอร์ HEADER
+```php
+$request->setHeader(['host' => 'example.com']);
+$request->header('host'); // output: example.com
+```

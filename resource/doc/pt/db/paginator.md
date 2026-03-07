@@ -1,6 +1,6 @@
 # Paginação
 
-# 1. Método de paginação baseado no ORM do Laravel
+# Paginação baseada no ORM do Laravel
 O `illuminate/database` do Laravel fornece uma forma conveniente de realizar a paginação.
 
 ## Instalação
@@ -69,8 +69,8 @@ class UserController
 }
 ```
 
-**Modelo (PHP nativo)**
-Crie o modelo app/view/user/get.html
+**Template (PHP nativo)**
+Criar novo template app/view/user/get.html
 ```html
 <html>
 <head>
@@ -85,8 +85,8 @@ Crie o modelo app/view/user/get.html
 </html>
 ```
 
-**Modelo (twig)**
-Crie o modelo app/view/user/get.html
+**Template (twig)**
+Criar novo template app/view/user/get.html
 ```html
 <html>
 <head>
@@ -103,8 +103,8 @@ Crie o modelo app/view/user/get.html
 </html>
 ```
 
-**Modelo (blade)**
-Crie o modelo app/view/user/get.blade.php
+**Template (blade)**
+Criar novo template app/view/user/get.blade.php
 ```html
 <html>
 <head>
@@ -119,8 +119,8 @@ Crie o modelo app/view/user/get.blade.php
 </html>
 ```
 
-**Modelo (thinkphp)**
-Crie o modelo app/view/user/get.html
+**Template (thinkphp)**
+Criar novo template app/view/user/get.html
 ```html
 <html>
 <head>
@@ -135,11 +135,12 @@ Crie o modelo app/view/user/get.html
 </html>
 ```
 
-Efeito mostrado:
+O resultado é o seguinte:
 ![](../../assets/img/paginator.png)
 
-# 2. Método de paginação baseado no ORM do Thinkphp
-Não é necessário instalar bibliotecas adicionais, apenas é necessário ter o think-orm instalado.
+# Paginação baseada no ORM do ThinkPHP
+
+Não é necessário instalar bibliotecas adicionais; basta ter o think-orm instalado.
 
 ## Utilização
 ```php
@@ -151,7 +152,7 @@ public function index(Request $request)
 }
 ```
 
-**Modelo (thinkphp)**
+**Template (thinkphp)**
 ```html
 <html>
 <head>

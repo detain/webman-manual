@@ -22,6 +22,8 @@ Wenn Sie die Adresse `http://127.0.0.1:8787/api/{Controller}/{Methode}` aufrufen
 
 Wenn Sie die Adresse `http://127.0.0.1:8787/admin/{Controller}/{Methode}` aufrufen, greifen Sie auf den Controller und die Methode unter `app/admin/controller` zu.
 
+In Webman kann jedes Verzeichnis unter app als eine Anwendung betrachtet werden.
+
 In Webman können Sie das App-Verzeichnis sogar folgendermaßen planen.
 ```
 app
@@ -55,7 +57,7 @@ class FooController
 ```
 
 ## Konfiguration von Middleware in mehreren Anwendungen
-Manchmal möchten Sie für verschiedene Anwendungen unterschiedliche Middleware konfigurieren. Zum Beispiel benötigt die `API`-Anwendung möglicherweise eine CORS-Middleware, während `Admin` eine Middleware zur Überprüfung des Administrator-Logins benötigt. Die Konfiguration der Datei `config/midlleware.php` könnte wie folgt aussehen:
+Manchmal möchten Sie für verschiedene Anwendungen unterschiedliche Middleware konfigurieren. Zum Beispiel benötigt die `API`-Anwendung möglicherweise eine CORS-Middleware, während `Admin` eine Middleware zur Überprüfung des Administrator-Logins benötigt. Die Konfiguration der Datei `config/middleware.php` könnte wie folgt aussehen:
 
 ```php
 return [

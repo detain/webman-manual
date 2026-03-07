@@ -1,15 +1,16 @@
-# Multi-idioma
+# Multilingüe
 
-El multi-idioma utiliza el componente [symfony/translation](https://github.com/symfony/translation).
+La funcionalidad multilingüe utiliza el componente [symfony/translation](https://github.com/symfony/translation).
 
 ## Instalación
-```composer require symfony/translation```
+```
+composer require symfony/translation
+```
 
-## Crear Paquete de Idioma
-Por defecto, webman coloca los paquetes de idioma en el directorio `resource/translations` (si no existe, créalo tú mismo). Si necesitas cambiar el directorio, configúralo en `config/translation.php`. 
-Cada idioma tiene su propia subcarpeta y las definiciones de idioma suelen ir por defecto en `messages.php`. Por ejemplo:
-
-``` 
+## Crear paquetes de idioma
+webman guarda los paquetes de idioma por defecto en el directorio `resource/translations` (crear si no existe). Para cambiar el directorio, configúralo en `config/translation.php`.
+Cada idioma corresponde a una subcarpeta y las definiciones se guardan en `messages.php` por defecto. Ejemplo:
+```
 resource/
 └── translations
     ├── en
@@ -17,6 +18,7 @@ resource/
     └── zh_CN
         └── messages.php
 ```
+
 Todos los archivos de idioma devuelven un array, por ejemplo:
 ```php
 // resource/translations/en/messages.php
@@ -27,31 +29,32 @@ return [
 ```
 
 ## Configuración
+
 `config/translation.php`
 
 ```php
 return [
     // Idioma por defecto
     'locale' => 'zh_CN',
-    // Idioma de reemplazo. Si no se puede encontrar una traducción en el idioma actual, se intentará usar la traducción del idioma de reemplazo.
+    // Idioma alternativo: si no se encuentra la traducción en el idioma actual, se intenta con el alternativo
     'fallback_locale' => ['zh_CN', 'en'],
-    // Directorio donde se almacenan los archivos de idioma
+    // Carpeta donde se guardan los archivos de idioma
     'path' => base_path() . '/resource/translations',
 ];
 ```
 
 ## Traducción
-La traducción se realiza mediante el método `trans()`.
 
-Crea el archivo de idioma `resource/translations/zh_CN/messages.php` de la siguiente manera:
+Se usa el método `trans()` para traducir.
 
+Crear archivo de idioma `resource/translations/zh_CN/messages.php`:
 ```php
 return [
-    'hello' => '¡Hola mundo!',
+    'hello' => '你好 世界!',
 ];
 ```
 
-Crea el archivo `app/controller/UserController.php`:
+Crear archivo `app/controller/UserController.php`:
 ```php
 <?php
 namespace app\controller;
@@ -62,21 +65,22 @@ class UserController
 {
     public function get(Request $request)
     {
-        $hello = trans('hello'); // ¡Hola mundo!
+        $hello = trans('hello'); // 你好 世界!
         return response($hello);
     }
 }
 ```
 
-Al visitar `http://127.0.0.1:8787/user/get` regresará "¡Hola mundo!"
+Al acceder a `http://127.0.0.1:8787/user/get` se devolverá "你好 世界!"
 
-## Cambiar Idioma Predeterminado
-Para cambiar el idioma, usa el método `locale()`.
+## Cambiar el idioma por defecto
 
-Agrega el archivo de idioma `resource/translations/en/messages.php` de la siguiente manera:
+Usa el método `locale()` para cambiar de idioma.
+
+Añadir archivo de idioma `resource/translations/en/messages.php`:
 ```php
 return [
-    'hello' => '¡Hola mundo!',
+    'hello' => 'hello world!',
 ];
 ```
 
@@ -92,15 +96,14 @@ class UserController
     {
         // Cambiar idioma
         locale('en');
-        $hello = trans('hello'); // ¡Hola mundo!
+        $hello = trans('hello'); // hello world!
         return response($hello);
     }
 }
 ```
+Al acceder a `http://127.0.0.1:8787/user/get` se devolverá "hello world!"
 
-Al visitar `http://127.0.0.1:8787/user/get` regresará "¡Hola mundo!"
-
-También puedes usar el cuarto parámetro de la función `trans()` para cambiar temporalmente el idioma. Por ejemplo, los dos ejemplos a continuación son equivalentes:
+También puedes usar el cuarto parámetro de `trans()` para cambiar el idioma temporalmente. El ejemplo anterior equivale a:
 ```php
 <?php
 namespace app\controller;
@@ -111,18 +114,17 @@ class UserController
 {
     public function get(Request $request)
     {
-        // Cuarto parámetro para cambiar el idioma
-        $hello = trans('hello', [], null, 'en'); // ¡Hola mundo!
+        // El 4º parámetro cambia el idioma
+        $hello = trans('hello', [], null, 'en'); // hello world!
         return response($hello);
     }
 }
 ```
 
-## Establecer un Idioma Específico para Cada Solicitud
-La traducción es un singleton, lo que significa que todas las solicitudes comparten la misma instancia. Si una solicitud usa `locale()` para establecer el idioma por defecto, afectará a todas las solicitudes posteriores en el mismo proceso. Por lo tanto, se debe establecer un idioma específico para cada solicitud. Por ejemplo, utilizando el middleware siguiente:
+## Establecer el idioma explícitamente en cada petición
+translation es un singleton, por lo que todas las peticiones comparten la misma instancia. Si una petición usa `locale()` para establecer el idioma por defecto, afectará a todas las peticiones posteriores del proceso. Por eso conviene establecer el idioma explícitamente en cada petición, por ejemplo con el siguiente middleware:
 
-Crea el archivo `app/middleware/Lang.php` (si el directorio no existe, créalo tú mismo) de la siguiente manera:
-
+Crear archivo `app/middleware/Lang.php` (crear el directorio si no existe):
 ```php
 <?php
 namespace app\middleware;
@@ -141,76 +143,80 @@ class Lang implements MiddlewareInterface
 }
 ```
 
-Agrega el middleware global en `config/middleware.php` de la siguiente manera:
+Añadir el middleware global en `config/middleware.php`:
 ```php
 return [
     // Middleware global
     '' => [
-        // ... Se omiten otros middlewares
+        // ... otros middlewares omitidos
         app\middleware\Lang::class,
     ]
 ];
 ```
 
-## Uso de Marcadores de Posición
-A veces, un mensaje contiene variables que deben ser traducidas, por ejemplo:
+
+## Usar marcadores de posición
+A veces un mensaje contiene variables que deben traducirse, por ejemplo
 ```php
 trans('hello ' . $name);
 ```
-En estos casos, se utilizan marcadores de posición.
+En estos casos se usan marcadores de posición.
 
-Modifica `resource/translations/zh_CN/messages.php` de la siguiente manera:
+Actualizar `resource/translations/zh_CN/messages.php`:
 ```php
 return [
-    'hello' => '¡Hola %name%!',
+    'hello' => '你好 %name%!',
 ];
 ```
-Al traducir, se pasa el valor correspondiente del marcador de posición como segundo parámetro:
+Al traducir, se pasan los valores mediante el segundo parámetro:
 ```php
-trans('hello', ['%name%' => 'webman']); // ¡Hola webman!
+trans('hello', ['%name%' => 'webman']); // 你好 webman!
 ```
 
-## Tratamiento de Pluralidad
-Algunos idiomas requieren diferentes formas de frases dependiendo de la cantidad de elementos, por ejemplo `Hay %count% manzanas`, donde la frase es correcta cuando `%count%` es 1, pero incorrecta cuando es mayor. 
-En estos casos, se utilizan un **pipe** (`|`) para listar las formas de pluralidad.
+## Manejar plurales
+En algunos idiomas la estructura de la oración varía según la cantidad. Por ejemplo, "There is %count% apple" es correcto cuando `%count%` es 1, pero incorrecto cuando es mayor.
 
-Agrega la clave `apple_count` al archivo de idioma `resource/translations/en/messages.php` de la siguiente manera:
-```php
-return [
-    // ...
-    'apple_count' => 'Hay una manzana|Hay %count% manzanas',
-];
-```
-```php
-trans('apple_count', ['%count%' => 10]); // Hay 10 manzanas
-```
+En estos casos se usa el **pipe** (`|`) para listar las formas en plural.
 
-Incluso se pueden especificar rangos numéricos para crear reglas de pluralidad más complejas:
+Añadir `apple_count` en `resource/translations/en/messages.php`:
 ```php
 return [
     // ...
-    'apple_count' => '{0} No hay manzanas|{1} Hay una manzana|]1,19] Hay %count% manzanas|[20,Inf[ Hay muchas manzanas'
+    'apple_count' => 'There is one apple|There are %count% apples',
 ];
 ```
 
 ```php
-trans('apple_count', ['%count%' => 20]); // Hay muchas manzanas
+trans('apple_count', ['%count%' => 10]); // There are 10 apples
 ```
 
-## Especificar Archivos de Idioma
-El archivo de idioma se llama por defecto `messages.php`, pero en realidad puedes crear archivos de idioma con otros nombres.
-
-Crea el archivo de idioma `resource/translations/zh_CN/admin.php` de la siguiente manera:
+También se pueden especificar rangos numéricos para reglas de plural más complejas:
 ```php
 return [
-    'hello_admin' => '¡Hola administrador!',
+    // ...
+    'apple_count' => '{0} There are no apples|{1} There is one apple|]1,19] There are %count% apples|[20,Inf[ There are many apples'
 ];
 ```
 
-Especifica el archivo de idioma a través del tercer parámetro de `trans()` (omitir la extensión `.php`).
 ```php
-trans('hello', [], 'admin', 'zh_CN'); // ¡Hola administrador!
+trans('apple_count', ['%count%' => 20]); // There are many apples
 ```
 
-## Más Información
-Consulta el [manual de symfony/translation](https://symfony.com/doc/current/translation.html) para más detalles.
+## Especificar archivo de idioma
+
+Por defecto el archivo se llama `messages.php`, pero puedes crear archivos con otros nombres.
+
+Crear archivo `resource/translations/zh_CN/admin.php`:
+```php
+return [
+    'hello_admin' => '你好 管理员!',
+];
+```
+
+Especificar el archivo con el tercer parámetro de `trans()` (sin la extensión `.php`):
+```php
+trans('hello', [], 'admin', 'zh_CN'); // 你好 管理员!
+```
+
+## Más información
+Consultar [documentación de symfony/translation](https://symfony.com/doc/current/translation.html)

@@ -1,6 +1,7 @@
 # Prestazioni di webman
 
-### Flusso di gestione delle richieste dei framework tradizionali
+
+## Flusso di gestione delle richieste dei framework tradizionali
 
 1. Nginx/Apache riceve la richiesta
 2. Nginx/Apache inoltra la richiesta a php-fpm
@@ -18,10 +19,10 @@
 14. php-fpm inoltra il risultato a Nginx/Apache
 15. Nginx/Apache restituisce il risultato al client
 
-### Flusso di gestione delle richieste di webman
+## Flusso di gestione delle richieste di webman
 
 1. Il framework riceve la richiesta
-2. Il framework esegue la logica di business
+2. Il framework esegue la logica di business (bytecode opcode)
 3. Il framework restituisce il risultato al client
 
 Sì, senza un proxy inverso Nginx, il framework ha solo questi 3 passaggi. Si potrebbe dire che questo è il massimo di un framework PHP, rendendo le prestazioni di webman diverse volte superiori, anche decine di volte, rispetto ai framework tradizionali.

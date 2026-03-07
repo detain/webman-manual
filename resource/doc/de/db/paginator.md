@@ -1,8 +1,8 @@
 # Pagination
 
-# 1. Pagination based on Laravel's ORM
+# Pagination using Laravel's ORM
 
-The `illuminate/database` of Laravel provides convenient pagination functionality.
+Laravel's `illuminate/database` provides convenient pagination functionality.
 
 ## Installation
 `composer require illuminate/pagination`
@@ -139,9 +139,9 @@ Create a new template at app/view/user/get.html
 The effect is as follows:
 ![](../../assets/img/paginator.png)
 
-# 2. Pagination based on Thinkphp's ORM
+# Pagination using ThinkPHP's ORM
 
-No additional library is required. You just need to install think-orm.
+No additional libraries need to be installed; think-orm alone is sufficient.
 
 ## Usage
 ```php

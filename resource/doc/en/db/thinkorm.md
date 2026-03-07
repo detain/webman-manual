@@ -1,27 +1,29 @@
-## ThinkORM
+# think-orm
 
-### Installing ThinkORM
+[webman/think-orm](https://github.com/webman-php/think-orm) is a database component based on [top-think/think-orm](https://github.com/top-think/think-orm). It supports connection pooling and works in both coroutine and non-coroutine environments.
+
+## Installation
 
 `composer require -W webman/think-orm`
 
-After installation, restart is required (reload does not work)
+A restart is required after installation (reload does not take effect).
 
-> **Note**
-> If the installation fails, it may be because you are using a composer proxy. Try running `composer config -g --unset repos.packagist` to cancel the composer proxy and try again.
+## Configuration
 
-> [webman/think-orm](https://www.workerman.net/plugin/14) is actually a plugin for automated installation of `toptink/think-orm`. If your webman version is lower than `1.2` and cannot use plugins, please refer to the article [Manually install and configure think-orm](https://www.workerman.net/a/1289).
+Modify the configuration file `config/think-orm.php` according to your actual needs.
 
-### Configuration file
-Modify the configuration file `config/thinkorm.php` according to your actual situation.
+## Documentation
 
-### Usage
+https://www.kancloud.cn/manual/think-orm
+
+## Usage
 
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use think\facade\Db;
+use support\think\Db;
 
 class FooController
 {
@@ -33,14 +35,15 @@ class FooController
 }
 ```
 
-### Creating a model
+## Creating Models
 
-The ThinkOrm model inherits `think\Model`, as shown below
-```
+Think-orm models extend `support\think\Model`, as shown below:
+
+```php
 <?php
 namespace app\model;
 
-use think\Model;
+use support\think\Model;
 
 class User extends Model
 {
@@ -58,17 +61,17 @@ class User extends Model
      */
     protected $pk = 'id';
 
-    
 }
 ```
 
-You can also use the following command to create a model based on thinkorm
+You can also create think-orm models using the following command:
+
 ```
 php webman make:model table_name
 ```
 
-> **Note**
-> This command requires the installation of `webman/console`, the installation command is `composer require webman/console ^1.2.13`
+> **Tip**
+> This command requires `webman/console`. Install it with `composer require webman/console ^1.2.13`.
 
 > **Note**
-> If the make:model command detects that the main project is using `illuminate/database`, it will create a model file based on `illuminate/database`, not thinkorm. In this case, you can force the generation of think-orm models by adding an additional parameter `tp` to the command, similar to `php webman make:model table_name tp` (If it doesn't take effect, please upgrade `webman/console`)
+> If `make:model` detects that the main project uses `illuminate/database`, it will create Illuminate-based model files instead of think-orm. In that case, add the `tp` parameter to force think-orm model generation: `php webman make:model table_name tp` (upgrade `webman/console` if it does not work).

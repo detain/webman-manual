@@ -1,4 +1,4 @@
-# দ্রুত শুরু
+# ডাটাবেস মডেল - মডেল ব্যবহার (Laravel স্টাইল)
 
 webman মডেলটি [Eloquent ORM](https://laravel.com/docs/7.x/eloquent) ভিত্তিতে তৈরি করা হয়েছে। প্রতিটি ডাটাবেস টেবিলের জন্য একটি "মডেল" আছে যা ঐ টেবিলে সাথে সাম্প্রদায়িক। আপনি মডেল দ্বারা ডাটাবেস টেবিলে ডেটা চেক করতে পারেন, এবং নতুন রেকর্ড টেবিলে ঢুকিয়ে দিতে পারেন।
 
@@ -6,7 +6,7 @@ webman মডেলটি [Eloquent ORM](https://laravel.com/docs/7.x/eloquent) 
 
 > লক্ষ্য করুন: Eloquent ORM মডেল অবশ্যই মডেল অবদানকারী সমর্থন করতে ইভেন্টস অতিরিক্ত আমদানি করতে হবে `composer require "illuminate/events"` [উদাহরণ](#মডেল-অবদানকারী)
 
-## উদাহরণ
+## ডাটাবেস মডেল উদাহরণ
 ```php
 <?php
 namespace app\model;
@@ -188,7 +188,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -530,7 +530,8 @@ if ($post->is($anotherPost)) {
 ## মডেল চেকার
 [Laravel মডেল ইভেন্ট এবং অবজারভার উপর ভিত্তি করে](https://learnku.com/articles/6657/model-events-and-observer-in-laravel) ব্যবহার করা।
 
-লক্ষ্যকরুন: Eloquent ORM মডেল চেকার সমর্থন করতে অতিরিক্তভাবে আমন্ত্রিত পাঠানোর composer require "illuminate/events" প্রয়োজন।
+লক্ষ্যকরুন: Eloquent ORM মডেল চেকার সমর্থন করতে অতিরিক্তভাবে `composer require "illuminate/events"` প্রয়োজন।
+
 ```php
 <?php
 namespace app\model;
@@ -547,3 +548,6 @@ class User extends Model
     }
 }
 ```
+
+## লেনদেন
+[ডাটাবেস লেনদেন](../others/transaction.md) দেখুন

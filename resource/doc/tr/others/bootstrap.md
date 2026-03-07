@@ -62,7 +62,7 @@ return [
 Bu şekilde işletme başlatma sürecini tamamlamış oluruz.
 
 ## Ek Açıklamalar
-[Özel İşlemler](../process.md) başlatıldığında da `config/bootstrap.php` dosyasında belirtilen start metotlarını çalıştırır. Hangi işlemin hangi işlem olduğunu belirlemek için `$worker->name` ile mevcut işlemi kontrol edebilir ve bu işlemlere özgü işletme başlatma kodlarını çalıştırıp çalıştırmamaya karar verebiliriz. Örneğin, monitor işlemine gözetim yapmak istemiyoruz, bu durumda `MemReport.php` içeriği aşağıdaki gibi olabilir:
+[Özel İşlemler](../process.md) başlatıldığında da `config/bootstrap.php` dosyasında belirtilen start metotlarını çalıştırır. `$worker->name` ile mevcut işlemin hangi işlem olduğunu belirleyebilir, ayrıca `$worker->id` ile işlem numarasını öğrenebiliriz. Böylece bu işlemde işletme başlatma kodunuzu çalıştırıp çalıştırmamaya karar verebiliriz. Örneğin, yalnızca webman'ın 0 numaralı işleminde çalıştırmak istiyorsak, `MemReport.php` içeriği aşağıdaki gibi olabilir:
 
 ```php
 <?php
@@ -82,8 +82,8 @@ class MemReport implements Bootstrap
             return;
         }
         
-        // monitor işlemi zamanlayıcıyı çalıştırmasın
-        if ($worker->name == 'monitor') {
+        // Yalnızca webman'ın 0 numaralı işleminde çalıştır
+        if ($worker->name != 'webman' || $worker->id != 0) {
             return;
         }
         

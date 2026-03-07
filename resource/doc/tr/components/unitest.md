@@ -1,4 +1,4 @@
-# Birim Test
+# Birim Testi
 
 ## Kurulum
 
@@ -6,9 +6,43 @@
 composer require --dev phpunit/phpunit
 ```
 
+## Yapılandırma
+
+Proje kök dizinine `phpunit.xml` yapılandırma dosyası ekleyin. Projenizin ihtiyaçlarına göre özelleştirebilirsiniz. [phpunit.xml yapılandırma belgelerine](https://docs.phpunit.de/en/12.4/configuration.html) bakın.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="support/bootstrap.php"
+    cacheDirectory=".phpunit.cache"
+    executionOrder="depends,defects"
+    shortenArraysForExportThreshold="10"
+    requireCoverageMetadata="false"
+    beStrictAboutCoverageMetadata="true"
+    beStrictAboutOutputDuringTests="true"
+    displayDetailsOnPhpunitDeprecations="true"
+    failOnPhpunitDeprecation="true"
+    failOnRisky="true"
+    failOnWarning="true"
+    colors="true">
+    <testsuites>
+        <testsuite name="tests">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </source>
+</phpunit>
+
+```
+
 ## Kullanım
 
-`tests/TestConfig.php` adında yeni bir dosya oluşturun ve veritabanı yapılandırmasını test etmek için kullanın.
+Uygulama yapılandırmasını test etmek için `tests/TestConfig.php` dosyası oluşturun:
 
 ```php
 <?php
@@ -27,15 +61,25 @@ class TestConfig extends TestCase
     }
 }
 ```
-
+  
 ## Çalıştırma
 
-Proje kök dizininde aşağıdaki komutu çalıştırın: `./vendor/bin/phpunit --bootstrap support/bootstrap.php tests/TestConfig.php`
+Proje kök dizininden tüm testleri çalıştırın:
 
-Sonuç aşağıdakine benzer olmalıdır:
+```bash
+./vendor/bin/phpunit
+```
 
-```plaintext
-PHPUnit 9.5.10 tarafından Sebastian Bergmann ve katkıda bulunanlar.
+Proje kök dizininden belirli bir testi çalıştırın:
+
+```bash
+./vendor/bin/phpunit tests/TestConfig.php
+```
+
+Sonuç aşağıdakine benzer olacaktır:
+
+```
+PHPUnit 9.5.10 by Sebastian Bergmann and contributors.
 
 .                                                                   1 / 1 (100%)
 

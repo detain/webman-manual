@@ -2,7 +2,7 @@
 
 ## Beschreibung
 
-Casbin ist ein leistungsfähiges, effizientes Open-Source-Zugriffskontroll-Framework, dessen Berechtigungsverwaltungsmechanismus mehrere Zugriffskontrollmodelle unterstützt.
+Casbin ist ein leistungsfähiges und effizientes Open-Source-Zugriffskontroll-Framework. Sein Berechtigungsverwaltungsmechanismus unterstützt mehrere Zugriffskontrollmodelle.
 
 ## Projektadresse
 
@@ -11,26 +11,26 @@ https://github.com/teamones-open/casbin
 ## Installation
 
 ```php
-  composer require teamones/casbin
+composer require teamones/casbin
 ```
 
 ## Casbin-Website
 
-Für detaillierte Anleitungen besuchen Sie bitte die offizielle chinesische Dokumentation, hier wird nur erklärt, wie man es in webman konfiguriert und verwendet.
+Für ausführliche Anleitungen konsultieren Sie bitte die offizielle chinesische Dokumentation. Hier wird nur die Konfiguration und Verwendung in webman erläutert.
 
 https://casbin.org/docs/zh-CN/overview
 
 ## Verzeichnisstruktur
 
-```bash
+```
 .
 ├── config                        Konfigurationsverzeichnis
-│   ├── casbin-restful-model.conf Verwendete Berechtigungsmodellkonfigurationsdatei
-│   ├── casbin.php                Casbin-Konfiguration
+│   ├── casbin-restful-model.conf Konfigurationsdatei des Berechtigungsmodells
+│   ├── casbin.php                Casbin-Konfiguration
 ......
 ├── database                      Datenbankdateien
-│   ├── migrations                Umzugsdateien
-│   │   └── 20210218074218_create_rule_table.php
+│   ├── migrations                Migrationsdateien
+│   │   └── 20210218074218_create_rule_table.php
 ......
 ```
 
@@ -44,15 +44,15 @@ use Phinx\Migration\AbstractMigration;
 class CreateRuleTable extends AbstractMigration
 {
     /**
-     * Methode ändern.
+     * Change Method.
      *
-     * Schreiben Sie Ihre umkehrbaren Migrationen mit dieser Methode.
+     * Write your reversible migrations using this method.
      *
-     * Weitere Informationen zur Erstellung von Migrationen finden Sie hier:
+     * More information on writing migrations is available here:
      * http://docs.phinx.org/en/latest/migrations.html#the-abstractmigration-class
      *
-     * Die folgenden Befehle können in dieser Methode verwendet werden und Phinx wird
-     * sie automatisch rückgängig machen, wenn Sie die Migration zurückrollen:
+     * The following commands can be used in this method and Phinx will
+     * automatically reverse them when rolling back:
      *
      *    createTable
      *    renameTable
@@ -62,16 +62,17 @@ class CreateRuleTable extends AbstractMigration
      *    addIndex
      *    addForeignKey
      *
-     * Jede andere destructive Änderung führt zu einem Fehler beim Versuch, die
-     * Migration zurückzurollen.
+     * Any other destructive changes will result in an error when trying to
+     * rollback the migration.
      *
-     * Denken Sie daran, "create()" oder "update()" aufzurufen und NICHT "speichern()", wenn Sie mit der Klassen-Tabelle arbeiten.
+     * Remember to call "create()" or "update()" and NOT "save()" when working
+     * with the Table class.
      */
     public function change()
     {
-        $table = $this->table('rule', ['id' => false, 'primary_key' => ['id'], 'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => 'Regel-Tabelle']);
+        $table = $this->table('rule', ['id' => false, 'primary_key' => ['id'], 'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => 'Regeltabelle']);
 
-        // Hinzufügen von Datenfeldern
+        // Datenfelder hinzufügen
         $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => 'Primärschlüssel-ID'])
             ->addColumn('ptype', 'char', ['default' => '', 'limit' => 8, 'comment' => 'Regeltyp'])
             ->addColumn('v0', 'string', ['default' => '', 'limit' => 128])
@@ -89,7 +90,7 @@ class CreateRuleTable extends AbstractMigration
 
 ## Casbin-Konfiguration
 
-Syntax der Berechtigungsregelmodellkonfiguration finden Sie unter: https://casbin.org/docs/zh-CN/syntax-for-models
+Zur Syntax der Berechtigungsregelmodell-Konfiguration siehe: https://casbin.org/docs/zh-CN/syntax-for-models
 
 ```php
 <?php
@@ -98,23 +99,23 @@ return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Berechtigungsregelmodellkonfigurationsdatei
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Berechtigungsregelmodell-Konfigurationsdatei
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'model', // Modell oder Adapter
+            'type' => 'model', // model or adapter
             'class' => \app\model\Rule::class,
         ],
     ],
-    // Mehrere Berechtigungsmodelle konfigurierbar
+    // Mehrere Berechtigungsmodelle können konfiguriert werden
     'rbac' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // Berechtigungsregelmodellkonfigurationsdatei
+            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // Berechtigungsregelmodell-Konfigurationsdatei
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'model', // Modell oder Adapter
+            'type' => 'model', // model or adapter
             'class' => \app\model\RBACRule::class,
         ],
     ],
@@ -123,111 +124,111 @@ return [
 
 ### Adapter
 
-Das aktuelle Composer-Paket enthält die Methode `model` von think-orm, für andere ORMs siehe `vendor/teamones/src/adapters/DatabaseAdapter.php`
+Die aktuelle Composer-Paket-Implementierung ist an die Model-Methoden von think-orm angepasst. Für andere ORMs siehe vendor/teamones/src/adapters/DatabaseAdapter.php
 
-Dann ändern Sie die Konfiguration:
+Anschließend die Konfiguration anpassen:
 
 ```php
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Berechtigungsregelmodellkonfigurationsdatei
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Berechtigungsregelmodell-Konfigurationsdatei
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'adapter', // Hier wird der Typ als Adaptermodus konfiguriert
+            'type' => 'adapter', // Hier den Typ als Adapter-Modus konfigurieren
             'class' => \app\adapter\DatabaseAdapter::class,
         ],
     ],
 ];
 ```
 
-## Anleitung zur Verwendung
+## Verwendungsanleitung
 
-### Einbinden
+### Import
 
 ```php
-# Einbinden
+# Import
 use teamones\casbin\Enforcer;
 ```
 
-### Zwei Arten der Verwendung
+### Zwei Verwendungsarten
 
 ```php
-# 1. Standardmäßig die default-Konfiguration verwenden
-Enforcer::addPermissionForUser('Benutzer1', '/Benutzer', 'lesen');
+# 1. Standardkonfiguration verwenden
+Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# 1. Verwendung der benutzerdefinierten rbac-Konfiguration
-Enforcer::instance('rbac')->addPermissionForUser('Benutzer1', '/Benutzer', 'lesen');
+# 2. Benutzerdefinierte rbac-Konfiguration verwenden
+Enforcer::instance('rbac')->addPermissionForUser('user1', '/user', 'read');
 ```
 
-### Übliche API-Einführung
+### Übersicht gängiger APIs
 
-Weitere API-Verwendungen finden Sie in der offiziellen Dokumentation
+Weitere API-Verwendung siehe offizielle Dokumentation:
 
-- Management-API: https://casbin.org/docs/zh-CN/management-api
-- RBAC-API: https://casbin.org/docs/zh-CN/rbac-api
+- Management API: https://casbin.org/docs/zh-CN/management-api
+- RBAC API: https://casbin.org/docs/zh-CN/rbac-api
 
 ```php
 # Berechtigung für Benutzer hinzufügen
 
-Enforcer::addPermissionForUser('Benutzer1', '/Benutzer', 'lesen');
+Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# Berechtigung eines Benutzers löschen
+# Berechtigung für Benutzer entfernen
 
-Enforcer::deletePermissionForUser('Benutzer1', '/Benutzer', 'lesen');
+Enforcer::deletePermissionForUser('user1', '/user', 'read');
 
-# Alle Berechtigungen eines Benutzers erhalten
+# Alle Berechtigungen eines Benutzers abrufen
 
-Enforcer::getPermissionsForUser('Benutzer1');
+Enforcer::getPermissionsForUser('user1');
 
 # Rolle für Benutzer hinzufügen
 
-Enforcer::addRoleForUser('Benutzer1', 'Rolle1');
+Enforcer::addRoleForUser('user1', 'role1');
 
-# Berechtigung für eine Rolle hinzufügen
+# Berechtigung für Rolle hinzufügen
 
-Enforcer::addPermissionForUser('Rolle1', '/Benutzer', 'bearbeiten');
+Enforcer::addPermissionForUser('role1', '/user', 'edit');
 
-# Alle Rollen erhalten
+# Alle Rollen abrufen
 
 Enforcer::getAllRoles();
 
-# Alle Rollen eines Benutzers erhalten
+# Alle Rollen eines Benutzers abrufen
 
-Enforcer::getRolesForUser('Benutzer1');
+Enforcer::getRolesForUser('user1');
 
-# Benutzer anhand der Rolle erhalten
+# Benutzer nach Rolle abrufen
 
-Enforcer::getUsersForRole('Rolle1');
+Enforcer::getUsersForRole('role1');
 
-# Überprüfen, ob ein Benutzer zu einer Rolle gehört
+# Prüfen, ob Benutzer einer Rolle angehört
 
-Enforcer::hasRoleForUser('Benutzer1', 'Rolle1');
+Enforcer::hasRoleForUser('user1', 'role1');
 
-# Benutzerrolle löschen
+# Benutzerrolle entfernen
 
-Enforcer::deleteRoleForUser('Benutzer1', 'Rolle1');
+Enforcer::deleteRoleForUser('user1', 'role1');
 
-# Alle Rollen eines Benutzers löschen
+# Alle Rollen eines Benutzers entfernen
 
-Enforcer::deleteRolesForUser('Benutzer1');
+Enforcer::deleteRolesForUser('user1');
 
-# Rolle löschen
+# Rolle entfernen
 
-Enforcer::deleteRole('Rolle1');
+Enforcer::deleteRole('role1');
 
-# Berechtigung löschen
+# Berechtigung entfernen
 
-Enforcer::deletePermission('/Benutzer', 'lesen');
+Enforcer::deletePermission('/user', 'read');
 
-# Alle Berechtigungen eines Benutzers oder einer Rolle löschen
+# Alle Berechtigungen eines Benutzers oder einer Rolle entfernen
 
-Enforcer::deletePermissionsForUser('Benutzer1');
-Enforcer::deletePermissionsForUser('Rolle1');
+Enforcer::deletePermissionsForUser('user1');
+Enforcer::deletePermissionsForUser('role1');
 
-# Berechtigung prüfen, true oder false zurückgeben
+# Berechtigung prüfen, gibt true oder false zurück
 
-Enforcer::enforce("Benutzer1", "/Benutzer", "bearbeiten");
+Enforcer::enforce("user1", "/user", "edit");
 ```

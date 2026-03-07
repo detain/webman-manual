@@ -1,40 +1,41 @@
 # Carga automática
 
-## Cargar archivos bajo la especificación PSR-0 utilizando Composer
-webman sigue la especificación de carga automática `PSR-4`. Si su proyecto necesita cargar bibliotecas de código que siguen la especificación `PSR-0`, siga los pasos a continuación.
+## Cargar archivos PSR-0 mediante Composer
+webman sigue la especificación de carga automática `PSR-4`. Si tu proyecto necesita cargar bibliotecas compatibles con PSR-0, sigue estos pasos:
 
-- Cree el directorio `extend` para almacenar las bibliotecas de código que siguen la especificación `PSR-0`.
-- Edite `composer.json` y agregue lo siguiente dentro de `autoload`:
+- Crea un directorio `extend` para almacenar las bibliotecas PSR-0
+- Edita `composer.json` y añade lo siguiente en `autoload`:
 
-```js
+```json
 "psr-0" : {
     "": "extend/"
 }
 ```
-El resultado final se verá similar a
+El resultado final será similar a:
 ![](../../assets/img/psr0.png)
 
-- Ejecute `composer dumpautoload`.
-- Ejecute `php start.php restart` para reiniciar webman (nota: es necesario reiniciar para que surta efecto).
+- Ejecuta `composer dumpautoload`
+- Ejecuta `php start.php restart` para reiniciar webman (nota: es necesario reiniciar para que surta efecto)
 
-## Cargar ciertos archivos utilizando Composer
-- Edite `composer.json` y agregue los archivos que desea cargar dentro de `autoload.files`:
+## Cargar ciertos archivos mediante Composer
 
-```json
+- Edita `composer.json` y añade en `autoload.files` los archivos a cargar:
+```
 "files": [
     "./support/helpers.php",
     "./app/helpers.php"
 ]
 ```
-- Ejecute `composer dumpautoload`.
-- Ejecute `php start.php restart` para reiniciar webman (nota: es necesario reiniciar para que surta efecto).
+
+- Ejecuta `composer dumpautoload`
+- Ejecuta `php start.php restart` para reiniciar webman (nota: es necesario reiniciar para que surta efecto)
 
 > **Nota**
-> Los archivos especificados en `autoload.files` en `composer.json` se cargarán antes de que webman se inicie. Por otro lado, los archivos cargados mediante la configuración en `config/autoload.php` del framework se cargarán después de que webman se inicie.
-> Los cambios en los archivos cargados mediante `autoload.files` en `composer.json` solo surtirán efecto después de reiniciar; no funcionará con la recarga. Mientras que los archivos cargados mediante la configuración en `config/autoload.php` del framework admiten la recarga en caliente, por lo que los cambios surten efecto al recargar.
+> Los archivos configurados en `autoload.files` de composer.json se cargan antes de que arranque webman. Los archivos cargados mediante `config/autoload.php` del framework se cargan después de que arranque webman.
+> Los cambios en archivos de `autoload.files` de composer.json requieren restart para aplicarse; reload no basta. Los archivos cargados mediante `config/autoload.php` del framework admiten hot-reload; los cambios se aplican tras un reload.
 
-## Cargar ciertos archivos utilizando el framework
-Algunos archivos pueden no seguir la especificación SPR y no se pueden cargar automáticamente. En estos casos, podemos cargar estos archivos mediante la configuración en `config/autoload.php`, por ejemplo:
+## Cargar ciertos archivos mediante el framework
+Algunos archivos pueden no cumplir la especificación PSR y no cargarse automáticamente. Puedes cargarlos configurando `config/autoload.php`, por ejemplo:
 ```php
 return [
     'files' => [
@@ -44,5 +45,5 @@ return [
     ]
 ];
 ```
-> **Nota**
-> Podemos ver en el archivo `autoload.php` que se establece la carga de dos archivos, `support/Request.php` y `support/Response.php`. Esto se debe a que en `vendor/workerman/webman-framework/src/support/` también hay dos archivos con el mismo nombre. Al utilizar `autoload.php`, priorizamos la carga de `support/Request.php` y `support/Response.php` en el directorio raíz del proyecto, lo que nos permite personalizar el contenido de estos dos archivos sin necesidad de modificar los archivos en `vendor`. Si no necesita personalizarlos, puede ignorar esta configuración.
+ > **Nota**
+ > En `autoload.php` están configurados `support/Request.php` y `support/Response.php` porque existen archivos homónimos en `vendor/workerman/webman-framework/src/support/`. Mediante `autoload.php` se priorizan las versiones del directorio raíz del proyecto, permitiendo personalizar estos archivos sin tocar los de `vendor`. Si no necesitas personalizarlos, puedes omitir estas dos entradas.

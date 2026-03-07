@@ -24,6 +24,7 @@
   - [Registo](log.md)
   - [Ficheiros de configuração](config.md)
   - [Multiaplicação](multiapp.md)
+  - [Coroutine](coroutine/coroutine.md)
 
 - Base de dados
 
@@ -47,6 +48,7 @@
  
 - Componentes comuns
   - [Validador](components/validation.md)
+  - [Limitador de taxa](components/rate-limiter.md)
   - [Componente de paginação](components/paginator.md)
   - [Múltiplos idiomas](components/translation.md)
   - [Processamento de imagens](components/image.md)
@@ -91,17 +93,18 @@
 
   - [Processo personalizado](process.md)
   - [Injeção de dependência](di.md)
+  - [Empacotamento binário](others/bin.md)
   - [AOP](aop.md)
   
 - Outros
   - [Segurança](others/security.md)
+  - [Transações de banco de dados](others/transaction.md)
   - [Verificação de funções desativadas](others/disable-function-check.md)
   - [Script personalizado](others/scripts.md)
   - [Página de erro personalizada 404 500](others/custom-error-page.md)
   - [Métodos de atualização](others/upgrade.md)
   - [Proxy nginx](others/nginx-proxy.md)
   - [Empacotamento phar](others/phar.md)
-  - [Empacotamento binário](others/bin.md)
   - [Processo de inicialização](others/process.md)
   - [Ciclo de vida](others/lifecycle.md)
   - [Vazamento de memória](others/memory-leak.md)
@@ -114,4 +117,9 @@
 
 - Atualização
   - [1.4](upgrade/1-4.md)
+  - [1.5](upgrade/1-5.md)
+  - [1.6](upgrade/1-6.md)
+  - [2.0](upgrade/2-0.md)
+  - [2.1](upgrade/2-1.md)
+  - [2.2](upgrade/2-2.md)
   - [Obrigado](thanks.md)

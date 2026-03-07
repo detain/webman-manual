@@ -1,6 +1,6 @@
 # Bộ điều khiển
 
-Tạo một tệp điều khiển mới `app/controller/FooController.php`.
+Tạo tệp điều khiển mới `app/controller/FooController.php`.
 
 ```php
 <?php
@@ -12,27 +12,27 @@ class FooController
 {
     public function index(Request $request)
     {
-        return response('xin chào index');
+        return response('hello index');
     }
     
     public function hello(Request $request)
     {
-        return response('xin chào webman');
+        return response('hello webman');
     }
 }
 ```
 
-Khi truy cập `http://127.0.0.1:8787/foo`, trang web sẽ trả về `xin chào index`.
+Khi truy cập `http://127.0.0.1:8787/foo`, trang sẽ trả về `hello index`.
 
-Khi truy cập `http://127.0.0.1:8787/foo/hello`, trang web sẽ trả về `xin chào webman`.
+Khi truy cập `http://127.0.0.1:8787/foo/hello`, trang sẽ trả về `hello webman`.
 
-Tất nhiên, bạn có thể thay đổi quy tắc định tuyến thông qua cấu hình định tuyến, xem [Định tuyến](route.md).
+Bạn có thể thay đổi quy tắc định tuyến qua cấu hình định tuyến, xem [Định tuyến](route.md).
 
 > **Gợi ý**
-> Nếu gặp lỗi 404 không truy cập được, hãy mở tệp `config/app.php`, đặt `controller_suffix` thành `Controller`, sau đó khởi động lại.
+> Nếu gặp lỗi 404, hãy mở `config/app.php`, đặt `controller_suffix` thành `Controller` và khởi động lại.
 
 ## Hậu tố điều khiển
-Từ phiên bản 1.3 trở lên, webman hỗ trợ cài đặt hậu tố điều khiển trong `config/app.php`. Nếu `controller_suffix` trong tệp `config/app.php` được đặt thành `''`, tên lớp điều khiển sẽ như sau
+Từ phiên bản 1.3, webman hỗ trợ thiết lập hậu tố điều khiển trong `config/app.php`. Nếu `controller_suffix` trong `config/app.php` được đặt là chuỗi rỗng `''`, điều khiển sẽ có dạng:
 
 `app\controller\Foo.php`.
 
@@ -46,33 +46,235 @@ class Foo
 {
     public function index(Request $request)
     {
-        return response('xin chào index');
+        return response('hello index');
     }
     
     public function hello(Request $request)
     {
-        return response('xin chào webman');
+        return response('hello webman');
     }
 }
 ```
 
-Đề xuất mạnh mẽ đặt hậu tố điều khiển thành `Controller`, điều này giúp tránh xung đột tên giữa nhiều lớp điều khiển và tăng cường tính an toàn.
+Nên đặt hậu tố điều khiển là `Controller` để tránh xung đột tên với lớp mô hình và tăng bảo mật.
 
 ## Giải thích
-- Framework sẽ tự động truyền đối tượng `support\Request` vào điều khiển. Qua đối tượng này, bạn có thể lấy dữ liệu nhập từ người dùng (như dữ liệu get, post, header, cookie, vv.), xem [Yêu cầu](request.md).
-- Trong điều khiển, bạn có thể trả về số, chuỗi hoặc đối tượng `support\Response`, nhưng không thể trả về bất kỳ loại dữ liệu khác.
-- Đối tượng `support\Response` có thể được tạo ra thông qua các hàm trợ giúp như `response()`, `json()`, `xml()`, `jsonp()`, `redirect()`, và các hàm khác.
+- Framework tự động truyền đối tượng `support\Request` vào điều khiển, qua đó có thể lấy dữ liệu đầu vào (get, post, header, cookie, v.v.), xem [Yêu cầu](request.md).
+- Điều khiển có thể trả về số, chuỗi hoặc đối tượng `support\Response`, nhưng không thể trả về kiểu dữ liệu khác.
+- Đối tượng `support\Response` có thể tạo qua các hàm trợ giúp như `response()`, `json()`, `xml()`, `jsonp()`, `redirect()`, v.v.
 
-## Chu kỳ sống của điều khiển
-Khi `controller_reuse` trong `config/app.php` là `false`, mỗi yêu cầu sẽ khởi tạo một lần phiên bản điều khiển tương ứng, sau khi yêu cầu kết thúc, phiên bản điều khiển sẽ bị hủy bỏ, tương tự như cách hoạt động của framework truyền thống.
+## Ràng buộc tham số điều khiển
 
-Khi `controller_reuse` trong `config/app.php` là `true`, tất cả các yêu cầu sẽ sử dụng lại phiên bản điều khiển, nghĩa là một khi phiên bản điều khiển được tạo ra, nó sẽ ở trong bộ nhớ và sẽ được sử dụng lại cho tất cả các yêu cầu.
+#### Ví dụ
+webman hỗ trợ ràng buộc tự động tham số yêu cầu với tham số phương thức điều khiển. Ví dụ:
 
-> **Chú ý**
-> Để tắt việc sử dụng lại điều khiển, cần sử dụng webman>=1.4.0, nghĩa là trước phiên bản 1.4.0, việc sử dụng lại điều khiển mặc định là bật và không thể thay đổi.
+```php
+<?php
+namespace app\controller;
+use support\Response;
 
-> **Chú ý**
-> Khi bật việc sử dụng lại điều khiển, yêu cầu không nên thay đổi bất kỳ thuộc tính của điều khiển nào, vì những thay đổi này sẽ ảnh hưởng đến các yêu cầu sau này, ví dụ:
+class UserController
+{
+    public function create(string $name, int $age): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+
+Bạn có thể truyền giá trị `name` và `age` qua `GET` hoặc `POST`, hoặc qua tham số đường dẫn. Ví dụ:
+
+```php
+Route::any('/user/{name}/{age}', [app\controller\UserController::class, 'create']);
+```
+
+Thứ tự ưu tiên: `tham số đường dẫn` > `GET` > `POST`.
+
+#### Giá trị mặc định
+
+Khi truy cập `/user/create?name=tom`, sẽ gặp lỗi:
+
+```html
+Missing input parameter age
+```
+
+Do không truyền tham số `age`. Có thể xử lý bằng cách đặt giá trị mặc định. Ví dụ:
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+
+#### Kiểu tham số
+Khi truy cập `/user/create?name=tom&age=not_int`, sẽ gặp lỗi:
+
+> **Gợi ý**
+> Để tiện kiểm thử, chúng ta truyền tham số trực tiếp trong thanh địa chỉ. Trong phát triển thực tế nên truyền qua `POST`.
+
+```html
+Input age must be of type int, string given
+```
+
+Dữ liệu nhận được sẽ được chuyển theo kiểu. Nếu không chuyển được sẽ ném ngoại lệ `support\exception\InputTypeException`. Vì `age` không chuyển được sang `int` nên gặp lỗi trên.
+
+#### Thông báo lỗi tùy chỉnh
+Có thể tùy chỉnh thông báo như `Missing input parameter age` và `Input age must be of type int, string given` qua đa ngôn ngữ. Tham khảo lệnh:
+
+```
+composer require symfony/translation
+mkdir resource/translations/zh_CN/ -p
+echo "<?php
+return [
+    'Input :parameter must be of type :exceptType, :actualType given' => 'Tham số :parameter phải có kiểu :exceptType, kiểu truyền vào là :actualType',
+    'Missing input parameter :parameter' => 'Thiếu tham số :parameter',
+];" > resource/translations/zh_CN/messages.php
+php start.php restart
+```
+
+#### Các kiểu khác
+webman hỗ trợ kiểu `int`, `float`, `string`, `bool`, `array`, `object`, `thể hiện lớp`, v.v. Ví dụ:
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age, float $balance, bool $vip, array $extension): Response
+    {
+        return json([
+            'name' => $name,
+            'age' => $age,
+            'balance' => $balance,
+            'vip' => $vip,
+            'extension' => $extension,
+        ]);
+    }
+}
+```
+
+Khi truy cập `/user/create?name=tom&age=18&balance=100.5&vip=true&extension[foo]=bar`, sẽ nhận được:
+
+```json
+{
+  "name": "tom",
+  "age": 18,
+  "balance": 100.5,
+  "vip": true,
+  "extension": {
+    "foo": "bar"
+  }
+}
+```
+
+#### Thể hiện lớp
+webman hỗ trợ truyền thể hiện lớp qua type hint. Ví dụ:
+
+**app\service\Blog.php**
+```php
+<?php
+namespace app\service;
+class Blog
+{
+    private $title;
+    private $content;
+    public function __construct(string $title, string $content)
+    {
+        $this->title = $title;
+        $this->content = $content;
+    }
+    public function get()
+    {
+        return [
+            'title' => $this->title,
+            'content' => $this->content,
+        ];
+    }
+}
+```
+
+**app\controller\BlogController.php**
+```php
+<?php
+namespace app\controller;
+use app\service\Blog;
+use support\Response;
+
+class BlogController
+{
+    public function create(Blog $blog): Response
+    {
+        return json($blog->get());
+    }
+}
+```
+
+Khi truy cập `/blog/create?blog[title]=hello&blog[content]=world`, sẽ nhận được:
+
+```json
+{
+  "title": "hello",
+  "content": "world"
+}
+```
+
+#### Thể hiện mô hình
+
+**app\model\User.php**
+```php
+<?php
+namespace app\model;
+use support\Model;
+class User extends Model
+{
+    protected $connection = 'mysql';
+    protected $table = 'user';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
+    // Cần thêm các trường có thể điền ở đây để tránh trường không an toàn từ giao diện
+    protected $fillable = ['name', 'age'];
+}
+```
+
+**app\controller\UserController.php**
+```php
+<?php
+namespace app\controller;
+use app\model\User;
+class UserController
+{
+    public function create(User $user): int
+    {
+        $user->save();
+        return $user->id;
+    }
+}
+```
+
+Khi truy cập `/user/create?user[name]=tom&user[age]=18`, sẽ nhận được kết quả tương tự:
+
+```json
+1
+```
+
+## Vòng đời điều khiển
+
+Khi `controller_reuse` trong `config/app.php` là `false`, mỗi yêu cầu khởi tạo một thể hiện điều khiển tương ứng, sau khi yêu cầu kết thúc thể hiện bị hủy. Giống cơ chế framework truyền thống.
+
+Khi `controller_reuse` là `true`, mọi yêu cầu dùng chung thể hiện điều khiển. Tức là thể hiện khi tạo sẽ nằm trong bộ nhớ và được tái sử dụng.
+
+> **Lưu ý**
+> Khi bật tái sử dụng điều khiển, yêu cầu không nên thay đổi thuộc tính của điều khiển vì sẽ ảnh hưởng yêu cầu tiếp theo. Ví dụ:
 
 ```php
 <?php
@@ -100,8 +302,8 @@ class FooController
     
     protected function getModel($id)
     {
-        // Phương thức này sẽ giữ lại $model sau lần yêu cầu update?id=1 đầu tiên
-        // Nếu yêu cầu lại delete?id=2, dữ liệu của 1 sẽ bị xóa đi
+        // Phương thức này sẽ giữ model sau yêu cầu đầu update?id=1
+        // Nếu yêu cầu delete?id=2, sẽ xóa dữ liệu id=1
         if (!$this->model) {
             $this->model = Model::find($id);
         }
@@ -111,7 +313,7 @@ class FooController
 ```
 
 > **Gợi ý**
-> Trong hàm tạo `__construct()` của điều khiển, việc trả về dữ liệu sẽ không có tác dụng gì cả, ví dụ:
+> Return dữ liệu trong constructor `__construct()` của điều khiển không có hiệu lực. Ví dụ:
 
 ```php
 <?php
@@ -123,23 +325,22 @@ class FooController
 {
     public function __construct()
     {
-        // Trả về dữ liệu trong hàm tạo không có tác dụng gì cả, trình duyệt sẽ không nhận được phản hồi này
-        return response('xin chào'); 
+        // Return trong constructor không có hiệu lực, trình duyệt không nhận phản hồi này
+        return response('hello'); 
     }
 }
 ```
 
-## Sự khác biệt giữa việc sử dụng lại và không sử dụng lại điều khiển
-Sự khác biệt như sau:
+## Khác biệt giữa không tái sử dụng và tái sử dụng điều khiển
 
-#### Không sử dụng lại điều khiển
-Mỗi yêu cầu sẽ tạo một phiên bản điều khiển mới, sau khi kết thúc yêu cầu, phiên bản này sẽ bị giải phóng và giải phóng bộ nhớ. Không sử dụng lại điều khiển giống như hoạt động của framework truyền thống, phù hợp với hầu hết thói quen phát triển của người dùng. Do việc tạo và giải phóng điều khiển nhiều lần, hiệu suất sẽ hơi kém hơn so với việc sử dụng lại điều khiển (hiệu suất kiểm tra với chức năng hello world kém 10% xấp xỉ, có thể bỏ qua khi có chức năng thực tế)
+#### Không tái sử dụng
+Mỗi yêu cầu đều tạo thể hiện điều khiển mới, kết thúc yêu cầu thì giải phóng và thu hồi bộ nhớ. Giống framework truyền thống, phù hợp thói quen đa số lập trình viên. Do tạo và hủy lặp lại nên hiệu năng kém hơn tái sử dụng một chút (benchmark helloworld chênh khoảng 10%, với nghiệp vụ thực tế gần như bỏ qua được).
 
-#### Sử dụng lại điều khiển
-Nếu sử dụng lại, một tiến trình chỉ tạo một lần phiên bản điều khiển, sau khi yêu cầu kết thúc, phiên bản điều khiển này không được giải phóng, và các yêu cầu sau này trong tiến trình sẽ sử dụng lại phiên bản điều khiển này. Sử dụng lại điều khiển có hiệu suất tốt hơn, nhưng không phù hợp với hầu hết thói quen phát triển của người dùng.
+#### Tái sử dụng
+Mỗi tiến trình chỉ new điều khiển một lần, kết thúc yêu cầu không giải phóng thể hiện. Yêu cầu tiếp theo trong tiến trình dùng lại thể hiện đó. Hiệu năng tốt hơn nhưng không hợp thói quen đa số lập trình viên.
 
-#### Trường hợp không nên sử dụng lại điều khiển
+#### Trường hợp không dùng tái sử dụng điều khiển
 
-Khi yêu cầu làm thay đổi thuộc tính của điều khiển, không thể bật sự sử dụng lại điều khiển, vì những thay đổi này sẽ ảnh hưởng đến các yêu cầu sau này.
+Khi yêu cầu thay đổi thuộc tính điều khiển thì không nên bật tái sử dụng vì thay đổi đó ảnh hưởng yêu cầu tiếp theo.
 
-Một số nhà phát triển thích thực hiện một số khởi tạo cho mỗi yêu cầu trong hàm tạo `__construct()` của điều khiển, lúc đó không thể sử dụng lại điều khiển, vì hàm tạo của mỗi tiến trình chỉ được gọi một lần và không phải là mỗi yêu cầu.
+Một số lập trình viên thích khởi tạo cho từng yêu cầu trong constructor `__construct()` của điều khiển. Khi đó không thể dùng tái sử dụng vì constructor của tiến trình chỉ gọi một lần, không phải mỗi yêu cầu đều gọi.

@@ -10,6 +10,7 @@
 
 ## Cosa significa HTTP keep-alive?
 Il meccanismo HTTP Keep-Alive è una tecnologia utilizzata per inviare più richieste e risposte HTTP su una singola connessione TCP. Questo meccanismo ha un forte impatto sui risultati del test di prestazioni, e disabilitando il keep-alive potrebbe ridurre drasticamente la quantità di richieste al secondo (QPS). Attualmente, i browser sono configurati per attivare automaticamente il keep-alive, consentendo così di mantenere la connessione aperta dopo la prima richiesta e di riutilizzarla per le successive richieste, contribuendo ad aumentare le prestazioni. Si consiglia di attivare il keep-alive durante il test di stress.
+Inoltre, se si effettua un test di stress senza keep-alive attivato, le porte locali del client si esauriranno rapidamente a causa delle connessioni in stato TIME_WAIT. Ciò si manifesta con richieste fallite una volta che il numero totale di richieste supera una certa soglia (generalmente circa 28.000).
 
 ## Come attivare l'HTTP keep-alive durante il test di stress?
 Se si utilizza il programma ab per il test di stress, è necessario aggiungere il parametro -k, ad esempio `ab -n100000 -c200 -k http://127.0.0.1:8787/`. Per apipost, è necessario restituire l'intestazione gzip per abilitare il keep-alive (a causa di un bug in apipost, fare riferimento qui sotto). Di solito, altri programmi di test di stress lo attivano per impostazione predefinita.
@@ -30,7 +31,7 @@ Il test di stress di [techempower](https://www.techempower.com/benchmarks/#secti
 Ecco un insieme di dati di test di stress:
 
 **Ambiente**
-Server Alibaba Cloud, 4 core, 4 GB, restituzione di un record JSON da una selezione casuale di 100.000 record.
+Server Alibaba Cloud 4 core 4 GB, database MySQL locale, query casuale di un record da 100.000 e restituzione in JSON, test di stress locale.
 
 **Se si utilizza PDO nativo**
 Il QPS di webman è di 17.800.
@@ -44,7 +45,8 @@ Il QPS di webman scende a 7.200.
 I risultati di ThinkORM sono simili, con poche differenze. 
 
 > **Nota**
-> Anche se l'uso di ORM può comportare una perdita delle prestazioni, per la maggior parte delle attività è già sufficiente. Dovremmo trovare un equilibrio tra efficienza nello sviluppo, manutenibilità e prestazioni, anziché concentrarci esclusivamente sulle prestazioni.
+> Anche se l'uso di ORM può comportare una perdita delle prestazioni, per il 99% degli scenari aziendali le prestazioni sono già più che sufficienti. Se appartenete al restante 1%, potete risolvere facilmente aggiungendo più CPU o server.
+> Dovremmo trovare un equilibrio tra efficienza nello sviluppo, manutenibilità e prestazioni, anziché concentrarci esclusivamente sulle prestazioni.
 
 ## Perché il QPS durante il test di stress con apipost è così basso?
 Il modulo di test di stress di apipost ha un bug che impedisce di mantenere il keep-alive se il server non restituisce l'intestazione gzip, causando una significativa diminuzione delle prestazioni. Per risolvere questo problema, è possibile comprimere i dati al momento della restituzione e aggiungere l'intestazione gzip, ad esempio:
@@ -55,7 +57,7 @@ class IndexController
 {
     public function index()
     {
-        return response(gzencode('ciao webman'))->withHeader('Content-Encoding', 'gzip');
+        return response(gzencode('hello webman'))->withHeader('Content-Encoding', 'gzip');
     }
 }
 ```

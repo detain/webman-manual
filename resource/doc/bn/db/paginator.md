@@ -1,6 +1,6 @@
 # পৃষ্ঠাবিভাজন
 
-# 1. Laravel ORM-এর ভিত্তিতে পৃষ্ঠাবিভাজন পদ্ধতি
+# Laravel ORM-এর ভিত্তিতে পৃষ্ঠাবিভাজন
 Laravel-এর `illuminate/database` প্যাকেজ সহজেই পৃষ্ঠাবিভাজন সুবিধা প্রদান করে।
 
 ## ইনস্টলেশন
@@ -23,7 +23,7 @@ public function index(Request $request)
 |$paginator->currentPage()|বর্তমান পৃষ্ঠার পাতার নম্বর পেতে|
 |$paginator->firstItem()|ফলাফল সেটে প্রথম ডেটার নম্বর পেতে|
 |$paginator->getOptions()|পৃষ্ঠাবিভাজকারীর অপশন পেতে|
-|$paginator->getUrlRange($start, $end)|দেয়া পৃষ্ঠা পরিসীমা এর URL ইতোয়া|
+|$paginator->getUrlRange($start, $end)|নির্দিষ্ট পৃষ্ঠা পরিসীমার URL তৈরি করুন|
 |$paginator->hasPages()|পর্যাপ্ত ডেটা আছে তার জন্য একাধিক পৃষ্ঠা তৈরি করা উচিত না|
 |$paginator->hasMorePages()|আরো পৃষ্ঠা আছে তা দেখানোর জন্য|
 |$paginator->items()|বর্তমান পৃষ্ঠার ডেটা আইটেমের জন্য|
@@ -38,15 +38,16 @@ public function index(Request $request)
 |$paginator->getPageName()|পাতার নম্বর সংরক্ষণের জন্য ব্যবহৃত প্রশ্নের প্রতিনিধি নাম পেতে|
 |$paginator->setPageName($name)|পাতার নম্বর সংরক্ষণের জন্য ব্যবহৃত প্রশ্নের প্রতিনিধি নাম সেট করতে|
 
-> **দ্য দ্য]
+> **বিঃদ্রঃ**
+> `$paginator->links()` মেথড সমর্থন করা হয় না
 
-## পৃষ্ঠাবিভাজক
-webman-এ `$paginator->links()` মেথড ব্যবহার করা যায় না পৃষ্ঠাবিভাজক বোতিসিত্তিক, তবে আমরা অন্যান্য কম্পোনেন্ট ব্যবহার করতে পারি, যেমন `jasongrimes/php-paginator`।
+## পৃষ্ঠাবিভাজন কম্পোনেন্ট
+webman-এ `$paginator->links()` মেথড দিয়ে পৃষ্ঠাবিভাজন বাটন রেন্ডার করা যায় না, তবে আমরা অন্যান্য কম্পোনেন্ট ব্যবহার করতে পারি, যেমন `jasongrimes/php-paginator`।
 
 **ইনস্টলেশন**
 `composer require "jasongrimes/paginator:~1.0"`
 
-**ব্যবহারকারী-অনুচ্ছেদ**
+**ব্যাকএন্ড**
 ```php
 <?php
 namespace app\controller;
@@ -134,11 +135,12 @@ app/view/user/get.html নতুন টেম্পলেট তৈরি কর
 </html>
 ```
 
-প্রভাব:
+ফলাফল নিচের মতো:
 ![](../../assets/img/paginator.png)
 
-# 2. Thinkphp ORM-এর ভিত্তিতে পৃষ্ঠাবিভাজন পদ্ধতি
-অতিরিক্ত লাইব্রেরি ইনস্টলেশন প্রয়োজন নেই, শুধুমাত্র think-orm ইনস্টল হলেই চলবে
+# ThinkPHP ORM-এর ভিত্তিতে পৃষ্ঠাবিভাজন
+
+অতিরিক্ত লাইব্রেরি ইনস্টল করার প্রয়োজন নেই; শুধুমাত্র think-orm ইনস্টল থাকলেই হবে।
 ## ব্যবহার
 ```php
 public function index(Request $request)

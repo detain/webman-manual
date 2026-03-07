@@ -28,6 +28,7 @@ class FooController
 
 เมื่อเข้าถึง `http://127.0.0.1:8787/app/foo/foo/hello` จะแสดงผลเป็น `hello webman`
 
+
 ## URL ที่เข้าถึง
 ที่อยู่ URL ของปลั๊กอินแอปพลิเคชันเริ่มต้นด้วย `/app` ตามด้วยรหัสปลั๊กอิน และตามด้วยควบคุมและวิธีการที่เฉพาะเจาะจง
 เช่น URL ของควบคุม `plugin\foo\app\controller\UserController` คือ `http://127.0.0.1:8787/app/foo/user`

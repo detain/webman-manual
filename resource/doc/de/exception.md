@@ -63,11 +63,11 @@ class FooController
 {
     public function index(Request $request)
     {
-        $this->chackInpout($request->post());
+        $this->checkInput($request->post());
         return response('hello index');
     }
     
-    protected function chackInpout($input)
+    protected function checkInput($input)
     {
         if (!isset($input['token'])) {
             throw new BusinessException('Parameterfehler', 3000);
@@ -121,7 +121,7 @@ eine JSON-Anfrage eine JSON-Antwort wie folgt erhalten:
 {"code": 3000, "message": "Parameterfehler"}
 ```
 
-> **Hinweis**
+> **Tipp**
 > Da die BusinessException zu den erwarteten Geschäftsfehlern (z. B. falsche Benutzereingaben) gehört und vorhersehbar ist, geht das Framework nicht davon aus, dass es sich um einen schwerwiegenden Fehler handelt, und generiert keine Protokolleinträge.
 
 ## Zusammenfassung

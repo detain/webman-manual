@@ -64,6 +64,21 @@ Al igual que el método get, también puedes pasar un segundo parámetro a la fu
 $request->post('name', 'tom');
 ```
 
+## Función helper input()
+Similar a `$request->input()`, la función helper `input()` puede obtener todos los parámetros. Tiene dos parámetros:
+1. name: el nombre del parámetro a obtener (si está vacío, devuelve un array de todos los parámetros)
+2. default: valor predeterminado (se usa cuando no se encuentra el parámetro del primer argumento)
+
+**Ejemplo**
+```php
+// Obtener el parámetro name
+$name = input('name');
+// Obtener el parámetro name, usar valor predeterminado si no existe
+$name = input('name', 'Juan');
+// Obtener todos los parámetros
+$all_params = input();
+```
+
 ## Obtener cuerpo de solicitud POST crudo
 ```php
 $post = $request->rawBody();
@@ -127,15 +142,53 @@ $only = $request->only(['username', 'password']);
 $except = $request->except(['avatar', 'age']);
 ```
 
+## Obtener entrada mediante parámetros del controlador
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+La lógica anterior es equivalente a:
+```php
+<?php
+namespace app\controller;
+use support\Request;
+use support\Response;
+
+class UserController
+{
+    public function create(Request $request): Response
+    {
+        $name = $request->input('name');
+        $age = (int)$request->input('age', 18);
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+Para más información, consulte [Enlace de parámetros del controlador](controller.md#enlace-de-parámetros-del-controlador).
+
 ## Obtener archivos cargados
+
+> **Nota**
+> La carga de archivos requiere un formulario con codificación `multipart/form-data`.
+
 **Obtener el array completo de archivos cargados**
 ```php
 $request->file();
 ```
 
-Formulario similar a:
+Ejemplo de formulario:
 ```html
-<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data" />
+<form method="post" action="http://127.0.0.1:8787/upload/files" enctype="multipart/form-data">
 <input name="file1" multiple="multiple" type="file">
 <input name="file2" multiple="multiple" type="file">
 <input type="submit">
@@ -300,7 +353,7 @@ $request->getRealIp($safe_mode=true);
 
 Cuando el proyecto utiliza un proxy (por ejemplo, nginx), al usar `$request->getRemoteIp()` generalmente se obtiene la IP del servidor proxy (similar a `127.0.0.1` `192.168.x.x`) en lugar de la IP real del cliente. En este caso, se puede intentar utilizar `$request->getRealIp()` para obtener la IP real del cliente.
 
-`$request->getRealIp()` intentará obtener la IP real a partir de los encabezados HTTP `x-real-ip`, `x-forwarded-for`, `client-ip`, `x-client-ip` y `via`.
+`$request->getRealIp()` intentará obtener la IP real a partir de los encabezados HTTP `x-forwarded-for`, `x-real-ip`, `client-ip`, `x-client-ip` y `via`.
 
 > Debido a que los encabezados HTTP son muy fáciles de falsificar, la IP del cliente obtenida mediante este método no es completamente confiable, especialmente cuando `$safe_mode` es false. Una forma más confiable de obtener la IP real del cliente a través de un proxy es conocer la IP del servidor proxy segura y saber claramente qué encabezado HTTP lleva la IP real, si `$request->getRemoteIp()` devuelve la IP del servidor proxy segura conocida, entonces se puede obtener la IP real a través de `$request->header('encabezado HTTP que lleva la IP real')`.
 
@@ -368,3 +421,33 @@ Devuelve algo similar a `index`
 
 > Debido a que las funciones de cierre no pertenecen a ningún controlador, el nombre de la solicitud de la ruta de cierre `$request->action` siempre devuelve una cadena vacía `''`.
 > Consultar ruta de cierre en [ruta](route.md)
+
+## Sobrescribir parámetros
+
+A veces necesitamos sobrescribir los parámetros de la solicitud, por ejemplo para filtrar la solicitud y reasignar los valores al objeto solicitud. En tales casos, podemos usar los métodos `setGet()`, `setPost()` y `setHeader()`.
+
+#### Sobrescribir parámetros GET
+```php
+$request->get(); // Supongamos que el resultado es ['name' => 'tom', 'age' => 18]
+$request->setGet(['name' => 'tom']);
+$request->get(); // El resultado final es ['name' => 'tom']
+```
+
+> **Nota**
+> Como se muestra en el ejemplo, `setGet()` sobrescribe todos los parámetros GET. `setPost()` y `setHeader()` se comportan de la misma manera.
+
+#### Sobrescribir parámetros POST
+```php
+$post = $request->post();
+foreach ($post as $key => $value) {
+    $post[$key] = htmlspecialchars($value);
+}
+$request->setPost($post);
+$request->post(); // Obtener parámetros post filtrados
+```
+
+#### Sobrescribir parámetros HEADER
+```php
+$request->setHeader(['host' => 'example.com']);
+$request->header('host'); // Salida: example.com
+```

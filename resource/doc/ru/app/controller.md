@@ -2,7 +2,7 @@
 
 Согласно спецификации PSR4, пространство имен класса контроллера начинается с `plugin\{идентификатор_плагина}`, например
 
-Создайте файл контроллера `plugin/foo/app/controller/FooController.php`.
+Создайте новый файл контроллера `plugin/foo/app/controller/FooController.php`.
 
 ```php
 <?php

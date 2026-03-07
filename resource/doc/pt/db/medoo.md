@@ -1,20 +1,20 @@
-## Medoo
+# Banco de dados Medoo
 
-Medoo é um plug-in de operação de banco de dados leve, [site oficial do Medoo](https://medoo.in/).
+[webman/medoo](https://github.com/webman-php/medoo) estende [Medoo](https://medoo.in/) com pool de conexões e funciona em ambientes coroutine e não-coroutine. O uso é o mesmo do Medoo.
 
 ## Instalação
 `composer require webman/medoo`
 
-## Configuração do Banco de Dados
-O arquivo de configuração está localizado em `config/plugin/webman/medoo/database.php`.
+## Configuração do banco de dados Medoo
+Local do arquivo de configuração: `config/plugin/webman/medoo/database.php`
 
-## Utilização
+## Uso do banco de dados Medoo
 ```php
 <?php
 namespace app\controller;
 
 use support\Request;
-use Webman\Medoo\Medoo;
+use support\Medoo;
 
 class Index
 {
@@ -28,13 +28,13 @@ class Index
 
 > **Dica**
 > `Medoo::get('user', '*', ['uid' => 1]);`
-> É equivalente a
+> equivale a
 > `Medoo::instance('default')->get('user', '*', ['uid' => 1]);`
 
-## Configuração de Múltiplos Bancos de Dados
+## Configuração de múltiplos bancos de dados Medoo
 
 **Configuração**
-Adicione uma nova configuração em `config/plugin/webman/medoo/database.php`, com a chave sendo qualquer uma, neste caso está sendo usada `other`.
+Adicione uma nova configuração em `config/plugin/webman/medoo/database.php` com qualquer chave; aqui usamos `other`.
 
 ```php
 <?php
@@ -56,9 +56,16 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
+        ],
+        'pool' => [ // Configuração do pool de conexões
+            'max_connections' => 5, // Número máximo de conexões
+            'min_connections' => 1, // Número mínimo de conexões
+            'wait_timeout' => 60,   // Tempo máximo de espera ao obter uma conexão do pool; exceção se excedido
+            'idle_timeout' => 3,    // Tempo máximo de inatividade das conexões no pool; as que excederem são fechadas até min_connections
+            'heartbeat_interval' => 50, // Intervalo de heartbeat do pool em segundos; recomendado menos de 60 segundos
         ]
     ],
-    // Aqui foi adicionada uma configuração 'other'
+    // Adicionar configuração 'other' aqui
     'other' => [
         'type' => 'mysql',
         'host' => 'localhost',
@@ -76,15 +83,21 @@ return [
         ],
         'command' => [
             'SET SQL_MODE=ANSI_QUOTES'
-        ]
+        ],
+        'pool' => [
+            'max_connections' => 5,
+            'min_connections' => 1,
+            'wait_timeout' => 60,
+            'idle_timeout' => 3,
+            'heartbeat_interval' => 50,
+        ],
     ],
 ];
 ```
 
-**Utilização**
+## Uso do banco de dados Medoo
 ```php
 $user = Medoo::instance('other')->get('user', '*', ['uid' => 1]);
 ```
 
-## Documentação Detalhada
-Consulte a [documentação oficial do Medoo](https://medoo.in/api/select).
+Consulte a [documentação oficial do Medoo](https://medoo.in/api/select)

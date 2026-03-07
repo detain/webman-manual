@@ -1,4 +1,4 @@
-# เริ่มต้นอย่างรวดเร็ว
+# โมเดลฐานข้อมูล - วิธีใช้ Model (สไตล์ Laravel)
 
 โมเดล webman นี้ขึ้นอยู่กับ [Eloquent ORM](https://laravel.com/docs/7.x/eloquent) ทุกรายการในฐานข้อมูลมี "โมเดล" ที่เกี่ยวข้องใช้สื่อสารกับตารางนั้น ๆ คุณสามารถค้นหาข้อมูลในตารางและแทรกบันทึกใหม่ในตารางด้วยโมเดล
 
@@ -6,7 +6,7 @@
 
 > หมายเหตุ: ในการสนับสนุนตัวกระตุ้นโมเดลคุณต้องนำเข้าเพิ่มเติม `composer require "illuminate/events"` [ตัวอย่าง](#โมเดลตัวกระตุ้น)
 
-## ตัวอย่าง 
+## ตัวอย่างโมเดลฐานข้อมูล
 ```php
 <?php
 namespace app\model;
@@ -192,7 +192,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -548,7 +548,7 @@ if ($post->is($anotherPost)) {
 ## ดูการดูแลโมเดล
 ใช้โดยอ้างอิง [ตัวดูแลของโมเดลและเหตุการณ์ใน Laravel](https://learnku.com/articles/6657/model-events-and-observer-in-laravel)
 
-โปรดทราบ: Eloquent ORM ต้องการที่จะสนับสนุนตัวดูแลโมเดลจะต้องนำ compose เพิ่มเติม
+โปรดทราบ: Eloquent ORM ต้องการที่จะสนับสนุนตัวดูแลโมเดลจะต้องนำเข้าเพิ่มเติม `composer require "illuminate/events"`
 
 ```php
 <?php
@@ -566,3 +566,6 @@ class User extends Model
     }
 }
 ```
+
+## ธุรกรรม
+ดู [ธุรกรรมฐานข้อมูล](../others/transaction.md)

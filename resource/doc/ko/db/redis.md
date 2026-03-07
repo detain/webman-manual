@@ -1,34 +1,47 @@
 # Redis
 
-웹맨의 Redis 구성 요소는 기본적으로 [illuminate/redis](https://github.com/illuminate/redis)를 사용합니다. 이것은 라라벨의 Redis 라이브러리이며 라라벨과 동일한 방식으로 사용됩니다.
+[webman/redis](https://github.com/webman-php/redis)는 [illuminate/redis](https://github.com/illuminate/redis)를 기반으로 연결 풀 기능을 추가한 것으로, 코루틴 및 비코루틴 환경을 모두 지원하며 Laravel과 동일하게 사용합니다.
 
 `illuminate/redis`를 사용하기 전에 `php-cli`에 Redis 확장을 설치해야 합니다.
-
-> **주의**
-> `php-cli`에 Redis 확장이 설치되어 있는지 확인하려면 `php -m | grep redis` 명령을 사용하십시오. 참고: `php-fpm`에 Redis 확장을 설치했더라도 `php-cli`에서 사용할 수 있는 것은 아닙니다. 왜냐하면 `php-cli`와 `php-fpm`은 다른 응용프로그램이며 서로 다른 `php.ini` 설정을 사용할 수 있습니다. `php-cli`가 사용하는 `php.ini` 설정 파일을 확인하려면 `php --ini` 명령을 사용하십시오.
 
 ## 설치
 
 ```php
-composer require -W illuminate/redis illuminate/events
+composer require -W webman/redis illuminate/events
 ```
 
-설치 후에는 restart를 해야 합니다. (reload는 무효)
+설치 후에는 restart가 필요합니다 (reload는 적용되지 않음).
 
 ## 구성
 
-Redis 구성 파일은 `config/redis.php`에 있습니다. 
+Redis 구성 파일은 `config/redis.php`에 있습니다.
 
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
+        'pool' => [ // 연결 풀 설정
+            'max_connections' => 10,     // 풀 최대 연결 수
+            'min_connections' => 1,      // 풀 최소 연결 수
+            'wait_timeout' => 3,         // 연결 획득 최대 대기 시간(초)
+            'idle_timeout' => 50,        // 유휴 타임아웃, 초과 후 min_connections까지 연결 해제
+            'heartbeat_interval' => 50,  // heartbeat 간격 (60초 이하여야 함)
+        ],
     ]
 ];
 ```
+
+## 연결 풀에 대해
+
+* 각 프로세스는 자체 연결 풀을 가지며, 프로세스 간에는 공유되지 않습니다.
+* 코루틴을 사용하지 않으면 작업이 순차 실행되어 최대 1개의 연결만 사용됩니다.
+* 코루틴을 사용하면 작업이 동시 실행되며, 풀은 `min_connections`~`max_connections` 범위에서 동적으로 조정됩니다.
+* Redis를 사용하는 코루틴 수가 `max_connections`를 초과하면 대기열에서 최대 `wait_timeout`초 대기하며, 초과 시 예외가 발생합니다.
+* 유휴 시(코루틴 여부와 무관) 연결은 `idle_timeout` 후 해제되며, `min_connections`(`min_connections`는 0 가능)에 도달할 때까지 줄어듭니다.
 
 ## 예제
 
@@ -51,6 +64,7 @@ class UserController
 ```
 
 ## Redis 인터페이스
+
 ```php
 Redis::append($key, $value)
 Redis::bitCount($key)
@@ -80,7 +94,9 @@ Redis::expire($key, $ttl)
 Redis::expireAt($key, $timestamp)
 Redis::select($dbIndex)
 ```
-동등한 표현은 다음과 같습니다.
+
+다음과 동일합니다:
+
 ```php
 $redis = Redis::connection('default');
 $redis->append($key, $value)
@@ -93,16 +109,17 @@ $redis->getBit($key, $offset)
 ```
 
 > **주의**
-> `Redis::select($db)` 인터페이스는 신중하게 사용해야 합니다. 웹맨은 메모리 상주형 프레임워크이기 때문에 한 요청이 `Redis::select($db)`를 사용하여 데이터베이스를 변경하면 이후 다른 요청에 영향을 미칠 수 있습니다. 다중 데이터베이스를 사용하는 경우 각각의 `$db`를 다른 Redis 연결 구성으로 설정하는 것이 좋습니다.
+> `Redis::select($db)` 인터페이스는 신중히 사용하세요. webman은 상주형 메모리 프레임워크이므로, 한 요청에서 `Redis::select($db)`로 데이터베이스를 전환하면 이후 요청에 영향을 줍니다. 여러 데이터베이스를 사용할 경우 각 `$db`를 서로 다른 Redis 연결로 설정하는 것이 좋습니다.
 
-## 다중 Redis 연결 사용
+## 여러 Redis 연결 사용
 
-예를 들어 구성 파일 `config/redis.php`은 다음과 같습니다.
+예: `config/redis.php` 구성 파일
 
 ```php
 return [
     'default' => [
         'host'     => '127.0.0.1',
+        'username' => null,
         'password' => null,
         'port'     => 6379,
         'database' => 0,
@@ -118,7 +135,7 @@ return [
 ]
 ```
 
-기본적으로는 `default`에 구성된 연결을 사용하지만, `Redis::connection()` 메서드를 사용하여 어떤 Redis 연결을 사용할지 선택할 수 있습니다.
+기본값은 `default`에 설정된 연결입니다. `Redis::connection()`으로 사용할 Redis 연결을 선택할 수 있습니다.
 
 ```php
 $redis = Redis::connection('cache');
@@ -127,7 +144,7 @@ $redis->get('test_key');
 
 ## 클러스터 구성
 
-애플리케이션이 Redis 서버 클러스터를 사용하는 경우, 클러스터를 정의하기 위해 Redis 구성 파일에 `clusters` 키를 사용해야 합니다.
+애플리케이션이 Redis 클러스터를 사용하는 경우, 구성 파일에서 `clusters` 키로 정의합니다:
 
 ```php
 return [
@@ -135,6 +152,7 @@ return [
         'default' => [
             [
                 'host'     => 'localhost',
+                'username' => null,
                 'password' => null,
                 'port'     => 6379,
                 'database' => 0,
@@ -145,7 +163,7 @@ return [
 ];
 ```
 
-기본적으로 클러스터는 클라이언트 샤딩을 노드에 구현하므로 노드 풀 및 대규모 인메모리를 생성할 수 있습니다. 그러나 클라이언트 공유는 오류 처리를 다루지 않으므로 주로 다른 메인 데이터베이스로부터 캐시 데이터를 가져오는 경우에 사용됩니다. Redis의 원래 클러스터를 사용하려면 `options` 키에 다음을 지정해야 합니다.
+기본적으로 클러스터는 노드에서 클라이언트 샤딩을 수행하여 노드 풀과 대량의 메모리를 확보할 수 있습니다. 클라이언트 샤딩은 장애를 처리하지 않으므로, 다른 주 데이터베이스에서 캐시 데이터를 가져오는 용도에 적합합니다. Redis 네이티브 클러스터를 사용하려면 구성의 `options`에서 다음과 같이 지정합니다:
 
 ```php
 return[
@@ -161,7 +179,7 @@ return[
 
 ## 파이프라인 명령
 
-서버에 여러 명령을 보내야 할 때 파이프라인 명령을 사용하는 것이 좋습니다. `pipeline` 메서드는 Redis 인스턴스의 익명함수를 받습니다. 모든 명령을 Redis 인스턴스에 보낼 수 있으며 한 번에 실행됩니다.
+한 번에 여러 명령을 보내야 할 때는 파이프라인을 사용하는 것이 좋습니다. `pipeline` 메서드는 Redis 인스턴스의 클로저를 받으며, 전달된 명령은 한 번의 작업으로 실행됩니다:
 
 ```php
 Redis::pipeline(function ($pipe) {

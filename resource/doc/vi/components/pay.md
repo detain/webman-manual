@@ -1,17 +1,17 @@
 # SDK thanh toán
 
 
-### Địa chỉ dự án
+## Địa chỉ dự án
 
  https://github.com/yansongda/pay
 
-### Cài đặt
+## Cài đặt
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### Sử dụng
+## Sử dụng
 
 **Alipay**
 
@@ -84,7 +84,7 @@ class PayController
             // 4. Xác minh app_id có phải là người bán chính mình không.
             // 5. Tình hình logic thương mại khác
 
-            Log::debug('Thông báo Alipay', $data->all());
+            Log::debug('Alipay notify', $data->all());
         } catch (\Exception $e) {
             // $e->getMessage();
         }
@@ -108,7 +108,7 @@ class PayController
 {
     protected $config = [
         'appid' => 'wxb3fxxxxxxxxxxx', // APP APPID
-        'app_id' => 'wxb3fxxxxxxxxxxx', // APP APPID
+        'app_id' => 'wxb3fxxxxxxxxxxx', // APPID tài khoản công khai
         'miniapp_id' => 'wxb3fxxxxxxxxxxx', // APPID ứng dụng nhỏ
         'mch_id' => '14577xxxx',
         'key' => 'mF2suE9sU6Mk1Cxxxxxxxxxxx',
@@ -154,7 +154,7 @@ class PayController
         try{
             $data = $pay->verify(); // Đúng vậy, xác minh chữ ký chỉ với một dòng mã!
 
-            Log::debug('Thông báo Wechat', $data->all());
+            Log::debug('Wechat notify', $data->all());
         } catch (\Exception $e) {
             // $e->getMessage();
         }
@@ -164,6 +164,6 @@ class PayController
 }
 ```
 
-### Nội dung thêm
+## Thông tin thêm
 
-Truy cập  https://pay.yanda.net.cn/docs/2.x/overview
+Truy cập https://pay.yanda.net.cn/docs/2.x/overview

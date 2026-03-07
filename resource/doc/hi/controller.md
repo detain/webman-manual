@@ -22,18 +22,17 @@ class FooController
 }
 ```
 
-`http://127.0.0.1:8787/foo` पर जब पहुंचते हैं, पेज `hello index` लौटाती है।
+जब `http://127.0.0.1:8787/foo` तक पहुंचते हैं, पेज `hello index` लौटाता है।
 
-`http://127.0.0.1:8787/foo/hello` पर जब जाते हैं, पेज `hello webman` लौटाती है।
+जब `http://127.0.0.1:8787/foo/hello` तक पहुंचते हैं, पेज `hello webman` लौटाता है।
 
-और अगर आप रूटिंग सेटिंग के माध्यम से रूटिंग नियमों को बदलना चाहते हैं तो, [रूटिंग](route.md) देखें।
+रूट कॉन्फ़िगरेशन के जरिए रूट नियम बदल सकते हैं, [रूट](route.md) देखें।
 
 > **सुझाव**
-> अगर 404 त्रुटि होती है, तो `config/app.php` खोलें, और `controller_suffix` को `Controller` के रूप में सेट करें, और पुनः आरंभ करें।
+> 404 त्रुटि होने पर `config/app.php` खोलें, `controller_suffix` को `Controller` पर सेट करें और पुनः आरंभ करें।
 
 ## नियंत्रक प्रत्यय
-
-वेबमैन 1.3 संस्करण से आगे, `config/app.php` में नियंत्रक प्रत्यय को सेट करने का समर्थन है, अगर `config/app.php` में `controller_suffix` को खाली `''` सेट किया जाता है, तो नियंत्रक जैसा कि निम्नलिखित है
+webman 1.3 से `config/app.php` में नियंत्रक प्रत्यय सेट करने का समर्थन है। अगर `controller_suffix` खाली `''` है, तो नियंत्रक ऐसा होगा:
 
 `app\controller\Foo.php`।
 
@@ -57,25 +56,225 @@ class Foo
 }
 ```
 
-सख्त रूप से नियंत्रक प्रत्यय को `Controller` के रूप में सेट करने की सलाह दी जाती है, इससे नियंत्रक और मॉडल कक्षाएँ के नाम संरेखित होते हैं, साथ ही सुरक्षा बढ़ती है।
+नियंत्रक प्रत्यय को `Controller` पर सेट करने की सख्त सिफारिश है, ताकि नियंत्रक और मॉडल क्लास के नाम टकराएं नहीं और सुरक्षा बढ़े।
 
-## स्पष्टीकरण
- - फ़्रेमवर्क स्वचालित रूप से नियंत्रक को `support\Request` ऑब्जेक्ट पहुंचाता है, जिसके माध्यम से उपयोक्ता इनपुट डेटा (गेट पोस्ट हेडर कुकी आदि डेटा) प्राप्त कर सकता है, [अनुरोध](request.md) देखें
- - नियंत्रक में संख्या, स्ट्रिंग या `support\Response` ऑब्जेक्ट लौटा सकता है, लेकिन अन्य प्रकार के डेटा नहीं लौटा सकता है।
- - `support\Response` ऑब्जेक्ट `response()`, `json()`, `xml()`, `jsonp()`, `redirect()` आदि सहायक फ़ंक्शन के माध्यम से बनाया जा सकता है।
+## व्याख्या
+- फ़्रेमवर्क नियंत्रक को `support\Request` ऑब्जेक्ट अपने आप भेजता है, जिससे उपयोगकर्ता इनपुट (get, post, header, cookie आदि) मिल सकता है, [अनुरोध](request.md) देखें।
+- नियंत्रक संख्या, स्ट्रिंग या `support\Response` ऑब्जेक्ट लौटा सकता है, अन्य डेटा प्रकार नहीं।
+- `support\Response` ऑब्जेक्ट `response()`, `json()`, `xml()`, `jsonp()`, `redirect()` आदि हेल्पर फ़ंक्शन से बनाए जा सकते हैं।
 
-## नियंत्रक जीवनकाल
- `config/app.php` में `controller_reuse` जब `false` होता है, तो प्रत्येक अनुरोध अपने समर्थन में नियंत्रक नमूने का नवीनीकरण करेगा, अनुरोध समाप्त होने के बाद नियंत्रक नमूने को 'मार देगा', यह पारंपरिक ढंग से कार्य करने वाले फ़्रेमवर्क के तरह है।
+## नियंत्रक पैरामीटर बाइंडिंग
 
- `config/app.php` में `controller_reuse` जब `true` होता है, तब सभी अनुरोध निन्मित नियंत्रक नमूने को पुनर्चक्रण करेंगे, अर्थात नियंत्रक नमूने एक बार नमूना बनाने के बाद मेमोरी में सन्चित रहेगा, सभी अनुरोध नमूने फिर से उपयोग करेंगे।
+#### उदाहरण
+webman नियंत्रक मेथड पैरामीटर में अनुरोध पैरामीटर की अपने आप बाइंडिंग की सपोर्ट करता है। उदाहरण:
 
-> **ध्यान दें**
-> नियंत्रक पुनर्चक्रण को बंद करने के लिए webman>=1.4.0 की आवश्यकता है, अर्थात 1.4.0 से पहले नियंत्रक को डिफ़ॉल्ट रूप से सभी अनुरोध पुनर्चक्रणीय हैं, और इसे बदला नहीं जा सकता है।
+```php
+<?php
+namespace app\controller;
+use support\Response;
 
-> **ध्यान दें**
-> नियंत्रक पुनर्चक्रण को खोलने पर, अनुरोध कोई नियंत्रक गुणसूचक परिवर्तित करते समय, क्योंकि इन परिवर्तनों से आगे के अनुरोध प्रभावित होंगे।
+class UserController
+{
+    public function create(string $name, int $age): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
 
-कुछ विकसितकर्ता नियंत्रक नामकरण फ़्कस्त `__construct()` में हर अनुरोध के लिए कुछ प्रारंभिकण करना चाहते हैं, इस स्थिति में नियंत्रक पुनर्चक्रण नहीं किया जा सकता, क्योंकि वर्तमान प्रक्रिया में केवल एक बार कार्य संचालन होगा, और हर अनुरोध के लिए नहीं।
+`name` और `age` के मान `GET` या `POST` से या रूट पैरामीटर से भेज सकते हैं। उदाहरण:
+
+```php
+Route::any('/user/{name}/{age}', [app\controller\UserController::class, 'create']);
+```
+
+अग्रिमता: `रूट पैरामीटर` > `GET` > `POST` पैरामीटर।
+
+#### डिफ़ॉल्ट मान
+
+`/user/create?name=tom` पर जाने पर यह त्रुटि मिलेगी:
+
+```html
+Missing input parameter age
+```
+
+कारण कि हमने `age` पैरामीटर नहीं भेजा। पैरामीटर में डिफ़ॉल्ट मान देकर ठीक किया जा सकता है। उदाहरण:
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age = 18): Response
+    {
+        return json(['name' => $name, 'age' => $age]);
+    }
+}
+```
+
+#### पैरामीटर प्रकार
+`/user/create?name=tom&age=not_int` पर जाने पर यह त्रुटि मिलेगी:
+
+> **सुझाव**
+> परीक्षण में आसानी के लिए पैरामीटर ब्राउज़र एड्रेस बार में डाल रहे हैं। वास्तविक विकास में पैरामीटर `POST` से भेजने चाहिए।
+
+```html
+Input age must be of type int, string given
+```
+
+प्राप्त डेटा प्रकार के हिसाब से बदला जाता है। बदल नहीं पाने पर `support\exception\InputTypeException` फेंकी जाती है। `age` को `int` में नहीं बदला जा सका इसलिए यह त्रुटि आई।
+
+#### कस्टम त्रुटि संदेश
+`Missing input parameter age` और `Input age must be of type int, string given` जैसे संदेश बहुभाषा से कस्टमाइज़ किए जा सकते हैं। ये कमांड देखें:
+
+```
+composer require symfony/translation
+mkdir resource/translations/zh_CN/ -p
+echo "<?php
+return [
+    'Input :parameter must be of type :exceptType, :actualType given' => 'इनपुट पैरामीटर :parameter प्रकार :exceptType का होना चाहिए, भेजा गया प्रकार :actualType है',
+    'Missing input parameter :parameter' => 'इनपुट पैरामीटर :parameter गायब है',
+];" > resource/translations/zh_CN/messages.php
+php start.php restart
+```
+
+#### अन्य प्रकार
+webman `int`, `float`, `string`, `bool`, `array`, `object` और `क्लास इन्स्टैंस` जैसे पैरामीटर प्रकार सपोर्ट करता है। उदाहरण:
+
+```php
+<?php
+namespace app\controller;
+use support\Response;
+
+class UserController
+{
+    public function create(string $name, int $age, float $balance, bool $vip, array $extension): Response
+    {
+        return json([
+            'name' => $name,
+            'age' => $age,
+            'balance' => $balance,
+            'vip' => $vip,
+            'extension' => $extension,
+        ]);
+    }
+}
+```
+
+`/user/create?name=tom&age=18&balance=100.5&vip=true&extension[foo]=bar` पर जाने पर:
+
+```json
+{
+  "name": "tom",
+  "age": 18,
+  "balance": 100.5,
+  "vip": true,
+  "extension": {
+    "foo": "bar"
+  }
+}
+```
+
+#### क्लास इन्स्टैंस
+webman पैरामीटर टाइप हिंट से क्लास इन्स्टैंस पास करने की सपोर्ट करता है। उदाहरण:
+
+**app\service\Blog.php**
+```php
+<?php
+namespace app\service;
+class Blog
+{
+    private $title;
+    private $content;
+    public function __construct(string $title, string $content)
+    {
+        $this->title = $title;
+        $this->content = $content;
+    }
+    public function get()
+    {
+        return [
+            'title' => $this->title,
+            'content' => $this->content,
+        ];
+    }
+}
+```
+
+**app\controller\BlogController.php**
+```php
+<?php
+namespace app\controller;
+use app\service\Blog;
+use support\Response;
+
+class BlogController
+{
+    public function create(Blog $blog): Response
+    {
+        return json($blog->get());
+    }
+}
+```
+
+`/blog/create?blog[title]=hello&blog[content]=world` पर जाने पर:
+
+```json
+{
+  "title": "hello",
+  "content": "world"
+}
+```
+
+#### मॉडल इन्स्टैंस
+
+**app\model\User.php**
+```php
+<?php
+namespace app\model;
+use support\Model;
+class User extends Model
+{
+    protected $connection = 'mysql';
+    protected $table = 'user';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
+    // सामने के छोर से असुरक्षित फील्ड आने से रोकने के लिए यहाँ भरने योग्य फील्ड जोड़ें
+    protected $fillable = ['name', 'age'];
+}
+```
+
+**app\controller\UserController.php**
+```php
+<?php
+namespace app\controller;
+use app\model\User;
+class UserController
+{
+    public function create(User $user): int
+    {
+        $user->save();
+        return $user->id;
+    }
+}
+```
+
+`/user/create?user[name]=tom&user[age]=18` पर जाने पर लगभग ऐसा नतीजा मिलेगा:
+
+```json
+1
+```
+
+## नियंत्रक जीवन चक्र
+
+जब `config/app.php` में `controller_reuse` `false` हो, हर अनुरोध पर एक बार नियंत्रक इन्स्टैंस बनता है और अनुरोध खत्म होने पर हट जाता है। पारंपरिक फ़्रेमवर्क की तरह।
+
+जब `controller_reuse` `true` हो, सभी अनुरोध एक ही नियंत्रक इन्स्टैंस इस्तेमाल करते हैं, यानी बनने के बाद वह मेमोरी में रहता है।
+
+> **ध्यान**
+> रीयूज़ चालू होने पर अनुरोध को नियंत्रक की कोई भी प्रॉपर्टी बदलनी नहीं चाहिए, क्योंकि उसका असर बाद के अनुरोधों पर पड़ेगा। उदाहरण:
 
 ```php
 <?php
@@ -86,7 +285,7 @@ use support\Request;
 class FooController
 {
     protected $model;
-
+    
     public function update(Request $request, $id)
     {
         $model = $this->getModel($id);
@@ -103,8 +302,8 @@ class FooController
     
     protected function getModel($id)
     {
-        // इस विधि को पहले के अनुरोध update?id=1 के बाद मॉडल को संरक्षित करेगी
-        // अगर फिर से नियंत्रक नमूना delete?id=2 को अनुरोध किया गया है, तो 1 को डेटा हटा दिया जाएगा।
+        // पहले update?id=1 अनुरोध के बाद model रह जाएगा
+        // delete?id=2 अनुरोध आने पर id=1 का डेटा मिट जाएगा
         if (!$this->model) {
             $this->model = Model::find($id);
         }
@@ -114,7 +313,7 @@ class FooController
 ```
 
 > **सुझाव**
-> नियंत्रक `__construct()` फ़ंक्शन में डेटा लौटाना कोई प्रभाव नहीं डालेगा, उदाहरण के लिए
+> नियंत्रक के `__construct()` में डेटा return करने का कोई असर नहीं होता। उदाहरण:
 
 ```php
 <?php
@@ -126,23 +325,22 @@ class FooController
 {
     public function __construct()
     {
-        // निर्माण फ़ंक्शन में डेटा लौटाने का कोई प्रभाव नहीं होगा, ब्राउज़र इस प्रतिक्रिया को प्राप्त नहीं करेगा
+        // कन्स्ट्रक्टर में return का कोई असर नहीं, ब्राउज़र को यह रिस्पॉन्स नहीं मिलेगा
         return response('hello'); 
     }
 }
 ```
 
-## नियंत्रक पुनर्चक्रण और पुराने में अंतर
-इसके पुराने और पुराने में अंतर इस प्रकार है
+## रीयूज़ न करने और रीयूज़ करने में अंतर
 
-#### पुराने नियंत्रक
-प्रत्येक अनुरोध के लिए एक नया नियंत्रक नमूना बनाया जाएगा, अनुरोध समाप्त होने के बाद यह नियंत्रक नमूना मुक्त किया जाएगा और मेमोरी संचय किया जाएगा। नियंत्रक पुराने के साथ भी बेहद कमजोर (helloworld दबाव-परीक्षण प्रदर्शन 10% लगभग कमजोर, व्यापार सहित लगभग इसे नजरानुहार परिगणित कर सकते हैं)।
+#### रीयूज़ न करना
+हर अनुरोध पर नया नियंत्रक इन्स्टैंस बनता है, अनुरोध खत्म पर हट जाता है। पारंपरिक फ़्रेमवर्क जैसा, ज़्यादातर डेवलपर्स की आदत के अनुकूल। बार-बार बनाने/हटाने की वजह से प्रदर्शन रीयूज़ से थोड़ा कम (helloworld बेंचमार्क में लगभग 10%, असली बिजनेस में आमतौर पर नगण्य)।
 
-#### नियंत्रक पुनर्चक्रण
-यदि एक प्रक्रिया नियंत्रक एक बार बनाती है तो, अनुरोध समाप्त होने के बाद यह नियंत्रक मूर्ति नहीं करती है, तो मौजूद प्रक्रिया के उपयोगकर्ता इस मूर्ति का उपयोग करेंगे। नियंत्रक पुनर्चक्रण की प्रदर्शन अधिक बेहतर होती है, लेकिन इसकी कुलता के बहुत कम लोग अनुभव कर पाते हैं।
+#### रीयूज़ करना
+एक प्रोसेस में सिर्फ एक बार नियंत्रक बनता है, अनुरोध खत्म होने पर इन्स्टैंस हटाया नहीं जाता। उस प्रोसेस के बाद के अनुरोध वही इन्स्टैंस इस्तेमाल करते हैं। बेहतर प्रदर्शन, लेकिन ज़्यादातर डेवलपर्स की आदत से कम मेल खाता है।
 
-#### नियंत्रक पुनर्चक्रण के निषेध मामले
+#### इन हालात में रीयूज़ नहीं करना चाहिए
 
-जब अनुरोध नियंत्रक के गुणसूचकों को परिवर्तित करता है, तो नियंत्रक पुनर्चक्रण नहीं कर सकते, क्योंकि इन परिवर्तनों के बाद उपकारिता प्रभावित होगी।
+जब अनुरोध नियंत्रक की प्रॉपर्टी बदलता हो – इसका असर बाद के अनुरोधों पर पड़ेगा।
 
-कुछ विकसितकर्ता नियंत्रक `__construct()` फ़ंक्शन में हर अनुरोध के लिए कुछ प्रारंभिकण करना पसंद करते हैं, तो इस गतिविधि में नियंत्रक पुनर्चक्रण नहीं किया जा सकता, क्योंकि मौजूद प्रक्रिया में `__construct()` सिर्फ एक बार बुलाया जाएगा, और हर अनुरोध के लिए नहीं।
+कुछ डेवलपर्स हर अनुरोध के लिए नियंत्रक के `__construct()` में कुछ इनिशियलाइज़ करते हैं। ऐसे में रीयूज़ नहीं करना चाहिए, क्योंकि प्रोसेस में कन्स्ट्रक्टर सिर्फ एक बार चलता है, हर अनुरोध पर नहीं।

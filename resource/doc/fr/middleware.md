@@ -206,8 +206,8 @@ class AccessControlTest implements MiddlewareInterface
 }
 ```
 
-> **Remarque**
-> Les requêtes CORS peuvent déclencher des requêtes OPTIONS. Nous ne voulons pas que les requêtes OPTIONS atteignent le contrôleur, donc nous renvoyons directement une réponse vide (`response('')`) pour intercepter la requête.
+> **Conseil**
+> Les requêtes cross-origin peuvent déclencher des requêtes OPTIONS de précontrôle. Nous ne voulons pas que les requêtes OPTIONS atteignent le contrôleur, donc nous renvoyons directement une réponse vide (`response('')`) pour intercepter la requête.
 > Si votre API nécessite un routage, veuillez utiliser `Route::any(..)` ou `Route::add(['POST', 'OPTIONS'], ..)`.
 
 Ajoutez le middleware global dans le fichier `config/middleware.php` comme ceci :
@@ -225,10 +225,9 @@ return [
 > **Remarque**
 > Si une requête ajax a des en-têtes personnalisés, ces en-têtes personnalisés doivent être ajoutés au champ `Access-Control-Allow-Headers` du middleware, sinon une erreur `Request header field XXXX is not allowed by Access-Control-Allow-Headers in preflight response.` se produira.
 
-## Remarque
+## Explication
 
 - Les middlewares sont divisés en middlewares globaux, middlewares d'application (uniquement disponibles en mode multi-Applications, voir [multiapp.md](multiapp.md)), et middlewares de routage.
-- Actuellement, les middlewares individuels de contrôleur ne sont pas pris en charge (mais il est possible d'implémenter une fonctionnalité similaire à travers le middleware en vérifiant `$request->controller`).
 - La configuration des middlewares se trouve dans le fichier `config/middleware.php`.
 - La configuration des middlewares globaux est sous la clé `''`.
 - La configuration des middlewares d'application est sous le nom de l'application spécifique, par exemple :
@@ -245,6 +244,31 @@ return [
         app\middleware\ApiOnly::class,
     ]
 ];
+```
+
+## Middleware du contrôleur et middleware de méthode
+
+En utilisant des annotations, nous pouvons attribuer un middleware à un contrôleur ou à des méthodes spécifiques du contrôleur.
+
+```php
+<?php
+namespace app\controller;
+use app\middleware\Controller1Middleware;
+use app\middleware\Controller2Middleware;
+use app\middleware\Method1Middleware;
+use app\middleware\Method2Middleware;
+use support\annotation\Middleware;
+use support\Request;
+
+#[Middleware(Controller1Middleware::class, Controller2Middleware::class)]
+class IndexController
+{
+    #[Middleware(Method1Middleware::class, Method2Middleware::class)]
+    public function index(Request $request): string
+    {
+        return 'hello';
+    }
+}
 ```
 
 ## Middleware de routage
@@ -275,43 +299,68 @@ Route::group('/blog', function () {
 
 ## Passage de paramètres au Middleware via le constructeur
 
-> **Remarque**
-> Cette fonctionnalité nécessite webman-framework >= 1.4.8
+Le fichier de configuration prend en charge l'instanciation directe des middlewares, ce qui facilite la transmission de paramètres au middleware via le constructeur.
 
-À partir de la version 1.4.8, le fichier de configuration prend en charge l'instanciation directe des middlewares ou des fonctions anonymes, ce qui rend possible la transmission de paramètres au middleware via le constructeur. Par exemple, dans le fichier `config/middleware.php`, la configuration peut être la suivante :
+Par exemple, dans le fichier `config/middleware.php`, la configuration peut être la suivante :
 
-```
+```php
 return [
-   // Middleware global
-   '' => [
-       new app\middleware\AuthCheckTest($param1, $param2, ...),
-       function(){
-           return new app\middleware\AccessControlTest($param1, $param2, ...);
-       },
-   ],
-   // Middleware d'application api (uniquement disponible en mode multi-Applications)
-   'api' => [
-       app\middleware\ApiOnly::class,
-   ]
+    // Middleware global
+    '' => [
+        new app\middleware\AuthCheckTest($param1, $param2, ...),
+        new app\middleware\AccessControlTest($param1, $param2, ...)
+    ],
+    // Middleware d'application api (uniquement disponible en mode multi-Applications)
+    'api' => [
+        app\middleware\ApiOnly::class,
+    ]
 ];
 ```
 
 De même, les middlewares de routage peuvent également transmettre des paramètres via le constructeur, par exemple dans `config/route.php` :
 
-```
+```php
 Route::any('/admin', [app\admin\controller\IndexController::class, 'index'])->middleware([
     new app\middleware\MiddlewareA($param1, $param2, ...),
-    function(){
-        return new app\middleware\MiddlewareB($param1, $param2, ...);
-    },
+    new app\middleware\MiddlewareB($param1, $param2, ...),
 ]);
+```
+
+Exemple d'utilisation des paramètres dans le middleware :
+
+```php
+<?php
+namespace app\middleware;
+
+use Webman\MiddlewareInterface;
+use Webman\Http\Response;
+use Webman\Http\Request;
+
+class MiddlewareA implements MiddlewareInterface
+{
+    protected $param1;
+
+    protected $param2;
+
+    public function __construct($param1, $param2)
+    {
+        $this->param1 = $param1;
+        $this->param2 = $param2;
+    }
+
+    public function process(Request $request, callable $handler) : Response
+    {
+        var_dump($this->param1, $this->param2);
+        return $handler($request);
+    }
+}
 ```
 
 ## Ordre d'exécution des middlewares
 
-- L'ordre d'exécution des middlewares est le suivant : `middlewares globaux` -> `middlewares d'application` -> `middlewares de routage`.
-- Lorsqu'il y a plusieurs middlewares globaux, ils sont exécutés dans l'ordre réel de leur configuration (il en va de même pour les middlewares d'application et de routage).
-- Les requêtes 404 ne déclenchent aucun middleware, y compris les middlewares globaux.
+- L'ordre d'exécution des middlewares est le suivant : `middlewares globaux` -> `middlewares d'application` -> `middlewares du contrôleur` -> `middlewares de routage` -> `middlewares de méthode`.
+- Lorsqu'il y a plusieurs middlewares au même niveau, ils sont exécutés dans l'ordre réel de leur configuration.
+- Les requêtes 404 ne déclenchent aucun middleware par défaut (vous pouvez toujours ajouter un middleware via `Route::fallback(function(){})->middleware()`).
 
 ## Passage de paramètres aux middlewares via la route (route->setParams)
 
@@ -388,8 +437,6 @@ class FooController
 ```
 
 ## Obtention des informations de route actuelle depuis un middleware
-> **Remarque**
-> Nécessite webman-framework >= 1.3.2
 
 Nous pouvons utiliser `$request->route` pour obtenir l'objet de la route, et en appelant les méthodes correspondantes, obtenir les informations appropriées.
 
@@ -432,13 +479,7 @@ class Hello implements MiddlewareInterface
 }
 ```
 
-> **Remarque**
-> La méthode `$route->param()` nécessite webman-framework >= 1.3.16
-
-
 ## Récupération d'exceptions depuis un middleware
-> **Remarque**
-> Nécessite webman-framework >= 1.3.15
 
 Pendant le traitement des requêtes, des exceptions peuvent survenir. Dans le middleware, utilisez `$response->exception()` pour obtenir l'exception.
 
@@ -478,9 +519,6 @@ class Hello implements MiddlewareInterface
 
 ## Middleware super global
 
-> **Remarque**
-> Cette fonctionnalité nécessite webman-framework >= 1.5.16
-
 Les middlewares globaux du projet principal n'affectent que le projet principal et n'ont aucun effet sur les [plugins d'application](app/app.md). Parfois, nous voulons ajouter un middleware qui affecte globalement tous les plugins, y compris les plugins d'application, nous pouvons alors utiliser un middleware super global.
 
 Configurez comme suit dans `config/middleware.php` :
@@ -493,14 +531,10 @@ return [
 ];
 ```
 
-> **Remarque**
+> **Conseil**
 > Les middlewares super globaux `@` peuvent être configurés non seulement dans le projet principal, mais aussi dans un plugin spécifique, par exemple, en configurant le middleware super global `@` dans `plugin/ai/config/middleware.php`, il affectera également le projet principal et tous les plugins.
 
-
 ## Ajout d'un middleware à un plugin spécifique
-
-> **Remarque**
-> Cette fonctionnalité nécessite webman-framework >= 1.5.16
 
 Parfois, nous voulons ajouter un middleware à un [plugin d'application](app/app.md), mais nous ne voulons pas modifier le code du plugin (car la mise à niveau écraserait les modifications). Dans ce cas, nous pouvons ajouter un middleware au plugin depuis le projet principal.
 
@@ -508,9 +542,9 @@ Configurez comme suit dans `config/middleware.php` :
 ```php
 return [
     'plugin.ai' => [], // Ajouter un middleware au plugin ai
-    'plugin.ai.admin' => [], // Ajouter un middleware au module admin du plugin ai
+    'plugin.ai.admin' => [], // Ajouter un middleware au module admin du plugin ai (répertoire plugin\ai\app\admin)
 ];
 ```
 
-> **Remarque**
+> **Conseil**
 > Bien sûr, il est également possible d'ajouter une configuration similaire à un autre plugin pour affecter le plugin AI, par exemple en ajoutant une telle configuration dans `plugin/foo/config/middleware.php`, cela affecterait également le plugin AI.

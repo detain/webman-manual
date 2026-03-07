@@ -1,40 +1,65 @@
-# 環境要件
+# webman のインストール方法
 
-* PHP >= 7.2
+* PHP >= 8.1
 * [Composer](https://getcomposer.org/) >= 2.0
 
-### 1. プロジェクトの作成
+
+## Linux：PHP + Composer 環境のインストール（既存環境の場合はスキップ可）
+```
+curl -sO https://www.workerman.net/install-php-and-composer && sudo bash install-php-and-composer
+```
+> **注意**
+> 上記コマンドは Linux/Mac 向けです。Windows の場合は別途 PHP 環境をインストールしてください。
+
+webman 公式が提供する[静的 PHP](https://www.workerman.net/download) を手動でダウンロードし、解凍して使用することもできます。
+
+## 1. プロジェクトの作成
 
 ```php
-composer create-project workerman/webman
+composer create-project workerman/webman:~2.0
 ```
 
-### 2. 実行
+> **ヒント**
+> エラーが出る場合は、問題のある Composer ミラーを使用している可能性があります。`composer config -g --unset repos.packagist` を実行してプロキシを解除してください。
 
-webmanディレクトリに移動
+## 2. 実行
 
-#### Windowsユーザー
-`windows.bat`をダブルクリックするか、`php windows.php`を実行して起動します。
+webman ディレクトリに移動
 
-> **注意**
-> エラーが発生した場合、おそらく関数が無効化されています。[無効化関数のチェック](others/disable-function-check.md)を参照して無効化を解除してください。
+#### Windows ユーザー
+`windows.bat` をダブルクリックするか、`php windows.php` を実行して起動
 
-#### Linuxユーザー
-`debug`モードで実行（開発デバッグ用）
+> **ヒント**
+> エラーが発生した場合、関数が無効化されている可能性があります。[無効化関数のチェック](others/disable-function-check.md) を参照して解除してください。
+
+#### Linux ユーザー
+**デバッグモード**（開発・デバッグ用：出力がターミナルに表示され、ターミナル終了時に webman サービスも停止します）
 
 ```php
 php start.php start
 ```
 
-`daemon`モードで実行（本番環境用）
+**デーモンモード**（本番環境用：出力はターミナルに表示されず、ターミナル終了後も webman サービスは継続して動作します）
 
 ```php
 php start.php start -d
 ```
 
-> **注意**
-> エラーが発生した場合、おそらく関数が無効化されています。[無効化関数のチェック](others/disable-function-check.md)を参照して無効化を解除してください。
+#### Docker ユーザー
 
-### 3. アクセス
+全サービスを起動してコンソールにアタッチ
+```php
+docker-compose up
+```
 
-ブラウザで `http://ipアドレス:8787` にアクセスしてください。
+バックグラウンドモードでサービスを実行
+```php
+docker-compose up -d
+```
+
+> **ヒント**
+> エラーが発生した場合、関数が無効化されている可能性があります。[無効化関数のチェック](others/disable-function-check.md) を参照して解除してください。
+
+## 3. アクセス
+
+ブラウザで `http://IPアドレス:8787` にアクセスしてください。

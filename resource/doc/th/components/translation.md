@@ -1,14 +1,15 @@
-# ภาษาหลายภาษา
+# หลายภาษา
 
-การใช้งานภาษาหลายภาษาต้องใช้คอมโพเนนต์ [symfony/translation](https://github.com/symfony/translation) โปรดติดตั้ง
+การรองรับหลายภาษใช้คอมโพเนนต์ [symfony/translation](https://github.com/symfony/translation)
+
+## การติดตั้ง
 ```
 composer require symfony/translation
 ```
 
-## สร้างแพ็คภาษา (Language Pack)
-webman จะมีการจัดทำแพ็คภาษาไว้ที่ไดเรกทอรี `resource/translations` (หากไม่มีโปรดสร้างใหม่) หากต้องการเปลี่ยนไดเรกทอรีโปรดตั้งค่าใน `config/translation.php`
-
-แต่ละภาษาจะมีไดเรกทอรีในนั้น และการกำหนดภาษาจะถูกเก็บไว้ใน `message.php` เช่น
+## สร้างแพ็กเกจภาษา
+webman จะเก็บแพ็กเกจภาษาไว้ในโฟลเดอร์ `resource/translations` โดยค่าเริ่มต้น (สร้างโฟลเดอร์หากยังไม่มี) หากต้องการเปลี่ยนโฟลเดอร์ ให้ตั้งค่าใน `config/translation.php`
+แต่ละภาษาจะมีโฟลเดอร์ย่อย แยกตามภาษา คำจำกัดความภาษาเก็บไว้ใน `messages.php` โดยค่าเริ่มต้น ตัวอย่าง:
 ```
 resource/
 └── translations
@@ -18,34 +19,42 @@ resource/
         └── messages.php
 ```
 
-ไฟล์ภาษาทั้งหมดจะส่งค่ากลับเป็นอาร์เรย์ เช่น ไฟล์ `/translations/en/messages.php` จะส่งค่ากลับเป็น
+ไฟล์ภาษาทั้งหมดจะคืนค่าเป็นอาร์เรย์ เช่น:
 ```php
+// resource/translations/en/messages.php
+
 return [
-    'hello' => 'สวัสดี webman',
+    'hello' => 'Hello webman',
 ];
 ```
 
-## การตั้งค่า
+## การกำหนดค่า
 
 `config/translation.php`
+
 ```php
 return [
     // ภาษาเริ่มต้น
     'locale' => 'zh_CN',
-    // ภาษาสำรอง ในกรณีที่ภาษาปัจจุบันไม่พร้อมใช้
+    // ภาษาสำรอง: หากไม่พบคำแปลในภาษาปัจจุบัน จะลองใช้คำแปลจากภาษาสำรอง
     'fallback_locale' => ['zh_CN', 'en'],
-    // ไดเรกทอรีที่เก็บไฟล์ภาษา
+    // โฟลเดอร์เก็บไฟล์ภาษา
     'path' => base_path() . '/resource/translations',
 ];
 ```
-การแปลทำได้ผ่าน `trans()` มีการสร้างไฟล์ภาษา `resource/translations/zh_CN/messages.php` เช่น
+
+## การแปล
+
+ใช้เมธอด `trans()` สำหรับการแปล
+
+สร้างไฟล์ภาษา `resource/translations/zh_CN/messages.php`:
 ```php
 return [
-    'hello' => 'สวัสดี โลก!',
+    'hello' => '你好 世界!',
 ];
 ```
 
-สร้างไฟล์ `app/controller/UserController.php`
+สร้างไฟล์ `app/controller/UserController.php`:
 ```php
 <?php
 namespace app\controller;
@@ -56,19 +65,22 @@ class UserController
 {
     public function get(Request $request)
     {
-        $hello = trans('hello'); // สวัสดี โลก!
+        $hello = trans('hello'); // 你好 世界!
         return response($hello);
     }
 }
 ```
 
-เข้าชม `http://127.0.0.1:8787/user/get` จะแสดง "สวัสดี โลก!"
-การเปลี่ยนภาษาเริ่มต้นจะใช้ `locale()`
+เมื่อเข้าถึง `http://127.0.0.1:8787/user/get` จะได้ "你好 世界!"
 
-เพิ่มไฟล์ภาษา `resource/translations/en/messages.php` เช่น
+## เปลี่ยนภาษาเริ่มต้น
+
+ใช้เมธอด `locale()` เพื่อสลับภาษา
+
+เพิ่มไฟล์ภาษา `resource/translations/en/messages.php`:
 ```php
 return [
-    'hello' => 'สวัสดีชาวโลก!',
+    'hello' => 'hello world!',
 ];
 ```
 
@@ -82,16 +94,16 @@ class UserController
 {
     public function get(Request $request)
     {
-        // เปลี่ยนภาษาเริ่มต้น
+        // สลับภาษา
         locale('en');
-        $hello = trans('hello'); // สวัสดีชาวโลก!
+        $hello = trans('hello'); // hello world!
         return response($hello);
     }
 }
 ```
-เข้าชม `http://127.0.0.1:8787/user/get` จะแสดง "สวัสดีชาวโลก!"
+เมื่อเข้าถึง `http://127.0.0.1:8787/user/get` จะได้ "hello world!"
 
-คุณสามารถใช้พารามิเตอร์ที่ 4 ของฟังก์ชัน `trans()` เพื่อเปลี่ยนภาษาชั่วคราว เช่นตัวอย่างด้านบนและตัวอย่างด้านล่างคือเทียบเท่ากัน
+ยังสามารถใช้พารามิเตอร์ตัวที่ 4 ของฟังก์ชัน `trans()` เพื่อสลับภาษาชั่วคราวได้ เช่น ตัวอย่างด้านบนเทียบเท่ากับ:
 ```php
 <?php
 namespace app\controller;
@@ -102,17 +114,17 @@ class UserController
 {
     public function get(Request $request)
     {
-        // พารามิเตอร์ที่ 4 เปลี่ยนภาษา
-        $hello = trans('hello', [], null, 'en'); // สวัสดีชาวโลก!
+        // พารามิเตอร์ตัวที่ 4 สลับภาษา
+        $hello = trans('hello', [], null, 'en'); // hello world!
         return response($hello);
     }
 }
 ```
-## การตั้งค่าภาษาให้แน่ใจสำหรับคำขอแต่ละอัน
 
-translation เป็น Singleton ซึ่งหมายความว่าคำขอทั้งหมดจะใช้ instances เดียวกัน หากคำขอไหนใช้ `locale()` ในการตั้งค่าภาษาเริ่มต้น มันจะส่งผลต่อคำขอทั้งหมดของ processes ที่เหลือ ดังนั้นคุณควรตั้งค่าภาษาอย่างแน่นอนสำหรับแต่ละคำขอ เช่น ใช้ middleware ต่อไปนี้
+## ตั้งค่าภาษาอย่างชัดเจนสำหรับแต่ละคำขอ
+translation เป็นซิงเกิลตัน หมายความว่าคำขอทั้งหมดแชร์อินสแตนซ์เดียวกัน หากคำขอใดใช้ `locale()` ตั้งค่าภาษาเริ่มต้น จะส่งผลต่อคำขอทั้งหมดถัดไปในโปรเซสนั้น ดังนั้นควรตั้งค่าภาษาอย่างชัดเจนสำหรับแต่ละคำขอ เช่น ใช้มิดเดิลแวร์ต่อไปนี้:
 
-สร้างไฟล์ `app/middleware/Lang.php` (ถ้า directory อยู่ใหม่โปรดสร้างเอง) เช่น
+สร้างไฟล์ `app/middleware/Lang.php` (สร้างโฟลเดอร์หากยังไม่มี):
 ```php
 <?php
 namespace app\middleware;
@@ -131,41 +143,42 @@ class Lang implements MiddlewareInterface
 }
 ```
 
-ใน `config/middleware.php` เพิ่ม middleware ระดับ global ดังนี้
+เพิ่มมิดเดิลแวร์ส่วนกลางใน `config/middleware.php`:
 ```php
 return [
-    // มิดเดิลแอร์ระดับ global
+    // มิดเดิลแวร์ส่วนกลาง
     '' => [
-        // ... มิดเดิลแอร์อื่นๆ จะมีการเก็บเงื่อนไข
+        // ... มิดเดิลแวร์อื่น ๆ ข้ามไป
         app\middleware\Lang::class,
     ]
 ];
 ```
-## การใช้ตราบส่วน
 
-บางครั้งข้อความอาจมีตัวแปรที่ต้องการแปล เช่น
+
+## ใช้ตัวยึด
+บางครั้งข้อความมีตัวแปรที่ต้องแปล เช่น
 ```php
 trans('hello ' . $name);
 ```
-เมื่อพบกรณีนี้ เราจะใช้ตราบส่วนในการจัดการ
+ในกรณีนี้ใช้ตัวยึดจัดการ
 
-เปลี่ยน `resource/translations/zh_CN/messages.php` เช่น
+แก้ไข `resource/translations/zh_CN/messages.php`:
 ```php
 return [
-    'hello' => '你好 %name%! ',
+    'hello' => '你好 %name%!',
 ];
 ```
-แปลเมื่อมีการส่งตราบส่วนที่สอดคล้องผ่านพารามิเตอร์ที่ 2 เช่น
+เมื่อแปล ส่งค่ารอบตัวยึดผ่านพารามิเตอร์ตัวที่ 2:
 ```php
-trans('hello', ['%name%' => 'webman']); // 你好 webman! 
+trans('hello', ['%name%' => 'webman']); // 你好 webman!
 ```
-## การจัดการข้อความแบบพหุน
 
-ภาษาบางภาษาอาจต้องการการเปลี่ยนแปลงขึ้นอยู่กับจำนวนของวัตถุ ตัวอย่างเช่น `There is %count% apple` เมื่อค่า `%count%` เท่ากับ 1 จะแสดงผลถูกต้อง แต่เมื่อมากกว่า 1 ค่าที่แสดงผิดพลาด
+## การจัดการพหูพจน์
+บางภาษาประโยคเปลี่ยนตามจำนวน เช่น `There is %count% apple` ถูกต้องเมื่อ `%count%` เป็น 1 แต่ผิดเมื่อมากกว่า 1
 
-ในกรณีนี้เราสามารถใช้ **pipe** (`|`) เพื่อแสดงจำนวนของวัตถุเอง
+ในกรณีนี้ใช้ **ท่อ** (`|`) เพื่อแสดงรูปแบบพหูพจน์
 
-ไฟล์ภาษา `/translations/en/messages.php` จึงมีการเพิ่ม `apple_count` เช่น
+เพิ่ม `apple_count` ในไฟล์ภาษา `resource/translations/en/messages.php`:
 ```php
 return [
     // ...
@@ -177,7 +190,7 @@ return [
 trans('apple_count', ['%count%' => 10]); // There are 10 apples
 ```
 
-เรายังสามารถกำหนดช่วงของตัวเลขเพื่อเปลี่ยนแปลงข้อความของวัตถุที่มากขึ้น ในทางกลับกันจะทำให้มันเป็นการแสดงผลที่ถูกต้องขึ้นมากขึ้น
+ยังสามารถกำหนดช่วงตัวเลขเพื่อสร้างกฎพหูพจน์ที่ซับซ้อนขึ้นได้:
 ```php
 return [
     // ...
@@ -188,21 +201,22 @@ return [
 ```php
 trans('apple_count', ['%count%' => 20]); // There are many apples
 ```
-## เลือกไฟล์ภาษา
 
-ไฟล์ภาษาเริ่มต้นมีชื่อว่า `message.php` แต่คุณสามารถสร้างไฟล์ที่มีชื่ออื่นได้
+## ระบุไฟล์ภาษา
 
-สร้างไฟล์ภาษา `resource/translations/zh_CN/admin.php` เช่น
+ชื่อไฟล์เริ่มต้นคือ `messages.php` แต่สามารถสร้างไฟล์ภาษาอื่นได้
+
+สร้างไฟล์ภาษา `resource/translations/zh_CN/admin.php`:
 ```php
 return [
-    'hello_admin' => 'สวัสดี ผู้ดูแลระบบ!',
+    'hello_admin' => '你好 管理员!',
 ];
 ```
 
-ผ่าน `trans()` พารามิเตอร์ที่ 3 ใช้ในการระบุไฟล์ภาษา (เว้นชื่อไฟล์ `.php`)
+ระบุไฟล์ภาษาผ่านพารามิเตอร์ตัวที่ 3 ของ `trans()` (ไม่ต้องใส่ส่วนขยาย `.php`):
 ```php
-trans('hello', [], 'admin', 'zh_CN'); // สวัสดี ผู้ดูแลระบบ!
+trans('hello', [], 'admin', 'zh_CN'); // 你好 管理员!
 ```
 
 ## ข้อมูลเพิ่มเติม
-ดูเพิ่มเติมได้ที่ [คู่มือ symfony/translation](https://symfony.com/doc/current/translation.html)
+ดู [คู่มือ symfony/translation](https://symfony.com/doc/current/translation.html)

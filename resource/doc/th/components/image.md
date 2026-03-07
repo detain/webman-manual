@@ -1,35 +1,34 @@
-# คอมโพเนนต์การประมวลภาพ
+# คอมโพเนนต์การประมวลผลภาพ
 
-## intervention/image
-
-### ที่อยู่โปรเจค
+## ที่อยู่โปรเจกต์
 
 https://github.com/Intervention/image
-
-### การติดตั้ง
-
+  
+## การติดตั้ง
+ 
 ```php
 composer require intervention/image
 ```
+  
+## การใช้งาน
 
-### การใช้งาน
-
-**โค้ดส่วนหน้า**
+**ตัวอย่างโค้ดหน้าแอปโหลด**
 
 ```html
   <form method="post" action="/user/img" enctype="multipart/form-data">
       <input type="file" name="file">
-      <input type="submit" value="Submit">
+      <input type="submit" value="ส่ง">
   </form>
 ```
 
-**สร้าง `app/controller/UserController.php` ใหม่**
+**สร้างไฟล์ใหม่ `app/controller/UserController.php`**
 
 ```php
 <?php
 namespace app\controller;
 use support\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class UserController
 {
@@ -37,8 +36,9 @@ class UserController
     {
         $file = $request->file('file');
         if ($file && $file->isValid()) {
-            $image = Image::make($file)->resize(100, 100);
-            return response($image->encode('png'), 200, ['Content-Type' => 'image/png']);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file)->scale(100, 100);
+            return response($image->encode(), 200, ['Content-Type' => 'image/png']);
         }
         return response('file not found');
     }
@@ -46,6 +46,10 @@ class UserController
 }
 ```
 
-### เนื้อหาเพิ่มเติม
+> **หมายเหตุ**
+> ตัวอย่างด้านบนใช้ API เวอร์ชัน v3
 
-เข้าชม http://image.intervention.io/getting_started/introduction
+## ข้อมูลเพิ่มเติม
+
+เยี่ยมชม https://image.intervention.io/v3
+  

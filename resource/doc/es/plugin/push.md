@@ -4,8 +4,6 @@
 
 El complemento incluye un cliente JavaScript de página web llamado push.js y un cliente uniapp `uniapp-push.js`. Para obtener clientes en otros lenguajes, se pueden descargar desde https://pusher.com/docs/channels/channels_libraries/libraries/.
 
-> Este complemento requiere webman-framework>=1.2.0
-
 ## Instalación
 
 ```sh

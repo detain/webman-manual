@@ -2,9 +2,9 @@
 
 ## Описание
 
-Casbin - это мощный и эффективный фреймворк управления доступом с открытым исходным кодом, механизм управления правами которого поддерживает несколько моделей управления доступом.
+Casbin — это мощный и эффективный фреймворк управления доступом с открытым исходным кодом. Его механизм управления правами поддерживает различные модели контроля доступа.
 
-## URL проекта
+## Адрес проекта
 
 https://github.com/teamones-open/casbin
 
@@ -16,25 +16,25 @@ composer require teamones/casbin
 
 ## Официальный сайт Casbin
 
-Для подробного использования можно просмотреть официальную китайскую документацию, здесь мы расскажем только о том, как настроить и использовать в webman.
+Для подробного использования обратитесь к официальной китайской документации. Здесь описывается только настройка и использование Casbin в webman.
 
 https://casbin.org/docs/zh-CN/overview
 
 ## Структура каталогов
 
-``` 
+```
 .
-├── config                        Папка конфигурации
-│   ├── casbin-restful-model.conf Файл настроек используемой модели разрешений
-│   ├── casbin.php                Конфигурация casbin
+├── config                        Каталог конфигурации
+│   ├── casbin-restful-model.conf Файл конфигурации модели разрешений
+│   ├── casbin.php                Конфигурация Casbin
 ......
 ├── database                      Файлы базы данных
-│   ├── migrations                Файлы миграции
-│   │   └── 20210218074218_create_rule_table.php
+│   ├── migrations                Файлы миграции
+│   │   └── 20210218074218_create_rule_table.php
 ......
 ```
 
-## Файлы миграции базы данных
+## Файл миграции базы данных
 
 ```php
 <?php
@@ -44,14 +44,15 @@ use Phinx\Migration\AbstractMigration;
 class CreateRuleTable extends AbstractMigration
 {
     /**
-     * Метод изменения.
+     * Change Method.
      *
-     * Напишите ваши обратимые миграции с использованием этого метода.
+     * Write your reversible migrations using this method.
      *
-     * Более подробная информация о написании миграций доступна здесь:
+     * More information on writing migrations is available here:
      * http://docs.phinx.org/en/latest/migrations.html#the-abstractmigration-class
      *
-     * В этом методе можно использовать следующие команды, и Phinx автоматически их откатит при откате:
+     * The following commands can be used in this method and Phinx will
+     * automatically reverse them when rolling back:
      *
      *    createTable
      *    renameTable
@@ -61,16 +62,18 @@ class CreateRuleTable extends AbstractMigration
      *    addIndex
      *    addForeignKey
      *
-     * Любые другие разрушающие изменения приведут к ошибке при попытке отката миграции.
+     * Any other destructive changes will result in an error when trying to
+     * rollback the migration.
      *
-     * Помните, что при работе с классом Table нужно вызывать "create()" или "update()", а не "save()".
+     * Remember to call "create()" or "update()" and NOT "save()" when working
+     * with the Table class.
      */
     public function change()
     {
         $table = $this->table('rule', ['id' => false, 'primary_key' => ['id'], 'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => 'Таблица правил']);
 
-        //Добавление полей данных
-        $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => 'Идентификатор'])
+        // Добавление полей данных
+        $table->addColumn('id', 'integer', ['identity' => true, 'signed' => false, 'limit' => 11, 'comment' => 'ID первичного ключа'])
             ->addColumn('ptype', 'char', ['default' => '', 'limit' => 8, 'comment' => 'Тип правила'])
             ->addColumn('v0', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v1', 'string', ['default' => '', 'limit' => 128])
@@ -79,30 +82,28 @@ class CreateRuleTable extends AbstractMigration
             ->addColumn('v4', 'string', ['default' => '', 'limit' => 128])
             ->addColumn('v5', 'string', ['default' => '', 'limit' => 128]);
 
-        //Выполнение создания
+        // Выполнение создания
         $table->create();
     }
 }
-
 ```
 
-## Конфигурация casbin
+## Конфигурация Casbin
 
-Синтаксис конфигурации модели разрешений можно найти по ссылке: https://casbin.org/docs/zh-CN/syntax-for-models
+Синтаксис конфигурации модели правил разрешений см.: https://casbin.org/docs/zh-CN/syntax-for-models
 
 ```php
-
 <?php
 
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Файл конфигурации модели разрешений
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Файл конфигурации модели правил разрешений
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'model', // модель или адаптер
+            'type' => 'model', // model or adapter
             'class' => \app\model\Rule::class,
         ],
     ],
@@ -110,11 +111,11 @@ return [
     'rbac' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // Файл конфигурации модели разрешений
+            'config_file_path' => config_path() . '/casbin-rbac-model.conf', // Файл конфигурации модели правил разрешений
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'model', // модель или адаптер
+            'type' => 'model', // model or adapter
             'class' => \app\model\RBACRule::class,
         ],
     ],
@@ -123,27 +124,27 @@ return [
 
 ### Адаптер
 
-В текущей обертке composer используется метод model think-orm, для других ORM см. vendor/teamones/src/adapters/DatabaseAdapter.php
+Текущий пакет Composer адаптирован к методам model think-orm. Для других ORM см. vendor/teamones/src/adapters/DatabaseAdapter.php
 
-Затем измените конфигурацию
+Затем измените конфигурацию:
 
 ```php
 return [
     'default' => [
         'model' => [
             'config_type' => 'file',
-            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Файл конфигурации модели разрешений
+            'config_file_path' => config_path() . '/casbin-restful-model.conf', // Файл конфигурации модели правил разрешений
             'config_text' => '',
         ],
         'adapter' => [
-            'type' => 'adapter', // здесь тип настраивается как адаптер
+            'type' => 'adapter', // Здесь тип настраивается в режиме адаптера
             'class' => \app\adapter\DatabaseAdapter::class,
         ],
     ],
 ];
-``` 
+```
 
-## Использование
+## Инструкция по использованию
 
 ### Импорт
 
@@ -155,79 +156,79 @@ use teamones\casbin\Enforcer;
 ### Два способа использования
 
 ```php
-# 1. Использование конфигурации default по умолчанию
+# 1. Использование конфигурации по умолчанию
 Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# 2. Использование настраиваемой конфигурации rbac
+# 2. Использование пользовательской конфигурации rbac
 Enforcer::instance('rbac')->addPermissionForUser('user1', '/user', 'read');
 ```
 
-### Обзор популярных API
+### Обзор распространённых API
 
-Для получения более подробной информации об использовании API обратитесь к официальной документации
+Для подробной информации по API обратитесь к официальной документации:
 
 - API управления: https://casbin.org/docs/zh-CN/management-api
 - RBAC API: https://casbin.org/docs/zh-CN/rbac-api
 
 ```php
-# Добавление разрешения для пользователя
+# Добавить разрешение для пользователя
 
 Enforcer::addPermissionForUser('user1', '/user', 'read');
 
-# Удаление разрешения у пользователя
+# Удалить разрешение у пользователя
 
 Enforcer::deletePermissionForUser('user1', '/user', 'read');
 
-# Получение всех разрешений пользователя
+# Получить все разрешения пользователя
 
-Enforcer::getPermissionsForUser('user1'); 
+Enforcer::getPermissionsForUser('user1');
 
-# Добавление роли для пользователя
+# Добавить роль для пользователя
 
 Enforcer::addRoleForUser('user1', 'role1');
 
-# Добавление разрешения для роли
+# Добавить разрешение для роли
 
 Enforcer::addPermissionForUser('role1', '/user', 'edit');
 
-# Получение всех ролей
+# Получить все роли
 
 Enforcer::getAllRoles();
 
-# Получение всех ролей пользователя
+# Получить все роли пользователя
 
 Enforcer::getRolesForUser('user1');
 
-# Получение пользователей по роли
+# Получить пользователей по роли
 
 Enforcer::getUsersForRole('role1');
 
-# Проверка, принадлежит ли пользователь какой-либо роли
+# Проверить, принадлежит ли пользователь роли
 
-Enforcer::hasRoleForUser('use1', 'role1');
+Enforcer::hasRoleForUser('user1', 'role1');
 
-# Удаление роли у пользователя
+# Удалить роль пользователя
 
-Enforcer::deleteRoleForUser('use1', 'role1');
+Enforcer::deleteRoleForUser('user1', 'role1');
 
-# Удаление всех ролей пользователя
+# Удалить все роли пользователя
 
-Enforcer::deleteRolesForUser('use1');
+Enforcer::deleteRolesForUser('user1');
 
-# Удаление роли
+# Удалить роль
 
 Enforcer::deleteRole('role1');
 
-# Удаление разрешения
+# Удалить разрешение
 
 Enforcer::deletePermission('/user', 'read');
 
-# Удаление всех разрешений пользователя или роли
+# Удалить все разрешения пользователя или роли
 
 Enforcer::deletePermissionsForUser('user1');
 Enforcer::deletePermissionsForUser('role1');
 
-# Проверка разрешения, возвращает true или false
+# Проверить разрешение, возвращает true или false
 
 Enforcer::enforce("user1", "/user", "edit");
 ```

@@ -5,8 +5,7 @@
 * Mã nguồn của plugin phải là mã nguồn đầy đủ và không được mã hóa
 * Plugin phải có chức năng đầy đủ, không được là chức năng đơn giản
 * Phải cung cấp hướng dẫn sử dụng đầy đủ và tài liệu
-* Plugin không được chứa các thành phần con
-* Trong plugin không được chứa bất kỳ từ hoặc liên kết quảng cáo nào
+* Không nên sử dụng coroutine trong plugin vì người dùng có thể chưa bật coroutine
 
 ## Định danh của plugin ứng dụng
 Mỗi plugin ứng dụng đều có một định danh duy nhất, được tạo thành từ các ký tự chữ cái. Định danh này ảnh hưởng đến tên thư mục nguồn của plugin, không gian tên của lớp và tiền tố bảng cơ sở dữ liệu của plugin.

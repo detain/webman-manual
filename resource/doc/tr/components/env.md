@@ -1,9 +1,9 @@
-# vlucas/phpdotenv
+# ENV Bileşeni vlucas/phpdotenv
 
 ## Açıklama
-`vlucas/phpdotenv`, farklı ortamların (örneğin geliştirme ortamı, test ortamı vb.) yapılandırmasını ayırt etmek için kullanılan bir ortam değişkeni yükleme bileşenidir.
+`vlucas/phpdotenv`, farklı ortamların (geliştirme, test vb.) yapılandırmasını ayırt etmek için kullanılan bir ortam değişkeni yükleme bileşenidir.
 
-## Proje Adresi
+## Proje adresi
 
 https://github.com/vlucas/phpdotenv
   
@@ -15,9 +15,9 @@ composer require vlucas/phpdotenv
   
 ## Kullanım
 
-#### Proje kök dizinine `.env` dosyası oluşturun
+### Proje kök dizininde yeni `.env` dosyası oluşturun
 **.env**
-```plaintext
+```
 DB_HOST = 127.0.0.1
 DB_PORT = 3306
 DB_NAME = test
@@ -25,7 +25,7 @@ DB_USER = foo
 DB_PASSWORD = 123456
 ```
 
-#### Yapılandırma dosyasını değiştirin
+### Yapılandırma dosyasını değiştirin
 **config/database.php**
 ```php
 return [
@@ -52,13 +52,13 @@ return [
 ];
 ```
 
+> **İpucu**
+> `.env` dosyasını `.gitignore` listesine eklemeniz önerilir, böylece depolarına gönderilmez. Depoda bir `.env.example` örnek yapılandırma dosyası bulundurun. Projeyi dağıtırken `.env.example` dosyasını `.env` olarak kopyalayıp mevcut ortama göre yapılandırmayı düzenleyin. Böylece proje ortama göre farklı yapılandırmalar yükler.
+
 > **Not**
-> `.env` dosyasını `.gitignore` listesine eklemenizi öneririz, böylece kod deposuna gönderilmez. Projeye bir `.env.example` yapılandırma örneği dosyası ekleyin. Projeyi dağıtırken `.env.example` dosyasını `.env` olarak kopyalayarak, mevcut ortama göre `.env` dosyasını değiştirerek farklı ortamlarda farklı yapılandırmalar yükleyebilirsiniz.
+> `vlucas/phpdotenv` PHP TS sürümünde (Thread Safe) hata verebilir. Lütfen NTS sürümünü (Non-Thread-Safe) kullanın. Mevcut PHP sürümünü `php -v` komutuyla kontrol edebilirsiniz.
 
-> **Dikkat**
-> `vlucas/phpdotenv` PHP TS sürümünde (thread safe sürümünde) hatalara neden olabilir, lütfen NTS sürümünü (thread safe olmayan sürüm) kullanın.
-> Mevcut PHP sürümünü `php -v` komutunu kullanarak kontrol edebilirsiniz.
+## Daha fazla bilgi
 
-## Daha Fazla Bilgi
-
-https://github.com/vlucas/phpdotenv
+https://github.com/vlucas/phpdotenv adresini ziyaret edin.
+  

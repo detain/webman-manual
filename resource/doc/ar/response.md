@@ -358,9 +358,9 @@ class ImageController
 }
 ```
 
-## 分段响应
+## الاستجابة المجزأة
 
-有时候我们想分段发送响应，可以参考下面例子。
+أحيانًا نريد إرسال الاستجابة على دفعات. يمكنك الرجوع إلى المثال التالي.
 
 ```php
 <?php
@@ -376,22 +376,22 @@ class IndexController
 {
     public function index(Request $request): Response
     {
-        //获取连接
+        // الحصول على الاتصال
         $connection = $request->connection;
-        // 定时发送http包体
+        // إرسال جسم HTTP بشكل دوري
         $timer = Timer::add(1, function () use ($connection, &$timer) {
             static $i = 0;
             if ($i++ < 10) {
-                // 发送http包体
+                // إرسال جسم HTTP
                 $connection->send(new Chunk($i));
             } else {
-                // 删除不用的定时器，避免定时器越来越多内存泄漏
+                // حذف المؤقت غير المستخدم لتجنب تسرب الذاكرة
                 Timer::del($timer);
-                // 输出空的Chunk包体通知客户端响应结束
+                // إرسال Chunk فارغ للإبلاغ عن انتهاء الاستجابة
                 $connection->send(new Chunk(''));
             }
         });
-        // 先输出一个带Transfer-Encoding: chunked的http头，http包体异步发送
+        // أولاً إخراج رأس HTTP مع Transfer-Encoding: chunked، ثم إرسال جسم HTTP بشكل غير متزامن
         return response()->withHeaders([
             "Transfer-Encoding" => "chunked",
         ]);
@@ -401,7 +401,7 @@ class IndexController
 
 ```
 
-如果你是调用的大模型，参考下面例子。
+إذا كنت تستدعي نموذج لغة كبيرة، راجع المثال التالي.
 
 ```
 composer require webman/openai
@@ -420,7 +420,7 @@ class ChatController
     public function completions(Request $request)
     {
         $connection = $request->connection;
-        // https://api.openai.com 国内访问不到的话可以用地址 https://api.openai-proxy.com 替代
+        // إذا لم يكن https://api.openai.com متاحًا في منطقتك، يمكنك استخدام https://api.openai-proxy.com بدلاً منه
         $chat = new Chat(['apikey' => 'sk-xx', 'api' => 'https://api.openai.com']);
         $chat->completions(
             [
@@ -429,19 +429,19 @@ class ChatController
                 'messages' => [['role' => 'user', 'content' => 'hello']],
             ], [
             'stream' => function($data) use ($connection) {
-                // 当openai接口返回数据时转发给浏览器
+                // إعادة توجيه البيانات إلى المتصفح عند إرجاع واجهة OpenAI
                 $connection->send(new Chunk(json_encode($data, JSON_UNESCAPED_UNICODE) . "\n"));
             },
             'complete' => function($result, $response) use ($connection) {
-                // 响应结束时检查是否有错误
+                // التحقق من الأخطاء عند انتهاء الاستجابة
                 if (isset($result['error'])) {
                     $connection->send(new Chunk(json_encode($result, JSON_UNESCAPED_UNICODE) . "\n"));
                 }
-                // 返回空的chunk代表响应结束
+                // إرسال chunk فارغ للإشارة إلى نهاية الاستجابة
                 $connection->send(new Chunk(''));
             },
         ]);
-        // 先返回一个http头，后面数据异步返回
+        // أولاً إرجاع رأس HTTP، سيتم إرجاع البيانات بشكل غير متزامن
         return response()->withHeaders([
             "Transfer-Encoding" => "chunked",
         ]);

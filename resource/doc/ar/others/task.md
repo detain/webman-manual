@@ -1,59 +1,59 @@
-# 慢业务处理
+# معالجة العمليات البطيئة
 
-有时候我们需要处理慢业务，为了避免慢业务影响webman的其它请求处理，这些业务根据情况不同可以使用不同的处理方案。
+أحيانًا نحتاج إلى معالجة عمليات بطيئة لتجنب تأثيرها على معالجة الطلبات الأخرى في webman. يمكن لهذه العمليات استخدام حلول معالجة مختلفة حسب الحالة.
 
-## 方案一 使用消息队列
-参考[redis队列](../queue/redis.md) [stomp队列](../queue/stomp.md)
+## الحل 1: استخدام قائمة انتظار الرسائل
+راجع [قائمة انتظار Redis](../queue/redis.md) [قائمة انتظار Stomp](../queue/stomp.md)
 
-#### 优点
-可以应对突发海量业务处理请求
+#### المزايا
+يمكن التعامل مع طفرات مفاجئة في طلبات المعالجة
 
-#### 缺点
-无法直接返回结果给客户端。如需推送结果需要配合其它服务，例如使用 [webman/push](https://www.workerman.net/plugin/2) 推送处理结果。
+#### العيوب
+لا يمكن إرجاع النتائج مباشرةً إلى العميل. إذا احتجت لإرسال النتائج، يجب التنسيق مع خدمات أخرى، مثل استخدام [webman/push](https://www.workerman.net/plugin/2) لإرسال نتائج المعالجة.
 
-## 方案二 新增HTTP端口
+## الحل 2: إضافة منفذ HTTP جديد
 
-新增HTTP端口处理慢请求，这些慢请求通过访问这个端口进入特定的一组进程处理，处理后将结果直接返回给客户端。
+إضافة منفذ HTTP جديد لمعالجة الطلبات البطيئة. يتم معالجة هذه الطلبات البطيئة من خلال مجموعة محددة من العمليات عبر الوصول لهذا المنفذ، ثم إرجاع النتائج مباشرةً إلى العميل بعد المعالجة.
 
-#### 优点
-可以直接将数据返回给客户端
+#### المزايا
+يمكن إرجاع البيانات مباشرةً إلى العميل
 
-#### 缺点
-无法应对突发的海量请求
+#### العيوب
+لا يمكن التعامل مع طفرات مفاجئة في الطلبات
 
-#### 实施步骤
-在 `config/process.php` 里增加如下配置。
+#### خطوات التنفيذ
+أضف الإعدادات التالية في `config/process.php`.
 ```php
 return [
-    // ... 这里省略了其它配置 ...
+    // ... إعدادات أخرى محذوفة ...
     
     'task' => [
         'handler' => \Webman\App::class,
         'listen' => 'http://0.0.0.0:8686',
-        'count' => 8, // 进程数
+        'count' => 8, // عدد العمليات
         'user' => '',
         'group' => '',
         'reusePort' => true,
         'constructor' => [
-            'requestClass' => \support\Request::class, // request类设置
-            'logger' => \support\Log::channel('default'), // 日志实例
-            'appPath' => app_path(), // app目录位置
-            'publicPath' => public_path() // public目录位置
+            'requestClass' => \support\Request::class, // إعداد فئة الطلب
+            'logger' => \support\Log::channel('default'), // مثيل المسجل
+            'appPath' => app_path(), // موقع مجلد app
+            'publicPath' => public_path() // موقع مجلد public
         ]
     ]
 ];
 ```
 
-这样慢接口可以走 `http://127.0.0.1:8686/` 这组进程，不影响其它进程的业务处理。
+وبهذا يمكن للواجهات البطيئة المرور عبر مجموعة العمليات على `http://127.0.0.1:8686/` دون التأثير على معالجة العمليات الأخرى.
 
-为了让前端无感知端口的区别，可以在nginx加一个到8686端口的代理。假设慢接口请求路径都是以`/tast`开头，整个nginx配置类似如下：
+لجعل الواجهة الأمامية لا تلاحظ فرق المنفذ، يمكن إضافة وكيل للمنفذ 8686 في nginx. إذا بدأت مسارات الطلبات البطيئة بـ `/task`، تكون إعدادات nginx مشابهة لما يلي:
 ```
 upstream webman {
     server 127.0.0.1:8787;
     keepalive 10240;
 }
 
-# 新增一个8686 upstream
+# إضافة upstream جديد 8686
 upstream task {
    server 127.0.0.1:8686;
    keepalive 10240;
@@ -65,8 +65,8 @@ server {
   access_log off;
   root /path/webman/public;
 
-  # 以/tast开头的请求走8686端口，请按实际情况将/tast更改为你需要的前缀
-  location /tast {
+  # الطلبات التي تبدأ بـ /task تذهب للمنفذ 8686، غيّر /task حسب البادئة المطلوبة
+  location /task {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header Host $host;
       proxy_http_version 1.1;
@@ -74,7 +74,7 @@ server {
       proxy_pass http://task;
   }
 
-  # 其它请求走原8787端口
+  # الطلبات الأخرى تذهب للمنفذ 8787 الأصلي
   location / {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header Host $host;
@@ -87,14 +87,14 @@ server {
 }
 ```
 
-这样客户端访问`域名.com/tast/xxx`时将会走单独的8686端口处理，不影响8787端口的请求处理。
+وبهذا عند وصول العميل لـ `domain.com/task/xxx` سيتم المعالجة عبر المنفذ المنفصل 8686 دون التأثير على معالجة الطلبات على المنفذ 8787.
 
-## 方案三 利用http chunked 异步分段发送数据
+## الحل 3: استخدام HTTP Chunked لإرسال البيانات المقسمة بشكل غير متزامن
 
-#### 优点
-可以直接将数据返回给客户端
+#### المزايا
+يمكن إرجاع البيانات مباشرةً إلى العميل
 
-**安装 workerman/http-client**
+**تثبيت workerman/http-client**
 
 ```
 composer require workerman/http-client
@@ -117,9 +117,9 @@ class IndexController
         $http = new \Workerman\Http\Client();
         $http->get('https://example.com/', function ($response) use ($connection) {
             $connection->send(new Chunk($response->getBody()));
-            $connection->send(new Chunk('')); // 发送空的的chunk代表response结束
+            $connection->send(new Chunk('')); // إرسال chunk فارغ للدلالة على نهاية الاستجابة
         });
-        // 先发送一个http头，后续数据通过异步发送
+        // إرسال رأس HTTP أولاً، البيانات تُرسل بشكل غير متزامن
         return response()->withHeaders([
             "Transfer-Encoding" => "chunked",
         ]);
@@ -127,5 +127,5 @@ class IndexController
 }
 ```
 
-> **提示**
-> 本例中使用了 `workerman/http-client` 客户端异步获取http结果并返回数据，也可以使用其它异步客户端例如 [AsyncTcpConnection](https://www.workerman.net/doc/workerman/async-tcp-connection/construct.html) 。
+> **ملاحظة**
+> يستخدم هذا المثال عميل `workerman/http-client` لجلب نتائج HTTP بشكل غير متزامن وإرجاع البيانات. يمكن أيضًا استخدام عملاء غير متزامنين آخرين مثل [AsyncTcpConnection](https://www.workerman.net/doc/workerman/async-tcp-connection/construct.html).

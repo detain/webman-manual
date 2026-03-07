@@ -1,41 +1,39 @@
-# crontab定時タスクコンポーネント
+# crontab 定期タスクコンポーネント
 
-## workerman/crontab
+## 説明
 
-### 説明
-
-`workerman/crontab`は、Linuxのcrontabに似ていますが、`workerman/crontab`は秒単位のタイミングをサポートしています。
+`workerman/crontab` は Linux の crontab に似ていますが、秒単位のスケジューリングに対応しています。
 
 時間の指定：
 
-```plaintext
+```
 0   1   2   3   4   5
 |   |   |   |   |   |
-|   |   |   |   |   +------ 曜日 (0 - 6) (日曜日=0)
-|   |   |   |   +------ 月 (1 - 12)
-|   |   |   +-------- 月の日 (1 - 31)
-|   |   +---------- 時 (0 - 23)
-|   +------------ 分 (0 - 59)
-+-------------- 秒 (0-59) [省略可能、0位がない場合、最小の時間単位は分]
+|   |   |   |   |   +------ day of week (0 - 6) (Sunday=0)
+|   |   |   |   +------ month (1 - 12)
+|   |   |   +-------- day of month (1 - 31)
+|   |   +---------- hour (0 - 23)
+|   +------------ min (0 - 59)
++-------------- sec (0-59)[省略可。0の桁がない場合、最小単位は分]
 ```
 
-### プロジェクトのリンク
+## プロジェクト URL
 
 https://github.com/walkor/crontab
-
-### インストール
-
+  
+## インストール
+ 
 ```php
 composer require workerman/crontab
 ```
+  
+## 使用方法
 
-### 使用法
-
-**ステップ1: プロセスファイル `process/Task.php` の作成**
+**ステップ1: プロセスファイル `app/process/Task.php` を作成**
 
 ```php
 <?php
-namespace process;
+namespace app\process;
 
 use Workerman\Crontab\Crontab;
 
@@ -64,12 +62,12 @@ class Task
             echo date('Y-m-d H:i:s')."\n";
         });
         
-        // 1分の最初の秒に実行
+        // 毎分の1秒目に実行
         new Crontab('1 * * * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
       
-        // 毎日7時50分に実行、ここでは秒を省略しています
+        // 毎日7時50分に実行（秒は省略）
         new Crontab('50 7 * * *', function(){
             echo date('Y-m-d H:i:s')."\n";
         });
@@ -77,28 +75,28 @@ class Task
     }
 }
 ```
-
-**ステップ2: webmanの起動とともにプロセスファイルを設定**
-
-`config/process.php`ファイルを開き、以下の設定を追加します。
+  
+**ステップ2: webman と同時にプロセスを起動するよう設定**
+  
+設定ファイル `config/process.php` を開き、以下を追加：
 
 ```php
 return [
     ....その他の設定は省略....
   
     'task'  => [
-        'handler'  => process\Task::class
+        'handler'  => app\process\Task::class
     ],
 ];
 ```
+  
+**ステップ3: webman を再起動**
 
-**ステップ3: webmanの再起動**
+> 注意：定期タスクは即座には実行されません。次の分からカウントを開始し実行されます。
 
-> 注意：タイミングタスクはすぐに実行されるわけではありません。すべてのタイミングタスクは次の分に実行されるように計画されています。
-
-### 説明
-crontabは非同期ではありません。たとえば、1つのtaskプロセスにAとBの2つのタイマーを設定し、両方とも1秒ごとにタスクを実行する場合、Aのタスクが10秒かかると、BはAの実行が終わるまで待たなければならず、Bの実行に遅延が発生します。
-時間間隔に敏感なビジネスの場合、時間間隔に敏感なタイミングタスクを別々のプロセスで実行し、他のタイミングタスクに影響を受けないようにする必要があります。たとえば `config/process.php` を以下のように構成します。
+## 補足
+crontab は非同期ではありません。例：1つの task プロセスに A と B の2つのタイマーを設定し、どちらも1秒ごとに実行する場合、タスク A に10秒かかると、B は A の完了を待つ必要があり、B の実行が遅れます。
+時間間隔に敏感な処理の場合は、他のタスクの影響を受けないよう、時間に敏感な定期タスクを別プロセスで実行してください。例：`config/process.php` を次のように設定：
 
 ```php
 return [
@@ -112,7 +110,6 @@ return [
     ],
 ];
 ```
-時間感覚の敏感なタイミングタスクを `process/Task1.php` に、他のタイミングタスクを`process/Task2.php` に配置します。
+時間に敏感な定期タスクは `process/Task1.php` に、その他は `process/Task2.php` に配置してください。
 
-### その他
-`config/process.php`の詳細な設定については、[カスタムプロセス](../process.md)を参照してください。
+`config/process.php` の詳細は [カスタムプロセス](../process.md) を参照してください。

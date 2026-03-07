@@ -1,14 +1,14 @@
 # Benutzerdefinierter Prozess
 
-In webman können Sie wie in Workerman benutzerdefinierte Listener- oder Prozesse erstellen.
+In webman können Sie wie in Workerman benutzerdefinierte Listener oder Prozesse erstellen.
 
 > **Hinweis**
-> Windows-Benutzer müssen `php windows.php` verwenden, um webman zu starten und benutzerdefinierte Prozesse zu starten.
+> Windows-Benutzer müssen `php windows.php` verwenden, um webman zu starten und benutzerdefinierte Prozesse auszuführen.
 
 ## Benutzerdefinierter HTTP-Server
 Manchmal haben Sie möglicherweise spezielle Anforderungen, die eine Änderung des Kerncodes des webman HTTP-Servers erfordern. In diesem Fall können Sie benutzerdefinierte Prozesse verwenden.
 
-Beispielsweise erstellen Sie eine neue Datei app\Server.php
+Erstellen Sie z.B. die neue Datei `app\Server.php`.
 
 ```php
 <?php
@@ -23,13 +23,13 @@ class Server extends App
 }
 ```
 
-Fügen Sie die folgende Konfiguration zu `config/process.php` hinzu
+Fügen Sie die folgende Konfiguration zu `config/process.php` hinzu.
 
 ```php
 use Workerman\Worker;
 
 return [
-    // ... Andere Konfigurationen hier ausgelassen...
+    // ... andere Konfigurationen ausgelassen ...
     
     'my-http' => [
         'handler' => app\Server::class,
@@ -39,21 +39,22 @@ return [
         'group' => '',
         'reusePort' => true,
         'constructor' => [
-            'request_class' => \support\Request::class, // Anforderungsklasse einrichten
-            'logger' => \support\Log::channel('default'), // Protokollinstanz
-            'app_path' => app_path(), // Position des App-Verzeichnisses
-            'public_path' => public_path() // Position des Public-Verzeichnisses
+            'requestClass' => \support\Request::class, // Request-Klasse setzen
+            'logger' => \support\Log::channel('default'), // Logger-Instanz
+            'appPath' => app_path(), // Speicherort des app-Verzeichnisses
+            'publicPath' => public_path() // Speicherort des public-Verzeichnisses
         ]
     ]
 ];
 ```
 
-> **Hinweis**
-> Wenn Sie den mitgelieferten HTTP-Prozess von webman ausschalten möchten, setzen Sie einfach `listen => ''` in der Datei `config/server.php`.
+> **Tipp**
+> Um den eingebauten HTTP-Prozess von webman zu deaktivieren, setzen Sie einfach `listen=>''` in `config/server.php`.
 
 ## Beispiel für benutzerdefinierten WebSocket-Listener
 
-Erstellen Sie `app/Pusher.php`
+Erstellen Sie `app/Pusher.php`.
+
 ```php
 <?php
 namespace app;
@@ -83,14 +84,16 @@ class Pusher
     }
 }
 ```
-> Hinweis: Alle onXXX-Eigenschaften sind public
 
-Fügen Sie die folgende Konfiguration zu `config/process.php` hinzu
+> Hinweis: Alle onXXX-Methoden müssen public sein.
+
+Fügen Sie die folgende Konfiguration zu `config/process.php` hinzu.
+
 ```php
 return [
-    // ... Andere Prozesskonfigurationen hier ausgelassen ...
+    // ... andere Prozesskonfigurationen ausgelassen ...
     
-    // websocket_test ist der Name des Prozesses
+    // websocket_test ist der Prozessname
     'websocket_test' => [
         // Hier wird die Prozessklasse angegeben, d.h. die oben definierte Pusher-Klasse
         'handler' => app\Pusher::class,
@@ -101,7 +104,9 @@ return [
 ```
 
 ## Beispiel für benutzerdefinierten Nicht-Listener-Prozess
-Erstellen Sie `app/TaskTest.php`
+
+Erstellen Sie `app/TaskTest.php`.
+
 ```php
 <?php
 namespace app;
@@ -114,7 +119,7 @@ class TaskTest
   
     public function onWorkerStart()
     {
-        // Überprüfe alle 10 Sekunden, ob sich ein neuer Benutzer registriert hat
+        // Überprüfen Sie alle 10 Sekunden, ob neue Benutzer registriert wurden
         Timer::add(10, function(){
             Db::table('users')->where('regist_timestamp', '>', time()-10)->get();
         });
@@ -122,10 +127,12 @@ class TaskTest
     
 }
 ```
-Fügen Sie die folgende Konfiguration zu `config/process.php` hinzu
+
+Fügen Sie die folgende Konfiguration zu `config/process.php` hinzu.
+
 ```php
 return [
-    // ... Andere Prozesskonfigurationen hier ausgelassen...
+    // ... andere Prozesskonfigurationen ausgelassen ...
     
     'task' => [
         'handler'  => app\TaskTest::class
@@ -133,11 +140,12 @@ return [
 ];
 ```
 
-> Hinweis: Wenn listen weggelassen wird, lauscht der Prozess keinen Port. Wenn count weggelassen wird, ist die Anzahl der Prozesse standardmäßig auf 1 festgelegt.
+> Hinweis: Wenn listen weggelassen wird, lauscht der Prozess auf keinem Port. Wenn count weggelassen wird, ist die Standardanzahl der Prozesse 1.
 
 ## Erklärung der Konfigurationsdatei
 
-Eine vollständige Konfiguration für einen Prozess ist wie folgt definiert:
+Eine vollständige Prozesskonfiguration wird wie folgt definiert:
+
 ```php
 return [
     // ... 
@@ -148,25 +156,28 @@ return [
         'handler' => app\Pusher::class,
         // Protokoll, IP und Port zum Lauschen (optional)
         'listen'  => 'websocket://0.0.0.0:8888',
-        // Anzahl der Prozesse (optional, standardmäßig 1)
+        // Anzahl der Prozesse (optional, Standard 1)
         'count'   => 2,
-        // Benutzer, unter dem der Prozess läuft (optional, standardmäßig aktueller Benutzer)
+        // Benutzer, unter dem der Prozess läuft (optional, Standard aktueller Benutzer)
         'user'    => '',
-        // Benutzergruppe, unter der der Prozess läuft (optional, standardmäßig aktuelle Benutzergruppe)
+        // Benutzergruppe, unter der der Prozess läuft (optional, Standard aktuelle Benutzergruppe)
         'group'   => '',
-        // Ist der aktuelle Prozess reloadable? (optional, standardmäßig true)
+        // Unterstützt der aktuelle Prozess Reload? (optional, Standard true)
         'reloadable' => true,
-        // Ist reusePort aktiviert? (optional, diese Option erfordert php>=7.0, standardmäßig true)
+        // reusePort aktivieren
         'reusePort'  => true,
-        // Transport (optional, wenn SSL aktiviert werden soll, auf ssl setzen, standardmäßig tcp)
+        // Transport (optional, bei SSL-Bedarf auf ssl setzen, Standard tcp)
         'transport'  => 'tcp',
-        // Kontext (optional, wenn transport auf ssl steht, muss der Pfad des Zertifikats übergeben werden)
+        // Kontext (optional, Zertifikatspfad übergeben, wenn transport ssl ist)
         'context'    => [], 
-        // Konstruktorparameter der Prozessklasse, dies sind optionale Parameter (optional)
+        // Konstruktorparameter der Prozessklasse (optional)
         'constructor' => [],
+        // Ob dieser Prozess aktiviert ist
+        'enable' => true
     ],
 ];
 ```
 
 ## Zusammenfassung
-Benutzerdefinierte Prozesse in webman sind eigentlich nur eine einfache Verpackung von Workerman. Es trennt die Konfiguration von der Geschäftslogik und implementiert die `onXXX`-Rückrufe von Workerman durch Methoden in Klassen. Alle anderen Verwendungszwecke bleiben vollständig identisch mit Workerman.
+
+Benutzerdefinierte Prozesse in webman sind im Wesentlichen eine einfache Kapselung von Workerman. Sie trennen Konfiguration von Geschäftslogik und implementieren die `onXXX`-Callbacks von Workerman durch Klassenmethoden. Alle anderen Verwendungsarten sind mit Workerman identisch.

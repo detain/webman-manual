@@ -1,4 +1,4 @@
-# シンプルな例
+# webman クイックスタート簡単サンプル
 
 ## 文字列を返す
 **コントローラーの作成**
@@ -54,7 +54,7 @@ class UserController
 
 **アクセス**
 
-ブラウザで `http://127.0.0.1:8787/user/hello?name=tom` にアクセスすると、ブラウザは `{"code":0,"msg":"ok","data":"tom""}` と返します。
+ブラウザで `http://127.0.0.1:8787/user/hello?name=tom` にアクセスすると、ブラウザは `{"code":0,"msg":"ok","data":"tom"}` と返します。
 
 データをJSONヘルパー関数で返すと、自動的に `Content-Type: application/json` ヘッダーが追加されます。
 

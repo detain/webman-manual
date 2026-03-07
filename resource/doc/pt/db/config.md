@@ -1,131 +1,156 @@
-# Configuração
-O suporte do banco de dados illuminate/database e suas versões são as seguintes:
+# Configuração do banco de dados (estilo Laravel)
+O webman/database suporta as seguintes bases de dados e versões:
 
 - MySQL 5.6+
 - PostgreSQL 9.4+
 - SQLite 3.8.8+
 - SQL Server 2017+
 
-O arquivo de configuração do banco de dados está localizado em `config/database.php`.
+O arquivo de configuração fica em `config/database.php`.
 
 ```php
 return [
     // Banco de dados padrão
     'default' => 'mysql',
-    // Conexões de vários bancos de dados
+    // Várias configurações de bancos de dados
     'connections' => [
 
         'mysql' => [
-            'driver' => 'mysql',
-            'host' => '127.0.0.1',
-            'port' => 3306,
-            'database' => 'webman',
-            'username' => 'webman',
-            'password' => '',
+            'driver'      => 'mysql',
+            'host'        => '127.0.0.1',
+            'port'        => 3306,
+            'database'    => 'webman',
+            'username'    => 'webman',
+            'password'    => '',
             'unix_socket' => '',
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix' => '',
-            'strict' => true,
-            'engine' => null,
-        ],
+            'charset'     => 'utf8',
+            'collation'   => 'utf8_unicode_ci',
+            'prefix'      => '',
+            'strict'      => true,
+            'engine'      => null,
+            'pool' => [ // Configuração do pool de conexões, apenas com drivers swoole/swow
+                'max_connections' => 5, // Número máximo de conexões
+                'min_connections' => 1, // Número mínimo de conexões
+                'wait_timeout' => 3,    // Tempo máximo de espera para obter conexão do pool, lança exceção ao exceder
+                'idle_timeout' => 60,   // Tempo máximo de inatividade das conexões no pool, recupera até min_connections
+                'heartbeat_interval' => 50, // Intervalo de heartbeat em segundos, recomendado menos de 60
+            ],
+         ],
+         
+         'sqlite' => [
+             'driver'   => 'sqlite',
+             'database' => '',
+             'prefix'   => '',
+             'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
+            ],
+         ],
 
-        'sqlite' => [
-            'driver' => 'sqlite',
-            'database' => '',
-            'prefix' => '',
-        ],
+         'pgsql' => [
+             'driver'   => 'pgsql',
+             'host'     => '127.0.0.1',
+             'port'     => 5432,
+             'database' => 'webman',
+             'username' => 'webman',
+             'password' => '',
+             'charset'  => 'utf8',
+             'prefix'   => '',
+             'schema'   => 'public',
+             'sslmode'  => 'prefer',
+             'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
+            ],
+         ],
 
-        'pgsql' => [
-            'driver' => 'pgsql',
-            'host' => '127.0.0.1',
-            'port' => 5432,
-            'database' => 'webman',
-            'username' => 'webman',
-            'password' => '',
-            'charset' => 'utf8',
-            'prefix' => '',
-            'schema' => 'public',
-            'sslmode' => 'prefer',
-        ],
-
-        'sqlsrv' => [
-            'driver' => 'sqlsrv',
-            'host' => 'localhost',
-            'port' => 1433,
-            'database' => 'webman',
-            'username' => 'webman',
-            'password' => '',
-            'charset' => 'utf8',
-            'prefix' => '',
-        ],
-    ],
-];
+         'sqlsrv' => [
+             'driver'   => 'sqlsrv',
+             'host'     => 'localhost',
+             'port'     => 1433,
+             'database' => 'webman',
+             'username' => 'webman',
+             'password' => '',
+             'charset'  => 'utf8',
+             'prefix'   => '',
+             'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
+            ],
+         ],
+     ],
+ ];
 ```
 
-## Usando vários bancos de dados
-Para selecionar qual banco de dados usar, utilize `Db::connection('nome_da_configuração')`, onde `nome_da_configuração` corresponde à `key` da configuração no arquivo de configuração `config/database.php`.
+## Usar vários bancos de dados
+Use `Db::connection('nome_config')` para escolher o banco, onde `nome_config` é a `key` correspondente no arquivo `config/database.php`.
 
-Por exemplo, com a seguinte configuração de banco de dados:
+Exemplo com a seguinte configuração:
 
 ```php
  return [
-    // Banco de dados padrão
-    'default' => 'mysql',
-    // Conexões de vários bancos de dados
-    'connections' => [
+     'default' => 'mysql',
+     'connections' => [
 
-        'mysql' => [
-            'driver' => 'mysql',
-            'host' => '127.0.0.1',
-            'port' => 3306,
-            'database' => 'webman',
-            'username' => 'webman',
-            'password' => '',
-            'unix_socket' => '',
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix' => '',
-            'strict' => true,
-            'engine' => null,
-        ],
-        
-        'mysql2' => [
-            'driver' => 'mysql',
-            'host' => '127.0.0.1',
-            'port' => 3306,
-            'database' => 'webman2',
-            'username' => 'webman2',
-            'password' => '',
-            'unix_socket' => '',
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix' => '',
-            'strict' => true,
-            'engine' => null,
-        ],
-        'pgsql' => [
-            'driver' => 'pgsql',
-            'host' => '127.0.0.1',
-            'port' => 5432,
-            'database' => 'webman',
-            'username' => 'webman',
-            'password' => '',
-            'charset' => 'utf8',
-            'prefix' => '',
-            'schema' => 'public',
-            'sslmode' => 'prefer',
-        ],
-];
+         'mysql' => [
+             'driver'      => 'mysql',
+             'host'        =>   '127.0.0.1',
+             'port'        => 3306,
+             'database'    => 'webman',
+             'username'    => 'webman',
+             'password'    => '',
+             'unix_socket' =>  '',
+             'charset'     => 'utf8',
+             'collation'   => 'utf8_unicode_ci',
+             'prefix'      => '',
+             'strict'      => true,
+             'engine'      => null,
+         ],
+         
+         'mysql2' => [
+              'driver'      => 'mysql',
+              'host'        => '127.0.0.1',
+              'port'        => 3306,
+              'database'    => 'webman2',
+              'username'    => 'webman2',
+              'password'    => '',
+              'unix_socket' => '',
+              'charset'     => 'utf8',
+              'collation'   => 'utf8_unicode_ci',
+              'prefix'      => '',
+              'strict'      => true,
+              'engine'      => null,
+         ],
+         'pgsql' => [
+              'driver'   => 'pgsql',
+              'host'     => '127.0.0.1',
+              'port'     =>  5432,
+              'database' => 'webman',
+              'username' =>  'webman',
+              'password' => '',
+              'charset'  => 'utf8',
+              'prefix'   => '',
+              'schema'   => 'public',
+              'sslmode'  => 'prefer',
+          ],
+ ];
 ```
 
-Assim é feita a troca de bancos de dados.
-
+Para alternar entre bancos de dados:
 ```php
-// Usando o banco de dados padrão, equivalente a Db::connection('mysql')->table('users')->where('name', 'John')->first();
+// Usar o banco padrão, equivalente a Db::connection('mysql')->table('users')->where('name', 'John')->first();
 $users = Db::table('users')->where('name', 'John')->first(); 
-// Usando mysql2
+// Usar mysql2
 $users = Db::connection('mysql2')->table('users')->where('name', 'John')->first();
-// Usando pgsql
+// Usar pgsql
 $users = Db::connection('pgsql')->table('users')->where('name', 'John')->first();
 ```

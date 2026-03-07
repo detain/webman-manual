@@ -61,7 +61,7 @@ La méthode `Container::get()` est utilisée pour créer et stocker une instance
 > **Remarque**
 > `Container::get()` ne peut pas initialiser d'instances avec des paramètres de constructeur. `Container::make()` peut créer des instances avec des paramètres de constructeur, mais contrairement à `Container::get()`, `Container::make()` ne réutilisera pas l'instance, c'est-à-dire qu'à chaque appel avec les mêmes paramètres, `Container::make()` renverra toujours une nouvelle instance.
 
-# À propos des fuites de mémoire
+## À propos des fuites de mémoire
 Dans la plupart des cas, notre code métier ne provoque pas de fuites de mémoire (très peu de retours d'utilisateurs signalent des fuites de mémoire), il suffit de faire attention à ne pas agrandir indéfiniment les tableaux de données de longue durée. Veuillez consulter le code ci-dessous :
 ```php
 <?php

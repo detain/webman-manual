@@ -1,35 +1,34 @@
 # Componente de Processamento de Imagens
 
-## intervention/image
-
-### Endereço do Projeto
+## Endereço do Projeto
 
 https://github.com/Intervention/image
-
-### Instalação
-
+  
+## Instalação
+ 
 ```php
 composer require intervention/image
 ```
+  
+## Utilização
 
-### Utilização
-
-**Trecho da Página de Upload**
+**Trecho da página de upload**
 
 ```html
-<form method="post" action="/user/img" enctype="multipart/form-data">
-    <input type="file" name="file">
-    <input type="submit" value="Submit">
-</form>
+  <form method="post" action="/user/img" enctype="multipart/form-data">
+      <input type="file" name="file">
+      <input type="submit" value="Enviar">
+  </form>
 ```
 
-**Criar novo arquivo `app/controller/UserController.php`**
+**Criar `app/controller/UserController.php`**
 
 ```php
 <?php
 namespace app\controller;
 use support\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class UserController
 {
@@ -37,14 +36,20 @@ class UserController
     {
         $file = $request->file('file');
         if ($file && $file->isValid()) {
-            $image = Image::make($file)->resize(100, 100);
-            return response($image->encode('png'), 200, ['Content-Type' => 'image/png']);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file)->scale(100, 100);
+            return response($image->encode(), 200, ['Content-Type' => 'image/png']);
         }
         return response('file not found');
     }
+    
 }
 ```
 
-### Mais Informações
+> **Observação**
+> O exemplo acima utiliza a API v3.
 
-Acesse http://image.intervention.io/getting_started/introduction
+## Mais informações
+
+Acesse https://image.intervention.io/v3
+  

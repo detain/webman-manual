@@ -1,16 +1,14 @@
-# Phần mở rộng ứng dụng
-
-> Phần mở rộng ứng dụng yêu cầu webman>=1.4.0
+# Plugin ứng dụng
 
 ## Triết lý
-Xây dựng ứng dụng của riêng mình một cách nhanh chóng như xếp hình lắp ráp.
+Xây dựng ứng dụng của bạn một cách nhanh chóng, như lắp ráp các khối xây dựng.
 
 ## Giới thiệu
-Phần mở rộng ứng dụng thực tế là một ứng dụng hoàn chỉnh, có thể được cài đặt dưới dạng phần mở rộng vào dự án chính, giúp dự án chính nhanh chóng có được một số tính năng mô-đun cụ thể.
-Ví dụ, dự án chính cần một hệ thống hỏi đáp, bạn có thể cài đặt một phần mở rộng ứng dụng hỏi đáp, cần một hệ thống cửa hàng, bạn có thể cài đặt phần mở rộng ứng dụng cửa hàng. Tất cả các phần mở rộng không ảnh hưởng lẫn nhau, cài đặt và sử dụng theo nguyên tắc cắm và chạy, có thể gỡ bỏ ngay khi không cần.
+Plugin ứng dụng thực chất là một ứng dụng hoàn chỉnh, có thể được cài đặt dưới dạng plugin vào dự án chính, giúp dự án chính nhanh chóng có được chức năng module cụ thể.
+Chẳng hạn, nếu dự án chính cần hệ thống hỏi đáp, bạn có thể cài đặt plugin ứng dụng Q&A; cần hệ thống thương mại điện tử thì cài đặt plugin ứng dụng thương mại điện tử. Tất cả các plugin độc lập với nhau, plug-and-play, và có thể gỡ bỏ bằng một cú nhấp chuột khi không còn cần thiết.
 
 ## Tác động
-Phần mở rộng ứng dụng tăng đáng kể tính tái sử dụng của dự án webman, bất kỳ nhà phát triển nào đều có thể chuyển đổi dự án của mình thành phần mở rộng và cung cấp cho các dự án khác cài đặt và sử dụng, giúp các dự án khác hưởng lợi và giúp chính mình thu được lợi nhuận.
+Plugin ứng dụng nâng cao đáng kể khả năng tái sử dụng của các dự án webman. Bất kỳ nhà phát triển nào cũng có thể chuyển dự án của mình thành plugin và cung cấp cho các dự án khác để cài đặt sử dụng, giúp các dự án đó hưởng lợi đồng thời thu về lợi nhuận cho bản thân.
 
 ## Kiếm lợi nhuận
-webman cung cấp một [thị trường ứng dụng](https://www.workerman.net/apps) chính thức, nhà phát triển có thể gửi ứng dụng mình phát triển đến thị trường và thu lợi nhuận từ đó.
+webman cung cấp [chợ ứng dụng](https://www.workerman.net/apps) chính thức, nơi nhà phát triển có thể gửi ứng dụng đã phát triển lên và thu lợi nhuận từ đó.

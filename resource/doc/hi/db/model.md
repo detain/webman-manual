@@ -1,4 +1,4 @@
-# तेजी से शुरू करें
+# डेटाबेस मॉडल - मॉडल उपयोग (Laravel शैली)
 
 webman मॉडल [Eloquent ORM](https://laravel.com/docs/7.x/eloquent) पर आधारित है। प्रत्येक डेटाबेस तालिका के लिए एक "मॉडल" है जो उस तालिका के साथ इंटरेक्ट करने के लिए होता है। आप मॉडल का उपयोग करके डेटा तालिका में से डेटा क्वेरी कर सकते हैं, साथ ही नए रिकॉर्ड तालिका में डाल सकते हैं।
 
@@ -6,7 +6,7 @@ webman मॉडल [Eloquent ORM](https://laravel.com/docs/7.x/eloquent) पर
 
 > ध्यान दें: Eloquent ORM मॉडल ऑब्जेवर्स का समर्थन करने के लिए `composer require "illuminate/events"` [उदाहरण](#मॉडल-ऑब्जेवर्स)
 
-## उदाहरण
+## डेटाबेस मॉडल उदाहरण
 ```php
 <?php
 namespace app\model;
@@ -190,7 +190,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -540,7 +540,7 @@ if ($post->is($anotherPost)) {
 ## मॉडल नेतृत्वीय
 [Laravel में मॉडल घटनाएं और अवलोककर्ता  के लेख](https://learnku.com/articles/6657/model-events-and-observer-in-laravel) का उपयोग करें
 
-ध्यान दें: Eloquent ORM मॉडल नेतृत्वीय का समर्थन करने के लिए अतिरिक्त आयात की आवश्यकता है composer require "illuminate/events"
+ध्यान दें: Eloquent ORM मॉडल नेतृत्वीय का समर्थन करने के लिए अतिरिक्त आयात की आवश्यकता है `composer require "illuminate/events"`
 
 ```php
 <?php
@@ -558,3 +558,6 @@ class User extends Model
     }
 }
 ```
+
+## लेनदेन
+[डेटाबेस लेनदेन](../others/transaction.md) देखें

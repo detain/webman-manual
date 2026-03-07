@@ -24,6 +24,7 @@
   - [Protokoll](log.md)
   - [Konfigurationsdatei](config.md)
   - [Mehrere Anwendungen](multiapp.md)
+  - [Koroutine](coroutine/coroutine.md)
 
 - Datenbank
 
@@ -47,6 +48,7 @@
  
 - Übliche Komponenten
   - [Validierer](components/validation.md)
+  - [Rate Limiter](components/rate-limiter.md)
   - [Pagination-Komponente](components/paginator.md)
   - [Mehrsprachigkeit](components/translation.md)
   - [Bildverarbeitung](components/image.md)
@@ -90,17 +92,18 @@
 - Fortgeschrittene Themen
   - [Benutzerdefinierte Prozesse](process.md)
   - [Abhängigkeitsinjektion](di.md)
+  - [Binäre Paketierung](others/bin.md)
   - [AOP](aop.md)
   
 - Sonstiges
   - [Sicherheit](others/security.md)
+  - [Datenbanktransaktionen](others/transaction.md)
   - [Überprüfung nicht erlaubter Funktionen](others/disable-function-check.md)
   - [Benutzerdefiniertes Skript](others/scripts.md)
   - [Benutzerdefinierte 404- und 500-Fehlerseiten](others/custom-error-page.md)
   - [Upgrade-Methode](others/upgrade.md)
   - [nginx-Proxy](others/nginx-proxy.md)
   - [phar-Paketierung](others/phar.md)
-  - [Binäre Paketierung](others/bin.md)
   - [Startprozess](others/process.md)
   - [Lebenszyklus](others/lifecycle.md)
   - [Speicherleckage](others/memory-leak.md)
@@ -113,4 +116,9 @@
 
 - Upgrade
   - [1.4](upgrade/1-4.md)
+  - [1.5](upgrade/1-5.md)
+  - [1.6](upgrade/1-6.md)
+  - [2.0](upgrade/2-0.md)
+  - [2.1](upgrade/2-1.md)
+  - [2.2](upgrade/2-2.md)
   - [Danksagung](thanks.md)

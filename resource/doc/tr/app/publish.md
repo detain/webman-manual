@@ -1,15 +1,15 @@
 # Yayınlama
 
-Geliştiriciler, kendi telif haklarına sahip eklentilerini uygulama mağazasına yükleyebilirler, diğerlerine yardım ederken aynı zamanda fayda sağlayabilirler.
+Geliştiriciler, kendi telif haklarına sahip eklentilerini uygulama mağazasına yükleyerek başkalarına yardımcı olurken aynı zamanda bundan fayda sağlayabilir.
 Yayınlama adresi: https://www.workerman.net/app/create
 
-Not: **Sürüm numarası** doldurulurken, `plugin/{eklenti}/config/app.php` dosyasındaki sürüm numarası ile aynı olmalıdır.
+Not: Yayınlama sırasında girilen **sürüm numarası**, `plugin/{eklenti}/config/app.php` dosyasındaki sürüm numarasıyla eşleşmelidir.
 
-## Yayınlama Sınırlamaları
-**Aşağıdaki türdeki uygulamaların yayınlanması desteklenmemektedir:**
+## Yayınlama Kısıtlamaları
+**Aşağıdaki uygulama türlerinin yayınlanması desteklenmemektedir:**
 
-**Finansal türdeki** örnekler: konsolide ödeme, geri ödeme, kredi, açık artırma, dijital para birimi, blok zinciri gibi türlerle sınırlı olmamak üzere  
-**Oyun türündeki** örnekler: çekiliş, çekilişe katılma, poker, satın alma kartları gibi türlerle sınırlı olmamak üzere  
-**Toplama türündeki** örnekler: roman, çizgi roman, film, kaynak paylaşımı gibi türlerle sınırlı olmamak üzere  
-**Yurtdışı uygulama ile ilgili** örnekler: bulut sunucu, vpn gibi türlerle sınırlı olmamak üzere 
-**Sohbet ve müşteri hizmetleri türündeki** geçici olarak yayınlama desteği sunulmamaktadır.
+**Finans** Örnekleri: toplu ödeme, iade, kredi, açık artırma, kripto para, blok zinciri  
+**Masa ve kart oyunları** Örnekleri: piyango, hazine avı, NiuNiu, ön ödemeli kartlar vb.  
+**Veri toplama** Örnekleri: romanlar, çizgi romanlar, filmler, diziler, kaynak paylaşımı vb.  
+**Yurtdışı uygulamalar** Örnekleri: bulut barındırma, VPN vb.  
+**Sohbet ve müşteri hizmetleri** Şu anda yayınlanması desteklenmemektedir.

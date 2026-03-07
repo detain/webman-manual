@@ -5,8 +5,7 @@
 - The plugin source code must be complete and cannot be encrypted.
 - Plugins must provide complete functionality and cannot have simple functions.
 - Complete function introduction and documentation must be provided.
-- Plugins cannot contain sub-markets.
-- No text or promotional links are allowed in the plugin.
+- Coroutines are not recommended in plugins, as users may not have coroutines enabled.
 
 ## Application Plugin Identifier
 Each application plugin has a unique identifier composed of letters. This identifier affects the source code directory of the application plugin, the namespace of the class, and the prefix of the plugin database table.
@@ -18,7 +17,7 @@ Since the identifier is unique throughout the network, developers need to check 
 ## Database
 - Table names consist of lowercase letters `a-z` and underscores `_`.
 - The plugin data table should have the plugin identifier as a prefix. For example, the "article" table for the "foo" plugin is `foo_article`.
-- The primary key of the table should be indexed as "id".
+- The primary key of the table should be `id`.
 - Use the InnoDB engine for storage.
 - Use the utf8mb4_general_ci character set.
 - Database ORM can use Laravel or ThinkORM.

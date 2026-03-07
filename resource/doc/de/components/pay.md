@@ -1,18 +1,17 @@
-Vielen Dank für die Bereitstellung der Webman-Dokumentation. Ich werde jetzt mit der Übersetzung beginnen und Sie mit dem Übersetzungsfortschritt auf dem Laufenden halten.
 # Zahlungs-SDK
 
 
-### Projektadresse
+## Projektadresse
 
-https://github.com/yansongda/pay
+ https://github.com/yansongda/pay
 
-### Installation
+## Installation
 
 ```php
 composer require yansongda/pay -vvv
 ```
 
-### Verwendung
+## Verwendung
 
 **Alipay**
 
@@ -78,8 +77,7 @@ class PayController
         try{
             $data = $alipay->verify(); // Ja, die Überprüfung ist so einfach!
 
-            // Bitte selbst die trade_status überprüfen und andere Logik überprüfen. Im Alipay-Geschäftsmeldung wird nur dann, wenn der Geschäftsbenachrichitgungsstatus TRA... 
-TRANS_SUCCESS oder TRADE_FINISHED ist, von Alipay angenommen, dass der Käufer die Zahlung erfolgreich geleistet hat.
+            // Bitte prüfen Sie trade_status und andere Logik selbst. Bei Alipay-Geschäftsbenachrichtigungen gilt die Zahlung nur bei TRADE_SUCCESS oder TRADE_FINISHED als erfolgreich.
             // 1. Der Händler muss prüfen, ob die out_trade_no in den Benachrichtigungsdaten die Bestellnummer ist, die im Händlersystem erstellt wurde;
             // 2. Überprüfen, ob total_amount wirklich der tatsächliche Betrag dieser Bestellung ist (d. h. der Betrag, der bei der Erstellung der Händlerbestellung angegeben wurde);
             // 3. Überprüfen, ob seller_id (oder seller_email) in der Benachrichtigung mit out_trade_no der entsprechenden betrieblichen Partei dieses Buchungsbelegs entspricht (manchmal hat ein Händler möglicherweise mehrere seller_id/seller_email);
@@ -166,6 +164,6 @@ class PayController
 ```
 
 
-### Mehr Inhalte
+## Mehr Inhalte
 
 Besuchen Sie https://pay.yanda.net.cn/docs/2.x/overview

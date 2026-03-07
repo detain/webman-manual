@@ -1,23 +1,25 @@
-# Çoklu Dil Desteği
+# Çok Dilli
 
-Çoklu dil desteği için [symfony/translation](https://github.com/symfony/translation) bileşeni kullanılır.
+Çok dilli destek [symfony/translation](https://github.com/symfony/translation) bileşenini kullanır.
 
 ## Kurulum
-```composer require symfony/translation```
+```
+composer require symfony/translation
+```
 
-## Dil Paketi Oluşturma
-webman varsayılan olarak dil paketlerini `resource/translations` dizinine yerleştirir (eğer yoksa kendiniz oluşturun), dizini değiştirmek isterseniz `config/translation.php` dosyasında ayarlayabilirsiniz.
-Her dil için bir alt dizin oluşturulur ve dil tanımları genellikle `messages.php` dosyasında bulunur. Örnek dizin yapısı şöyle olabilir:
-```bash
+## Dil Paketleri Oluşturma
+webman varsayılan olarak dil paketlerini `resource/translations` dizininde saklar (yoksa oluşturun). Dizini değiştirmek için `config/translation.php` içinde ayarlayın.
+Her dil bir alt dizine karşılık gelir, dil tanımları varsayılan olarak `messages.php` dosyasında tutulur. Örnek:
+```
 resource/
 └── translations
     ├── en
-    │   └── messages.php
+    │   └── messages.php
     └── zh_CN
         └── messages.php
 ```
 
-Tüm dil dosyaları genellikle bir dizi döndürülecek şekilde oluşturulur. Örneğin:
+Tüm dil dosyaları bir dizi döndürür, örneğin:
 ```php
 // resource/translations/en/messages.php
 
@@ -34,25 +36,25 @@ return [
 return [
     // Varsayılan dil
     'locale' => 'zh_CN',
-    // Yedek dil - mevcut dilde çeviri bulunamazsa yedek dildeki çeviriyi deneyecek
+    // Yedek dil: Mevcut dilde çeviri bulunamazsa yedek dildeki çeviri denenir
     'fallback_locale' => ['zh_CN', 'en'],
-    // Dil dosyalarının bulunduğu klasör
+    // Dil dosyalarının saklandığı dizin
     'path' => base_path() . '/resource/translations',
 ];
 ```
 
 ## Çeviri
 
-Çeviri için `trans()` yöntemi kullanılır.
+Çeviri için `trans()` metodu kullanılır.
 
-`resource/translations/zh_CN/messages.php` dosyası aşağıdaki gibi oluşturulur:
+Dil dosyası `resource/translations/zh_CN/messages.php` oluşturun:
 ```php
 return [
-    'hello' => 'Merhaba Dünya!',
+    'hello' => '你好 世界!',
 ];
 ```
 
-`app/controller/UserController.php` dosyası şu şekilde oluşturulur:
+Dosya `app/controller/UserController.php` oluşturun:
 ```php
 <?php
 namespace app\controller;
@@ -63,19 +65,19 @@ class UserController
 {
     public function get(Request $request)
     {
-        $hello = trans('hello'); // Merhaba Dünya!
+        $hello = trans('hello'); // 你好 世界!
         return response($hello);
     }
 }
 ```
 
-`http://127.0.0.1:8787/user/get` adresine gidildiğinde "Merhaba Dünya!" dönecektir.
+`http://127.0.0.1:8787/user/get` adresine erişildiğinde "你好 世界!" döner.
 
-## Varsayılan Dili Değiştirmek
+## Varsayılan Dili Değiştirme
 
-Dil değişikliği için `locale()` yöntemi kullanılır.
+Dil değiştirmek için `locale()` metodu kullanılır.
 
-`resource/translations/en/messages.php` dosyasına aşağıdaki gibi ek yapılır:
+Dil dosyası `resource/translations/en/messages.php` ekleyin:
 ```php
 return [
     'hello' => 'hello world!',
@@ -92,17 +94,16 @@ class UserController
 {
     public function get(Request $request)
     {
-        // Dil değiştir
+        // Dili değiştir
         locale('en');
         $hello = trans('hello'); // hello world!
         return response($hello);
     }
 }
 ```
+`http://127.0.0.1:8787/user/get` adresine erişildiğinde "hello world!" döner.
 
-`http://127.0.0.1:8787/user/get` adresine gidildiğinde "hello world!" dönecektir.
-
-Ayrıca dil geçici olarak değiştirmek için `trans()` fonksiyonunun dördüncü parametresini kullanabilirsiniz. Örneğin yukarıdaki örnek ile aşağıdaki örnek aynıdır:
+`trans()` fonksiyonunun 4. parametresiyle geçici olarak dil değiştirilebilir. Örneğin yukarıdaki örnek şununla eşdeğerdir:
 ```php
 <?php
 namespace app\controller;
@@ -113,16 +114,17 @@ class UserController
 {
     public function get(Request $request)
     {
-        // Dil değiştirme için dördüncü parametre
+        // 4. parametre dili değiştirir
         $hello = trans('hello', [], null, 'en'); // hello world!
         return response($hello);
     }
 }
 ```
-## Her İstek İçin Ayrı Ayrı Dil Belirleme
-Çeviri bir örnektir ve bu nedenle tüm istekler bu örneği paylaşır. Bu nedenle, yalnızca belirli bir istek için dil belirlemek önemlidir. Bunun için aşağıdaki gibi bir ara yazılım kullanabilirsiniz:
 
-`app/middleware/Lang.php` dosyası oluşturulur (dizin yoksa oluşturun):
+## Her İstek İçin Dili Açıkça Ayarlama
+translation bir singleton olduğundan tüm istekler aynı örneği paylaşır. Bir istek `locale()` ile varsayılan dili ayarlarsa, bu süreçteki sonraki tüm istekleri etkiler. Bu nedenle her istek için dili açıkça ayarlamalıyız. Örneğin aşağıdaki middleware kullanılır:
+
+Dosya `app/middleware/Lang.php` oluşturun (dizin yoksa oluşturun):
 ```php
 <?php
 namespace app\middleware;
@@ -141,41 +143,42 @@ class Lang implements MiddlewareInterface
 }
 ```
 
-`config/middleware.php` dosyasına genel bir ara yazılım ekleyin:
+`config/middleware.php` içinde global middleware ekleyin:
 ```php
 return [
-    // Global ara yazılımlar
+    // Global middleware
     '' => [
-        // ... Diğer ara yazılımlar buraya eklenir
+        // ... diğer middleware'ler atlandı
         app\middleware\Lang::class,
     ]
 ];
 ```
 
-## Yer Tutucu Kullanımı
-Bazı durumlarda, bir çevirilecek olan ifadenin içinde değişkenler bulunabilir. Örneğin:
+
+## Yer Tutucu Kullanma
+Bazen bir mesajda çevrilmesi gereken değişkenler bulunur, örneğin
 ```php
 trans('hello ' . $name);
 ```
-Bu durumla karşılaşıldığında yer tutucular kullanılır.
+Bu durumda yer tutucu kullanılır.
 
-`resource/translations/zh_CN/messages.php` dosyası aşağıdaki gibi değiştirilir:
+`resource/translations/zh_CN/messages.php` dosyasını güncelleyin:
 ```php
 return [
-    'hello' => 'Merhaba %name%!',
+    'hello' => '你好 %name%!',
 ];
 ```
-Çeviri yapılırken ikinci parametre olarak yer tutucuların değerleri aktarılır.
+Çeviri sırasında değerler ikinci parametreyle aktarılır:
 ```php
-trans('hello', ['%name%' => 'webman']); // Merhaba webman!
+trans('hello', ['%name%' => 'webman']); // 你好 webman!
 ```
 
-## Çoğul Durumları Kullanımı
-Bazı dillerde miktar durumuna göre cümle yapısı değişebilir, örneğin `There is %count% apple`, `%count%` değeri 1 ise cümlenin yapısı doğrudur, 1'den büyükse yanlıştır.
+## Çoğul Biçimlerle Çalışma
+Bazı dillerde cümle yapısı miktara göre değişir. Örneğin `There is %count% apple`, `%count%` 1 olduğunda doğrudur, 1'den büyük olduğunda yanlıştır.
 
-Bu durumlar için **|** işareti kullanarak çoğul durumları belirtebiliriz.
+Bu durumda çoğul biçimleri listelemek için **pipe** (`|`) kullanılır.
 
-`resource/translations/en/messages.php` dosyasına `apple_count` örneği aşağıdaki gibi ekleyebiliriz:
+Dil dosyası `resource/translations/en/messages.php` içine `apple_count` ekleyin:
 ```php
 return [
     // ...
@@ -187,7 +190,7 @@ return [
 trans('apple_count', ['%count%' => 10]); // There are 10 apples
 ```
 
-Ayrıca, sayısal aralıkları da belirterek daha karmaşık kurallar oluşturabiliriz:
+Sayı aralıkları belirleyerek daha karmaşık çoğul kuralları da oluşturabiliriz:
 ```php
 return [
     // ...
@@ -199,13 +202,21 @@ return [
 trans('apple_count', ['%count%' => 20]); // There are many apples
 ```
 
-## Belirli Dil Dosyasını Kullanma
-Dil dosyalarının varsayılan adı `messages.php`dir, ancak aslında farklı adlarda da oluşturabilirsiniz.
+## Dil Dosyası Belirtme
 
-Aşağıdaki gibi `trans()` fonksiyonunun üçüncü parametresi ile dil dosyasını belirleyebilirsiniz (`.php` uzantısını dahil etmeyin).
+Varsayılan dil dosyası adı `messages.php`'dir, ancak başka isimli dil dosyaları da oluşturulabilir.
+
+Dil dosyası `resource/translations/zh_CN/admin.php` oluşturun:
 ```php
-trans('hello', [], 'admin', 'zh_CN'); // Merhaba Admin!
+return [
+    'hello_admin' => '你好 管理员!',
+];
+```
+
+Dil dosyası `trans()` fonksiyonunun 3. parametresiyle belirtilir (`.php` uzantısı yazılmaz).
+```php
+trans('hello', [], 'admin', 'zh_CN'); // 你好 管理员!
 ```
 
 ## Daha Fazla Bilgi
-[symfony/translation belgeleri](https://symfony.com/doc/current/translation.html) sayfasına bakabilirsiniz.
+[symfony/translation dokümantasyonuna](https://symfony.com/doc/current/translation.html) bakın

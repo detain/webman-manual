@@ -1,4 +1,4 @@
-# Basit Örnek
+# webman Hızlı Başlangıç Basit Örnek
 
 ## Dize döndürme
 **Controller Oluşturma**

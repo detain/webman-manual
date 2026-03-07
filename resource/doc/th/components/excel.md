@@ -1,18 +1,16 @@
-# Excel
+# ตาราง Excel
 
-## phpoffice/phpspreadsheet
-
-### ที่อยู่โครงการ
+## ที่อยู่โครงการ
 
 https://github.com/PHPOffice/PhpSpreadsheet
   
-### การติดตั้ง
+## การติดตั้ง
  
   ```php
   composer require phpoffice/phpspreadsheet
   ```
   
-### การใช้
+## การใช้
 
 ```php
 <?php
@@ -27,7 +25,7 @@ class ExcelController
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'สวัสดีชาวโลก!');
+        $sheet->setCellValue('A1', 'Hello World !');
 
         $writer = new Xlsx($spreadsheet);
         $file_path = public_path().'/hello_world.xlsx';
@@ -39,7 +37,8 @@ class ExcelController
 
 }
 ```
-  
-### เนื้อหาเพิ่มเติม
+
+## เนื้อหาเพิ่มเติม
 
 เยี่ยมชม https://phpspreadsheet.readthedocs.io/en/latest/
+  

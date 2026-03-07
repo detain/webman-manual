@@ -1,4 +1,4 @@
-# クイックスタート
+# データベースモデル Modelの使い方（Laravelスタイル）
 
 webmanモデルは[Eloquent ORM](https://laravel.com/docs/7.x/eloquent)に基づいています。各データベーステーブルには、テーブルとのやり取りに使用する「モデル」があります。モデルを使用してデータテーブルからデータをクエリしたり、新しいレコードをデータテーブルに挿入したりできます。
 
@@ -6,7 +6,7 @@ webmanモデルは[Eloquent ORM](https://laravel.com/docs/7.x/eloquent)に基づ
 
 > 注意：Eloquent ORMがモデルオブザーバをサポートするには、`composer require "illuminate/events"`を追加する必要があります。[例](#モデルオブザーバ)
 
-## 例
+## データベースモデル例
 ```php
 <?php
 namespace app\model;
@@ -192,7 +192,7 @@ $user = app\model\User::where('name', 'tom')->first();
 
 $user->name = 'jerry';
 
-$user = $user->fresh();
+$user->refresh();
 
 $user->name; // "tom"
 ```
@@ -545,7 +545,7 @@ if ($post->is($anotherPost)) {
 ## モデルオブザーバ
 [Laravel 中のモデルイベントとオブザーバー]（https://learnku.com/articles/6657/model-events-and-observer-in-laravel）を参照してください。
 
-注意：Eloquent ORMでモデルオブザーバをサポートするには、追加でcomposer require "illuminate/events"をインポートする必要があります。
+注意：Eloquent ORMでモデルオブザーバをサポートするには、追加で`composer require "illuminate/events"`をインポートする必要があります。
 
 ```php
 <?php
@@ -563,3 +563,6 @@ class User extends Model
     }
 }
 ```
+
+## トランザクション
+[データベーストランザクション](../others/transaction.md)を参照してください

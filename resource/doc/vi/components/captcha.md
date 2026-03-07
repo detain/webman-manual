@@ -1,14 +1,13 @@
-# Các thành phần liên quan đến mã xác minh
+# Thành phần captcha
 
-## webman/captcha
-Địa chỉ dự án: https://github.com/webman-php/captcha
+Địa chỉ dự án https://github.com/webman-php/captcha
 
-### Cài đặt
-``` 
+## Cài đặt
+```
 composer require webman/captcha
 ```
 
-### Sử dụng
+## Sử dụng
 
 **Tạo tệp `app/controller/LoginController.php`**
 
@@ -30,32 +29,32 @@ class LoginController
     }
 
     /**
-     * Xuất hình ảnh mã xác minh
+     * Xuất hình ảnh captcha
      */
     public function captcha(Request $request)
     {
-        // Khởi tạo lớp mã xác minh
+        // Khởi tạo lớp captcha
         $builder = new CaptchaBuilder;
-        // Tạo mã xác minh
+        // Tạo captcha
         $builder->build();
-        // Lưu giá trị mã xác minh vào phiên
+        // Lưu giá trị captcha vào phiên
         $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Lấy dữ liệu nhị phân của hình ảnh mã xác minh
+        // Lấy dữ liệu nhị phân của hình ảnh captcha
         $img_content = $builder->get();
-        // Trả về dữ liệu nhị phân của mã xác minh
+        // Trả về dữ liệu nhị phân của captcha
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 
     /**
-     * Kiểm tra mã xác minh
+     * Kiểm tra captcha
      */
     public function check(Request $request)
     {
-        // Lấy trường mã xác minh từ yêu cầu post
+        // Lấy trường captcha từ yêu cầu POST
         $captcha = $request->post('captcha');
-        // So sánh giá trị mã xác minh trong phiên
+        // So sánh với giá trị captcha trong phiên
         if (strtolower($captcha) !== $request->session()->get('captcha')) {
-            return json(['code' => 400, 'msg' => 'Mã xác minh không đúng']);
+            return json(['code' => 400, 'msg' => 'Mã captcha nhập vào không đúng']);
         }
         return json(['code' => 0, 'msg' => 'ok']);
     }
@@ -69,7 +68,7 @@ class LoginController
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Kiểm tra mã xác minh</title>
+    <title>Kiểm tra captcha</title>
 </head>
 <body>
     <form method="post" action="/login/check">
@@ -81,31 +80,21 @@ class LoginController
 </html>
 ```
 
-Truy cập trang `http://127.0.0.1:8787/login` sẽ hiển thị giao diện tương tự như sau:
+Truy cập trang `http://127.0.0.1:8787/login`, giao diện sẽ tương tự như sau:
   ![](../../assets/img/captcha.png)
 
-### Cài đặt thông số phổ biến
+## Cài đặt thông số phổ biến
 ```php
     /**
-     * Xuất hình ảnh mã xác minh
+     * Xuất hình ảnh captcha
      */
     public function captcha(Request $request)
     {
-        // Khởi tạo lớp mã xác minh
-        $builder = new CaptchaBuilder;
-        // Độ dài mã xác minh
-        $length = 4;
-        // Bao gồm những ký tự nào
-        $chars = '0123456789abcefghijklmnopqrstuvwxyz';
-        $builder = new PhraseBuilder($length, $chars);
+        $builder = new PhraseBuilder(4, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ');
         $captcha = new CaptchaBuilder(null, $builder);
-        // Tạo mã xác minh
-        $builder->build();
-        // Lưu giá trị mã xác minh vào phiên
-        $request->session()->set('captcha', strtolower($builder->getPhrase()));
-        // Lấy dữ liệu nhị phân của hình ảnh mã xác minh
-        $img_content = $builder->get();
-        // Trả về dữ liệu nhị phân của mã xác minh
+        $captcha->build();
+        $request->session()->set('join', strtolower($captcha->getPhrase()));
+        $img_content = $captcha->get();
         return response($img_content, 200, ['Content-Type' => 'image/jpeg']);
     }
 ```

@@ -122,7 +122,7 @@ une requête JSON recevra une réponse au format JSON similaire à la suivante
 {"code": 3000, "message": "Erreur de paramètre"}
 ```
 
-> **Remarque**
+> **Conseil**
 > Comme l'exception BusinessException est une exception métier (par exemple, une erreur de saisie utilisateur) et est prévisible, le framework ne la considère pas comme une erreur fatale et ne la journalise pas.
 
 ## Conclusion

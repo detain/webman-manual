@@ -1,17 +1,17 @@
-## Rota Yapılandırma Dosyası
-Eklenti için rota yapılandırma dosyası `plugin/eklentiadı/config/route.php` içinde bulunur.
+# Rota yapılandırma dosyası
+Eklentilerin rota yapılandırma dosyası `plugin/eklenti_adı/config/route.php` konumundadır.
 
-## Varsayılan Rota
-Uygulama eklenti URL adres yolları her zaman `/app` ile başlar, örneğin `plugin\foo\app\controller\UserController` URL adresi `http://127.0.0.1:8787/app/foo/user` şeklindedir.
+## Varsayılan rota
+Uygulama eklentilerinin tüm URL yolları `/app` ile başlar, örneğin `plugin\foo\app\controller\UserController` için URL `http://127.0.0.1:8787/app/foo/user` şeklindedir.
 
-## Varsayılan Rota Devre Dışı Bırakma
-Belirli bir uygulama eklentisinin varsayılan rotasını devre dışı bırakmak istiyorsanız, rota yapılandırmasında aşağıdaki gibi ayarlayabilirsiniz.
+## Varsayılan rotayı devre dışı bırakma
+Bir uygulama eklentisinin varsayılan rotasını devre dışı bırakmak için rota yapılandırmasına şunu ekleyin:
 ```php
 Route::disableDefaultRoute('foo');
 ```
 
-## 404 Hatası İçin Geri Çağrı Oluşturma
-Belirli bir uygulama eklentisine fallback belirtmek istiyorsanız, ikinci parametre olarak eklenti adını ileterek aşağıdaki gibi bir geri çağrı oluşturabilirsiniz.
+## 404 geri çağrısını işleme
+Bir uygulama eklentisi için fallback ayarlamak üzere eklenti adını ikinci parametre olarak geçirmeniz gerekir. Örnek:
 ```php
 Route::fallback(function(){
     return redirect('/');
